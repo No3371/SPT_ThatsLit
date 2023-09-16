@@ -12,7 +12,7 @@ The third meter roughly represent the effectiveness of how your visual presence 
 
 Also noted that AIs don't always relies on their vision to detect you.
 
-There are multiple factors to consider when playing with the mod:
+The "lit score" ranges from -1 to 1, there are multiple factors to consider in order to get the lowest score as possible:
 
 - Even a bit lit up body surfaces will increase your score a lot
 - Remain stably lit (less to no brightness change) in decrease the score (so, moving between brightness and darkness, or getting lit by flashing lights, make you lose this bonus)
