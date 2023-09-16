@@ -15,9 +15,9 @@ Also noted that AIs don't always relies on their vision to detect you.
 The "lit score" ranges from -1 to 1, there are multiple factors to consider in order to get the lowest score as possible:
 
 - Even a bit lit up body surfaces will increase your score a lot
-- Remain stably lit (less to no brightness change) in decrease the score (so, moving between brightness and darkness, or getting lit by flashing lights, make you lose this bonus)
+- Remain stably lit (less to no brightness change) decrease the score (so, moving between brightness and darkness, or getting lit by flashing lights, make you lose this bonus)
 - Time and cloudiness matters
-- Sudden brightness change increase the score (ex: walking into bright are or flashing lights)
+- Sudden brightness change increase the score (ex: walking into bright area or flashing lights)
 - Yes, getting lit up flashlighs and gun flashes increase the score
 - Sneak in the shadow with light or laser on is useless
 - AIs using nvg are not affected
