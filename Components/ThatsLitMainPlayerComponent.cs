@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.CameraControl;
@@ -60,11 +61,14 @@ namespace ThatsLit.Components
         public float foliageScore;
         Collider[] collidersCache;
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
+        // PlayerSpiritAura is Visceral Bodies compat
 
         float startAt, lastCheckedLights;
         public bool secondaryShining, lightOn, laserOn, lightIR, laserIR;
 
         public Vector3 envCamOffset = new Vector3(0, 2, 0);
+
+        public RaidSettings activeRaidSettings;
 
         public void Awake()
         {
@@ -91,24 +95,6 @@ namespace ThatsLit.Components
 
             cam.targetTexture = rt;
 
-            envRt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
-            envRt.filterMode = FilterMode.Point;
-            envRt.Create();
-
-            envTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
-
-            envCam = new GameObject().AddComponent<Camera>();
-            envCam.clearFlags = CameraClearFlags.SolidColor;
-            envCam.backgroundColor = Color.white;
-            envCam.transform.SetParent(MainPlayer.Transform.Original);
-            envCam.transform.localPosition = Vector3.up * 3;
-
-            envCam.nearClipPlane = 0.01f;
-
-            envCam.cullingMask &= ~LayerMaskClass.PlayerMask;
-            envCam.fieldOfView = 90;
-
-            envCam.targetTexture = envRt;
 
 
             if (ThatsLitPlugin.DebugTexture.Value)
@@ -119,6 +105,26 @@ namespace ThatsLit.Components
                 display.RectTransform().sizeDelta = new Vector2(160, 160);
                 display.texture = debugTex;
                 display.RectTransform().anchoredPosition = new Vector2(-720, -360);
+
+
+                envRt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
+                envRt.filterMode = FilterMode.Point;
+                envRt.Create();
+
+                envTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
+
+                envCam = new GameObject().AddComponent<Camera>();
+                envCam.clearFlags = CameraClearFlags.SolidColor;
+                envCam.backgroundColor = Color.white;
+                envCam.transform.SetParent(MainPlayer.Transform.Original);
+                envCam.transform.localPosition = Vector3.up * 3;
+
+                envCam.nearClipPlane = 0.01f;
+
+                envCam.cullingMask = ~LayerMaskClass.PlayerMask;
+                envCam.fieldOfView = 75;
+
+                envCam.targetTexture = envRt;
 
                 envDebugTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
                 displayEnv = new GameObject().AddComponent<RawImage>();
@@ -132,6 +138,13 @@ namespace ThatsLit.Components
 
             startAt = Time.time;
             globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
+        }
+
+        void Start ()
+        {
+
+            var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+            activeRaidSettings = (RaidSettings) (typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
         }
 
 
@@ -199,35 +212,38 @@ namespace ThatsLit.Components
             }
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
 
-            envCam.transform.localPosition = envCamOffset;
-            switch (currentCamPos)
+            if (ThatsLitPlugin.DebugTexture.Value)
             {
-                case 0:
-                    {
-                        envCam.transform.LookAt(bodyPos + Vector3.left * 25);
-                        break;
-                    }
-                case 1:
-                    {
-                        envCam.transform.LookAt(bodyPos + Vector3.right * 25);
-                        break;
-                    }
-                case 2:
-                    {
-                        envCam.transform.localPosition = envCamOffset;
-                        envCam.transform.LookAt(bodyPos + Vector3.up * 10);
-                        break;
-                    }
-                case 3:
-                    {
-                        envCam.transform.LookAt(bodyPos + Vector3.back * 25);
-                        break;
-                    }
-                case 4:
-                    {
-                        envCam.transform.LookAt(bodyPos + Vector3.right * 25);
-                        break;
-                    }
+                envCam.transform.localPosition = envCamOffset;
+                switch (currentCamPos)
+                {
+                    case 0:
+                        {
+                            envCam.transform.LookAt(bodyPos + Vector3.left * 25);
+                            break;
+                        }
+                    case 1:
+                        {
+                            envCam.transform.LookAt(bodyPos + Vector3.right * 25);
+                            break;
+                        }
+                    case 2:
+                        {
+                            envCam.transform.localPosition = envCamOffset;
+                            envCam.transform.LookAt(bodyPos + Vector3.down * 10);
+                            break;
+                        }
+                    case 3:
+                        {
+                            envCam.transform.LookAt(bodyPos + Vector3.back * 25);
+                            break;
+                        }
+                    case 4:
+                        {
+                            envCam.transform.LookAt(bodyPos + Vector3.right * 25);
+                            break;
+                        }
+                }
             }
 
             if (Time.time > lastCheckedLights + 0.33f)
@@ -316,10 +332,13 @@ namespace ThatsLit.Components
             tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             tex.Apply();
             RenderTexture.active = null;
-            //RenderTexture.active = envRt;
-            //envTex.ReadPixels(new Rect(0, 0, envRt.width, envRt.height), 0, 0);
-            //envTex.Apply();
-            //RenderTexture.active = null;
+            if (ThatsLitPlugin.DebugTexture.Value)
+            {
+                RenderTexture.active = envRt;
+                envTex.ReadPixels(new Rect(0, 0, envRt.width, envRt.height), 0, 0);
+                envTex.Apply();
+                RenderTexture.active = null;
+            }
 
             if (debugTex != null && Time.frameCount % 61 == 0)Graphics.CopyTexture(tex, debugTex);
             if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
@@ -372,7 +391,7 @@ namespace ThatsLit.Components
                             else if (pLum > 0.5f) high += 1;
                             else if (pLum > 0.25f) highMid += 1;
                             else if (pLum > 0.13f) mid += 1;
-                            else if (pLum > 0.055f - 0.01f * v) midLow += 1;
+                            else if (pLum > 0.055f) midLow += 1;
                             else if (pLum > 0.015f - 0.005f * v) low += 1;
                             else dark += 1;
                         }
@@ -402,6 +421,7 @@ namespace ThatsLit.Components
             var modifiedMidScore = midLightScore;
             var modifiedMidLowScore = midLowLightScore;
             var modifiedLowScore = lowLightScore;
+            var darkScore = 0.01f;
 
             if (GetTimeLighingFactor() < 0)
             {
@@ -411,6 +431,16 @@ namespace ThatsLit.Components
                 // cloud = 0.4, time = -1 (night) => 0.8x (cloudy night)
                 // cloud = -0.4, time = -1 (night) => 1.2x (clear night)
                 // cloud = -1, time = -1 (night) => 1.5x
+                switch (activeRaidSettings.SelectedLocation.Name)
+                {
+                    case "Streets Of Tarkov": // The streets tend to be showered with a dim ambience light
+                        darkScore *= GetTimeLighingFactor() < 0? 5 : 1; 
+                        break;
+                    case "Woods": // The woods looks quite dark in the night
+                        darkScore = 0;
+                        modifiedLowScore *= GetTimeLighingFactor() < 0 ? 0.6f : 1;
+                        break;
+                }
             }
             else
             {
@@ -423,13 +453,14 @@ namespace ThatsLit.Components
                 // cloud = -0.4, time = 1 (day) => 1.2x (clear day)
             }
 
-
             frameLitScore = shinePixels * shineScore
                           + highLightPixels * highLightScore
                           + highMidLightPixels * highMidLightScore
                           + midLightPixels * modifiedMidScore
                           + midLowLightPixels * modifiedMidLowScore
-                          + lowLightPixels * modifiedLowScore;
+                          + lowLightPixels * modifiedLowScore
+                          + darkPixels * darkScore;
+
             avgLum /= (float)validPixels;
             lastValidPixels = validPixels;
 
@@ -464,12 +495,12 @@ namespace ThatsLit.Components
 
             frameLitScore /= (float) validPixels;
             // Transform to -1 ~ 1
+            // ↑ 0 ~ 1
             frameLitScore = Mathf.Clamp01(frameLitScore);
             frameLitScore -= 0.5f;
             frameLitScore *= 2f;
 
             frameLitScoreRaw0 = frameLitScore;
-            // ↑ 0 ~ 1
             // ↓ -1 ~ 1
 
             // Suppress highlight score for likely bright env (daylight)
@@ -627,8 +658,18 @@ namespace ThatsLit.Components
             //        frameLitScore = Mathf.Lerp(frameLitScore, 0, cloud * cloudinessCompensationScale);
             //}
 
+            switch (activeRaidSettings.SelectedLocation.Name)
+            {
+                case "Streets Of Tarkov":
+                    if (GetTimeLighingFactor() < 0 && frameLitScore < -0.5f) frameLitScore = -0.5f + ((frameLitScore + 0.5f) * 0.7f); // The street has a dim light vision even with 1.0 cloud during the darkest hours
+                    break;
+                case "Lighthouse":
+                    if (GetTimeLighingFactor() < 0) frameLitScore *= 0.8f + (0.1f * cloud); // The street has a dim light vision even with 1.0 cloud during the darkest hours
+                    break;
+            }
+
             frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
-            
+
             multiFrameLitScore = (brightestFrameScore * 2f
                                 + frameLitScore
                                 + frame1.score
@@ -706,7 +747,7 @@ namespace ThatsLit.Components
             //GUILayout.Label(lastValidPixels.ToString());
             GUILayout.Label(string.Format("AFFECTED: {0} (+{1})", calced, calcedLastFrame));
 
-            GUILayout.Label(string.Format("FOLIAGE: {1:0.000}", foliageScore));
+            GUILayout.Label(string.Format("FOLIAGE: {0:0.000}", foliageScore));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / {3} -> TIME_LIGHT: {4:0.00}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), GetTimeLighingFactor()));
             GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}]", lightOn? lightIR? "I" : "V" : "  ", laserOn? laserIR? "I" : "V" : "  "));
 
@@ -807,18 +848,31 @@ namespace ThatsLit.Components
         {
             var time = GetInGameDayTime();
             if (time >= 20 && time < 24)
-                return -Mathf.Clamp01((time - 20f) / 2.5f);
+                return -Mathf.Clamp01((time - 20f) / 2.25f);
             else if (time >= 0 && time < 3)
-                return -0.5f - Mathf.Clamp01((2f - time) / 2f) * 0.5f; // 0:00 -> 100%, 2:00 -> 50%, 3:00 -> 50%
+                return GetBrightestNightHourFactor() - Mathf.Clamp01((2f - time) / 2f) * (GetBrightestNightHourFactor() + 1f); // 0:00 -> 100%, 1:00 -> 75%, 2:00 -> 25%, 3:00 -> 25%
             else if (time >= 3 && time < 5)
-                return -0.5f - Mathf.Clamp01((time - 3f) / 2f) * 0.5f; // 3:00 -> 50%, 5:00 -> 100%
+                return GetBrightestNightHourFactor() - Mathf.Clamp01((time - 3f) / 2f) * (GetBrightestNightHourFactor() + 1f); // 3:00 -> 25%, 5:00 -> 100%
             else if (time >= 5 && time < 7)
                 return -Mathf.Clamp01((7f - time) / 2f); // 5:00 -> 100%, 5:00 -> 0%
-            else if (time >= 7 && time < 13)
-                return 1f - Mathf.Clamp01((13f - time) / 6f);
-            else if (time >= 13 && time < 20)
+            else if (time >= 7 && time < 16)
+                return 1f - Mathf.Clamp01((12f - time) / 6f);
+            else if (time >= 16 && time < 20)
                 return Mathf.Clamp01((20f - time) / 7f);
             else return 0;
+
+            float GetBrightestNightHourFactor ()
+            {
+                switch (activeRaidSettings.SelectedLocation.Name)
+                {
+                    case "Streets Of Tarkov":
+                        return -0.25f;
+                    case "Woods":
+                        return -0.35f;
+                    default:
+                        return -0.25f;
+                }
+            }
         }
 
         void GetWeatherStats (out float fog, out float rain, out float cloud)

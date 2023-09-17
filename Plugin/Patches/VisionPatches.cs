@@ -93,7 +93,7 @@ namespace ThatsLit.Patches.Vision
 
                 var score = mainPlayer.multiFrameLitScore; // -1 ~ 1
                 if (score < 0 && __instance.Owner.NightVision.UsingNow) // The score was not reduced (toward 0) for IR lights, process the score here
-                {
+                {   
                     if (mainPlayer.lightOn && mainPlayer.lightIR) score *= 1.5f * (mainPlayer.secondaryShining? 0.7f: 1f);
                     else if (mainPlayer.laserOn && mainPlayer.laserIR) score *= 1.25f * (mainPlayer.secondaryShining ? 0.8f : 1f);
                 }
@@ -101,12 +101,12 @@ namespace ThatsLit.Patches.Vision
                 var factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
 
 
-                // Maybe randomly lose vision
-                if (UnityEngine.Random.Range(0f, 1f) < disFactor
-                 || UnityEngine.Random.Range(0f, 1f) < disFactor * mainPlayer.foliageScore * (1 - factor) * ThatsLitPlugin.FoliageImpactScale.Value) // Among bushes, from afar
+                // Maybe randomly lose vision for foliages
+                if (UnityEngine.Random.Range(0f, 1f) < disFactor * mainPlayer.foliageScore * (1 - factor) * ThatsLitPlugin.FoliageImpactScale.Value) // Among bushes, from afar
                 {
                     __result *= 10f;
                     if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;
+                    __result += ThatsLitPlugin.FinalOffset.Value;
                     return;
                 }
 
@@ -121,10 +121,9 @@ namespace ThatsLit.Patches.Vision
                 //    else if (factor > 0f) factor /= 1 + disFactor / 2f; // Highlight will be less effective from afar
                 //}
 
-                // Give posing influence
-                // (0.1) prone, 0.5 (110m) => 1.28 / (0.1) prone, 0.1 (20m) => 1.072
+                // (0.1) prone, 0.8 (110m) => 1.576x / (0.1) prone, 0.2 (60m) => 1.14x / (0.1) prone, 0.008 (20m) => 1.005x
                 // (1) stand => 1
-                if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f); // Darkness will be more effective from afar
+                if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f); // Darkness will be far more effective from afar
                 else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
                 factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 

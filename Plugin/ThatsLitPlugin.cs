@@ -55,8 +55,7 @@ namespace ThatsLit
         {
             string category = "1. Main";
             Enabled = Config.Bind(category, "Enable", true, "Enable the mod");
-            //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 and 0.4, up to -1 and 1, the score start to matter. See x^3 in Desmos plotter.");
-            FinalOffset = Config.Bind(category, key: "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means slower and vice versa.");
+            //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
             DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, "Scale the strength of increment of 'time to be seen' threshold.");
@@ -65,6 +64,7 @@ namespace ThatsLit
             category = "3. Tweaks";
             GlobalRandomOverlookChance = Config.Bind(category, key: "Global Random Overlook Chance", 0.01f, "The chance for all AIs to simply overlook in 1 vision check.");
             FoliageImpactScale = Config.Bind(category, key: "Foliage Impact Scale", 1f, "Scale the strength of extra chance to be overlooked from sneaking around foliages.");
+            FinalOffset = Config.Bind(category, key: "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa.");
 
             category = "4. Info";
             Info = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
