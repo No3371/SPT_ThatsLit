@@ -236,8 +236,7 @@ namespace ThatsLit.Components
                 DetermineShiningEquipments(ref secondaryShining, ref lightOn, ref laserOn, ref laserIR, ref lightIR);
 
 
-                lastCheckedFoliageAndTerrain = Time.time;
-                foliageScore = terrainScore = 0;
+                foliageScore = 0;
 
                 for (int i = 0; i < collidersCache.Length; i++)
                     collidersCache[i] = null;
@@ -703,7 +702,7 @@ namespace ThatsLit.Components
             //GUILayout.Label(lastValidPixels.ToString());
             GUILayout.Label(string.Format("AFFECTED: {0} (+{1})", calced, calcedLastFrame));
 
-            GUILayout.Label(string.Format("TERRAIN: {0:0.000} / FOLIAGE: {1:0.000}", terrainScore, foliageScore));
+            GUILayout.Label(string.Format("FOLIAGE: {1:0.000}", foliageScore));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / {3} -> TIME_LIGHT: {4:0.00}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), GetTimeLighingFactor()));
             GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}]", lightOn? lightIR? "I" : "V" : "  ", laserOn? laserIR? "I" : "V" : "  "));
 
