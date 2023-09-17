@@ -88,13 +88,12 @@ namespace ThatsLit.Patches.Vision
                     else if (mainPlayer.laserOn && mainPlayer.laserIR) score *= 1.25f;
                 }
 
-                    var factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
+                var factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
 
 
                 // Maybe randomly lose vision
-                if (UnityEngine.Random.Range(0f, 1f) < disFactor * disFactor
-                 || UnityEngine.Random.Range(0f, 1f) < mainPlayer.foliageScore * disFactor // Among bushes, from afar
-                 || UnityEngine.Random.Range(0f, 1f) < mainPlayer.terrainScore * (1.05f - poseFactor) * disFactor) // Among grasses, low pose, from afar
+                if (UnityEngine.Random.Range(0f, 1f) < disFactor
+                 || UnityEngine.Random.Range(0f, 1f) < disFactor * mainPlayer.foliageScore * (1 - factor)) // Among bushes, from afar
                 {
                     __result *= 10f;
                     if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;
@@ -102,7 +101,7 @@ namespace ThatsLit.Patches.Vision
                 }
 
                 if (factor < 0 && __instance.Owner.NightVision.UsingNow)
-                    factor *= disFactor;
+                    factor *= Mathf.Clamp01(disFactor + 0.1f); // Factor is reduced to only 10% at 10m for AIs using NVG, but at 110m their vision still get impacted
 
                 //if (factor < 0 && (__instance.Person.AIData.UsingLight || __instance.Person.AIData.GetFlare)) factor /= 5f; // Moved to score calculation
 
