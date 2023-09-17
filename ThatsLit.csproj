@@ -218,6 +218,7 @@
     <None Include="Properties\.vs\VSWorkspaceState.json" />
     <None Include="Properties\NuGet.Config" />
     <None Include="Plugin\VersionChecker\setbuild.ps1" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComponentHelpers.cs" />

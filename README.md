@@ -19,8 +19,9 @@ The "lit score" ranges from -1 to 1, there are multiple factors to consider in o
 - Time, cloudiness and distance matter
 - Sudden brightness change increase the score (ex: walking into bright area or under flashing lights)
 - Yes, getting lit up flashlighs and gun flashes increase the score
-- Sneaking in the shadow is useless when you left light or laser on
-- AIs using NVGs are quite unaffected
+- Sneaking in the shadow is useless when you left any light or laser on
+- AIs using NVGs are quite unaffected by darkness
+- Staying near multiple bushes makes AIs harder to see you from afar
 
 ## Fun facts
 
