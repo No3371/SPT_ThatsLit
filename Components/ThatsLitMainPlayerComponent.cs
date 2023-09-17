@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.CameraControl;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.Weather;
@@ -55,11 +57,9 @@ namespace ThatsLit.Components
 
         public float cloudinessCompensationScale = 0.5f;
 
-        public float bushScore, grassScore;
-        public float lastCheckBushAndGrass;
+        public float foliageScore;
         Collider[] collidersCache;
-        public LayerMask grassLayer = 0;
-        public LayerMask bushLayer = 0;
+        public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
 
         float startAt, lastCheckedLights;
         public bool secondaryShining, lightOn, laserOn, lightIR, laserIR;
@@ -91,24 +91,24 @@ namespace ThatsLit.Components
 
             cam.targetTexture = rt;
 
-            //envRt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
-            //envRt.filterMode = FilterMode.Point;
-            //envRt.Create();
+            envRt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
+            envRt.filterMode = FilterMode.Point;
+            envRt.Create();
 
-            //envTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
+            envTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
 
-            //envCam = new GameObject().AddComponent<Camera>();
-            //envCam.clearFlags = CameraClearFlags.SolidColor;
-            //envCam.backgroundColor = Color.white;
-            //envCam.transform.SetParent(MainPlayer.Transform.Original);
-            //envCam.transform.localPosition = Vector3.up * 3;
+            envCam = new GameObject().AddComponent<Camera>();
+            envCam.clearFlags = CameraClearFlags.SolidColor;
+            envCam.backgroundColor = Color.white;
+            envCam.transform.SetParent(MainPlayer.Transform.Original);
+            envCam.transform.localPosition = Vector3.up * 3;
 
-            //envCam.nearClipPlane = 0.01f;
+            envCam.nearClipPlane = 0.01f;
 
-            //envCam.cullingMask &= ~LayerMaskClass.PlayerMask;
-            //envCam.fieldOfView = 90;
+            envCam.cullingMask &= ~LayerMaskClass.PlayerMask;
+            envCam.fieldOfView = 90;
 
-            //envCam.targetTexture = envRt;
+            envCam.targetTexture = envRt;
 
 
             if (ThatsLitPlugin.DebugTexture.Value)
@@ -120,17 +120,15 @@ namespace ThatsLit.Components
                 display.texture = debugTex;
                 display.RectTransform().anchoredPosition = new Vector2(-720, -360);
 
-                //envDebugTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
-                //displayEnv = new GameObject().AddComponent<RawImage>();
-                //displayEnv.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
-                //displayEnv.RectTransform().sizeDelta = new Vector2(160, 160);
-                //displayEnv.texture = envDebugTex;
-                //displayEnv.RectTransform().anchoredPosition = new Vector2(-560, -360);
+                envDebugTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
+                displayEnv = new GameObject().AddComponent<RawImage>();
+                displayEnv.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
+                displayEnv.RectTransform().sizeDelta = new Vector2(160, 160);
+                displayEnv.texture = envDebugTex;
+                displayEnv.RectTransform().anchoredPosition = new Vector2(-560, -360);
             }
 
-            collidersCache = new Collider[10];
-            bushLayer = LayerMask.NameToLayer("Foliage");
-            grassLayer = LayerMask.NameToLayer("Grass");
+            collidersCache = new Collider[16];
 
             startAt = Time.time;
             globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
@@ -199,89 +197,89 @@ namespace ThatsLit.Components
                         break;
                     }
             }
+            Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
 
-            //envCam.transform.localPosition = envCamOffset;
-            //switch (currentCamPos)
-            //{
-            //    case 0:
-            //    {
-            //        envCam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.left * 25);
-            //        break;
-            //    }
-            //    case 1:
-            //    {
-            //        envCam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.right * 25);
-            //        break;
-            //        }
-            //    case 2:
-            //        {
-            //            envCam.transform.localPosition = envCamOffset;
-            //            envCam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * 10);
-            //            break;
-            //        }
-            //    case 3:
-            //        {
-            //            envCam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.back * 25);
-            //            break;
-            //        }
-            //    case 4:
-            //        {
-            //            envCam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.right * 25);
-            //            break;
-            //        }
-            //}
+            envCam.transform.localPosition = envCamOffset;
+            switch (currentCamPos)
+            {
+                case 0:
+                    {
+                        envCam.transform.LookAt(bodyPos + Vector3.left * 25);
+                        break;
+                    }
+                case 1:
+                    {
+                        envCam.transform.LookAt(bodyPos + Vector3.right * 25);
+                        break;
+                    }
+                case 2:
+                    {
+                        envCam.transform.localPosition = envCamOffset;
+                        envCam.transform.LookAt(bodyPos + Vector3.up * 10);
+                        break;
+                    }
+                case 3:
+                    {
+                        envCam.transform.LookAt(bodyPos + Vector3.back * 25);
+                        break;
+                    }
+                case 4:
+                    {
+                        envCam.transform.LookAt(bodyPos + Vector3.right * 25);
+                        break;
+                    }
+            }
 
             if (Time.time > lastCheckedLights + 0.33f)
             {
                 lastCheckedLights = Time.time;
-                DetermineShiningEquipments(ref secondaryShining, ref lightOn, ref laserOn, ref laserIR, ref lightIR);    
-            }
+                DetermineShiningEquipments(ref secondaryShining, ref lightOn, ref laserOn, ref laserIR, ref lightIR);
 
-            if (false&& Time.time > lastCheckBushAndGrass + 0.5f)
-            {
-                lastCheckBushAndGrass = Time.time;
-                bushScore = grassScore = 0;
+
+                lastCheckedFoliageAndTerrain = Time.time;
+                foliageScore = terrainScore = 0;
 
                 for (int i = 0; i < collidersCache.Length; i++)
                     collidersCache[i] = null;
 
-                Physics.OverlapSphereNonAlloc(MainPlayer.MainParts[BodyPartType.body].Position, 5f, collidersCache, LayerMaskClass.HighPolyWithTerrainMaskAI);
+                ObstacleCollider c;
+                //float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, LayerMaskClass.TriggersMask);
 
-                float count = 0;
-                for (int i = 0; i < collidersCache.Length; i++)
+                //if (count > 0)
+                //for (int i = 0; i < collidersCache.Length; i++)
+                //{
+                //    if (collidersCache[i] != null)
+                //    {
+                //        if (!collidersCache[i].transform.parent.gameObject.GetComponentInChildren<ObstacleCollider>()
+                //            || !(collidersCache[i].transform.parent.gameObject.name.Contains("filbert")
+                //            && !collidersCache[i].transform.parent.gameObject.name.Contains("fern_"))) continue;
+
+                //        float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
+                //        if (dis < 0.3f) foliageScore += 1;
+                //        else if (dis < 0.7f) foliageScore += 0.5f;
+                //        else if (dis < 1.5f) foliageScore += 0.2f;
+                //        else foliageScore += 0.1f;
+                //        count++;
+                //    }
+
+                //    foliageScore /= count;
+                //}
+
+                float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, foliageLayerMask);
+
+                for (int i = 0; i < count; i++)
                 {
-                    if (collidersCache[i] != null)
-                    {
-                        float dis = (collidersCache[i].transform.position - MainPlayer.Position).magnitude;
-                        if (dis < 0.3f) bushScore += 1;
-                        else if (dis < 0.7f) bushScore += 0.5f;
-                        else if (dis < 1.5f) bushScore += 0.2f;
-                        else bushScore += 0.1f;
-                        count++;
-                    }
-
-                    if (count == 0) bushScore = 0;
-                    else bushScore /= count;
+                    float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
+                    if (dis < 0.4f) foliageScore += 0.8f;
+                    else if (dis < 0.6f) foliageScore += 0.5f;
+                    else if (dis < 1f) foliageScore += 0.3f;
+                    else if (dis < 2f) foliageScore += 0.15f;
+                    else if (dis < 4f) foliageScore += 0.05f;
+                    else foliageScore += 0.02f;
                 }
 
-                for (int i = 0; i < collidersCache.Length; i++)
-                    collidersCache[i] = null;
-
-                Physics.OverlapSphereNonAlloc(MainPlayer.Position, 1f, collidersCache, grassLayer);
-                count = 0;
-                for (int i = 0; i < collidersCache.Length; i++)
-                {
-                    if (collidersCache[i] != null)
-                    {
-                        float dis = (collidersCache[i].transform.position - MainPlayer.Position).magnitude;
-                        if (dis < 0.5f) grassScore += 0.7f;
-                        else grassScore += 0.3f;
-                        count++;
-                    }
-
-                    if (count == 0) grassScore = 0;
-                    else grassScore /= count;
-                }
+                if (count > 0) foliageScore /= count;
+                if (count == 1) foliageScore /= 2f;
             }
         }
 
@@ -384,7 +382,7 @@ namespace ThatsLit.Components
                             else if (pLum > 0.5f + 0.03f * v) high += 1;
                             else if (pLum > 0.25f + 0.02f * v) highMid += 1;
                             else if (pLum > 0.13f - 0.02f * v) mid += 1;
-                            else if (pLum > 0.055f - 0.01f * cloud * v) midLow += 1;
+                            else if (pLum > 0.055f - 0.01f * v) midLow += 1;
                             else if (pLum > 0.015f - cloud * 0.07f * (1 - v) / 2f) low += 1;
                             else dark += 1;
                         }
@@ -407,18 +405,18 @@ namespace ThatsLit.Components
 
             if (GetTimeLighingFactor() < 0)
             {
-                // Nights looks overally brighter when the weather is clear and vice versa (cloudiness seems to be -1 ~ 1.5)
-                modifiedMidLowScore *= 1 + cloud * GetTimeLighingFactor() / 2f; // The cloudiness is scaled by darkness at the time
-                modifiedLowScore *= 1 + cloud * GetTimeLighingFactor() / 3f;
+                // Nights looks overally brighter when the weather is clear and vice versa, try to match the visual (cloudiness seems to be -1 (clear) ~ 1.5)
+                modifiedMidLowScore *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f; // The cloudiness is scaled by darkness at the time
+                modifiedLowScore *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
                 // cloud = 0.4, time = -1 (night) => 0.8x (cloudy night)
                 // cloud = -0.4, time = -1 (night) => 1.2x (clear night)
                 // cloud = -1, time = -1 (night) => 1.5x
             }
             else
             {
-                // Days looks dimmer when the weather is cloudy and vice versa
-                //modifiedMidLowScore *= 1 + Mathf.Abs(cloud * GetTimeLighingFactor() / 2f); // The cloudiness is scaled by darkness at the time
-                modifiedLowScore *= 1 - GetTimeLighingFactor() / 2f;
+                // Days looks dimmer when the weather is cloudy and vice versa, try to match the visual
+                // modifiedMidLowScore *= 1 + Mathf.Abs(cloud * GetTimeLighingFactor() / 2f);
+                modifiedLowScore *= 1 - cloud * GetTimeLighingFactor() / 6f + GetTimeLighingFactor() / 6f;
                 // The captured character is way dimmer when cloudy...
                 // cloud = 0.4, time = 1 (day) => 0.8x (cloudy day)
 
@@ -456,8 +454,8 @@ namespace ThatsLit.Components
             envLumEstiFast = Mathf.Lerp(envLumEstiFast, avgLumMultiFrames, Time.deltaTime);
             envLumEsti = Mathf.Lerp(envLumEsti, avgLumMultiFrames, Time.deltaTime / 3f);
             envLumEstiSlow = Mathf.Lerp(envLumEstiSlow, avgLumMultiFrames, Time.deltaTime / 10f);
-            if (Time.time - startAt > 5f)
-                globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time - startAt) * 2f, 300f)));
+            if (Time.time - startAt > 20f)
+                globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time + 20 - startAt) * 2f, 300f)));
 
 
             //// When entering dark places in bright env, we need to prevent the lights in the dark places not getting suppressed
@@ -705,8 +703,10 @@ namespace ThatsLit.Components
             //GUILayout.Label(lastValidPixels.ToString());
             GUILayout.Label(string.Format("AFFECTED: {0} (+{1})", calced, calcedLastFrame));
 
-            //GUILayout.Label(string.Format("GRASS: {0:0.000} / BUSH: {1:0.000}", grassScore, bushScore));
+            GUILayout.Label(string.Format("TERRAIN: {0:0.000} / FOLIAGE: {1:0.000}", terrainScore, foliageScore));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / {3} -> TIME_LIGHT: {4:0.00}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), GetTimeLighingFactor()));
+            GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}]", lightOn? lightIR? "I" : "V" : "  ", laserOn? laserIR? "I" : "V" : "  "));
+
         }
 
         void DrawAsymetricMeter (int level)
@@ -834,42 +834,53 @@ namespace ThatsLit.Components
         void DetermineShiningEquipments (ref bool secondary, ref bool light, ref bool laser, ref bool laserIsIR, ref bool lightIsIR)
         {
             secondary = light = laser = laserIsIR = lightIsIR = false;
-
-            var activeLights = ((Weapon)MainPlayer.ActiveSlot.ContainedItem).AllSlots
-                .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
-                .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
-
-            foreach (var i in activeLights)
+            IEnumerable<GClass2550> activeLights;
+            if (MainPlayer?.ActiveSlot?.ContainedItem != null)
             {
-                if (i == null) continue;
-                MapComponentsModes(i, ref light, ref laser, ref laserIsIR, ref lightIsIR);
-                if (light || laser) return;
+
+                activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
+                    .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
+                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
+
+                if (activeLights != null)
+                foreach (var i in activeLights)
+                {
+                    if (i == null) continue;
+                    MapComponentsModes(i, ref light, ref laser, ref laserIsIR, ref lightIsIR);
+                    if (light || laser) return;
+                }
             }
 
-            var inv = (InventoryControllerClass)MainPlayer.ActiveSlot.ContainedItem.Owner;
-            var helemt = inv.Inventory.Equipment.GetSlot(EquipmentSlot.Headwear).ContainedItem as GClass2537;
-            activeLights = helemt.AllSlots
-                .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
-                .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
+            var inv = (InventoryControllerClass) MainPlayer?.ActiveSlot?.ContainedItem?.Owner;
+            var helmet = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear)?.ContainedItem as GClass2537;
 
-            foreach (var i in activeLights)
+            if (helmet != null)
             {
-                if (i == null) continue;
-                light = laser = laserIsIR = lightIsIR = false;
-                MapComponentsModes(i, ref light, ref laser, ref laserIsIR, ref lightIsIR);
-                if (light || laser) return;
+                activeLights = helmet.AllSlots
+                    .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
+                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
+
+                foreach (var i in activeLights)
+                {
+                    if (i == null) continue;
+                    light = laser = laserIsIR = lightIsIR = false;
+                    MapComponentsModes(i, ref light, ref laser, ref laserIsIR, ref lightIsIR);
+                    if (light || laser) return;
+                }
             }
 
             secondary = true;
 
-            var secondaryWeapons = inv.Inventory.GetItemsInSlots(new[] { EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster });
+            var secondaryWeapons = inv?.Inventory?.GetItemsInSlots(new[] { EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster });
 
+            if (secondaryWeapons != null)
             foreach (Weapon w in secondaryWeapons)
             {
-                activeLights = w.AllSlots
+                activeLights = w?.AllSlots
                     .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
                     .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
 
+                if (w != null)
                 foreach (var i in activeLights)
                 {
                     if (i == null) continue;

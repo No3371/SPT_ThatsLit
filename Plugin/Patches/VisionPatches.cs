@@ -93,8 +93,8 @@ namespace ThatsLit.Patches.Vision
 
                 // Maybe randomly lose vision
                 if (UnityEngine.Random.Range(0f, 1f) < disFactor * disFactor
-                 || UnityEngine.Random.Range(0f, 1f) < mainPlayer.bushScore * disFactor // Among bushes, from afar
-                 || UnityEngine.Random.Range(0f, 1f) < mainPlayer.grassScore * (1.05f - poseFactor) * disFactor) // Among grasses, low pose, from afar
+                 || UnityEngine.Random.Range(0f, 1f) < mainPlayer.foliageScore * disFactor // Among bushes, from afar
+                 || UnityEngine.Random.Range(0f, 1f) < mainPlayer.terrainScore * (1.05f - poseFactor) * disFactor) // Among grasses, low pose, from afar
                 {
                     __result *= 10f;
                     if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;
