@@ -40,7 +40,7 @@ namespace ThatsLit
 
         private void Awake()
         {
-            if (!VersionChecker.CheckEftVersion(Logger, Info, Config))
+            if (!VersionChecker.CheckEftVersion(Logger, base.Info, Config))
             {
                 throw new Exception("Invalid EFT Version");
             }
@@ -53,23 +53,37 @@ namespace ThatsLit
 
         private void BindConfigs()
         {
-            string category = "Main";
-            LightingInfo = Config.Bind(category, "Lighting Info", true, "");
-            DebugInfo = Config.Bind(category, "Debug Info", false, "");
+            string category = "1. Main";
+            Enabled = Config.Bind(category, "Enable", true, "Enable the mod");
+            //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 and 0.4, up to -1 and 1, the score start to matter. See x^3 in Desmos plotter.");
+            FinalOffset = Config.Bind(category, key: "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means slower and vice versa.");
+
+            category = "2. Darkness / Brightness";
+            DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, "Scale the strength of increment of 'time to be seen' threshold.");
+            BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, "Scale the strength of decreament of 'time to be seen' threshold.");
+
+            category = "3. Tweaks";
+            GlobalRandomOverlookChance = Config.Bind(category, key: "Global Random Overlook Chance", 0.01f, "The chance for all AIs to simply overlook in 1 vision check.");
+            FoliageImpactScale = Config.Bind(category, key: "Foliage Impact Scale", 1f, "Scale the strength of extra chance to be overlooked from sneaking around foliages.");
+
+            category = "4. Info";
+            Info = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
+
+            category = "5. Debug";
+            DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
-            DisableEffect = Config.Bind(category, "Disable Effect", false, "Disable the mod");
-            ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 and 0.4, up to -1 and 1, the score start to matter. See x^3 in Desmos plotter.");
-            ImpactScale = Config.Bind(category, key: "Impact Scale", 1f, "Scale how much the calculation affect time to be seen.");
-            ImpactOffset = Config.Bind(category, key: "Impact Offset", 0f, "Modify the final time to be seen.");
         }
 
-        public static ConfigEntry<bool> LightingInfo { get; private set; }
+        public static ConfigEntry<bool> Info { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
-        public static ConfigEntry<bool> DisableEffect { get; private set; }
+        public static ConfigEntry<bool> Enabled { get; private set; }
         public static ConfigEntry<float> ScoreOffset { get; private set; }
-        public static ConfigEntry<float> ImpactScale { get; private set; }
-        public static ConfigEntry<float> ImpactOffset { get; private set; }
+        public static ConfigEntry<float> DarknessImpactScale { get; private set; }
+        public static ConfigEntry<float> BrightnessImpactScale { get; private set; }
+        public static ConfigEntry<float> FinalOffset { get; private set; }
+        public static ConfigEntry<float> GlobalRandomOverlookChance { get; private set; }
+        public static ConfigEntry<float> FoliageImpactScale { get; private set; }
 
         private void Patches()
         {

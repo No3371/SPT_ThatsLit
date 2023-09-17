@@ -31,7 +31,7 @@ namespace ThatsLit.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(GClass478 __instance, BifacialTransform BotTransform, BifacialTransform enemy, ref float __result)
         {
-            if (__result == 8888 || ThatsLitPlugin.DisableEffect.Value) return;
+            if (__result == 8888 || !ThatsLitPlugin.Enabled.Value) return;
             var original = __result;
 
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
@@ -47,24 +47,34 @@ namespace ThatsLit.Patches.Vision
             var disFactor = Mathf.Clamp01((dis - 10) / 100f);
             // To scale down various sneaking bonus
             // The bigger the distance the bigger it is, capped to 110m
-            disFactor = disFactor * disFactor * 0.5f; // A slow accelerating curve, 110m => 1, 10m => 0
+            disFactor = disFactor * disFactor * 0.8f; // A slow accelerating curve, 110m => 1, 10m => 0 (Scaled down to make things imperfect)
 
             if (__instance.Owner.WeaponManager.ShootController.IsAiming)
             {
-                disFactor *= 1 + 0.1f * (300 - __instance.Owner.WeaponManager.CurrentWeapon.GetSightingRange()) / 100;
-                // 10m sight? => 1.29x... 10m -> 0, 110m -> 0.645
-                // 50m sight => 1.25x... 10m -> 0, 110m -> 0.6
-                // 100m sight => 1.2x... 10m -> 0, 110m -> 0.6
-                // 300m sight => 1x... 110m -> 0.5
-                // 600m sight => 0.8x... 110m -> 0.4
-                // 1000m sight => 0.3x... 110m -> 0.15
+                float v = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 100;
+                disFactor *= 1 + 0.1f * (300 - v) / 100;
+                disFactor = Mathf.Clamp01(disFactor);
+                // 10m sight? => 1.29x... 10m -> 0, 110m -> 1.032
+                // 50m sight => 1.25x... 10m -> 0, 110m -> 1
+                // 100m sight => 1.2x... 10m -> 0, 110m -> 0.96
+                // 300m sight => 1x... 110m -> 0.8
+                // 600m sight => 0.8x... 110m -> 0.64
+                // 1000m sight => 0.3x... 110m -> 0.24
             }
 
             var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel;
-            if (UnityEngine.Random.Range(0f, 1f) < 0.01f * disFactor / poseFactor)
+            // The chance to overlook considering only the pose and the distance
+            // = the chance even the player is standing in some wild flat zone
+            float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value);
+            if (UnityEngine.Random.Range(0f, 1f) < globalOverlookChance * disFactor / poseFactor)
             {
-                __result *= 10;
-                // prone, 110m, 6%
+                __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
+                // prone, 110m, about 8% 
+                // prone, 50m, about 1.08%
+                // prone, 10m, 0
+                // stand, 110m, about 0.8% 
+                // stand, 50m, about 0.108%
+                // prone, 10m, 0
             }
 
             if (EFTInfo.IsPlayerMainPlayer(__instance.Person))
@@ -93,7 +103,7 @@ namespace ThatsLit.Patches.Vision
 
                 // Maybe randomly lose vision
                 if (UnityEngine.Random.Range(0f, 1f) < disFactor
-                 || UnityEngine.Random.Range(0f, 1f) < disFactor * mainPlayer.foliageScore * (1 - factor)) // Among bushes, from afar
+                 || UnityEngine.Random.Range(0f, 1f) < disFactor * mainPlayer.foliageScore * (1 - factor) * ThatsLitPlugin.FoliageImpactScale.Value) // Among bushes, from afar
                 {
                     __result *= 10f;
                     if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;
@@ -122,17 +132,19 @@ namespace ThatsLit.Patches.Vision
                 // 
                 var reducingSeconds = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f, 1f);
                 reducingSeconds *= factor < 0 ? 1 : 0.1f; // Give positive factor a lower impact because the normal value are like 0.15 or something
+                reducingSeconds *= reducingSeconds > 0 ? ThatsLitPlugin.DarknessImpactScale.Value : ThatsLitPlugin.BrightnessImpactScale.Value;
                 __result -= reducingSeconds;
 
+                // The scaling here allows the player to stay in the dark without being seen
                 if (factor < 0 && UnityEngine.Random.Range(-1, 0) > factor) __result = 8888f;
-                else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor) __result *= (1f - factor * 0.5f * ThatsLitPlugin.ImpactScale.Value); // Make it so even at 100% it only reduce half of the time
-                else if (factor < -0.9f) __result *= 1 - (factor * 3f * ThatsLitPlugin.ImpactScale.Value);
-                else if (factor < -0.5f) __result *= 1 - (factor * 2f * ThatsLitPlugin.ImpactScale.Value);
-                else if (factor < -0.2f) __result *= 1 - factor * ThatsLitPlugin.ImpactScale.Value;
-                else if (factor < 0f) __result *= 1 - factor / 2f * ThatsLitPlugin.ImpactScale.Value;
-                else if (factor > 0f) __result /= (1 + factor / 2f * ThatsLitPlugin.ImpactScale.Value);
+                else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor) __result *= (1f - factor * 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value); // Make it so even at 100% it only reduce half of the time
+                else if (factor < -0.9f) __result *= 1 - (factor * 2f * ThatsLitPlugin.DarknessImpactScale.Value);
+                else if (factor < -0.5f) __result *= 1 - (factor * 1.5f * ThatsLitPlugin.DarknessImpactScale.Value);
+                else if (factor < -0.2f) __result *= 1 - factor * ThatsLitPlugin.DarknessImpactScale.Value;
+                else if (factor < 0f) __result *= 1 - factor / 1.5f * ThatsLitPlugin.DarknessImpactScale.Value;
+                else if (factor > 0f) __result /= (1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value);
 
-                __result += ThatsLitPlugin.ImpactOffset.Value;
+                __result += ThatsLitPlugin.FinalOffset.Value;
                 if (__result < 0.001f) __result = 0.001f;
 
                 if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;

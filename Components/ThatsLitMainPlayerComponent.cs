@@ -278,7 +278,8 @@ namespace ThatsLit.Components
                 }
 
                 if (count > 0) foliageScore /= count;
-                if (count == 1) foliageScore /= 2f;
+                if (count == 1) foliageScore /= 1.7f;
+                if (count == 2) foliageScore /= 1.3f;
             }
         }
 
@@ -639,9 +640,6 @@ namespace ThatsLit.Components
 
             // In bright map, move toward 0
             multiFrameLitScore = Mathf.Lerp(multiFrameLitScore, 0, Mathf.Clamp01((globalLumEsti - 0.09f) / 0.05f) * 0.5f);
-
-
-            multiFrameLitScore += ThatsLitPlugin.ScoreOffset.Value;
         }
 
         private void OnDestroy()
@@ -654,10 +652,16 @@ namespace ThatsLit.Components
 
         private void OnGUI()
         {
-            if (!ThatsLitPlugin.DebugInfo.Value && ThatsLitPlugin.LightingInfo.Value)
+            if (!ThatsLitPlugin.DebugInfo.Value && ThatsLitPlugin.Info.Value)
             {
                 DrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));
                 DrawAsymetricMeter((int)(Mathf.Pow(multiFrameLitScore, POWER) / 0.0999f));
+                if (foliageScore > 0.15f)
+                    GUILayout.Label("[FOLIAGE++]");
+                else if (foliageScore > 0.1f)
+                    GUILayout.Label("[FOLIAGE+]");
+                else if (foliageScore > 0.05f)
+                    GUILayout.Label("[FOLIAGE]");
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
             if (Time.frameCount % 41 == 0)
