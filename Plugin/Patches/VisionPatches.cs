@@ -82,7 +82,7 @@ namespace ThatsLit.Patches.Vision
 
 
                 var score = mainPlayer.multiFrameLitScore; // -1 ~ 1
-                if (score < 0 && __instance.Owner.NightVision.UsingNow)
+                if (score < 0 && __instance.Owner.NightVision.UsingNow) // The score was not reduced (toward 0) for IR lights, process the score here
                 {
                     if (mainPlayer.lightOn && mainPlayer.lightIR) score *= 1.5f;
                     else if (mainPlayer.laserOn && mainPlayer.laserIR) score *= 1.25f;
