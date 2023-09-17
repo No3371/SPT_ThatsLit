@@ -54,6 +54,7 @@ namespace ThatsLit
         private void BindConfigs()
         {
             string category = "Main";
+            LightingInfo = Config.Bind(category, "Lighting Info", true, "");
             DebugInfo = Config.Bind(category, "Debug Info", false, "");
             DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
             DisableEffect = Config.Bind(category, "Disable Effect", false, "Disable the mod");
@@ -62,6 +63,7 @@ namespace ThatsLit
             ImpactOffset = Config.Bind(category, key: "Impact Offset", 0f, "Modify the final time to be seen.");
         }
 
+        public static ConfigEntry<bool> LightingInfo { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> DisableEffect { get; private set; }

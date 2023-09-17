@@ -126,6 +126,7 @@
     <Reference Include="DrakiaXYZ-BigBrain">
       <HintPath>..\..\BepInEx\plugins\DrakiaXYZ-BigBrain.dll</HintPath>
     </Reference>
+    <Reference Include="ItemComponent.Types, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\EscapeFromTarkov_Data\Managed\Mono.Data.Sqlite.dll</HintPath>
@@ -220,7 +221,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComponentHelpers.cs" />
-    <Compile Include="Components\MainPlayer\ThatsLitMainPlayerComponent.cs" />
+    <Compile Include="Components\ThatsLitMainPlayerComponent.cs" />
     <Compile Include="Components\ThatsLitGameworldComponent.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Plugin\GameWorldHandler.cs" />
