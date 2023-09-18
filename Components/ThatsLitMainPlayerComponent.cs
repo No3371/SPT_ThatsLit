@@ -137,14 +137,9 @@ namespace ThatsLit.Components
             collidersCache = new Collider[16];
 
             startAt = Time.time;
-            globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
-        }
-
-        void Start ()
-        {
-
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-            activeRaidSettings = (RaidSettings) (typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
+            activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
+            globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
         }
 
 
@@ -385,24 +380,26 @@ namespace ThatsLit.Components
                         lum += pLum;
 
                         float v = GetTimeLighingFactor();
+                        float thresholdShine, thresholdHigh, thresholdHighMid, thresholdMid, thresholdMidLow, thresholdLow;
+                        GetThresholds(v, out thresholdShine, out thresholdHigh, out thresholdHighMid, out thresholdMid, out thresholdMidLow, out thresholdLow);
                         if (v < 0) // Night
                         {
-                            if (pLum > 0.75f) shine += 1;
-                            else if (pLum > 0.5f) high += 1;
-                            else if (pLum > 0.25f) highMid += 1;
-                            else if (pLum > 0.13f) mid += 1;
-                            else if (pLum > 0.055f) midLow += 1;
-                            else if (pLum > 0.015f - 0.005f * v) low += 1;
+                            if (pLum > thresholdShine) shine += 1;
+                            else if (pLum > thresholdHigh) high += 1;
+                            else if (pLum > thresholdHighMid) highMid += 1;
+                            else if (pLum > thresholdMid) mid += 1;
+                            else if (pLum > thresholdMidLow) midLow += 1;
+                            else if (pLum > thresholdLow) low += 1;
                             else dark += 1;
                         }
                         else
                         {
-                            if (pLum > 0.75f + 0.05f * v) shine += 1;
-                            else if (pLum > 0.5f + 0.03f * v) high += 1;
-                            else if (pLum > 0.25f + 0.02f * v) highMid += 1;
-                            else if (pLum > 0.13f - 0.02f * v) mid += 1;
-                            else if (pLum > 0.055f - 0.01f * v) midLow += 1;
-                            else if (pLum > 0.015f - cloud * 0.07f * (1 - v) / 2f) low += 1;
+                            if (pLum > thresholdShine) shine += 1;
+                            else if (pLum > thresholdHigh) high += 1;
+                            else if (pLum > thresholdHighMid) highMid += 1;
+                            else if (pLum > thresholdMid) mid += 1;
+                            else if (pLum > thresholdMidLow) midLow += 1;
+                            else if (pLum > thresholdLow) low += 1;
                             else dark += 1;
                         }
 
@@ -418,6 +415,7 @@ namespace ThatsLit.Components
             var darkerLitPixels = midLightPixels / 2 + midLowLightPixels + lowLightPixels;
             darkerPixels = validPixels - brighterPixels;
 
+            var modifiedHighMidScore = highMidLightScore;
             var modifiedMidScore = midLightScore;
             var modifiedMidLowScore = midLowLightScore;
             var modifiedLowScore = lowLightScore;
@@ -426,6 +424,8 @@ namespace ThatsLit.Components
             if (GetTimeLighingFactor() < 0)
             {
                 // Nights looks overally brighter when the weather is clear and vice versa, try to match the visual (cloudiness seems to be -1 (clear) ~ 1.5)
+                modifiedMidScore *= 1 - GetTimeLighingFactor() / 5f;
+                modifiedMidScore *= 1 - GetTimeLighingFactor() / 6f;
                 modifiedMidLowScore *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f; // The cloudiness is scaled by darkness at the time
                 modifiedLowScore *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
                 // cloud = 0.4, time = -1 (night) => 0.8x (cloudy night)
@@ -434,11 +434,15 @@ namespace ThatsLit.Components
                 switch (activeRaidSettings.SelectedLocation.Name)
                 {
                     case "Streets Of Tarkov": // The streets tend to be showered with a dim ambience light
-                        darkScore *= GetTimeLighingFactor() < 0? 5 : 1; 
+                        darkScore *= 5; 
                         break;
-                    case "Woods": // The woods looks quite dark in the night
+                    case "Woods": // The woods looks quite dark in the night, lowering the score
                         darkScore = 0;
-                        modifiedLowScore *= GetTimeLighingFactor() < 0 ? 0.6f : 1;
+                        modifiedLowScore *= 0.6f;
+                        break;
+                    case "Shoreline": // The shoreline works fine when it's clear, but when it get cloudy, the score dip too fast (because the env response strongly to cloudiness) 
+                        var factor = Mathf.Clamp01((0.5f - cloud) / 0.68f); // cloud: 0 -> 0.18f cloud: 1 -> 1.18
+                        darkScore = 0.01f + 0.3f * factor; ;
                         break;
                 }
             }
@@ -451,11 +455,18 @@ namespace ThatsLit.Components
                 // cloud = 0.4, time = 1 (day) => 0.8x (cloudy day)
 
                 // cloud = -0.4, time = 1 (day) => 1.2x (clear day)
+                switch (activeRaidSettings.SelectedLocation.Name)
+                {
+                    case "Shoreline": // The shoreline works fine when it's clear, but when it get cloudy, the score dip too fast (because the env response strongly to cloudiness) 
+                        var factor = Mathf.Clamp01((0.5f - cloud) / 0.68f); // cloud: 0 -> 0.18f cloud: 1 -> 1.18
+                        darkScore = 0.01f + 0.25f * factor; ;
+                        break;
+                }
             }
 
             frameLitScore = shinePixels * shineScore
                           + highLightPixels * highLightScore
-                          + highMidLightPixels * highMidLightScore
+                          + highMidLightPixels * modifiedHighMidScore
                           + midLightPixels * modifiedMidScore
                           + midLowLightPixels * modifiedMidLowScore
                           + lowLightPixels * modifiedLowScore
@@ -664,7 +675,18 @@ namespace ThatsLit.Components
                     if (GetTimeLighingFactor() < 0 && frameLitScore < -0.5f) frameLitScore = -0.5f + ((frameLitScore + 0.5f) * 0.7f); // The street has a dim light vision even with 1.0 cloud during the darkest hours
                     break;
                 case "Lighthouse":
-                    if (GetTimeLighingFactor() < 0) frameLitScore *= 0.8f + (0.1f * cloud); // The street has a dim light vision even with 1.0 cloud during the darkest hours
+                    if (GetTimeLighingFactor() < 0) frameLitScore *= 0.8f + (0.1f * cloud);
+                    break;
+                case "Shoreline": // The shoreline works fine when it's clear, but when it get cloudy, the score dip too fast (because the env response strongly to cloudiness) 
+                    if (GetTimeLighingFactor() > 0.25f && frameLitScore < 0)
+                    {
+                        frameLitScore /= 10f;
+                        frameLitScore += 0.3f * (GetTimeLighingFactor() - 0.25f) / 0.75f;
+                    }
+                    else if (GetTimeLighingFactor() < 0)
+                    {
+
+                    }
                     break;
             }
 
@@ -681,6 +703,41 @@ namespace ThatsLit.Components
 
             // In bright map, move toward 0
             multiFrameLitScore = Mathf.Lerp(multiFrameLitScore, 0, Mathf.Clamp01((globalLumEsti - 0.09f) / 0.05f) * 0.5f);
+
+            void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
+            {
+                if (tlf < 0) // Night
+                {
+                    thresholdShine = 0.8f;
+                    thresholdHigh = 0.5f;
+                    thresholdHighMid = 0.25f;
+                    thresholdMid = 0.13f;
+                    thresholdMidLow = 0.055f;
+                    thresholdLow = 0.015f - 0.005f * tlf;
+                }
+                else
+                {
+                    thresholdShine = 0.8f;
+                    thresholdHigh = 0.5f;
+                    thresholdHighMid = 0.25f;
+                    thresholdMid = 0.13f;
+                    thresholdMidLow = 0.055f;
+                    thresholdLow = 0.015f;
+                    switch (activeRaidSettings.SelectedLocation.Name)
+                    {
+                        case "Shoreline":
+                            thresholdShine = 0.8f;
+                            thresholdHigh = 0.5f;
+                            thresholdHighMid = 0.25f;
+                            thresholdMid = 0.13f;
+                            thresholdMidLow = 0.055f - 0.02f * tlf * (cloud - 0.05f) / 1.05f;
+                            thresholdLow = 0.015f;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
         }
 
         private void OnDestroy()
@@ -1105,5 +1162,6 @@ namespace ThatsLit.Components
                     break;
             }
         }
+
     }
 }
