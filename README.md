@@ -8,7 +8,7 @@ Developed with SAIN installed, should work fine together unless things change.
 
 Most of the time on outdoor maps during the day, your "lit score" remains neutral because the ambience lighting lights you up quite evenly, even under most shadows. But when the sun goes down, the score will start to react how you are lit up.
 
-The most direct way to look at the maters at the top left corner, which is enabled by default. The first meter is the current "lit score", and the second meter shows how effective the score is affecting AIs.
+The most direct way to feel it is go to night factory and look at the maters at the top left corner, which is enabled by default. The first meter is the current "lit score", and the second meter shows how effective the score is affecting AIs.
 
 You won't be invisible with a -1 (-100%) score, it only makes AIs have quite a chance to overlook you.
 
