@@ -25,9 +25,10 @@ The "lit score" ranges from -1 to 1, there are multiple factors to consider in o
 - AIs using NVGs are quite unaffected by darkness
 - Staying near multiple bushes makes AIs harder to see you from afar
 
+The mod also introduce some randomness to AIs vision check regardless the "lit score" by rarely extremely increase the SeenCoef. In theory, this simulate how human space out or lose focus.
 # ​Calibrated Maps
 
-Every map has different ​lighting characteristic, so the light detection may need to be manually calibrated.
+Every map has different ​lighting characteristic, so the light detection may need to be manually calibrated per map.
 
 ​Here is the list of calibrated maps, maps not listed here may have overly inaccurate detection:​
 

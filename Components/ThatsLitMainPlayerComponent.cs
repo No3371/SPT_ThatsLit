@@ -336,8 +336,8 @@ namespace ThatsLit.Components
                 RenderTexture.active = null;
             }
 
-            if (debugTex != null && Time.frameCount % 61 == 0)Graphics.CopyTexture(tex, debugTex);
-            if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
+            if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
+            if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
             var validPixels = 0;
             multiAvgLum = 0f;
@@ -436,8 +436,10 @@ namespace ThatsLit.Components
                 // cloud = 0.4, time = -1 (night) => 0.8x (cloudy night)
                 // cloud = -0.4, time = -1 (night) => 1.2x (clear night)
                 // cloud = -1, time = -1 (night) => 1.5x
-                switch (activeRaidSettings.SelectedLocation.Name)
+                switch (activeRaidSettings?.SelectedLocation?.Name)
                 {
+                    default: // Hideout
+                        break;
                     case "Streets Of Tarkov": // The streets tend to be showered with a dim ambience light
                         darkScoreApplied *= 5f; 
                         break;
@@ -482,8 +484,10 @@ namespace ThatsLit.Components
                 // cloud = 0.4, time = 1 (day) => 0.8x (cloudy day)
 
                 // cloud = -0.4, time = 1 (day) => 1.2x (clear day)
-                switch (activeRaidSettings.SelectedLocation.Name)
+                switch (activeRaidSettings?.SelectedLocation?.Name)
                 {
+                    default: // Hideout
+                        break;
                     case "Shoreline": // The shoreline works fine when it's clear, but when it get cloudy, the score dip too fast (because the env response strongly to cloudiness) 
                         var factor = Mathf.Clamp01((0.5f - cloud) / 0.68f);
                         darkScoreApplied = 0.01f + 0.25f * factor;
@@ -718,8 +722,10 @@ namespace ThatsLit.Components
             //}
 
             frameLitScoreRaw4 = frameLitScore;
-            switch (activeRaidSettings.SelectedLocation.Name)
+            switch (activeRaidSettings?.SelectedLocation?.Name)
             {
+                default: // Hideout
+                    break;
                 case "Streets Of Tarkov":
                     if (GetTimeLighingFactor() < 0 && frameLitScore < -0.5f) frameLitScore = -0.5f + ((frameLitScore + 0.5f) * 0.7f); // The street has a dim light vision even with 1.0 cloud during the darkest hours
                     break;
@@ -755,7 +761,7 @@ namespace ThatsLit.Components
                     }
                     else if (GetTimeLighingFactor() < 0 && frameLitScore < 0)
                     {
-                        frameLitScore *= 0.8f + Mathf.Clamp01(cloud) * 0.1f; // Scale down to -0.9 ~ -0.95(cloud)
+                        frameLitScore *= 0.8f + Mathf.Clamp01(cloud) * 0.1f; // Scale down to -0.7 (clear) ~ -0.95(cloud)
                     }
                     break;
             }
@@ -793,7 +799,8 @@ namespace ThatsLit.Components
                     thresholdMid = 0.13f;
                     thresholdMidLow = 0.055f;
                     thresholdLow = 0.015f;
-                    switch (activeRaidSettings.SelectedLocation.Name)
+
+                    switch (activeRaidSettings?.SelectedLocation?.Name)
                     {
                         case "Shoreline":
                             thresholdShine = 0.8f;
@@ -995,7 +1002,7 @@ namespace ThatsLit.Components
             // Maybe should be done with score profile
             float GetBrightestNightHourFactor ()
             {
-                switch (activeRaidSettings.SelectedLocation.Name)
+                switch (activeRaidSettings?.SelectedLocation?.Name)
                 {
                     case "Streets Of Tarkov":
                         return -0.25f;
