@@ -473,6 +473,13 @@ namespace ThatsLit.Components
                             darkScoreApplied += 0.1f * cloud;
                         }
                         break;
+                    case "Factory": // NIGHT, thresholds compressed
+                        highLightScoreApplied *= 1.3f;
+                        highMidLightScoreApplied *= 1.2f;
+                        midLightScoreApplied *= 1.1f;
+                        midLowLightScoreApplied *= 0.75f;
+                        lowLightScoreApplied *= 0.75f;
+                        break;
                 }
             }
             else // DAY
@@ -790,6 +797,18 @@ namespace ThatsLit.Components
                     thresholdMid = 0.13f;
                     thresholdMidLow = 0.055f;
                     thresholdLow = 0.015f - 0.005f * tlf;
+                    switch (activeRaidSettings?.SelectedLocation?.Name)
+                    {
+                        case "Factory":
+                            thresholdShine *= 0.8f;
+                            thresholdHigh *= 0.8f;
+                            thresholdHighMid *= 0.8f;
+                            thresholdMid *= 0.8f;
+                            thresholdMidLow *= 0.8f;
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 else
                 {
