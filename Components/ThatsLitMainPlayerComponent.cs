@@ -70,6 +70,7 @@ namespace ThatsLit.Components
         public Vector3 envCamOffset = new Vector3(0, 2, 0);
 
         public RaidSettings activeRaidSettings;
+        bool skipFoliageCheck;
 
         public void Awake()
         {
@@ -141,6 +142,7 @@ namespace ThatsLit.Components
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
             activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
             globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
+            skipFoliageCheck = activeRaidSettings?.SelectedLocation?.Name == "Factory" || activeRaidSettings == null;
         }
 
 
@@ -250,8 +252,29 @@ namespace ThatsLit.Components
 
                 foliageScore = 0;
 
-                for (int i = 0; i < collidersCache.Length; i++)
-                    collidersCache[i] = null;
+                if (!skipFoliageCheck)
+                {
+
+                    for (int i = 0; i < collidersCache.Length; i++)
+                        collidersCache[i] = null;
+
+                    float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, foliageLayerMask);
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
+                        if (dis < 0.4f) foliageScore += 0.8f;
+                        else if (dis < 0.6f) foliageScore += 0.5f;
+                        else if (dis < 1f) foliageScore += 0.3f;
+                        else if (dis < 2f) foliageScore += 0.15f;
+                        else if (dis < 4f) foliageScore += 0.05f;
+                        else foliageScore += 0.02f;
+                    }
+
+                    if (count > 0) foliageScore /= count;
+                    if (count == 1) foliageScore /= 2f;
+                    if (count == 2) foliageScore /= 1.5f;
+                }
 
                 //float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, LayerMaskClass.TriggersMask);
 
@@ -274,23 +297,6 @@ namespace ThatsLit.Components
 
                 //    foliageScore /= count;
                 //}
-
-                float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, foliageLayerMask);
-
-                for (int i = 0; i < count; i++)
-                {
-                    float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
-                    if (dis < 0.4f) foliageScore += 0.8f;
-                    else if (dis < 0.6f) foliageScore += 0.5f;
-                    else if (dis < 1f) foliageScore += 0.3f;
-                    else if (dis < 2f) foliageScore += 0.15f;
-                    else if (dis < 4f) foliageScore += 0.05f;
-                    else foliageScore += 0.02f;
-                }
-
-                if (count > 0) foliageScore /= count;
-                if (count == 1) foliageScore /= 1.7f;
-                if (count == 2) foliageScore /= 1.3f;
             }
         }
 
