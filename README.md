@@ -36,7 +36,9 @@ Every map has different ​lighting characteristic, so the light detection may n
 - Factory
 - Shoreline
 - Reserve
-- Custom
+- Customs
+
+The calibration is a very very very tedious and time consuming process, if you find issues and want to help, turn on Debug Info, take screenshot and send it.
 
 ## Fun facts
 

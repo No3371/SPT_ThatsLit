@@ -464,6 +464,13 @@ namespace ThatsLit.Components
                         // The low light pixels disappear when the cloud 
                         lowLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
                         break;
+                    case "Customs":
+                        if (cloud > 0)
+                        {
+                            // compensate dark score for c0 ~ c1
+                            darkScoreApplied += 0.1f * cloud;
+                        }
+                        break;
                 }
             }
             else // DAY
@@ -739,6 +746,16 @@ namespace ThatsLit.Components
                     else if (GetTimeLighingFactor() < 0 && frameLitScore < 0)
                     {
                         frameLitScore *= 0.9f + Mathf.Clamp01(cloud) * 0.5f; // Cap to -0.9 ~ -0.95(cloud)
+                    }
+                    break;
+                case "Customs":
+                    if (GetTimeLighingFactor() > 0) // Limit cloud impact during daytime
+                    {
+                        if (cloud > 0 && frameLitScore < 0) frameLitScore *= 1 - Mathf.Clamp01(cloud); // Scale down to -0.9 ~ -0.95(cloud)
+                    }
+                    else if (GetTimeLighingFactor() < 0 && frameLitScore < 0)
+                    {
+                        frameLitScore *= 0.8f + Mathf.Clamp01(cloud) * 0.1f; // Scale down to -0.9 ~ -0.95(cloud)
                     }
                     break;
             }
