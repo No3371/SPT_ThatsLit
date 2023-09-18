@@ -439,7 +439,7 @@ namespace ThatsLit.Components
                 switch (activeRaidSettings.SelectedLocation.Name)
                 {
                     case "Streets Of Tarkov": // The streets tend to be showered with a dim ambience light
-                        darkScoreApplied *= 5; 
+                        darkScoreApplied *= 5f; 
                         break;
                     case "Woods": // The woods looks quite dark in the night, lowering the score
                         darkScoreApplied = 0;
@@ -447,7 +447,7 @@ namespace ThatsLit.Components
                         break;
                     case "Shoreline": // Shoreline night visual is very responsive to cloudiness
                         // Visual estimation -> 0:00 c0, -0.95 / 0:00 c0, -0.8 / 0:00, c-1, -0.5
-                        var cloudFactor = cloud < 0 ? cloud / 2 : cloud;
+                        var cloudFactor = cloud < 0 ? cloud / 2f : cloud;
                         darkScoreApplied = 0.12f - 0.1f * cloudFactor;
                         break;
                     case "ReserveBase":  // Reserve night visual is very responsive to cloudiness too
@@ -488,6 +488,20 @@ namespace ThatsLit.Components
                         darkScoreApplied = 0.01f + 0.2f * factor;
                         factor = Mathf.Clamp01(-cloud);
                         lowLightScoreApplied *= 1 + factor / 10f; // at -1 (clear), low light score +10%;
+                        break;
+                    case "Customs": // Cloudiness has too much impact on score during daytime
+                        // ML disappear at c1, like L40% - D60%
+                        // compensate dark score for c0 ~ c1
+                        if (cloud < 0)
+                        {
+                            midLowLightScoreApplied *= 1 - cloud / 10f; // at -1 (clear), +10%;
+                            lowLightScoreApplied *= 1f + cloud / 10f; // at -1 (clear), +10%;
+                        }
+                        else
+                        {
+                            darkScoreApplied *= 1f + cloud; // at 1 (clear), low light score +100%;
+                            lowLightScoreApplied *= 1f + cloud / 10f; // at 1 (clear), low light score +10%;
+                        }
                         break;
                 }
             }
