@@ -605,7 +605,7 @@ namespace ThatsLit.Components
             frameLitScoreRaw1 = frameLitScore;
 
             // Raise score for flashing lights especially in darker env
-            var recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - envLumEstiFast) / 0.2f);
+            var recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - envLumEsti) / 0.2f);
             frameLitScore += recentChangeFactor * (1 - Mathf.Clamp01(envLumEstiSlow / 0.1f));
             frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
 
