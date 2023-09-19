@@ -729,10 +729,11 @@ namespace ThatsLit.Components
                 else if (vLaserSub) frameLitScore /= 1.1f;
             }
 
-            if (vLight) frameLitScore += -GetTimeLighingFactor() * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
-            else if (vLaser) frameLitScore += 0.5f * -GetTimeLighingFactor() * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
-            else if (vLightSub) frameLitScore += 0.3f * -GetTimeLighingFactor() * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
-            else if (vLaserSub) frameLitScore += 0.1f * -GetTimeLighingFactor() * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
+            var equipmentShineFactorByTime = Mathf.Clamp01(-GetTimeLighingFactor()) + (1 - Mathf.Clamp01(GetTimeLighingFactor())) * 0.15f; // ~0.15 in daytime
+            if (vLight) frameLitScore += equipmentShineFactorByTime * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
+            else if (vLaser) frameLitScore += 0.5f * equipmentShineFactorByTime * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
+            else if (vLightSub) frameLitScore += 0.3f * equipmentShineFactorByTime * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
+            else if (vLaserSub) frameLitScore += 0.1f * equipmentShineFactorByTime * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
             frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
 
             //Cloudy?
