@@ -875,7 +875,7 @@ namespace ThatsLit.Components
                 else if (foliageScore > 0.05f)
                     GUILayout.Label("[FOLIAGE]");
                 if (Time.time < startAt + 10)
-                    GUILayout.Label("[That's Lit HUD] Can be disabled in plugin settings.)");
+                    GUILayout.Label("[That's Lit HUD] Can be disabled in plugin settings.");
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
             if (Time.frameCount % 41 == 0)
