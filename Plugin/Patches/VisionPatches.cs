@@ -153,7 +153,7 @@ namespace ThatsLit.Patches.Vision
                 else if (factor < 0f) __result *= 1 - factor / 1.5f * ThatsLitPlugin.DarknessImpactScale.Value;
                 else if (factor > 0f) __result /= (1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value); // 0.66x at 100% score
 
-                __result = Mathf.Lerp(__result, original, Mathf.Clamp01((1f - Time.time - __instance.PersonalSeenTime) / 0.1f)); // just seen (0s) => original, 0.1s => modified
+                __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(Time.time - __instance.PersonalSeenTime) / 0.1f); // just seen (0s) => original, 0.1s => modified
 
                 __result += ThatsLitPlugin.FinalOffset.Value;
                 if (__result < 0.001f) __result = 0.001f;
