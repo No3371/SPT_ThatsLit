@@ -569,11 +569,7 @@ namespace ThatsLit.Components
             envLumEsti = Mathf.Lerp(envLumEsti, avgLumMultiFrames, Time.deltaTime / 3f);
             envLumEstiSlow = Mathf.Lerp(envLumEstiSlow, avgLumMultiFrames, Time.deltaTime / 10f);
             if (Time.time - startAt > 20f)
-                globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time + 20 - startAt) * 2f, 300f)));
-
-
-            //// When entering dark places in bright env, we need to prevent the lights in the dark places not getting suppressed
-            //var suppressScale = (envLumEsti - globalLumEsti) / 0.1f;
+                globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time - 20 - startAt) * 2f, 300f)));
 
 
             frameLitScore /= (float) validPixels;
