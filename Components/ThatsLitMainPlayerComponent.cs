@@ -1064,18 +1064,17 @@ namespace ThatsLit.Components
         void DetermineShiningEquipments ()
         {
             vLight = vLaser = irLight = irLaser = vLightSub = vLaserSub = irLightSub = irLaserSub = false;
-            IEnumerable<GClass2550> activeLights;
+            IEnumerable<(Item item, LightComponent light)> activeLights;
             if (MainPlayer?.ActiveSlot?.ContainedItem != null)
             {
                 activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
                     .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
-                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
+                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l)); ;
 
                 if (activeLights != null)
                 foreach (var i in activeLights)
                 {
-                    if (i == null) continue;
-                    MapComponentsModes(i, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+                    MapComponentsModes(i.item.TemplateId, i.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
                     if (thisLight && !thisLightIsIR) vLight = true;
                     if (thisLight && thisLightIsIR) irLight = true;
                     if (thisLaser && !thisLaserIsIR) vLaser = true;
@@ -1092,14 +1091,13 @@ namespace ThatsLit.Components
 
             if (helmet != null)
             {
-                activeLights = helmet.AllSlots
+                activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
                     .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
-                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
+                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l));
 
                 foreach (var i in activeLights)
                 {
-                    if (i == null) continue;
-                    MapComponentsModes(i, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+                    MapComponentsModes(i.item.TemplateId, i.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
                     if (thisLight && !thisLightIsIR) vLight = true;
                     if (thisLight && thisLightIsIR) irLight = true;
                     if (thisLaser && !thisLaserIsIR) vLaser = true;
@@ -1111,17 +1109,17 @@ namespace ThatsLit.Components
             var secondaryWeapons = inv?.Inventory?.GetItemsInSlots(new[] { EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster });
 
             if (secondaryWeapons != null)
-            foreach (Weapon w in secondaryWeapons)
+            foreach (Item i in secondaryWeapons)
             {
+                Weapon w = i as Weapon;
                 if (w == null) continue;
-                activeLights = w?.AllSlots
+                activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
                     .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
-                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
+                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l));
 
-                foreach (var i in activeLights)
+                foreach (var ii in activeLights)
                 {
-                    if (i == null) continue;
-                    MapComponentsModes(i, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+                    MapComponentsModes(ii.item.TemplateId, ii.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
                     if (thisLight && !thisLightIsIR) vLightSub = true;
                     if (thisLight && thisLightIsIR) irLightSub = true;
                     if (thisLaser && !thisLaserIsIR) vLaserSub = true;
@@ -1152,18 +1150,22 @@ namespace ThatsLit.Components
 
 
             //"_id": "57d17c5e2459775a5c57d17d", "_name": "flashlight_ultrafire_WF-501B", 1 (2) (different slot)
-            //"_id": "59d790f486f77403cb06aec6", "_name": "flashlight_armytek_predator_pro_v3_xhp35_hi", 1(2)
+            //"_id": "59d790f486f77403cb06aec6", "_name": "flashlight_armytek_predator_pro_v3_xhp35_hi", 1(2) (different slot)
+
+
+            // "_id": "5bffcf7a0db83400232fea79", "_name": "pistolgrip_tt_pm_laser_tt_206", always on
         }
-        void MapComponentsModes(GClass2550 comp, out bool light, out bool laser, out bool lightIsIR, out bool laserIsIR)
+        void MapComponentsModes(string templateId, int selectedMode, out bool light, out bool laser, out bool lightIsIR, out bool laserIsIR)
         {
             light = laser = laserIsIR = lightIsIR = false;
-            switch (comp.TemplateId)
+
+            switch (templateId)
             {
                 case "544909bb4bdc2d6f028b4577": // tactical_all_insight_anpeq15
                 case "57fd23e32459772d0805bcf1": // tactical_all_holosun_ls321
                 case "5c06595c0db834001a66af6c": // tactical_all_insight_la5
                 case "5c5952732e2216398b5abda2": // tactical_all_zenit_perst_3
-                    switch (comp.Light.SelectedMode)
+                    switch (selectedMode)
                     {
                         case 0:
                             laser = true;
@@ -1180,7 +1182,7 @@ namespace ThatsLit.Components
                     }
                     break;
                 case "61605d88ffa6e502ac5e7eeb": // tactical_all_wilcox_raptar_es
-                    switch (comp.Light.SelectedMode)
+                    switch (selectedMode)
                     {
                         case 1:
                             laser = true;
@@ -1201,7 +1203,7 @@ namespace ThatsLit.Components
                 case "5a800961159bd4315e3a1657": // tactical_all_glock_gl_21_vis_lam
                 case "6272379924e29f06af4d5ecb": // tactical_all_olight_baldr_pro_tan
                 case "6272370ee4013c5d7e31f418": // tactical_all_olight_baldr_pro
-                    switch (comp.Light.SelectedMode)
+                    switch (selectedMode)
                     {
                         case 0:
                             light = true;
@@ -1215,7 +1217,7 @@ namespace ThatsLit.Components
                     }
                     break;
                 case "55818b164bdc2ddc698b456c": // tactical_all_zenit_2irs_kleh_lam
-                    switch (comp.Light.SelectedMode)
+                    switch (selectedMode)
                     {
                         case 0:
                             light = lightIsIR = true;
@@ -1237,10 +1239,11 @@ namespace ThatsLit.Components
                 case "5b07dd285acfc4001754240d": // tactical_all_steiner_las_tac_2
                 case "5c079ed60db834001a66b372": // tactical_tt_dlp_tactical_precision_laser_sight
                 case "5cc9c20cd7f00c001336c65d": // tactical_all_ncstar_tactical_blue_laser
+                case "5bffcf7a0db83400232fea79": // pistolgrip_tt_pm_laser_tt_206
                     laser = true;
                     break;
                 case "5d10b49bd7ad1a1a560708b0": // tactical_all_insight_anpeq2
-                    switch (comp.Light.SelectedMode)
+                    switch (selectedMode)
                     {
                         case 0:
                             laser = laserIsIR = true;
@@ -1253,7 +1256,7 @@ namespace ThatsLit.Components
                     }
                     break;
                 case "5d2369418abbc306c62e0c80": // tactical_all_steiner_9021_dbal_pl
-                    switch (comp.Light.SelectedMode)
+                    switch (selectedMode)
                     {
                         case 0:
                             light = true;
@@ -1276,7 +1279,7 @@ namespace ThatsLit.Components
                     }
                     break;
                 case "626becf9582c3e319310b837": // tactical_all_insight_wmx200
-                    switch (comp.Light.SelectedMode)
+                    switch (selectedMode)
                     {
                         case 0:
                             light = true;
