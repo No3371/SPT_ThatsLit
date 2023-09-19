@@ -568,9 +568,18 @@ namespace ThatsLit.Components
             envLumEstiFast = Mathf.Lerp(envLumEstiFast, avgLumMultiFrames, Time.deltaTime);
             envLumEsti = Mathf.Lerp(envLumEsti, avgLumMultiFrames, Time.deltaTime / 3f);
             envLumEstiSlow = Mathf.Lerp(envLumEstiSlow, avgLumMultiFrames, Time.deltaTime / 10f);
-            if (Time.time - startAt > 20f)
-                globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time - 20 - startAt) * 2f, 300f)));
 
+            switch (activeRaidSettings?.SelectedLocation?.Name)
+            {
+                default:
+                    if (Time.time - startAt > 20f)
+                        globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time - 20 - startAt) * 2f, 300f)));
+
+                    break;
+                case "Factory":
+                    if (GetTimeLighingFactor() < 0) globalLumEsti = 0.005f;
+                    break;
+            }
 
             frameLitScore /= (float) validPixels;
             // Transform to -1 ~ 1
