@@ -65,7 +65,8 @@ namespace ThatsLit.Components
         // PlayerSpiritAura is Visceral Bodies compat
 
         float startAt, lastCheckedLights;
-        public bool secondaryShining, lightOn, laserOn, lightIR, laserIR;
+        // Note: If vLight > 0, other counts may be skipped
+        public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
 
         public Vector3 envCamOffset = new Vector3(0, 2, 0);
 
@@ -247,7 +248,7 @@ namespace ThatsLit.Components
             if (Time.time > lastCheckedLights + 0.33f)
             {
                 lastCheckedLights = Time.time;
-                DetermineShiningEquipments(ref secondaryShining, ref lightOn, ref laserOn, ref laserIR, ref lightIR);
+                DetermineShiningEquipments();
 
 
                 foliageScore = 0;
@@ -709,20 +710,21 @@ namespace ThatsLit.Components
             //}
 
 
+            if (MainPlayer.AIData.GetFlare) frameLitScore = Mathf.Max(frameLitScore, Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(-GetTimeLighingFactor())));
             if (frameLitScore < 0)
             {
-                if (MainPlayer.AIData.GetFlare) frameLitScore /= 2f;
+                if (vLight) frameLitScore /= 2;
+                else if (vLaser) frameLitScore /= 1.5f;
+                else if (vLightSub) frameLitScore /= 1.3f;
+                else if (vLaserSub) frameLitScore /= 1.1f;
+            }
 
-                if (laserOn && !laserIR && !lightOn)
-                {
-                    if (secondaryShining) frameLitScore /= 1.1f;
-                    else frameLitScore /= 1.5f;
-                }
-                else if (lightOn && !lightIR)
-                {
-                    if (secondaryShining) frameLitScore /= 1.3f;
-                    else frameLitScore /= 2f;
-                }
+            if (GetTimeLighingFactor() < 0) // Visible lights and lasers increase score in night time
+            {
+                if (vLight) frameLitScore += 0.5f * -GetTimeLighingFactor();
+                else if (vLaser) frameLitScore += 0.2f * -GetTimeLighingFactor();
+                else if (vLightSub) frameLitScore += 0.2f * -GetTimeLighingFactor();
+                else if (vLaserSub) frameLitScore += 0.1f * -GetTimeLighingFactor();
             }
 
             //Cloudy?
@@ -910,7 +912,7 @@ namespace ThatsLit.Components
 
             GUILayout.Label(string.Format("FOLIAGE: {0:0.000}", foliageScore));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / {3} -> TIME_LIGHT: {4:0.00}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), GetTimeLighingFactor()));
-            GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}]", lightOn? lightIR? "I" : "V" : "  ", laserOn? laserIR? "I" : "V" : "  "));
+            GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", vLight? "V" : irLight? "I" : "-", vLaser ? "V" : irLaser ? "I" : "-", vLightSub ? "V" : irLightSub ? "I" : "-", vLaserSub ? "V" : irLaserSub ? "I" : "-"));
 
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:＋0.00;－0.00;+0.00} | {2:＋0.00;－0.00;+0.00} | {3:＋0.00;－0.00;+0.00} | {4:＋0.00;－0.00;+0.00} | {5:＋0.00;－0.00;+0.00} | {6:＋0.00;－0.00;+0.00}", (shineScoreApplied - shineScore), highLightScoreApplied - highLightScore, highMidLightScoreApplied - highMidLightScore, midLightScore - midLightScoreApplied, midLowLightScoreApplied - midLowLightScore, lowLightScoreApplied - lowLightScore, darkScoreApplied - darkScore));
 
@@ -1052,13 +1054,12 @@ namespace ThatsLit.Components
             cloud = WeatherController.Instance.WeatherCurve.Cloudiness;
         }
 
-        void DetermineShiningEquipments (ref bool secondary, ref bool light, ref bool laser, ref bool laserIsIR, ref bool lightIsIR)
+        void DetermineShiningEquipments ()
         {
-            secondary = light = laser = laserIsIR = lightIsIR = false;
+            vLight = vLaser = irLight = irLaser = vLightSub = vLaserSub = irLightSub = irLaserSub = false;
             IEnumerable<GClass2550> activeLights;
             if (MainPlayer?.ActiveSlot?.ContainedItem != null)
             {
-
                 activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
                     .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
                     .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
@@ -1067,12 +1068,19 @@ namespace ThatsLit.Components
                 foreach (var i in activeLights)
                 {
                     if (i == null) continue;
-                    MapComponentsModes(i, ref light, ref laser, ref laserIsIR, ref lightIsIR);
-                    if (light || laser) return;
+                    MapComponentsModes(i, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+                    if (thisLight && !thisLightIsIR) vLight = true;
+                    if (thisLight && thisLightIsIR) irLight = true;
+                    if (thisLaser && !thisLaserIsIR) vLaser = true;
+                    if (thisLaser && thisLaserIsIR) irLaser = true;
+                    if (vLight) return; // Early exit for main visible light because that's enough to decrease score
                 }
             }
 
-            var inv = (InventoryControllerClass) MainPlayer?.ActiveSlot?.ContainedItem?.Owner;
+            var inv = MainPlayer?.ActiveSlot?.ContainedItem?.Owner as InventoryControllerClass;
+
+            if (inv == null) return;
+
             var helmet = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear)?.ContainedItem as GClass2537;
 
             if (helmet != null)
@@ -1084,13 +1092,14 @@ namespace ThatsLit.Components
                 foreach (var i in activeLights)
                 {
                     if (i == null) continue;
-                    light = laser = laserIsIR = lightIsIR = false;
-                    MapComponentsModes(i, ref light, ref laser, ref laserIsIR, ref lightIsIR);
-                    if (light || laser) return;
+                    MapComponentsModes(i, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+                    if (thisLight && !thisLightIsIR) vLight = true;
+                    if (thisLight && thisLightIsIR) irLight = true;
+                    if (thisLaser && !thisLaserIsIR) vLaser = true;
+                    if (thisLaser && thisLaserIsIR) irLaser = true;
+                    if (vLight) return; // Early exit for main visible light because that's enough to decrease score
                 }
             }
-
-            secondary = true;
 
             var secondaryWeapons = inv?.Inventory?.GetItemsInSlots(new[] { EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster });
 
@@ -1101,13 +1110,15 @@ namespace ThatsLit.Components
                     .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
                     .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
 
-                if (w != null)
                 foreach (var i in activeLights)
                 {
                     if (i == null) continue;
-                    light = laser = laserIsIR = lightIsIR = false;
-                    MapComponentsModes(i, ref light, ref laser, ref laserIsIR, ref lightIsIR);
-                    if (light || laser) return;
+                    MapComponentsModes(i, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+                    if (thisLight && !thisLightIsIR) vLightSub = true;
+                    if (thisLight && thisLightIsIR) irLightSub = true;
+                    if (thisLaser && !thisLaserIsIR) vLaserSub = true;
+                    if (thisLaser && thisLaserIsIR) irLaserSub = true;
+                    if (vLightSub) return; // Early exit for main visible light because that's enough to decrease score
                 }
             }
             // GClass2550 544909bb4bdc2d6f028b4577 x item tactical_all_insight_anpeq15 2457 / V + IR + IRL / MODES: 4  V -> IR -> IRL -> IR+IRL
@@ -1134,10 +1145,10 @@ namespace ThatsLit.Components
 
             //"_id": "57d17c5e2459775a5c57d17d", "_name": "flashlight_ultrafire_WF-501B", 1 (2) (different slot)
             //"_id": "59d790f486f77403cb06aec6", "_name": "flashlight_armytek_predator_pro_v3_xhp35_hi", 1(2)
-
         }
-        void MapComponentsModes(GClass2550 comp, ref bool light, ref bool laser, ref bool laserIsIR, ref bool lightIsIR)
+        void MapComponentsModes(GClass2550 comp, out bool light, out bool laser, out bool lightIsIR, out bool laserIsIR)
         {
+            light = laser = laserIsIR = lightIsIR = false;
             switch (comp.TemplateId)
             {
                 case "544909bb4bdc2d6f028b4577": // tactical_all_insight_anpeq15
