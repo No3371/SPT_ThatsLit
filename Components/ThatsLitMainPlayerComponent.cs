@@ -863,7 +863,7 @@ namespace ThatsLit.Components
 
         private void OnGUI()
         {
-            if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.Info.Value)
+            if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
                 DrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));
                 DrawAsymetricMeter((int)(Mathf.Pow(multiFrameLitScore, POWER) / 0.0999f));

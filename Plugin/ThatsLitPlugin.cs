@@ -67,14 +67,14 @@ namespace ThatsLit
             FinalOffset = Config.Bind(category, key: "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa.");
 
             category = "4. Info";
-            Info = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
+            ScoreInfo = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
 
             category = "5. Debug";
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
         }
 
-        public static ConfigEntry<bool> Info { get; private set; }
+        public static ConfigEntry<bool> ScoreInfo { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> Enabled { get; private set; }
