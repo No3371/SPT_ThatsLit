@@ -145,7 +145,7 @@ namespace ThatsLit.Patches.Vision
                 // The scaling here allows the player to stay in the dark without being seen
                 // The reason why scaling is needed is because SeenCoef will change dramatically depends on vision angles
                 // Absolute offset alone won't work for different vision angles
-                if (factor < 0 && UnityEngine.Random.Range(-1, 0) > factor) __result = 8888f;
+                if (factor < 0 && UnityEngine.Random.Range(-1, 0) > factor * (1 - 0.5f * cqb)) __result = 8888f;
                 else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor) __result *= (1f - factor * 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value); // Half the reaction time regardles angle half of the time at 100% score
                 else if (factor < -0.9f) __result *= 1 - (factor * (2f - 1f * cqb) * ThatsLitPlugin.DarknessImpactScale.Value);
                 else if (factor < -0.5f) __result *= 1 - (factor * (1.5f - 0.5f * cqb) * ThatsLitPlugin.DarknessImpactScale.Value);
@@ -153,7 +153,8 @@ namespace ThatsLit.Patches.Vision
                 else if (factor < 0f) __result *= 1 - factor / 1.5f * ThatsLitPlugin.DarknessImpactScale.Value;
                 else if (factor > 0f) __result /= (1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value); // 0.66x at 100% score
 
-                __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(Time.time - __instance.PersonalSeenTime) / 0.1f); // just seen (0s) => original, 0.1s => modified
+                if (factor < 0) __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(Time.time - __instance.PersonalSeenTime) / 0.1f); // just seen (0s) => original, 0.1s => modified
+                // This probably will let bots stay unaffected until losing the visual
 
                 __result += ThatsLitPlugin.FinalOffset.Value;
                 if (__result < 0.001f) __result = 0.001f;
