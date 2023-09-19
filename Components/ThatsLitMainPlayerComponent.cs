@@ -64,7 +64,7 @@ namespace ThatsLit.Components
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
         // PlayerSpiritAura is Visceral Bodies compat
 
-        float startAt, lastCheckedLights;
+        float startAt, lastCheckedLights, lastCheckedFoliages;
         // Note: If vLight > 0, other counts may be skipped
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
 
@@ -251,6 +251,33 @@ namespace ThatsLit.Components
                 DetermineShiningEquipments();
 
 
+
+                //float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, LayerMaskClass.TriggersMask);
+
+                //if (count > 0)
+                //for (int i = 0; i < collidersCache.Length; i++)
+                //{
+                //    if (collidersCache[i] != null)
+                //    {
+                //        if (!collidersCache[i].transform.parent.gameObject.GetComponentInChildren<ObstacleCollider>()
+                //            || !(collidersCache[i].transform.parent.gameObject.name.Contains("filbert")
+                //            && !collidersCache[i].transform.parent.gameObject.name.Contains("fern_"))) continue;
+
+                //        float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
+                //        if (dis < 0.3f) foliageScore += 1;
+                //        else if (dis < 0.7f) foliageScore += 0.5f;
+                //        else if (dis < 1.5f) foliageScore += 0.2f;
+                //        else foliageScore += 0.1f;
+                //        count++;
+                //    }
+
+                //    foliageScore /= count;
+                //}
+            }
+
+            if (Time.time > lastCheckedFoliages + 0.4)
+            {
+                lastCheckedFoliages = Time.time;
                 foliageScore = 0;
 
                 if (!skipFoliageCheck)
@@ -276,28 +303,6 @@ namespace ThatsLit.Components
                     if (count == 1) foliageScore /= 2f;
                     if (count == 2) foliageScore /= 1.5f;
                 }
-
-                //float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, LayerMaskClass.TriggersMask);
-
-                //if (count > 0)
-                //for (int i = 0; i < collidersCache.Length; i++)
-                //{
-                //    if (collidersCache[i] != null)
-                //    {
-                //        if (!collidersCache[i].transform.parent.gameObject.GetComponentInChildren<ObstacleCollider>()
-                //            || !(collidersCache[i].transform.parent.gameObject.name.Contains("filbert")
-                //            && !collidersCache[i].transform.parent.gameObject.name.Contains("fern_"))) continue;
-
-                //        float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
-                //        if (dis < 0.3f) foliageScore += 1;
-                //        else if (dis < 0.7f) foliageScore += 0.5f;
-                //        else if (dis < 1.5f) foliageScore += 0.2f;
-                //        else foliageScore += 0.1f;
-                //        count++;
-                //    }
-
-                //    foliageScore /= count;
-                //}
             }
         }
 
