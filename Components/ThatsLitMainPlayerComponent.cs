@@ -1113,6 +1113,7 @@ namespace ThatsLit.Components
             if (secondaryWeapons != null)
             foreach (Weapon w in secondaryWeapons)
             {
+                if (w == null) continue;
                 activeLights = w?.AllSlots
                     .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
                     .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => l.Item as GClass2550);
