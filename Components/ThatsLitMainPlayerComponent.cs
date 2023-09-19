@@ -72,7 +72,7 @@ namespace ThatsLit.Components
 
         public RaidSettings activeRaidSettings;
         bool skipFoliageCheck;
-
+        public float fog, rain, cloud;
         public void Awake()
         {
             Singleton<ThatsLitMainPlayerComponent>.Instance = this;
@@ -308,7 +308,7 @@ namespace ThatsLit.Components
 
         void LateUpdate ()
         {
-            GetWeatherStats(out float fog, out float rain, out float cloud);
+            GetWeatherStats(out fog, out rain, out cloud);
             frame5 = frame4;
             frame4 = frame3;
             frame3 = frame2;
@@ -1041,7 +1041,7 @@ namespace ThatsLit.Components
                     case "Streets Of Tarkov":
                         return -0.25f;
                     case "Woods":
-                        return -0.35f;
+                        return -0.35f; // Moon is dimmer in Woods?
                     default:
                         return -0.25f;
                 }
