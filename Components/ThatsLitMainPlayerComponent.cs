@@ -720,13 +720,11 @@ namespace ThatsLit.Components
                 else if (vLaserSub) frameLitScore /= 1.1f;
             }
 
-            if (GetTimeLighingFactor() < 0) // Visible lights and lasers increase score in night time
-            {
-                if (vLight) frameLitScore += 0.5f * -GetTimeLighingFactor();
-                else if (vLaser) frameLitScore += 0.2f * -GetTimeLighingFactor();
-                else if (vLightSub) frameLitScore += 0.2f * -GetTimeLighingFactor();
-                else if (vLaserSub) frameLitScore += 0.1f * -GetTimeLighingFactor();
-            }
+            if (vLight) frameLitScore += -GetTimeLighingFactor() * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
+            else if (vLaser) frameLitScore += 0.5f * -GetTimeLighingFactor() * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
+            else if (vLightSub) frameLitScore += 0.3f * -GetTimeLighingFactor() * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
+            else if (vLaserSub) frameLitScore += 0.1f * -GetTimeLighingFactor() * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
+            frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
 
             //Cloudy?
             //if (cloud > 0 && frameLitScore < 0)
