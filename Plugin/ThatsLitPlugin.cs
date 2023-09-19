@@ -58,8 +58,8 @@ namespace ThatsLit
             //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
-            DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, "Scale the strength of increment of 'time to be seen' threshold.");
-            BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, "Scale the strength of decreament of 'time to be seen' threshold.");
+            DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, "Scale how AI noticing players slower due to darkness.");
+            BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, "Scale how AI noticing players faster due to brightness.");
 
             category = "3. Tweaks";
             GlobalRandomOverlookChance = Config.Bind(category, key: "Global Random Overlook Chance", 0.01f, "The chance for all AIs to simply overlook in 1 vision check.");
