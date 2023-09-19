@@ -129,7 +129,7 @@ namespace ThatsLit.Patches.Vision
                 else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
 
                 // Fix for blind bots who are already touching us
-                if (dis < 5) factor *= dis / 5f; // Darkness will be less effective from within 5m
+                if (dis < 5) factor *= dis / 5f; // less effective from within 5m
                 factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 
                 // factor: -0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -0.8 => -0.32~-0.64
