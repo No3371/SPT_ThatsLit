@@ -442,7 +442,6 @@ namespace ThatsLit.Components
             highMidLightScoreApplied = highMidLightScore;
             midLightScoreApplied = midLightScore;
             midLowLightScoreApplied = midLowLightScore;
-            midLowLightScoreApplied = midLowLightScore;
             lowLightScoreApplied = lowLightScore;
             darkScoreApplied = darkScore;
 
@@ -461,12 +460,18 @@ namespace ThatsLit.Components
                 {
                     default: // Hideout
                         break;
-                    case "Streets Of Tarkov": // The streets tend to be showered with a dim ambience light
-                        darkScoreApplied *= 5f; 
-                        break;
+                    //case "Streets of Tarkov": // The streets tend to be showered with a dim ambience light
+                        //darkScoreApplied *= 1 + 5f * Mathf.Clamp01(cloud); // When cloudy, 
+                        // c-1~c0 has no difference, 0:00~04:30 change either
+                        //midLightScoreApplied = midLightScore;
+                        //midLowLightScoreApplied = midLowLightScore;
+                        //lowLightScoreApplied = lowLightScore;
+
+                        //break;
                     case "Woods": // The woods looks quite dark in the night, lowering the score
                         darkScoreApplied = 0;
-                        lowLightScoreApplied *= 0.6f;
+                        lowLightScoreApplied *= 0.4f;
+                        midLowLightScoreApplied *= 0.5f;
                         break;
                     case "Shoreline": // Shoreline night visual is very responsive to cloudiness
                         // Visual estimation -> 0:00 c0, -0.95 / 0:00 c0, -0.8 / 0:00, c-1, -0.5
@@ -501,6 +506,16 @@ namespace ThatsLit.Components
                         midLowLightScoreApplied *= 0.75f;
                         lowLightScoreApplied *= 0.75f;
                         break;
+                    case "Streets of Tarkov": // NIGHT, thresholds smoothly compressed
+                                              // The streets is impacted by c0 ~ c1 a lot
+                                              // The streets is very weird, on clear (-1) days, L and L+ disappear starting from 20:45 and reappear at 23:45, both without matching visual change
+
+                        darkScoreApplied *= 5 + 5f * Mathf.Clamp01(cloud + 0.266f);
+                        midLowLightScoreApplied = 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
+                        midLightScoreApplied = 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 3f;
+                        //highMidLightScoreApplied *= 1.2f;
+                        //highLightScoreApplied *= 1.3f;
+                        break;
                 }
             }
             else // DAY
@@ -528,8 +543,8 @@ namespace ThatsLit.Components
                         factor = Mathf.Clamp01(-cloud);
                         lowLightScoreApplied *= 1 + factor / 10f; // at -1 (clear), low light score +10%;
                         break;
-                    case "Customs": // Cloudiness has too much impact on score during daytime
-                        // ML disappear at c1, like L40% - D60%
+                    case "Customs": // Cloudiness has too much impact on score during daytime, ML disappear at c1, like L40% - D60%
+                    //case "Streets of Tarkov":
                         // compensate dark score for c0 ~ c1
                         if (cloud < 0)
                         {
@@ -541,6 +556,16 @@ namespace ThatsLit.Components
                             darkScoreApplied *= 1f + cloud; // at 1 (clear), low light score +100%;
                             lowLightScoreApplied *= 1f + cloud / 10f; // at 1 (clear), low light score +10%;
                         }
+                        break;
+                    case "Streets of Tarkov":
+                                              // The streets is impacted by c0 ~ c1 a lot
+                                              // The streets is very weird, on clear (-1) days, L and L+ disappear starting from 20:45 and reappear at 23:45, both without matching visual change
+
+                        // Visibility on the streets is not really affected by cloudiness in day time
+                        // But pixels drop
+                        darkScoreApplied *= 5 + 5f * Mathf.Clamp01(cloud + 0.266f);
+                        midLowLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
+                        midLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 3f;
                         break;
                 }
             }
@@ -759,9 +784,6 @@ namespace ThatsLit.Components
             {
                 default: // Hideout
                     break;
-                case "Streets Of Tarkov":
-                    if (GetTimeLighingFactor() < 0 && frameLitScore < -0.5f) frameLitScore = -0.5f + ((frameLitScore + 0.5f) * 0.7f); // The street has a dim light vision even with 1.0 cloud during the darkest hours
-                    break;
                 case "Lighthouse":
                     if (GetTimeLighingFactor() < 0) frameLitScore *= 0.8f + (0.1f * cloud);
                     break;
@@ -797,6 +819,9 @@ namespace ThatsLit.Components
                         frameLitScore *= 0.8f + Mathf.Clamp01(cloud) * 0.1f; // Scale down to -0.7 (clear) ~ -0.95(cloud)
                     }
                     break;
+                case "Streets of Tarkov":
+                    if (GetTimeLighingFactor() < 0 && frameLitScore < -0.5f) frameLitScore = -0.5f + ((frameLitScore + 0.5f) * 0.8f); // The street has a dim light vision even with 1.0 cloud during the darkest hours
+                    break;
             }
 
             frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
@@ -815,14 +840,14 @@ namespace ThatsLit.Components
 
             void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
             {
+                thresholdShine = 0.8f;
+                thresholdHigh = 0.5f;
+                thresholdHighMid = 0.25f;
+                thresholdMid = 0.13f;
+                thresholdMidLow = 0.055f;
+                thresholdLow = 0.015f;
                 if (tlf < 0) // Night
                 {
-                    thresholdShine = 0.8f;
-                    thresholdHigh = 0.5f;
-                    thresholdHighMid = 0.25f;
-                    thresholdMid = 0.13f;
-                    thresholdMidLow = 0.055f;
-                    thresholdLow = 0.015f - 0.005f * tlf;
                     switch (activeRaidSettings?.SelectedLocation?.Name)
                     {
                         case "Factory":
@@ -832,19 +857,19 @@ namespace ThatsLit.Components
                             thresholdMid *= 0.8f;
                             thresholdMidLow *= 0.8f;
                             break;
+                        case "Streets of Tarkov":
+                            thresholdShine *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.3f;
+                            thresholdHigh *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.3f;
+                            thresholdHighMid *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.35f;
+                            thresholdMid *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.35f;
+                            thresholdMidLow *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.35f;
+                            break;
                         default:
                             break;
                     }
                 }
                 else
                 {
-                    thresholdShine = 0.8f;
-                    thresholdHigh = 0.5f;
-                    thresholdHighMid = 0.25f;
-                    thresholdMid = 0.13f;
-                    thresholdMidLow = 0.055f;
-                    thresholdLow = 0.015f;
-
                     switch (activeRaidSettings?.SelectedLocation?.Name)
                     {
                         case "Shoreline":
@@ -854,6 +879,15 @@ namespace ThatsLit.Components
                             thresholdMid = 0.13f;
                             thresholdMidLow = 0.055f - 0.02f * tlf * (cloud - 0.05f) / 1.05f;
                             thresholdLow = 0.015f;
+                            break;
+                        // Visibility on the streets is not really affected by cloudiness in day time
+                        // But pixels drop
+                        case "Streets of Tarkov":
+                            thresholdShine *= 1 - Mathf.Clamp01(cloud) * 0.3f;
+                            thresholdHigh *= 1 - Mathf.Clamp01(cloud) * 0.3f;
+                            thresholdHighMid *= 1 - Mathf.Clamp01(cloud) * 0.35f;
+                            thresholdMid *= 1 - Mathf.Clamp01(cloud) * 0.35f;
+                            thresholdMidLow *= 1 - Mathf.Clamp01(cloud) * 0.35f;
                             break;
                         default:
                             break;
@@ -1057,8 +1091,6 @@ namespace ThatsLit.Components
             {
                 switch (activeRaidSettings?.SelectedLocation?.Name)
                 {
-                    case "Streets Of Tarkov":
-                        return -0.25f;
                     case "Woods":
                         return -0.35f; // Moon is dimmer in Woods?
                     default:
