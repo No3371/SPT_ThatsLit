@@ -103,6 +103,8 @@ namespace ThatsLit.Components
                         return ThatsLitPlugin.EnableReserve.Value;
                     case "Customs":
                         return ThatsLitPlugin.EnableCustoms.Value;
+                    case "Lighthouse":
+                        return ThatsLitPlugin.EnableLighthouse.Value;
                     case "Factory":
                         return GetInGameDayTime() > 12? ThatsLitPlugin.EnableFactoryDay.Value : ThatsLitPlugin.EnableFactoryNight.Value;
                     case "Streets of Tarkov":

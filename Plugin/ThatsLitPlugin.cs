@@ -99,7 +99,6 @@ namespace ThatsLit
         public static ConfigEntry<bool> LessFoliageCheck { get; private set; }
         public static ConfigEntry<bool> LessEquipmentCheck { get; private set; }
         public static ConfigEntry<bool> EnableUncalibratedMaps { get; private set; }
-        public static ConfigEntry<bool> EnableStreets { get; private set; }
         public static ConfigEntry<bool> EnableLighthouse { get; private set; }
         public static ConfigEntry<bool> EnableFactoryDay { get; private set; }
         public static ConfigEntry<bool> EnableFactoryNight { get; private set; }
