@@ -30,7 +30,7 @@ namespace ThatsLit.Components
     public class ThatsLitMainPlayerComponent : MonoBehaviour
     {
         static readonly List<string> EnabledMaps = new List<string>() { "Customs", "Shoreline", "Lighthouse", "Woods", "Reserve", "Factory" };
-        public bool unavailable;
+        public bool disabledLit;
         const int RESOLUTION = 64;
         public const int POWER = 3;
         public RenderTexture rt, envRt;
@@ -87,8 +87,7 @@ namespace ThatsLit.Components
             activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
             if (!IsMapEnabled())
             {
-                unavailable = true;
-                this.enabled = false;
+                disabledLit = true;
                 return;
             }
 
@@ -322,6 +321,7 @@ namespace ThatsLit.Components
 
         void LateUpdate ()
         {
+            if (disabledLit) return;
             GetWeatherStats(out fog, out rain, out cloud);
             frame5 = frame4;
             frame4 = frame3;
@@ -896,10 +896,10 @@ namespace ThatsLit.Components
 
         private void OnGUI()
         {
-            if (!ThatsLitPlugin.DebugInfo.Value && unavailable && Time.time - awakeAt < 60f)
+            if (disabledLit && Time.time - awakeAt < 30f)
             {
-                GUILayout.Label("[That's Lit] The map is not yet calibrated or disabled by you.");
-                return;
+                GUILayout.Label("[That's Lit] The map is not yet ready or disabled in configs.");
+                if (!ThatsLitPlugin.DebugInfo.Value) return;
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
