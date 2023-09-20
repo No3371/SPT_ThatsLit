@@ -480,7 +480,7 @@ namespace ThatsLit.Components
                         if (cloud > 0)
                         {
                             // compensate dark score for c0 ~ c1
-                            darkScoreApplied += 0.1f * cloud;
+                            darkScoreApplied += 0.06f * cloud;
                         }
                         break;
                     case "Factory": // NIGHT, thresholds compressed
