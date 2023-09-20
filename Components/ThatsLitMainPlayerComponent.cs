@@ -78,6 +78,7 @@ namespace ThatsLit.Components
         public void Awake()
         {
             awakeAt = Time.time;
+            collidersCache = new Collider[16];
 
             Singleton<ThatsLitMainPlayerComponent>.Instance = this;
             MainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
@@ -171,7 +172,6 @@ namespace ThatsLit.Components
                 displayEnv.RectTransform().anchoredPosition = new Vector2(-560, -360);
             }
 
-            collidersCache = new Collider[16];
             globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
             skipFoliageCheck = activeRaidSettings?.SelectedLocation?.Name == "Factory" || activeRaidSettings == null;
         }
@@ -239,7 +239,6 @@ namespace ThatsLit.Components
                         break;
                     }
             }
-            Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
 
             if (ThatsLitPlugin.DebugTexture.Value)
             {
