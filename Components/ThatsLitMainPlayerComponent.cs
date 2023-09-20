@@ -245,7 +245,7 @@ namespace ThatsLit.Components
                 }
             }
 
-            if (Time.time > lastCheckedLights + 0.33f)
+            if (Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.6f : 0.33f))
             {
                 lastCheckedLights = Time.time;
                 DetermineShiningEquipments();
@@ -275,7 +275,7 @@ namespace ThatsLit.Components
                 //}
             }
 
-            if (Time.time > lastCheckedFoliages + 0.4)
+            if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value? 0.75f : 0.4f))
             {
                 lastCheckedFoliages = Time.time;
                 foliageScore = 0;

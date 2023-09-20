@@ -69,7 +69,10 @@ namespace ThatsLit
             category = "4. Info";
             ScoreInfo = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
 
-            category = "5. Debug";
+            category = "5. Performance";
+            LessFoliageCheck = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
+            LessEquipmentCheck = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
+
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
         }
@@ -84,6 +87,8 @@ namespace ThatsLit
         public static ConfigEntry<float> FinalOffset { get; private set; }
         public static ConfigEntry<float> GlobalRandomOverlookChance { get; private set; }
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
+        public static ConfigEntry<bool> LessFoliageCheck { get; private set; }
+        public static ConfigEntry<bool> LessEquipmentCheck { get; private set; }
 
         private void Patches()
         {
