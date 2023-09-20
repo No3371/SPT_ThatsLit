@@ -113,7 +113,7 @@ namespace ThatsLit.Patches.Vision
                 }
 
                 if (factor < 0 && __instance.Owner.NightVision.UsingNow)
-                    factor *= Mathf.Clamp01(disFactor + 0.1f); // Negative factor is reduced to only 10% at 10m for AIs using NVG, but at 110m their vision still get impacted
+                    factor *= 0.1f; // Negative factor is reduced to only 10% regardless distance
 
                 //if (factor < 0 && (__instance.Person.AIData.UsingLight || __instance.Person.AIData.GetFlare)) factor /= 5f; // Moved to score calculation
 
