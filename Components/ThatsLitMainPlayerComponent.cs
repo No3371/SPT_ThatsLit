@@ -1044,8 +1044,8 @@ namespace ThatsLit.Components
                 return GetBrightestNightHourFactor() - Mathf.Clamp01((2f - time) / 2f) * (GetBrightestNightHourFactor() + 1f); // 0:00 -> 100%, 1:00 -> 75%, 2:00 -> 25%, 3:00 -> 25%
             else if (time >= 3 && time < 5)
                 return GetBrightestNightHourFactor() - Mathf.Clamp01((time - 3f) / 2f) * (GetBrightestNightHourFactor() + 1f); // 3:00 -> 25%, 5:00 -> 100%
-            else if (time >= 5 && time < 7)
-                return -Mathf.Clamp01((7f - time) / 2f); // 5:00 -> 100%, 5:00 -> 0%
+            else if (time >= 5 && time < 8)
+                return -Mathf.Clamp01((8f - time) / 3f); // 5:00 -> 100%, 8:00 -> 0%
             else if (time >= 7 && time < 16)
                 return 1f - Mathf.Clamp01((12f - time) / 6f);
             else if (time >= 16 && time < 20)
