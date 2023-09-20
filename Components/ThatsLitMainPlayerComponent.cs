@@ -66,7 +66,7 @@ namespace ThatsLit.Components
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
         // PlayerSpiritAura is Visceral Bodies compat
 
-        float startAt, lastCheckedLights, lastCheckedFoliages;
+        float awakeAt, lastCheckedLights, lastCheckedFoliages;
         // Note: If vLight > 0, other counts may be skipped
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
 
@@ -77,6 +77,8 @@ namespace ThatsLit.Components
         public float fog, rain, cloud;
         public void Awake()
         {
+            awakeAt = Time.time;
+
             Singleton<ThatsLitMainPlayerComponent>.Instance = this;
             MainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
 
@@ -109,6 +111,7 @@ namespace ThatsLit.Components
                         return ThatsLitPlugin.EnableUncalibratedMaps.Value || EnabledMaps.Contains(activeRaidSettings.SelectedLocation.Name)
                 }
             }
+
             rt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
             rt.filterMode = FilterMode.Point;
             rt.Create();
@@ -169,8 +172,6 @@ namespace ThatsLit.Components
             }
 
             collidersCache = new Collider[16];
-
-            startAt = Time.time;
             globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
             skipFoliageCheck = activeRaidSettings?.SelectedLocation?.Name == "Factory" || activeRaidSettings == null;
         }
@@ -383,27 +384,6 @@ namespace ThatsLit.Components
             var validPixels = 0;
             multiAvgLum = 0f;
             avgLum = 0.0f;
-            //for (int x = 0; x < RESOLUTION; x++)
-            //{
-            //    for (int y = 0; y < RESOLUTION; y++)
-            //    {
-            //        var c = tex.GetPixel(x, y);
-            //        if (c == Color.white)
-            //        {
-            //            continue;
-            //        }
-            //        var lum = (c.r + c.g + c.b) / 3f;
-            //        avgLum += lum;
-            //        if (lum > 0.75f) shinePixels += 1;
-            //        else if (lum > 0.5f) highLightPixels += 1;
-            //        else if (lum > 0.25f) highMidLightPixels += 1;
-            //        else if (lum > 0.13f) midLightPixels += 1;
-            //        else if (lum > 0.055f) midLowLightPixels += 1;
-            //        else if (lum > 0.015f) lowLightPixels += 1;
-            //        else darkPixels += 1;
-            //        validPixels++;
-            //    }
-            //}
 
             CountPixels(tex, ref shinePixels, ref highLightPixels, ref highMidLightPixels, ref midLightPixels, ref midLowLightPixels, ref lowLightPixels, ref darkPixels, ref avgLum, ref validPixels);
 
@@ -601,8 +581,8 @@ namespace ThatsLit.Components
             switch (activeRaidSettings?.SelectedLocation?.Name)
             {
                 default:
-                    if (Time.time - startAt > 20f)
-                        globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time - 20 - startAt) * 2f, 300f)));
+                    if (Time.time - awakeAt > 20f)
+                        globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time - 20 - awakeAt) * 2f, 300f)));
 
                     break;
                 case "Factory":
@@ -909,7 +889,7 @@ namespace ThatsLit.Components
                     GUILayout.Label("[FOLIAGE+]");
                 else if (foliageScore > 0.05f)
                     GUILayout.Label("[FOLIAGE]");
-                if (Time.time < startAt + 10)
+                if (Time.time < awakeAt + 10)
                     GUILayout.Label("[That's Lit HUD] Can be disabled in plugin settings.");
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
@@ -959,7 +939,8 @@ namespace ThatsLit.Components
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / {3} -> TIME_LIGHT: {4:0.00}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), GetTimeLighingFactor()));
             GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", vLight? "V" : irLight? "I" : "-", vLaser ? "V" : irLaser ? "I" : "-", vLightSub ? "V" : irLightSub ? "I" : "-", vLaserSub ? "V" : irLaserSub ? "I" : "-"));
 
-            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:＋0.00;－0.00;+0.00} | {2:＋0.00;－0.00;+0.00} | {3:＋0.00;－0.00;+0.00} | {4:＋0.00;－0.00;+0.00} | {5:＋0.00;－0.00;+0.00} | {6:＋0.00;－0.00;+0.00}", (shineScoreApplied - shineScore), highLightScoreApplied - highLightScore, highMidLightScoreApplied - highMidLightScore, midLightScore - midLightScoreApplied, midLowLightScoreApplied - midLowLightScore, lowLightScoreApplied - lowLightScore, darkScoreApplied - darkScore));
+            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:0.00} | {2:0.00} | {3:0.00} | {4:0.00} | {5:0.00} | {6:0.00}", shineScoreApplied, highLightScoreApplied, highMidLightScoreApplied, midLightScore, midLowLightScoreApplied, lowLightScoreApplied, darkScoreApplied));
+            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:＋0.00;－0.00;+0.00} | {2:＋0.00;－0.00;+0.00} | {3:＋0.00;－0.00;+0.00} | {4:＋0.00;－0.00;+0.00} | {5:＋0.00;－0.00;+0.00} | {6:＋0.00;－0.00;+0.00}", shineScoreApplied - shineScore, highLightScoreApplied - highLightScore, highMidLightScoreApplied - highMidLightScore, midLightScore - midLightScoreApplied, midLowLightScoreApplied - midLowLightScore, lowLightScoreApplied - lowLightScore, darkScoreApplied - darkScore));
 
         }
 
