@@ -104,11 +104,11 @@ namespace ThatsLit.Components
                     case "Customs":
                         return ThatsLitPlugin.EnableCustoms.Value;
                     case "Factory":
-                        return ThatsLitPlugin.EnableFactory.Value;
+                        return GetInGameDayTime() > 12? ThatsLitPlugin.EnableFactoryDay.Value : ThatsLitPlugin.EnableFactoryNight.Value;
                     case "Streets of Tarkov":
                         return false;
                     default:
-                        return ThatsLitPlugin.EnableUncalibratedMaps.Value || EnabledMaps.Contains(activeRaidSettings.SelectedLocation.Name)
+                        return ThatsLitPlugin.EnableUncalibratedMaps.Value || EnabledMaps.Contains(activeRaidSettings.SelectedLocation.Name);
                 }
             }
 

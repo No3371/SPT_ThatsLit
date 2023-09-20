@@ -61,6 +61,13 @@ namespace ThatsLit
             category = "2. Darkness / Brightness";
             DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, "Scale how AI noticing players slower due to darkness.");
             BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, "Scale how AI noticing players faster due to brightness.");
+            EnableFactoryDay = Config.Bind(category, "Factory (Day)", false, "Enable darkness/brightness on the map.");
+            EnableFactoryNight = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
+            EnableLighthouse = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
+            EnableShoreline = Config.Bind(category, "Shoreline", true, "Enable darkness/brightness on the map.");
+            EnableReserve = Config.Bind(category, "Reserve", true, "Enable darkness/brightness on the map.");
+            EnableWoods = Config.Bind(category, "Woods", true, "Enable darkness/brightness on the map.");
+            EnableCustoms = Config.Bind(category, "Customs", true, "Enable darkness/brightness on the map.");
 
             category = "3. Tweaks";
             GlobalRandomOverlookChance = Config.Bind(category, key: "Global Random Overlook Chance", 0.01f, "The chance for all AIs to simply overlook in 1 vision check.");
@@ -74,15 +81,7 @@ namespace ThatsLit
             LessFoliageCheck = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
             LessEquipmentCheck = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
 
-            category = "6. Map Toggle";
-            EnableFactory = Config.Bind(category, "Factory", true, "Enable That's Lit on the map.");
-            EnableLighthouse = Config.Bind(category, "Lighthouse", true, "Enable That's Lit on the map.");
-            EnableShoreline = Config.Bind(category, "Shoreline", true, "Enable That's Lit on the map.");
-            EnableReserve = Config.Bind(category, "Reserve", true, "Enable That's Lit on the map.");
-            EnableWoods = Config.Bind(category, "Woods", true, "Enable That's Lit on the map.");
-            EnableCustoms = Config.Bind(category, "Customs", true, "Enable That's Lit on the map.");
-
-            category = "7. Debug";
+            category = "6. Debug";
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
         }
@@ -102,7 +101,8 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableUncalibratedMaps { get; private set; }
         public static ConfigEntry<bool> EnableStreets { get; private set; }
         public static ConfigEntry<bool> EnableLighthouse { get; private set; }
-        public static ConfigEntry<bool> EnableFactory { get; private set; }
+        public static ConfigEntry<bool> EnableFactoryDay { get; private set; }
+        public static ConfigEntry<bool> EnableFactoryNight { get; private set; }
         public static ConfigEntry<bool> EnableReserve { get; private set; }
         public static ConfigEntry<bool> EnableCustoms { get; private set; }
         public static ConfigEntry<bool> EnableShoreline { get; private set; }
