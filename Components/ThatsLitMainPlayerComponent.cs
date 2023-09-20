@@ -557,6 +557,11 @@ namespace ThatsLit.Components
                             lowLightScoreApplied *= 1f + cloud / 10f; // at 1 (clear), low light score +10%;
                         }
                         break;
+                    case "Factory": // NIGHT, thresholds compressed
+                        lowLightScoreApplied = lowLightScore * 0.7f;
+                        highMidLightScoreApplied *= 0.5f;
+                        highLightScoreApplied *= 0.5f;
+                        break;
                     case "Streets of Tarkov":
                                               // The streets is impacted by c0 ~ c1 a lot
                                               // The streets is very weird, on clear (-1) days, L and L+ disappear starting from 20:45 and reappear at 23:45, both without matching visual change
@@ -566,6 +571,7 @@ namespace ThatsLit.Components
                         darkScoreApplied *= 5 + 5f * Mathf.Clamp01(cloud + 0.266f);
                         midLowLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
                         midLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 3f;
+
                         break;
                 }
             }
