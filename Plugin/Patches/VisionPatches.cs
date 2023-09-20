@@ -47,7 +47,7 @@ namespace ThatsLit.Patches.Vision
             var disFactor = Mathf.Clamp01((dis - 10) / 100f);
             // To scale down various sneaking bonus
             // The bigger the distance the bigger it is, capped to 110m
-            disFactor = disFactor * disFactor * 0.8f; // A slow accelerating curve, 110m => 1, 10m => 0 (Then scaled down to make things imperfect)
+            disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0
 
             if (__instance.Owner.WeaponManager.ShootController.IsAiming)
             {
@@ -131,21 +131,24 @@ namespace ThatsLit.Patches.Vision
 
                 var cqb = 1 - Mathf.Clamp01(dis / 5f); // 5+ -> 0, 0 -> 1
                 // Fix for blind bots who are already touching us
-                factor *= 1 - cqb; // less effective from within 5m
+                factor *= 1 - cqb; // linear ineffectiveness within 5m
+
+                var cqbSmooth = 1 - Mathf.Clamp01(dis / 10f); // 10+ -> 0, 0 -> 1, 5 ->0.5
+                cqbSmooth *= cqbSmooth; // 10m -> 9%, 5m -> 25%
 
                 factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 
                 // Absoulute offset
                 // factor: -0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -0.8 => -0.32~-0.64
                 var reducingSeconds = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f, 1f);
-                reducingSeconds *= factor < 0 ? 1 : 0.1f; // Give positive factor a lower impact because the normal values are like 0.15 or something
+                reducingSeconds *= factor < 0 ? 1 : 0.1f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
                 reducingSeconds *= reducingSeconds > 0 ? ThatsLitPlugin.DarknessImpactScale.Value : ThatsLitPlugin.BrightnessImpactScale.Value;
                 __result -= reducingSeconds;
 
                 // The scaling here allows the player to stay in the dark without being seen
                 // The reason why scaling is needed is because SeenCoef will change dramatically depends on vision angles
                 // Absolute offset alone won't work for different vision angles
-                if (factor < 0 && UnityEngine.Random.Range(-1, 0) > factor * (1 - 0.5f * cqb)) __result = 8888f;
+                if (factor < 0 && UnityEngine.Random.Range(-1, 0) > factor * (1 - cqbSmooth)) __result = 8888f;
                 else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor) __result *= (1f - factor * 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value); // Half the reaction time regardles angle half of the time at 100% score
                 else if (factor < -0.9f) __result *= 1 - (factor * (2f - 1f * cqb) * ThatsLitPlugin.DarknessImpactScale.Value);
                 else if (factor < -0.5f) __result *= 1 - (factor * (1.5f - 0.5f * cqb) * ThatsLitPlugin.DarknessImpactScale.Value);
