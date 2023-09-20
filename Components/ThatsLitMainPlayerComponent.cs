@@ -179,6 +179,15 @@ namespace ThatsLit.Components
 
         private void Update()
         {
+            Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
+            if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.75f : 0.4f))
+            {
+                UpdateFoliageScore(bodyPos);
+            }
+            if (disabledLit)
+            {
+                return;
+            }
             if (lockPos != -1) currentCamPos = lockPos;
             var camHeight = MainPlayer.IsInPronePose ? 0.45f : 2.2f;
             var targetHeight = MainPlayer.IsInPronePose ? 0.2f : 0.7f;
@@ -278,60 +287,36 @@ namespace ThatsLit.Components
             {
                 lastCheckedLights = Time.time;
                 DetermineShiningEquipments();
-
-
-
-                //float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, LayerMaskClass.TriggersMask);
-
-                //if (count > 0)
-                //for (int i = 0; i < collidersCache.Length; i++)
-                //{
-                //    if (collidersCache[i] != null)
-                //    {
-                //        if (!collidersCache[i].transform.parent.gameObject.GetComponentInChildren<ObstacleCollider>()
-                //            || !(collidersCache[i].transform.parent.gameObject.name.Contains("filbert")
-                //            && !collidersCache[i].transform.parent.gameObject.name.Contains("fern_"))) continue;
-
-                //        float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
-                //        if (dis < 0.3f) foliageScore += 1;
-                //        else if (dis < 0.7f) foliageScore += 0.5f;
-                //        else if (dis < 1.5f) foliageScore += 0.2f;
-                //        else foliageScore += 0.1f;
-                //        count++;
-                //    }
-
-                //    foliageScore /= count;
-                //}
             }
+        }
 
-            if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value? 0.75f : 0.4f))
+        private void UpdateFoliageScore(Vector3 bodyPos)
+        {
+            lastCheckedFoliages = Time.time;
+            foliageScore = 0;
+
+            if (!skipFoliageCheck)
             {
-                lastCheckedFoliages = Time.time;
-                foliageScore = 0;
 
-                if (!skipFoliageCheck)
+                for (int i = 0; i < collidersCache.Length; i++)
+                    collidersCache[i] = null;
+
+                float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, foliageLayerMask);
+
+                for (int i = 0; i < count; i++)
                 {
-
-                    for (int i = 0; i < collidersCache.Length; i++)
-                        collidersCache[i] = null;
-
-                    float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, foliageLayerMask);
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
-                        if (dis < 0.4f) foliageScore += 0.8f;
-                        else if (dis < 0.6f) foliageScore += 0.5f;
-                        else if (dis < 1f) foliageScore += 0.3f;
-                        else if (dis < 2f) foliageScore += 0.15f;
-                        else if (dis < 4f) foliageScore += 0.05f;
-                        else foliageScore += 0.02f;
-                    }
-
-                    if (count > 0) foliageScore /= count;
-                    if (count == 1) foliageScore /= 2f;
-                    if (count == 2) foliageScore /= 1.5f;
+                    float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
+                    if (dis < 0.4f) foliageScore += 0.8f;
+                    else if (dis < 0.6f) foliageScore += 0.5f;
+                    else if (dis < 1f) foliageScore += 0.3f;
+                    else if (dis < 2f) foliageScore += 0.15f;
+                    else if (dis < 4f) foliageScore += 0.05f;
+                    else foliageScore += 0.02f;
                 }
+
+                if (count > 0) foliageScore /= count;
+                if (count == 1) foliageScore /= 2f;
+                if (count == 2) foliageScore /= 1.5f;
             }
         }
 
