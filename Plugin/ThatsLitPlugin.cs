@@ -55,6 +55,7 @@ namespace ThatsLit
         {
             string category = "1. Main";
             Enabled = Config.Bind(category, "Enable", true, "Enable the mod");
+            EnableUncalibratedMaps = Config.Bind(category, "Enable Uncalibrated Maps", false, "Every map need specific parameter to prevent incorrect lighting detection, by default That's Lit is disabled on maps not yet calibrated.");
             //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
@@ -73,6 +74,15 @@ namespace ThatsLit
             LessFoliageCheck = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
             LessEquipmentCheck = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
 
+            category = "6. Map Toggle";
+            EnableFactory = Config.Bind(category, "Factory", true, "Enable That's Lit on the map.");
+            EnableLighthouse = Config.Bind(category, "Lighthouse", true, "Enable That's Lit on the map.");
+            EnableShoreline = Config.Bind(category, "Shoreline", true, "Enable That's Lit on the map.");
+            EnableReserve = Config.Bind(category, "Reserve", true, "Enable That's Lit on the map.");
+            EnableWoods = Config.Bind(category, "Woods", true, "Enable That's Lit on the map.");
+            EnableCustoms = Config.Bind(category, "Customs", true, "Enable That's Lit on the map.");
+
+            category = "7. Debug";
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
         }
@@ -89,6 +99,14 @@ namespace ThatsLit
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
         public static ConfigEntry<bool> LessFoliageCheck { get; private set; }
         public static ConfigEntry<bool> LessEquipmentCheck { get; private set; }
+        public static ConfigEntry<bool> EnableUncalibratedMaps { get; private set; }
+        public static ConfigEntry<bool> EnableStreets { get; private set; }
+        public static ConfigEntry<bool> EnableLighthouse { get; private set; }
+        public static ConfigEntry<bool> EnableFactory { get; private set; }
+        public static ConfigEntry<bool> EnableReserve { get; private set; }
+        public static ConfigEntry<bool> EnableCustoms { get; private set; }
+        public static ConfigEntry<bool> EnableShoreline { get; private set; }
+        public static ConfigEntry<bool> EnableWoods { get; private set; }
 
         private void Patches()
         {

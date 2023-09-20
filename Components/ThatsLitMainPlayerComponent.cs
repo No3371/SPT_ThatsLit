@@ -29,6 +29,8 @@ namespace ThatsLit.Components
 
     public class ThatsLitMainPlayerComponent : MonoBehaviour
     {
+        static readonly List<string> EnabledMaps = new List<string>() { "Customs", "Shoreline", "Lighthouse", "Woods", "Reserve", "Factory" };
+        public bool unavailable;
         const int RESOLUTION = 64;
         public const int POWER = 3;
         public RenderTexture rt, envRt;
@@ -78,6 +80,35 @@ namespace ThatsLit.Components
             Singleton<ThatsLitMainPlayerComponent>.Instance = this;
             MainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
 
+            var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+            activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
+            if (!IsMapEnabled())
+            {
+                unavailable = true;
+                this.enabled = false;
+                return;
+            }
+
+            bool IsMapEnabled ()
+            {
+                switch (activeRaidSettings?.SelectedLocation?.Name)
+                {
+                    case "Woods":
+                        return ThatsLitPlugin.EnableWoods.Value;
+                    case "Shoreline":
+                        return ThatsLitPlugin.EnableShoreline.Value;
+                    case "ReserveBase":
+                        return ThatsLitPlugin.EnableReserve.Value;
+                    case "Customs":
+                        return ThatsLitPlugin.EnableCustoms.Value;
+                    case "Factory":
+                        return ThatsLitPlugin.EnableFactory.Value;
+                    case "Streets of Tarkov":
+                        return false;
+                    default:
+                        return ThatsLitPlugin.EnableUncalibratedMaps.Value || EnabledMaps.Contains(activeRaidSettings.SelectedLocation.Name)
+                }
+            }
             rt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
             rt.filterMode = FilterMode.Point;
             rt.Create();
@@ -140,8 +171,6 @@ namespace ThatsLit.Components
             collidersCache = new Collider[16];
 
             startAt = Time.time;
-            var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-            activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
             globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
             skipFoliageCheck = activeRaidSettings?.SelectedLocation?.Name == "Factory" || activeRaidSettings == null;
         }
@@ -856,13 +885,18 @@ namespace ThatsLit.Components
         private void OnDestroy()
         {
             if (display) GameObject.Destroy(display);
-            GameObject.Destroy(cam);
-            rt.Release();
+            if (cam) GameObject.Destroy(cam);
+            if (rt) rt.Release();
 
         }
 
         private void OnGUI()
         {
+            if (!ThatsLitPlugin.DebugInfo.Value && unavailable && Time.time - awakeAt < 60f)
+            {
+                GUILayout.Label("[That's Lit] The map is not yet calibrated or disabled by you.");
+                return;
+            }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
                 DrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));

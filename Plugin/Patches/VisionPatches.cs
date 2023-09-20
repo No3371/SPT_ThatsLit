@@ -32,9 +32,11 @@ namespace ThatsLit.Patches.Vision
         public static void PatchPostfix(GClass478 __instance, BifacialTransform BotTransform, BifacialTransform enemy, ref float __result)
         {
             if (__result == 8888 || !ThatsLitPlugin.Enabled.Value) return;
+            ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
+            if (mainPlayer.unavailable) return;
+
             var original = __result;
 
-            ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
             if (Time.frameCount != lastFrame)
             {
                 lastFrame = Time.frameCount;
