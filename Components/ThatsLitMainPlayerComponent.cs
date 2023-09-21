@@ -116,11 +116,12 @@ namespace ThatsLit.Components
                 }
             }
 
-            rt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
+            rt = new RenderTexture(RESOLUTION, RESOLUTION, 0, RenderTextureFormat.ARGB32);
+            rt.useMipMap = false;
             rt.filterMode = FilterMode.Point;
             rt.Create();
 
-            tex = new Texture2D(RESOLUTION, RESOLUTION);
+            tex = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
 
 
             //cam = GameObject.Instantiate<Camera>(Singleton<PlayerCameraController>.Instance.Camera);
@@ -140,7 +141,7 @@ namespace ThatsLit.Components
 
             if (ThatsLitPlugin.DebugTexture.Value)
             {
-                debugTex = new Texture2D(RESOLUTION, RESOLUTION);
+                debugTex = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
                 display = new GameObject().AddComponent<RawImage>();
                 display.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
                 display.RectTransform().sizeDelta = new Vector2(160, 160);
@@ -152,27 +153,27 @@ namespace ThatsLit.Components
                 envRt.filterMode = FilterMode.Point;
                 envRt.Create();
 
-                envTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
+                //envTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
 
-                envCam = new GameObject().AddComponent<Camera>();
-                envCam.clearFlags = CameraClearFlags.SolidColor;
-                envCam.backgroundColor = Color.white;
-                envCam.transform.SetParent(MainPlayer.Transform.Original);
-                envCam.transform.localPosition = Vector3.up * 3;
+                //envCam = new GameObject().AddComponent<Camera>();
+                //envCam.clearFlags = CameraClearFlags.SolidColor;
+                //envCam.backgroundColor = Color.white;
+                //envCam.transform.SetParent(MainPlayer.Transform.Original);
+                //envCam.transform.localPosition = Vector3.up * 3;
 
-                envCam.nearClipPlane = 0.01f;
+                //envCam.nearClipPlane = 0.01f;
 
-                envCam.cullingMask = ~LayerMaskClass.PlayerMask;
-                envCam.fieldOfView = 75;
+                //envCam.cullingMask = ~LayerMaskClass.PlayerMask;
+                //envCam.fieldOfView = 75;
 
-                envCam.targetTexture = envRt;
+                //envCam.targetTexture = envRt;
 
-                envDebugTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
-                displayEnv = new GameObject().AddComponent<RawImage>();
-                displayEnv.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
-                displayEnv.RectTransform().sizeDelta = new Vector2(160, 160);
-                displayEnv.texture = envDebugTex;
-                displayEnv.RectTransform().anchoredPosition = new Vector2(-560, -360);
+                //envDebugTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
+                //displayEnv = new GameObject().AddComponent<RawImage>();
+                //displayEnv.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
+                //displayEnv.RectTransform().sizeDelta = new Vector2(160, 160);
+                //displayEnv.texture = envDebugTex;
+                //displayEnv.RectTransform().anchoredPosition = new Vector2(-560, -360);
             }
 
             globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
@@ -252,7 +253,22 @@ namespace ThatsLit.Components
                     }
             }
 
-            if (ThatsLitPlugin.DebugTexture.Value)
+            if (ThatsLitPlugin.ExperimentalGPUReadback.Value)
+            {
+                AsyncGPUReadback.Request(rt, 0, req =>
+                {
+                    if (req.hasError)
+                        return;
+
+                    NativeArray<byte> data = req.GetData<byte>();
+                    //if (data.Length != RESOLUTION * RESOLUTION * 4) // RGBA32 -> 32 bits per pixel
+                    //    Debug.LogFormat("Data length mismatch: {0} / {1}", data.Length, RESOLUTION * RESOLUTION * 4);
+                    tex.LoadRawTextureData(data);
+                    tex.Apply();
+                });
+            }
+
+            if (ThatsLitPlugin.DebugTexture.Value && envCam)
             {
                 envCam.transform.localPosition = envCamOffset;
                 switch (currentCamPos)
@@ -354,16 +370,21 @@ namespace ThatsLit.Components
                 ratioDarkPixels = darkPixels / (float)lastValidPixels
             }; ;
             frameLitScore = shinePixels = highLightPixels = highMidLightPixels = midLightPixels = midLowLightPixels = lowLightPixels = darkPixels = 0;
-            RenderTexture.active = rt;
-            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-            tex.Apply();
-            RenderTexture.active = null;
-            if (ThatsLitPlugin.DebugTexture.Value)
+
+            if (!ThatsLitPlugin.ExperimentalGPUReadback.Value)
             {
-                RenderTexture.active = envRt;
-                envTex.ReadPixels(new Rect(0, 0, envRt.width, envRt.height), 0, 0);
-                envTex.Apply();
+                RenderTexture.active = rt;
+                tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+                tex.Apply();
                 RenderTexture.active = null;
+
+                if (ThatsLitPlugin.DebugTexture.Value)
+                {
+                    RenderTexture.active = envRt;
+                    envTex.ReadPixels(new Rect(0, 0, envRt.width, envRt.height), 0, 0);
+                    envTex.Apply();
+                    RenderTexture.active = null;
+                }
             }
 
             if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);

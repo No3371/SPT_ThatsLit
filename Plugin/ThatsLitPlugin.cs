@@ -80,6 +80,7 @@ namespace ThatsLit
             category = "5. Performance";
             LessFoliageCheck = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
             LessEquipmentCheck = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
+            ExperimentalGPUReadback = Config.Bind(category, "Experimental GPU Readback", true, "May increase performance if supported and works.");
 
             category = "6. Debug";
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
@@ -99,6 +100,7 @@ namespace ThatsLit
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
         public static ConfigEntry<bool> LessFoliageCheck { get; private set; }
         public static ConfigEntry<bool> LessEquipmentCheck { get; private set; }
+        public static ConfigEntry<bool> ExperimentalGPUReadback { get; private set; }
         public static ConfigEntry<bool> EnableUncalibratedMaps { get; private set; }
         public static ConfigEntry<bool> EnableLighthouse { get; private set; }
         public static ConfigEntry<bool> EnableFactoryDay { get; private set; }
