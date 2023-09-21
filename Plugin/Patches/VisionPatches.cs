@@ -142,18 +142,19 @@ namespace ThatsLit.Patches.Vision
                     if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f); // Darkness will be far more effective from afar
                     else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
 
-                    var cqb = 1 - Mathf.Clamp01(dis / 5f); // 5+ -> 0, 0 -> 1
+                    var cqb = 1 - Mathf.Clamp01((dis - 1.5f) / 5f); // 6.5+ -> 0, 1.5f -> 1
                     // Fix for blind bots who are already touching us
-                    factor *= 1 - cqb; // linear ineffectiveness within 5m
+                    factor *= 1 - cqb; // linear ineffectiveness within 6m
 
-                    var cqbSmooth = 1 - Mathf.Clamp01(dis / 10f); // 10+ -> 0, 0 -> 1, 5 ->0.5
-                    cqbSmooth *= cqbSmooth; // 10m -> 9%, 5m -> 25%
+                    var cqbSmooth = 1 - Mathf.Clamp01((dis - 1.5f) / 10f); // 11.5+ -> 0, 1.5 -> 1, 6.5 ->0.5
+                    cqbSmooth *= cqbSmooth; // 6.5m -> 25%, 1.5m ->
 
                     factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 
                     // Absoulute offset
-                    // factor: -0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -0.8 => -0.32~-0.64
-                    var reducingSeconds = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f, 1f);
+                    // factor: -0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (6.5m)
+                    // f-1, 1m => 
+                    var reducingSeconds = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqb, 1f - 0.5f*cqb);
                     reducingSeconds *= factor < 0 ? 1 : 0.1f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
                     reducingSeconds *= reducingSeconds > 0 ? ThatsLitPlugin.DarknessImpactScale.Value : ThatsLitPlugin.BrightnessImpactScale.Value;
                     __result -= reducingSeconds;
@@ -161,11 +162,11 @@ namespace ThatsLit.Patches.Vision
                     // The scaling here allows the player to stay in the dark without being seen
                     // The reason why scaling is needed is because SeenCoef will change dramatically depends on vision angles
                     // Absolute offset alone won't work for different vision angles
-                    if (factor < 0 && UnityEngine.Random.Range(-1, 0) > factor * (1 - cqbSmooth)) __result = 8888f;
+                    if (factor < 0 && UnityEngine.Random.Range(-1, 0) > factor * Mathf.Clamp01(1 - cqbSmooth - cqb)) __result = 8888f;
                     else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor) __result *= (1f - factor * 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value); // Half the reaction time regardles angle half of the time at 100% score
-                    else if (factor < -0.9f) __result *= 1 - (factor * (2f - 1f * cqb) * ThatsLitPlugin.DarknessImpactScale.Value);
-                    else if (factor < -0.5f) __result *= 1 - (factor * (1.5f - 0.5f * cqb) * ThatsLitPlugin.DarknessImpactScale.Value);
-                    else if (factor < -0.2f) __result *= 1 - factor * ThatsLitPlugin.DarknessImpactScale.Value;
+                    else if (factor < -0.9f) __result *= 1 - (factor * (2f - cqb - cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
+                    else if (factor < -0.5f) __result *= 1 - (factor * (1.5f - 0.75f * cqb - 0.75f * cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
+                    else if (factor < -0.2f) __result *= 1 - factor * cqb * ThatsLitPlugin.DarknessImpactScale.Value;
                     else if (factor < 0f) __result *= 1 - factor / 1.5f * ThatsLitPlugin.DarknessImpactScale.Value;
                     else if (factor > 0f) __result /= (1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value); // 0.66x at 100% score
                 }
