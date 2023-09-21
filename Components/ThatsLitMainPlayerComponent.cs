@@ -22,7 +22,7 @@ namespace ThatsLit.Components
         public int shinePixels, highLightPixels, highMidLightPixels, midLightPixels, midLowLightPixels, lowLightPixels, darkPixels;
         public int brighterPixels, darkerPixels;
         public float ratioShinePixels, ratioHPixels, ratioHMidLightPixels, ratioMPixels, ratioMLLightPixels, ratioLowLightPixels, ratioDarkPixels;
-        public float avgLum, multiAvgLum;
+        public float avgLumMultiFrames, multiAvgLum;
         public int validPixels;
         public float score;
     }
@@ -356,7 +356,7 @@ namespace ThatsLit.Components
                 midLowLightPixels = midLowLightPixels,
                 lowLightPixels = lowLightPixels,
                 darkPixels = darkPixels,
-                avgLum = avgLum,
+                avgLumMultiFrames = avgLum,
                 multiAvgLum = multiAvgLum,
                 score = frameLitScore,
                 validPixels = lastValidPixels,
@@ -607,7 +607,7 @@ namespace ThatsLit.Components
             float avgLowLightPixelsRatioMultiFrames = lowLightPixels / (float)validPixels + frame1.ratioLowLightPixels + frame2.ratioLowLightPixels + frame3.ratioLowLightPixels + frame4.ratioLowLightPixels + frame5.ratioLowLightPixels;
             float avgDarkPixelsRatioMultiFrames = darkPixels / (float)validPixels + frame1.ratioDarkPixels + frame2.ratioDarkPixels + frame3.ratioDarkPixels + frame4.ratioDarkPixels + frame5.ratioDarkPixels;
             float avgDarkerPixelsRatioMultiFrames = darkerPixels / (float)validPixels + frame1.darkerPixels / (float)frame1.validPixels + frame2.darkerPixels / (float)frame2.validPixels + frame3.darkerPixels / (float)frame3.validPixels + frame4.darkerPixels / (float)frame4.validPixels + frame5.darkerPixels / (float)frame5.validPixels;
-            float avgLumMultiFrames = avgLum + frame1.avgLum + frame2.avgLum + frame3.avgLum + frame4.avgLum + frame5.avgLum;
+            float avgLumMultiFrames = avgLum + frame1.avgLumMultiFrames + frame2.avgLumMultiFrames + frame3.avgLumMultiFrames + frame4.avgLumMultiFrames + frame5.avgLumMultiFrames;
             avgLowLightPixelsRatioMultiFrames /= 6f;
             avgDarkPixelsRatioMultiFrames /= 6f;
             avgDarkerPixelsRatioMultiFrames /= 6f;

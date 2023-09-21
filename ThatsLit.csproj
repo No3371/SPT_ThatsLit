@@ -222,7 +222,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComponentHelpers.cs" />
-    <Compile Include="Components\ScoreFormula.cs" />
+    <Compile Include="Components\ScoreCalculator.cs" />
     <Compile Include="Components\ThatsLitMainPlayerComponent.cs" />
     <Compile Include="Components\ThatsLitGameworldComponent.cs" />
     <Compile Include="Logger.cs" />
