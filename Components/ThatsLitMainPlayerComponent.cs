@@ -525,6 +525,9 @@ namespace ThatsLit.Components
                         //highMidLightScoreApplied *= 1.2f;
                         //highLightScoreApplied *= 1.3f;
                         break;
+                    case "Lighthouse": // NIGHT, thresholds compressed
+                        lowLightScoreApplied *= 3f + 5 * (1 - cloud);
+                        break;
                 }
             }
             else // DAY
@@ -800,7 +803,7 @@ namespace ThatsLit.Components
                 default: // Hideout
                     break;
                 case "Lighthouse":
-                    if (GetTimeLighingFactor() < 0) frameLitScore *= 0.8f + (0.1f * cloud);
+                    if (GetTimeLighingFactor() < 0) frameLitScore *= 0.9f;
                     break;
                 case "Shoreline": // The shoreline is very responsive to cloudiness, but when it get cloudy, the score dip too fast (because the env response strongly to cloudiness) 
                     // The score is so fricking low even in daytime, while it looks fine on screen
@@ -990,6 +993,7 @@ namespace ThatsLit.Components
 
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:0.00} | {2:0.00} | {3:0.00} | {4:0.00} | {5:0.00} | {6:0.00}", shineScoreApplied, highLightScoreApplied, highMidLightScoreApplied, midLightScore, midLowLightScoreApplied, lowLightScoreApplied, darkScoreApplied));
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:＋0.00;－0.00;+0.00} | {2:＋0.00;－0.00;+0.00} | {3:＋0.00;－0.00;+0.00} | {4:＋0.00;－0.00;+0.00} | {5:＋0.00;－0.00;+0.00} | {6:＋0.00;－0.00;+0.00}", shineScoreApplied - shineScore, highLightScoreApplied - highLightScore, highMidLightScoreApplied - highMidLightScore, midLightScore - midLightScoreApplied, midLowLightScoreApplied - midLowLightScore, lowLightScoreApplied - lowLightScore, darkScoreApplied - darkScore));
+            GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings.LocationId, activeRaidSettings.SelectedLocation.Name));
 
         }
 
