@@ -84,6 +84,7 @@ namespace ThatsLit
             category = "6. Debug";
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
+            EnableHideout = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
         }
 
         public static ConfigEntry<bool> ScoreInfo { get; private set; }
@@ -106,6 +107,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableCustoms { get; private set; }
         public static ConfigEntry<bool> EnableShoreline { get; private set; }
         public static ConfigEntry<bool> EnableWoods { get; private set; }
+        public static ConfigEntry<bool> EnableHideout { get; private set; }
 
         private void Patches()
         {

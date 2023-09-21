@@ -109,6 +109,8 @@ namespace ThatsLit.Components
                         return GetInGameDayTime() > 12? ThatsLitPlugin.EnableFactoryDay.Value : ThatsLitPlugin.EnableFactoryNight.Value;
                     case "Streets of Tarkov":
                         return false;
+                    case null:
+                        return ThatsLitPlugin.EnableHideout.Value;
                     default:
                         return ThatsLitPlugin.EnableUncalibratedMaps.Value || EnabledMaps.Contains(activeRaidSettings.SelectedLocation.Name);
                 }
