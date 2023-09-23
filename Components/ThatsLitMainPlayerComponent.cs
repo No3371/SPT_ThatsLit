@@ -31,7 +31,7 @@ namespace ThatsLit.Components
     {
         static readonly List<string> EnabledMaps = new List<string>() { "Customs", "Shoreline", "Lighthouse", "Woods", "Reserve", "Factory" };
         public bool disabledLit;
-        const int RESOLUTION = 64;
+        static readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value? 32 : 64;
         public const int POWER = 3;
         public RenderTexture rt, envRt;
         public Camera cam, envCam;
