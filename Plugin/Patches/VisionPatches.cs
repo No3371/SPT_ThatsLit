@@ -126,30 +126,20 @@ namespace ThatsLit.Patches.Vision
                 if (!mainPlayer.disabledLit)
                 {
 
+                    if (factor < 0) factor *= 2 * disFactor * (mainPlayer.fog / 0.35f);
+
                     if (factor < 0 && __instance.Owner.NightVision.UsingNow)
                         factor *= 0.1f; // Negative factor is reduced to only 10% regardless distance
-
-                    //if (factor < 0 && (__instance.Person.AIData.UsingLight || __instance.Person.AIData.GetFlare)) factor /= 5f; // Moved to score calculation
-
-                    //if (__instance.Person.AIData.Player.IsInPronePose)
-                    //{
-                    //    if (factor < 0f) factor *= 1 + disFactor / 2f; // Darkness will be more effective from afar
-                    //    else if (factor > 0f) factor /= 1 + disFactor / 2f; // Highlight will be less effective from afar
-                    //}
-
-                    // Scale up for distant bots (> 10m)
-                    // (0.1) prone, 0.8 (110m) => 1.576x / (0.1) prone, 0.2 (60m) => 1.14x / (0.1) prone, 0.008 (20m) => 1.005x
-                    // (1) stand => 1
 
                     if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f); // Darkness will be far more effective from afar
                     else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
 
-                    var cqb = 1 - Mathf.Clamp01((dis - 1.5f) / 5f); // 6.5+ -> 0, 1.5f -> 1
+                    var cqb = 1 - Mathf.Clamp01((dis - 1f) / 5f); // 6+ -> 0, 1f -> 1
                     // Fix for blind bots who are already touching us
                     factor *= 1 - cqb; // linear ineffectiveness within 6m
 
-                    var cqbSmooth = 1 - Mathf.Clamp01((dis - 1.5f) / 10f); // 11.5+ -> 0, 1.5 -> 1, 6.5 ->0.5
-                    cqbSmooth *= cqbSmooth; // 6.5m -> 25%, 1.5m ->
+                    var cqbSmooth = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
+                    cqbSmooth *= cqbSmooth; // 6m -> 25%, 1m -> 100%
 
                     factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 
