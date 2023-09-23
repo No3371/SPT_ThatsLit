@@ -103,6 +103,9 @@ namespace ThatsLit.Components
                     case "factory4_night":
                         scoreCalculator = GetInGameDayTime() > 12 ? null : new NightFactoryScoreCalculator();
                         break;
+                    case "factory4_day":
+                        scoreCalculator = null;
+                        break;
                     case "bigmap": // Customs
                         scoreCalculator = new CustomsScoreCalculator();
                         break;
@@ -140,7 +143,7 @@ namespace ThatsLit.Components
                     case "Lighthouse":
                         return ThatsLitPlugin.EnableLighthouse.Value;
                     case "Factory":
-                        return GetInGameDayTime() > 12? ThatsLitPlugin.EnableFactoryDay.Value : ThatsLitPlugin.EnableFactoryNight.Value;
+                        return GetInGameDayTime() > 12? false : ThatsLitPlugin.EnableFactoryNight.Value;
                     case "Streets of Tarkov":
                         return false;
                     case null:
