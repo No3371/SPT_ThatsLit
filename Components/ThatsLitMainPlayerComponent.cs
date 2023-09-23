@@ -17,16 +17,6 @@ using UnityEngine.UI;
 
 namespace ThatsLit.Components
 {
-    public struct FrameStats
-    {
-        public int shinePixels, highLightPixels, highMidLightPixels, midLightPixels, midLowLightPixels, lowLightPixels, darkPixels;
-        public int brighterPixels, darkerPixels;
-        public float ratioShinePixels, ratioHPixels, ratioHMidLightPixels, ratioMPixels, ratioMLLightPixels, ratioLowLightPixels, ratioDarkPixels;
-        public float avgLumMultiFrames, multiAvgLum;
-        public int validPixels;
-        public float score;
-    }
-
     public class ThatsLitMainPlayerComponent : MonoBehaviour
     {
         static readonly List<string> EnabledMaps = new List<string>() { "Customs", "Shoreline", "Lighthouse", "Woods", "Reserve", "Factory" };
@@ -36,7 +26,8 @@ namespace ThatsLit.Components
         public RenderTexture rt, envRt;
         public Camera cam, envCam;
         int currentCamPos = 0;
-        public Texture2D tex, debugTex, envTex, envDebugTex;
+        public Texture2D envTex, envDebugTex;
+        Unity.Collections.NativeArray<Color32> observed;
         public FrameStats frame1, frame2, frame3, frame4, frame5;
         public float multiFrameLitScore;
         public float multiFrameLitScoreSample;
@@ -75,6 +66,9 @@ namespace ThatsLit.Components
         public RaidSettings activeRaidSettings;
         bool skipFoliageCheck;
         public float fog, rain, cloud;
+
+        ScoreCalculator scoreCalculator;
+        // float benchMark1, benchMark2;
         public void Awake()
         {
             if (!ThatsLitPlugin.EnabledMod.Value)
@@ -95,6 +89,41 @@ namespace ThatsLit.Components
                 disabledLit = true;
                 return;
             }
+
+
+            if (ThatsLitPlugin.DebugInfo.Value)
+                switch (activeRaidSettings?.LocationId)
+                {
+                    case "Lighthouse":
+                        scoreCalculator = new LighthouseScoreCalculator();
+                        break;
+                    case "Woods":
+                        scoreCalculator = new WoodsScoreCalculator();
+                        break;
+                    case "factory4_night":
+                        scoreCalculator = GetInGameDayTime() > 12 ? null : new NightFactoryScoreCalculator();
+                        break;
+                    case "bigmap": // Customs
+                        scoreCalculator = new CustomsScoreCalculator();
+                        break;
+                    case "RezervBase": // Reserve
+                        scoreCalculator = new ReserveScoreCalculator();
+                        break;
+                    case "interchange":
+                    case "tarkovstreets":
+                        scoreCalculator = new StreetsScoreCalculator();
+                        break;
+                    case "shoreline":
+                    case "laboratory":
+                        scoreCalculator = new ScoreCalculator();
+                        break;
+                    case null:
+                        scoreCalculator = new HideoutScoreCalculator();
+                        break;
+                    default:
+                        scoreCalculator = new ScoreCalculator();
+                        break;
+                }
 
             bool IsMapEnabled ()
             {
@@ -125,9 +154,6 @@ namespace ThatsLit.Components
             rt.useMipMap = false;
             rt.filterMode = FilterMode.Point;
             rt.Create();
-
-            tex = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
-
 
             //cam = GameObject.Instantiate<Camera>(Singleton<PlayerCameraController>.Instance.Camera);
             cam = new GameObject().AddComponent<Camera>();
@@ -323,7 +349,8 @@ namespace ThatsLit.Components
             if (Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.6f : 0.33f))
             {
                 lastCheckedLights = Time.time;
-                DetermineShiningEquipments();
+                Utility.DetermineShiningEquipments(MainPlayer, out vLight, out vLaser, out irLight, out irLaser, out vLightSub, out vLaserSub, out irLightSub, out irLaserSub);
+                scoreCalculator?.UpdateEquipmentLights(vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub);
             }
         }
 
@@ -338,17 +365,17 @@ namespace ThatsLit.Components
                 for (int i = 0; i < collidersCache.Length; i++)
                     collidersCache[i] = null;
 
-                float count = Physics.OverlapSphereNonAlloc(bodyPos, 5f, collidersCache, foliageLayerMask);
+                float count = Physics.OverlapSphereNonAlloc(bodyPos, 3f, collidersCache, foliageLayerMask);
 
                 for (int i = 0; i < count; i++)
                 {
                     float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
-                    if (dis < 0.4f) foliageScore += 0.8f;
-                    else if (dis < 0.6f) foliageScore += 0.5f;
+                    if (dis < 0.25f) foliageScore += 3f;
+                    else if (dis < 0.4f) foliageScore += 2f;
+                    else if (dis < 0.6f) foliageScore += 1f;
                     else if (dis < 1f) foliageScore += 0.3f;
                     else if (dis < 2f) foliageScore += 0.15f;
-                    else if (dis < 4f) foliageScore += 0.05f;
-                    else foliageScore += 0.02f;
+                    else foliageScore += 0.05f;
                 }
 
                 if (count > 0) foliageScore /= count;
@@ -373,46 +400,20 @@ namespace ThatsLit.Components
             frame2 = frame1;
             frame1 = new FrameStats
             {
-                shinePixels = shinePixels,
-                highLightPixels = highLightPixels,
-                highMidLightPixels = highMidLightPixels,
-                midLightPixels = midLightPixels,
-                midLowLightPixels = midLowLightPixels,
-                lowLightPixels = lowLightPixels,
-                darkPixels = darkPixels,
-                avgLumMultiFrames = avgLum,
-                multiAvgLum = multiAvgLum,
+                pxS = shinePixels,
+                pxH = highLightPixels,
+                pxHM = highMidLightPixels,
+                pxM = midLightPixels,
+                pxML = midLowLightPixels,
+                pxL = lowLightPixels,
+                pxD = darkPixels,
+                avgLum = avgLum,
+                avgLumMultiFrames = multiAvgLum,
                 score = frameLitScore,
-                validPixels = lastValidPixels,
+                pixels = lastValidPixels,
                 darkerPixels = darkerPixels,
-                ratioShinePixels = shinePixels / (float)lastValidPixels,
-                ratioHPixels = highLightPixels / (float)lastValidPixels,
-                ratioHMidLightPixels = highMidLightPixels / (float)lastValidPixels,
-                ratioMPixels = midLightPixels / (float)lastValidPixels,
-                ratioMLLightPixels = midLowLightPixels / (float)lastValidPixels,
-                ratioLowLightPixels = lowLightPixels / (float)lastValidPixels,
-                ratioDarkPixels = darkPixels / (float)lastValidPixels
-            }; ;
+            };
             frameLitScore = shinePixels = highLightPixels = highMidLightPixels = midLightPixels = midLowLightPixels = lowLightPixels = darkPixels = 0;
-
-            if (!ThatsLitPlugin.ExperimentalGPUReadback.Value)
-            {
-                RenderTexture.active = rt;
-                tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-                tex.Apply();
-                RenderTexture.active = null;
-
-                if (ThatsLitPlugin.DebugTexture.Value)
-                {
-                    RenderTexture.active = envRt;
-                    envTex.ReadPixels(new Rect(0, 0, envRt.width, envRt.height), 0, 0);
-                    envTex.Apply();
-                    RenderTexture.active = null;
-                }
-            }
-
-            if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
-            if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
             var validPixels = 0;
             multiAvgLum = 0f;
@@ -955,8 +956,8 @@ namespace ThatsLit.Components
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
-                DrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));
-                DrawAsymetricMeter((int)(Mathf.Pow(multiFrameLitScore, POWER) / 0.0999f));
+                Utility.GUILayoutDrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));
+                Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(multiFrameLitScore, POWER) / 0.0999f));
                 if (foliageScore > 0.3f)
                     GUILayout.Label("[FOLIAGE+++]");
                 else if (foliageScore > 0.2f)
@@ -971,13 +972,13 @@ namespace ThatsLit.Components
             if (!ThatsLitPlugin.DebugInfo.Value) return;
             if (Time.frameCount % 41 == 0)
             {
-                shinePixelsRatioSample = (shinePixels / (float)lastValidPixels + frame1.ratioShinePixels + frame2.ratioShinePixels + frame3.ratioShinePixels + frame4.ratioShinePixels + frame5.ratioShinePixels) / 6f;
-                highLightPixelsRatioSample = (highLightPixels / (float)lastValidPixels + frame1.ratioHPixels + frame2.ratioHPixels + frame3.ratioHPixels + frame4.ratioHPixels + frame5.ratioHPixels) / 6f;
-                highMidLightPixelsRatioSample = (highMidLightPixels / (float)lastValidPixels + frame1.ratioHMidLightPixels + frame2.ratioHMidLightPixels + frame3.ratioHMidLightPixels + frame4.ratioHMidLightPixels + frame5.ratioHMidLightPixels) / 6f;
-                midLightPixelsRatioSample = (midLightPixels / (float)lastValidPixels + frame1.ratioMPixels + frame2.ratioMPixels + frame3.ratioMPixels + frame4.ratioMPixels + frame5.ratioMPixels) / 6f;
-                midLowLightPixelsRatioSample = (midLowLightPixels / (float)lastValidPixels + frame1.ratioMLLightPixels + frame2.ratioMLLightPixels + frame3.ratioMLLightPixels + frame4.ratioMLLightPixels + frame5.ratioMLLightPixels) / 6f;
-                lowLightPixelsRatioSample = (lowLightPixels / (float)lastValidPixels + frame1.ratioLowLightPixels + frame2.ratioLowLightPixels + frame3.ratioLowLightPixels + frame4.ratioLowLightPixels + frame5.ratioLowLightPixels) / 6f;
-                darkPixelsRatioSample = (darkPixels / (float)lastValidPixels + frame1.ratioDarkPixels + frame2.ratioDarkPixels + frame3.ratioDarkPixels + frame4.ratioDarkPixels + frame5.ratioDarkPixels) / 6f;
+                shinePixelsRatioSample = (shinePixels / (float)lastValidPixels + frame1.RatioShinePixels + frame2.RatioShinePixels + frame3.RatioShinePixels + frame4.RatioShinePixels + frame5.RatioShinePixels) / 6f;
+                highLightPixelsRatioSample = (highLightPixels / (float)lastValidPixels + frame1.RatioHighPixels + frame2.RatioHighPixels + frame3.RatioHighPixels + frame4.RatioHighPixels + frame5.RatioHighPixels) / 6f;
+                highMidLightPixelsRatioSample = (highMidLightPixels / (float)lastValidPixels + frame1.RatioHighMidPixels + frame2.RatioHighMidPixels + frame3.RatioHighMidPixels + frame4.RatioHighMidPixels + frame5.RatioHighMidPixels) / 6f;
+                midLightPixelsRatioSample = (midLightPixels / (float)lastValidPixels + frame1.RatioMidPixels + frame2.RatioMidPixels + frame3.RatioMidPixels + frame4.RatioMidPixels + frame5.RatioMidPixels) / 6f;
+                midLowLightPixelsRatioSample = (midLowLightPixels / (float)lastValidPixels + frame1.RatioMidLowPixels + frame2.RatioMidLowPixels + frame3.RatioMidLowPixels + frame4.RatioMidLowPixels + frame5.RatioMidLowPixels) / 6f;
+                lowLightPixelsRatioSample = (lowLightPixels / (float)lastValidPixels + frame1.RatioLowPixels + frame2.RatioLowPixels + frame3.RatioLowPixels + frame4.RatioLowPixels + frame5.RatioLowPixels) / 6f;
+                darkPixelsRatioSample = (darkPixels / (float)lastValidPixels + frame1.RatioDarkPixels + frame2.RatioDarkPixels + frame3.RatioDarkPixels + frame4.RatioDarkPixels + frame5.RatioDarkPixels) / 6f;
 
                 frameLitScoreSample = frameLitScore;
                 frameitScoreRawSample0 = frameLitScoreRaw0;
@@ -996,13 +997,13 @@ namespace ThatsLit.Components
             
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} -> {4:＋0.00;－0.00;+0.00} -> {5:＋0.00;－0.00;+0.00} (FRAME) ", frameLitScoreRaw0, frameLitScoreRaw1, frameLitScoreRaw2, frameLitScoreRaw3, frameLitScoreRaw4, frameLitScore));
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} -> {4:＋0.00;－0.00;+0.00} -> {5:＋0.00;－0.00;+0.00} (FRAME) (SAMPLE)", frameitScoreRawSample0, frameitScoreRawSample1, frameitScoreRawSample2, frameitScoreRawSample3, frameitScoreRawSample4, frameLitScoreSample));
-            DrawAsymetricMeter((int)(frameLitScore / 0.0999f));
+            Utility.GUILayoutDrawAsymetricMeter((int)(frameLitScore / 0.0999f));
 
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋000.0;－000.0;+000.0}% (MULTI)", multiFrameLitScore, Mathf.Pow(multiFrameLitScore, POWER) * 100));
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋000.0;－000.0;+000.0}% (MULTI) (SAMPLE)", multiFrameLitScoreSample, Mathf.Pow(multiFrameLitScoreSample, POWER) * 100));
-            DrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));
+            Utility.GUILayoutDrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));
             // Factor
-            DrawAsymetricMeter((int)(Mathf.Pow(multiFrameLitScore, POWER) / 0.0999f));
+            Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(multiFrameLitScore, POWER) / 0.0999f));
             GUILayout.Label(string.Format("CONTRA: {0:＋0.00;－0.00} <-> {1:＋0.00;－0.00} ({2:0.00}) (SAMPLE)", lastDarkestSample, lastBrightestSample, lastBrightestSample - lastDarkestSample));
             GUILayout.Label(string.Format("AVGLUM: {0:＋0.000;－0.000} (SAMPLE) / {1:＋0.000;－0.000} (MULTI)", avgLumSample, multiAvgLum));
             GUILayout.Label(string.Format("ENVLUM: {0:＋0.000;－0.000} (1s) {1:＋0.000;－0.000} (3s) / {2:＋0.000;－0.000} (10s) / {3:＋0.000;－0.000} (5m)", envLumEstiFast, envLumEsti, envLumEstiSlow, globalLumEsti));
@@ -1017,85 +1018,12 @@ namespace ThatsLit.Components
 
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:0.00} | {2:0.00} | {3:0.00} | {4:0.00} | {5:0.00} | {6:0.00}", shineScoreApplied, highLightScoreApplied, highMidLightScoreApplied, midLightScore, midLowLightScoreApplied, lowLightScoreApplied, darkScoreApplied));
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:＋0.00;－0.00;+0.00} | {2:＋0.00;－0.00;+0.00} | {3:＋0.00;－0.00;+0.00} | {4:＋0.00;－0.00;+0.00} | {5:＋0.00;－0.00;+0.00} | {6:＋0.00;－0.00;+0.00}", shineScoreApplied - shineScore, highLightScoreApplied - highLightScore, highMidLightScoreApplied - highMidLightScore, midLightScore - midLightScoreApplied, midLowLightScoreApplied - midLowLightScore, lowLightScoreApplied - lowLightScore, darkScoreApplied - darkScore));
-            GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings.LocationId, activeRaidSettings.SelectedLocation.Name));
+            GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
+            // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
+            scoreCalculator?.CalledOnGUI();
 
         }
 
-        void DrawAsymetricMeter (int level)
-        {
-            switch (level)
-            {
-                case -11:
-                    GUILayout.Label("＋＋＋＋＋＋＋＋＋＋|－－－－－－－－－－");
-                    break;
-                case -10:
-                    GUILayout.Label("＋＋＋＋＋＋＋＋＋＋|－－－－－－－－－－");
-                    break;
-                case -9:
-                    GUILayout.Label("－＋＋＋＋＋＋＋＋＋|－－－－－－－－－－");
-                    break;
-                case -8:
-                    GUILayout.Label("－－＋＋＋＋＋＋＋＋|－－－－－－－－－－");
-                    break;
-                case -7:
-                    GUILayout.Label("－－－＋＋＋＋＋＋＋|－－－－－－－－－－");
-                    break;
-                case -6:
-                    GUILayout.Label("－－－－＋＋＋＋＋＋|－－－－－－－－－－");
-                    break;
-                case -5:
-                    GUILayout.Label("－－－－－＋＋＋＋＋|－－－－－－－－－－");
-                    break;
-                case -4:
-                    GUILayout.Label("－－－－－－＋＋＋＋|－－－－－－－－－－");
-                    break;
-                case -3:
-                    GUILayout.Label("－－－－－－－＋＋＋|－－－－－－－－－－");
-                    break;
-                case -2:
-                    GUILayout.Label("－－－－－－－－＋＋|－－－－－－－－－－");
-                    break;
-                case -1:
-                    GUILayout.Label("－－－－－－－－－＋|－－－－－－－－－－");
-                    break;
-                case 0:
-                    GUILayout.Label("－－－－－－－－－－|－－－－－－－－－－");
-                    break;
-                case 1:
-                    GUILayout.Label("－－－－－－－－－－|＋－－－－－－－－－");
-                    break;
-                case 2:
-                    GUILayout.Label("－－－－－－－－－－|＋＋－－－－－－－－");
-                    break;
-                case 3:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋－－－－－－－");
-                    break;
-                case 4:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋＋－－－－－－");
-                    break;
-                case 5:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋＋＋－－－－－");
-                    break;
-                case 6:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋＋＋＋－－－－");
-                    break;
-                case 7:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋＋＋＋＋－－－");
-                    break;
-                case 8:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋＋＋＋＋＋－－");
-                    break;
-                case 9:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋＋＋＋＋＋＋－");
-                    break;
-                case 10:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋＋＋＋＋＋＋＋");
-                    break;
-                case 11:
-                    GUILayout.Label("－－－－－－－－－－|＋＋＋＋＋＋＋＋＋＋");
-                    break;
-            }
-        }
 
         public Player MainPlayer { get; private set; }
 
@@ -1155,236 +1083,236 @@ namespace ThatsLit.Components
             cloud = WeatherController.Instance.WeatherCurve.Cloudiness;
         }
 
-        void DetermineShiningEquipments ()
-        {
-            vLight = vLaser = irLight = irLaser = vLightSub = vLaserSub = irLightSub = irLaserSub = false;
-            IEnumerable<(Item item, LightComponent light)> activeLights;
-            if (MainPlayer?.ActiveSlot?.ContainedItem != null)
-            {
-                activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
-                    .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
-                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l)); ;
+        //void DetermineShiningEquipments (Player player, out bool vLight, out bool vLaser, out bool irLight, out bool irLaser, out bool vLightSub, out bool vLaserSub, out bool irLightSub, out bool irLaserSub)
+        //{
+        //    vLight = vLaser = irLight = irLaser = vLightSub = vLaserSub = irLightSub = irLaserSub = false;
+        //    IEnumerable<(Item item, LightComponent light)> activeLights;
+        //    if (player?.ActiveSlot?.ContainedItem != null)
+        //    {
+        //        activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
+        //            .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
+        //            .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l)); ;
 
-                if (activeLights != null)
-                foreach (var i in activeLights)
-                {
-                    MapComponentsModes(i.item.TemplateId, i.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
-                    if (thisLight && !thisLightIsIR) vLight = true;
-                    if (thisLight && thisLightIsIR) irLight = true;
-                    if (thisLaser && !thisLaserIsIR) vLaser = true;
-                    if (thisLaser && thisLaserIsIR) irLaser = true;
-                    if (vLight) return; // Early exit for main visible light because that's enough to decrease score
-                }
-            }
+        //        if (activeLights != null)
+        //        foreach (var i in activeLights)
+        //        {
+        //            MapComponentsModes(i.item.TemplateId, i.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+        //            if (thisLight && !thisLightIsIR) vLight = true;
+        //            if (thisLight && thisLightIsIR) irLight = true;
+        //            if (thisLaser && !thisLaserIsIR) vLaser = true;
+        //            if (thisLaser && thisLaserIsIR) irLaser = true;
+        //            if (vLight) return; // Early exit for main visible light because that's enough to decrease score
+        //        }
+        //    }
 
-            var inv = MainPlayer?.ActiveSlot?.ContainedItem?.Owner as InventoryControllerClass;
+        //    var inv = player?.ActiveSlot?.ContainedItem?.Owner as InventoryControllerClass;
 
-            if (inv == null) return;
+        //    if (inv == null) return;
 
-            var helmet = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear)?.ContainedItem as GClass2537;
+        //    var helmet = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear)?.ContainedItem as GClass2537;
 
-            if (helmet != null)
-            {
-                activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
-                    .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
-                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l));
+        //    if (helmet != null)
+        //    {
+        //        activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
+        //            .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
+        //            .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l));
 
-                foreach (var i in activeLights)
-                {
-                    MapComponentsModes(i.item.TemplateId, i.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
-                    if (thisLight && !thisLightIsIR) vLight = true;
-                    if (thisLight && thisLightIsIR) irLight = true;
-                    if (thisLaser && !thisLaserIsIR) vLaser = true;
-                    if (thisLaser && thisLaserIsIR) irLaser = true;
-                    if (vLight) return; // Early exit for main visible light because that's enough to decrease score
-                }
-            }
+        //        foreach (var i in activeLights)
+        //        {
+        //            MapComponentsModes(i.item.TemplateId, i.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+        //            if (thisLight && !thisLightIsIR) vLight = true;
+        //            if (thisLight && thisLightIsIR) irLight = true;
+        //            if (thisLaser && !thisLaserIsIR) vLaser = true;
+        //            if (thisLaser && thisLaserIsIR) irLaser = true;
+        //            if (vLight) return; // Early exit for main visible light because that's enough to decrease score
+        //        }
+        //    }
 
-            var secondaryWeapons = inv?.Inventory?.GetItemsInSlots(new[] { EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster });
+        //    var secondaryWeapons = inv?.Inventory?.GetItemsInSlots(new[] { EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster });
 
-            if (secondaryWeapons != null)
-            foreach (Item i in secondaryWeapons)
-            {
-                Weapon w = i as Weapon;
-                if (w == null) continue;
-                activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
-                    .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
-                    .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l));
+        //    if (secondaryWeapons != null)
+        //    foreach (Item i in secondaryWeapons)
+        //    {
+        //        Weapon w = i as Weapon;
+        //        if (w == null) continue;
+        //        activeLights = (MainPlayer.ActiveSlot.ContainedItem as Weapon)?.AllSlots
+        //            .Select<Slot, Item>((Func<Slot, Item>)(x => x.ContainedItem))
+        //            .GetComponents<LightComponent>().Where(c => c.IsActive).Select(l => (l.Item, l));
 
-                foreach (var ii in activeLights)
-                {
-                    MapComponentsModes(ii.item.TemplateId, ii.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
-                    if (thisLight && !thisLightIsIR) vLightSub = true;
-                    if (thisLight && thisLightIsIR) irLightSub = true;
-                    if (thisLaser && !thisLaserIsIR) vLaserSub = true;
-                    if (thisLaser && thisLaserIsIR) irLaserSub = true;
-                    if (vLightSub) return; // Early exit for main visible light because that's enough to decrease score
-                }
-            }
-            // GClass2550 544909bb4bdc2d6f028b4577 x item tactical_all_insight_anpeq15 2457 / V + IR + IRL / MODES: 4  V -> IR -> IRL -> IR+IRL
-            // 560d657b4bdc2da74d8b4572 tactical_all_zenit_2p_kleh_vis_laser MODES: 3, F -> F+V -> V
-            // GClass2550 56def37dd2720bec348b456a item tactical_all_surefire_x400_vis_laser 2457 F + V MDOES: 3: F -> F + V -> V
-            // 57fd23e32459772d0805bcf1 item tactical_all_holosun_ls321 2457 V + IR + IRL MDOES 4: V -> IR -> IRL -> IRL + IR
-            // 55818b164bdc2ddc698b456c tactical_all_zenit_2irs_kleh_lam MODES: 3 IRL -> IRL+IR -> IR
-            // 5a7b483fe899ef0016170d15 tactical_all_surefire_xc1 MODES: 1
-            // 5a800961159bd4315e3a1657 tactical_all_glock_gl_21_vis_lam MODES 3
-            // 5b07dd285acfc4001754240d tactical_all_steiner_las_tac_2 Modes 1
+        //        foreach (var ii in activeLights)
+        //        {
+        //            MapComponentsModes(ii.item.TemplateId, ii.light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+        //            if (thisLight && !thisLightIsIR) vLightSub = true;
+        //            if (thisLight && thisLightIsIR) irLightSub = true;
+        //            if (thisLaser && !thisLaserIsIR) vLaserSub = true;
+        //            if (thisLaser && thisLaserIsIR) irLaserSub = true;
+        //            if (vLightSub) return; // Early exit for main visible light because that's enough to decrease score
+        //        }
+        //    }
+        //    // GClass2550 544909bb4bdc2d6f028b4577 x item tactical_all_insight_anpeq15 2457 / V + IR + IRL / MODES: 4  V -> IR -> IRL -> IR+IRL
+        //    // 560d657b4bdc2da74d8b4572 tactical_all_zenit_2p_kleh_vis_laser MODES: 3, F -> F+V -> V
+        //    // GClass2550 56def37dd2720bec348b456a item tactical_all_surefire_x400_vis_laser 2457 F + V MDOES: 3: F -> F + V -> V
+        //    // 57fd23e32459772d0805bcf1 item tactical_all_holosun_ls321 2457 V + IR + IRL MDOES 4: V -> IR -> IRL -> IRL + IR
+        //    // 55818b164bdc2ddc698b456c tactical_all_zenit_2irs_kleh_lam MODES: 3 IRL -> IRL+IR -> IR
+        //    // 5a7b483fe899ef0016170d15 tactical_all_surefire_xc1 MODES: 1
+        //    // 5a800961159bd4315e3a1657 tactical_all_glock_gl_21_vis_lam MODES 3
+        //    // 5b07dd285acfc4001754240d tactical_all_steiner_las_tac_2 Modes 1
 
-            // "_id": "5b3a337e5acfc4704b4a19a0", "_name": "tactical_all_zenit_2u_kleh", 1
-            //"_id": "5c06595c0db834001a66af6c", "_name": "tactical_all_insight_la5", 4, V -> IR -> IRL -> IRL+IR
-            //"_id": "5c079ed60db834001a66b372", "_name": "tactical_tt_dlp_tactical_precision_laser_sight", 1
-            //"_id": "5c5952732e2216398b5abda2", "_name": "tactical_all_zenit_perst_3", 4
-            //"_id": "5cc9c20cd7f00c001336c65d", "_name": "tactical_all_ncstar_tactical_blue_laser", 1
-            //"_id": "5d10b49bd7ad1a1a560708b0", "_name": "tactical_all_insight_anpeq2", 2
-            //"_id": "5d2369418abbc306c62e0c80", "_name": "tactical_all_steiner_9021_dbal_pl", 6 / F -> V -> F+V -> IRF -> IR -> IRF+IR
-            //"_id": "61605d88ffa6e502ac5e7eeb", "_name": "tactical_all_wilcox_raptar_es", 5 / RF -> V -> IR -> IRL -> IRL+IR
-            //"_id": "626becf9582c3e319310b837", "_name": "tactical_all_insight_wmx200", 2
-            //"_id": "6272370ee4013c5d7e31f418", "_name": "tactical_all_olight_baldr_pro", 3
-            //"_id": "6272379924e29f06af4d5ecb", "_name": "tactical_all_olight_baldr_pro_tan", 3
-
-
-            //"_id": "57d17c5e2459775a5c57d17d", "_name": "flashlight_ultrafire_WF-501B", 1 (2) (different slot)
-            //"_id": "59d790f486f77403cb06aec6", "_name": "flashlight_armytek_predator_pro_v3_xhp35_hi", 1(2) (different slot)
+        //    // "_id": "5b3a337e5acfc4704b4a19a0", "_name": "tactical_all_zenit_2u_kleh", 1
+        //    //"_id": "5c06595c0db834001a66af6c", "_name": "tactical_all_insight_la5", 4, V -> IR -> IRL -> IRL+IR
+        //    //"_id": "5c079ed60db834001a66b372", "_name": "tactical_tt_dlp_tactical_precision_laser_sight", 1
+        //    //"_id": "5c5952732e2216398b5abda2", "_name": "tactical_all_zenit_perst_3", 4
+        //    //"_id": "5cc9c20cd7f00c001336c65d", "_name": "tactical_all_ncstar_tactical_blue_laser", 1
+        //    //"_id": "5d10b49bd7ad1a1a560708b0", "_name": "tactical_all_insight_anpeq2", 2
+        //    //"_id": "5d2369418abbc306c62e0c80", "_name": "tactical_all_steiner_9021_dbal_pl", 6 / F -> V -> F+V -> IRF -> IR -> IRF+IR
+        //    //"_id": "61605d88ffa6e502ac5e7eeb", "_name": "tactical_all_wilcox_raptar_es", 5 / RF -> V -> IR -> IRL -> IRL+IR
+        //    //"_id": "626becf9582c3e319310b837", "_name": "tactical_all_insight_wmx200", 2
+        //    //"_id": "6272370ee4013c5d7e31f418", "_name": "tactical_all_olight_baldr_pro", 3
+        //    //"_id": "6272379924e29f06af4d5ecb", "_name": "tactical_all_olight_baldr_pro_tan", 3
 
 
-            // "_id": "5bffcf7a0db83400232fea79", "_name": "pistolgrip_tt_pm_laser_tt_206", always on
-        }
-        void MapComponentsModes(string templateId, int selectedMode, out bool light, out bool laser, out bool lightIsIR, out bool laserIsIR)
-        {
-            light = laser = laserIsIR = lightIsIR = false;
+        //    //"_id": "57d17c5e2459775a5c57d17d", "_name": "flashlight_ultrafire_WF-501B", 1 (2) (different slot)
+        //    //"_id": "59d790f486f77403cb06aec6", "_name": "flashlight_armytek_predator_pro_v3_xhp35_hi", 1(2) (different slot)
 
-            switch (templateId)
-            {
-                case "544909bb4bdc2d6f028b4577": // tactical_all_insight_anpeq15
-                case "57fd23e32459772d0805bcf1": // tactical_all_holosun_ls321
-                case "5c06595c0db834001a66af6c": // tactical_all_insight_la5
-                case "5c5952732e2216398b5abda2": // tactical_all_zenit_perst_3
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            laser = true;
-                            break;
-                        case 1:
-                            laser = laserIsIR = true;
-                            break;
-                        case 2:
-                            light = lightIsIR = true;
-                            break;
-                        case 3:
-                            laser = laserIsIR = light = lightIsIR = true;
-                            break;
-                    }
-                    break;
-                case "61605d88ffa6e502ac5e7eeb": // tactical_all_wilcox_raptar_es
-                    switch (selectedMode)
-                    {
-                        case 1:
-                            laser = true;
-                            break;
-                        case 2:
-                            laser = laserIsIR = true;
-                            break;
-                        case 3:
-                            light = lightIsIR = true;
-                            break;
-                        case 4:
-                            laser = laserIsIR = light = lightIsIR = true;
-                            break;
-                    }
-                    break;
-                case "560d657b4bdc2da74d8b4572": // tactical_all_zenit_2p_kleh_vis_laser
-                case "56def37dd2720bec348b456a": // tactical_all_surefire_x400_vis_laser
-                case "5a800961159bd4315e3a1657": // tactical_all_glock_gl_21_vis_lam
-                case "6272379924e29f06af4d5ecb": // tactical_all_olight_baldr_pro_tan
-                case "6272370ee4013c5d7e31f418": // tactical_all_olight_baldr_pro
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = true;
-                            break;
-                        case 1:
-                            laser = light = true;
-                            break;
-                        case 2:
-                            laser = true;
-                            break;
-                    }
-                    break;
-                case "55818b164bdc2ddc698b456c": // tactical_all_zenit_2irs_kleh_lam
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = lightIsIR = true;
-                            break;
-                        case 1:
-                            laser = laserIsIR = light = lightIsIR = true;
-                            break;
-                        case 2:
-                            laser = laserIsIR = true;
-                            break;
-                    }
-                    break;
-                case "5a7b483fe899ef0016170d15": // tactical_all_surefire_xc1
-                case "5b3a337e5acfc4704b4a19a0": // tactical_all_zenit_2u_kleh
-                case "59d790f486f77403cb06aec6": // flashlight_armytek_predator_pro_v3_xhp35_hi
-                case "57d17c5e2459775a5c57d17d": // flashlight_ultrafire_WF
-                    light = true;
-                    break;
-                case "5b07dd285acfc4001754240d": // tactical_all_steiner_las_tac_2
-                case "5c079ed60db834001a66b372": // tactical_tt_dlp_tactical_precision_laser_sight
-                case "5cc9c20cd7f00c001336c65d": // tactical_all_ncstar_tactical_blue_laser
-                case "5bffcf7a0db83400232fea79": // pistolgrip_tt_pm_laser_tt_206
-                    laser = true;
-                    break;
-                case "5d10b49bd7ad1a1a560708b0": // tactical_all_insight_anpeq2
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            laser = laserIsIR = true;
-                            break;
-                        case 1:
-                            laser = laserIsIR = light = lightIsIR = true;
-                            break;
-                        case 2:
-                            break;
-                    }
-                    break;
-                case "5d2369418abbc306c62e0c80": // tactical_all_steiner_9021_dbal_pl
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = true;
-                            break;
-                        case 1:
-                            laser = true;
-                            break;
-                        case 2:
-                            laser = light = true;
-                            break;
-                        case 3:
-                            light = lightIsIR = true;
-                            break;
-                        case 4:
-                            laser = laserIsIR = true;
-                            break;
-                        case 5:
-                            light = lightIsIR = laser = laserIsIR = true;
-                            break;
-                    }
-                    break;
-                case "626becf9582c3e319310b837": // tactical_all_insight_wmx200
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = true;
-                            break;
-                        case 1:
-                            light = lightIsIR = true;
-                            break;
-                    }
-                    break;
-            }
-        }
+
+        //    // "_id": "5bffcf7a0db83400232fea79", "_name": "pistolgrip_tt_pm_laser_tt_206", always on
+        //}
+        //void MapComponentsModes(string templateId, int selectedMode, out bool light, out bool laser, out bool lightIsIR, out bool laserIsIR)
+        //{
+        //    light = laser = laserIsIR = lightIsIR = false;
+
+        //    switch (templateId)
+        //    {
+        //        case "544909bb4bdc2d6f028b4577": // tactical_all_insight_anpeq15
+        //        case "57fd23e32459772d0805bcf1": // tactical_all_holosun_ls321
+        //        case "5c06595c0db834001a66af6c": // tactical_all_insight_la5
+        //        case "5c5952732e2216398b5abda2": // tactical_all_zenit_perst_3
+        //            switch (selectedMode)
+        //            {
+        //                case 0:
+        //                    laser = true;
+        //                    break;
+        //                case 1:
+        //                    laser = laserIsIR = true;
+        //                    break;
+        //                case 2:
+        //                    light = lightIsIR = true;
+        //                    break;
+        //                case 3:
+        //                    laser = laserIsIR = light = lightIsIR = true;
+        //                    break;
+        //            }
+        //            break;
+        //        case "61605d88ffa6e502ac5e7eeb": // tactical_all_wilcox_raptar_es
+        //            switch (selectedMode)
+        //            {
+        //                case 1:
+        //                    laser = true;
+        //                    break;
+        //                case 2:
+        //                    laser = laserIsIR = true;
+        //                    break;
+        //                case 3:
+        //                    light = lightIsIR = true;
+        //                    break;
+        //                case 4:
+        //                    laser = laserIsIR = light = lightIsIR = true;
+        //                    break;
+        //            }
+        //            break;
+        //        case "560d657b4bdc2da74d8b4572": // tactical_all_zenit_2p_kleh_vis_laser
+        //        case "56def37dd2720bec348b456a": // tactical_all_surefire_x400_vis_laser
+        //        case "5a800961159bd4315e3a1657": // tactical_all_glock_gl_21_vis_lam
+        //        case "6272379924e29f06af4d5ecb": // tactical_all_olight_baldr_pro_tan
+        //        case "6272370ee4013c5d7e31f418": // tactical_all_olight_baldr_pro
+        //            switch (selectedMode)
+        //            {
+        //                case 0:
+        //                    light = true;
+        //                    break;
+        //                case 1:
+        //                    laser = light = true;
+        //                    break;
+        //                case 2:
+        //                    laser = true;
+        //                    break;
+        //            }
+        //            break;
+        //        case "55818b164bdc2ddc698b456c": // tactical_all_zenit_2irs_kleh_lam
+        //            switch (selectedMode)
+        //            {
+        //                case 0:
+        //                    light = lightIsIR = true;
+        //                    break;
+        //                case 1:
+        //                    laser = laserIsIR = light = lightIsIR = true;
+        //                    break;
+        //                case 2:
+        //                    laser = laserIsIR = true;
+        //                    break;
+        //            }
+        //            break;
+        //        case "5a7b483fe899ef0016170d15": // tactical_all_surefire_xc1
+        //        case "5b3a337e5acfc4704b4a19a0": // tactical_all_zenit_2u_kleh
+        //        case "59d790f486f77403cb06aec6": // flashlight_armytek_predator_pro_v3_xhp35_hi
+        //        case "57d17c5e2459775a5c57d17d": // flashlight_ultrafire_WF
+        //            light = true;
+        //            break;
+        //        case "5b07dd285acfc4001754240d": // tactical_all_steiner_las_tac_2
+        //        case "5c079ed60db834001a66b372": // tactical_tt_dlp_tactical_precision_laser_sight
+        //        case "5cc9c20cd7f00c001336c65d": // tactical_all_ncstar_tactical_blue_laser
+        //        case "5bffcf7a0db83400232fea79": // pistolgrip_tt_pm_laser_tt_206
+        //            laser = true;
+        //            break;
+        //        case "5d10b49bd7ad1a1a560708b0": // tactical_all_insight_anpeq2
+        //            switch (selectedMode)
+        //            {
+        //                case 0:
+        //                    laser = laserIsIR = true;
+        //                    break;
+        //                case 1:
+        //                    laser = laserIsIR = light = lightIsIR = true;
+        //                    break;
+        //                case 2:
+        //                    break;
+        //            }
+        //            break;
+        //        case "5d2369418abbc306c62e0c80": // tactical_all_steiner_9021_dbal_pl
+        //            switch (selectedMode)
+        //            {
+        //                case 0:
+        //                    light = true;
+        //                    break;
+        //                case 1:
+        //                    laser = true;
+        //                    break;
+        //                case 2:
+        //                    laser = light = true;
+        //                    break;
+        //                case 3:
+        //                    light = lightIsIR = true;
+        //                    break;
+        //                case 4:
+        //                    laser = laserIsIR = true;
+        //                    break;
+        //                case 5:
+        //                    light = lightIsIR = laser = laserIsIR = true;
+        //                    break;
+        //            }
+        //            break;
+        //        case "626becf9582c3e319310b837": // tactical_all_insight_wmx200
+        //            switch (selectedMode)
+        //            {
+        //                case 0:
+        //                    light = true;
+        //                    break;
+        //                case 1:
+        //                    light = lightIsIR = true;
+        //                    break;
+        //            }
+        //            break;
+        //    }
+        //}
 
     }
 }
