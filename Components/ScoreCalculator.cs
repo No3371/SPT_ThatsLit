@@ -115,6 +115,7 @@ namespace ThatsLit.Components
             // Extra score for multi frames(sides) contrast in darkness
             // For exmaple, lights on the floor contributes not much to the score but should make one much more visible
             var avgLumContrast = topAvgLumMultiFrames - bottomAvgLumMultiFrames; // a.k.a all sides contrast
+            avgLumContrast -= 0.01f;
             avgLumContrast = Mathf.Clamp01(avgLumContrast);
             var compensationTarget = avgLumContrast * avgLumContrast + lowAmbienceScoreFactor * 0.5f; // 0.1 -> 0.01, 0.5 -> 0.25
             compensationTarget *= 1 + hightLightedPixelFactor * lowAmbienceScoreFactor;
