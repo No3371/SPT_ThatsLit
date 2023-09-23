@@ -107,7 +107,7 @@ namespace ThatsLit.Components
                         if (ThatsLitPlugin.EnableShoreline.Value) scoreCalculator = new ShorelineScoreCalculator();
                         break;
                     case "laboratory":
-                        scoreCalculator = new LabScoreCalculator();
+                        // scoreCalculator = new LabScoreCalculator();
                         skipFoliageCheck = true;
                         break;
                     case null:
