@@ -115,9 +115,14 @@ namespace ThatsLit.Components
                         skipFoliageCheck = true;
                         break;
                     default:
-                        if (ThatsLitPlugin.EnableUncalibratedMaps.Value) scoreCalculator = new ScoreCalculator();
                         break;
                 }
+            }
+
+            if (scoreCalculator == null)
+            {
+                disabledLit = true;
+                return;
             }
 
             rt = new RenderTexture(RESOLUTION, RESOLUTION, 0, RenderTextureFormat.ARGB32);
