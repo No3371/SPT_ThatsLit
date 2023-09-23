@@ -138,10 +138,16 @@ namespace ThatsLit.Components
 
             if (player.MainPlayer.AIData.GetFlare) lumScore = Mathf.Max(lumScore, Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(-ambienceScore)));
 
-            if (vLight) lumScore = Mathf.Max(lumScore + 1f, 0.15f);
-            else if (vLaser) lumScore += Mathf.Max(lumScore + 0.6f, 0);
-            else if (vLightSub) lumScore += Mathf.Max(lumScore + 0.4f, 0);
-            else if (vLaserSub) lumScore += Mathf.Max(lumScore + 0.2f, 0);
+            if (vLight || vLaser || vLightSub || vLaserSub)
+            {
+                expectedFinalScore = lumScore + ambienceScore;
+                if (vLight) compensationTarget = 0.4f;
+                else if (vLaser) compensationTarget = 0.2f;
+                else if (vLightSub) compensationTarget = 0f;
+                else if (vLaserSub) compensationTarget = 0f;
+                compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2);
+                lumScore += compensation * (lowAmbienceScoreFactor + 0.1f);
+            }
 
             lumScore += ambienceScore;
             lumScore = Mathf.Clamp(lumScore, -1, 1);
