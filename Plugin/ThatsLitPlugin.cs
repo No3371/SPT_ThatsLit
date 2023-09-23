@@ -64,7 +64,9 @@ namespace ThatsLit
             EnableShoreline = Config.Bind(category, "Shoreline", true, "Enable darkness/brightness on the map.");
             EnableReserve = Config.Bind(category, "Reserve", true, "Enable darkness/brightness on the map.");
             EnableWoods = Config.Bind(category, "Woods", true, "Enable darkness/brightness on the map.");
+            EnableInterchange = Config.Bind(category, "Interchange", true, "Enable darkness/brightness on the map.");
             EnableCustoms = Config.Bind(category, "Customs", true, "Enable darkness/brightness on the map.");
+            EnableStreets = Config.Bind(category, "Streets", true, "Enable darkness/brightness on the map.");
 
             category = "3. Tweaks";
             GlobalRandomOverlookChance = Config.Bind(category, key: "Global Random Overlook Chance", 0.01f, "The chance for all AIs to simply overlook in 1 vision check.");
