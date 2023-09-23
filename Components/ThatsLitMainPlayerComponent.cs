@@ -117,8 +117,10 @@ namespace ThatsLit.Components
                         scoreCalculator = new StreetsScoreCalculator();
                         break;
                     case "shoreline":
+                        scoreCalculator = new ShorelineScoreCalculator();
+                        break;
                     case "laboratory":
-                        scoreCalculator = new ScoreCalculator();
+                        scoreCalculator = new LabScoreCalculator();
                         break;
                     case null:
                         scoreCalculator = new HideoutScoreCalculator();
