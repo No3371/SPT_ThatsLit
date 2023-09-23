@@ -31,13 +31,15 @@ namespace ThatsLit.Components
         internal static void DetermineShiningEquipments(Player player, out bool vLight, out bool vLaser, out bool irLight, out bool irLaser, out bool vLightSub, out bool vLaserSub, out bool irLightSub, out bool irLaserSub)
         {
             vLight = vLaser = irLight = irLaser = vLightSub = vLaserSub = irLightSub = irLaserSub = false;
+            Weapon active = null;
             if (player?.ActiveSlot?.ContainedItem != null)
             {
                 Weapon weapon = player.ActiveSlot.ContainedItem as Weapon;
+                active = weapon;
                 if (weapon != null)
                 foreach (var light in FindComponents<LightComponent>(weapon))
                 {
-                    if (!light.IsActive) continue;
+                    if (light == null || !light.IsActive) continue;
                     MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
                     if (thisLight && !thisLightIsIR) vLight = true;
                     if (thisLight && thisLightIsIR) irLight = true;
@@ -48,7 +50,6 @@ namespace ThatsLit.Components
             }
 
             var inv = player?.ActiveSlot?.ContainedItem?.Owner as InventoryControllerClass;
-
             if (inv == null) return;
 
             var helmet = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear)?.ContainedItem as GClass2537;
@@ -57,7 +58,7 @@ namespace ThatsLit.Components
             {
                 foreach (var light in FindComponents<LightComponent>(helmet))
                 {
-                    if (!light.IsActive) continue;
+                    if (light == null || !light.IsActive) continue;
                     MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
                     if (thisLight && !thisLightIsIR) vLight = true;
                     if (thisLight && thisLightIsIR) irLight = true;
@@ -67,36 +68,52 @@ namespace ThatsLit.Components
                 }
             }
 
+            var primary1 = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.FirstPrimaryWeapon)?.ContainedItem;
+            if (active != primary1 && primary1 != null)
+            {
+                Weapon weapon = primary1 as Weapon;
+                if (weapon != null) 
+                foreach (var light in FindComponents<LightComponent>(weapon))
+                {
+                    if (light == null || !light.IsActive) continue;
+                    MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+                    if (thisLight && !thisLightIsIR) if (active == primary1) vLight = true; else vLightSub = true;
+                    if (thisLight && thisLightIsIR) if (active == primary1) irLight = true; else irLightSub = true;
+                    if (thisLaser && !thisLaserIsIR) if (active == primary1) vLaser = true; else vLaserSub = true;
+                    if (thisLaser && thisLaserIsIR) if (active == primary1) irLaser = true; else irLaserSub = true;
+                }
+            }
+
             var holstered = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Holster)?.ContainedItem;
-            if (holstered != null)
+            if (active != holstered && holstered != null)
             {
                 Weapon weapon = holstered as Weapon;
                 if (weapon != null) 
                 foreach (var light in FindComponents<LightComponent>(weapon))
                 {
-                    if (!light.IsActive) continue;
+                    if (light == null || !light.IsActive) continue;
                     MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
-                    if (thisLight && !thisLightIsIR) vLight = true;
-                    if (thisLight && thisLightIsIR) irLight = true;
-                    if (thisLaser && !thisLaserIsIR) vLaser = true;
-                    if (thisLaser && thisLaserIsIR) irLaser = true;
+                    if (thisLight && !thisLightIsIR) if (active == holstered) vLight = true; else vLightSub = true;
+                    if (thisLight && thisLightIsIR) if (active == holstered) irLight = true; else irLightSub = true;
+                    if (thisLaser && !thisLaserIsIR) if (active == holstered) vLaser = true; else vLaserSub = true;
+                    if (thisLaser && thisLaserIsIR) if (active == holstered) irLaser = true; else irLaserSub = true;
                     if (vLight) return; // Early exit for main visible light because that's enough to decrease score
                 }
             }
 
             var secondary = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.SecondPrimaryWeapon)?.ContainedItem;
-            if (secondary != null)
+            if (active != secondary && secondary != null)
             {
                 Weapon weapon = secondary as Weapon;
-                if (weapon != null) 
+                if (weapon != null)
                 foreach (var light in FindComponents<LightComponent>(weapon))
                 {
-                    if (!light.IsActive) continue;
+                    if (light == null || !light.IsActive) continue;
                     MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
-                    if (thisLight && !thisLightIsIR) vLight = true;
-                    if (thisLight && thisLightIsIR) irLight = true;
-                    if (thisLaser && !thisLaserIsIR) vLaser = true;
-                    if (thisLaser && thisLaserIsIR) irLaser = true;
+                    if (thisLight && !thisLightIsIR) if (active == secondary) vLight = true; else vLightSub = true;
+                    if (thisLight && thisLightIsIR) if (active == secondary) irLight = true; else irLightSub = true;
+                    if (thisLaser && !thisLaserIsIR) if (active == secondary) vLaser = true; else vLaserSub = true;
+                    if (thisLaser && thisLaserIsIR) if (active == secondary) irLaser = true; else irLaserSub = true;
                     if (vLight) return; // Early exit for main visible light because that's enough to decrease score
                 }
             }
