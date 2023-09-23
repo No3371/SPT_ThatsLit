@@ -86,6 +86,7 @@ namespace ThatsLit
             DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
             EnableHideout = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
             DevMode = Config.Bind(category, "Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            DevModeInvisible = Config.Bind(category, "Dev Mode Invisible", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             OverrideMinBaseAmbienceScore = Config.Bind(category, "MinBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             OverrideMaxBaseAmbienceScore = Config.Bind(category, "MaxBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             OverrideMinAmbienceLum = Config.Bind(category, "MinAmbienceLum", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
@@ -132,6 +133,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableHideout { get; private set; }
         public static ConfigEntry<bool> LowResMode { get; private set; }
         public static ConfigEntry<bool> DevMode { get; private set; }
+        public static ConfigEntry<bool> DevModeInvisible { get; private set; }
         public static ConfigEntry<float> OverrideMinBaseAmbienceScore { get; private set; }
         public static ConfigEntry<float> OverrideMaxBaseAmbienceScore { get; private set; }
         public static ConfigEntry<float> OverrideMinAmbienceLum { get; private set; }
