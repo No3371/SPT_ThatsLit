@@ -53,14 +53,12 @@ namespace ThatsLit
         {
             string category = "1. Main";
             EnabledMod = Config.Bind(category, "Enable", true, "Enable the mod. Can not be turned back on in-raid.");
-            EnableUncalibratedMaps = Config.Bind(category, "Enable Uncalibrated Maps", false, "Every map need specific parameter to prevent incorrect lighting detection, by default That's Lit is disabled on maps not yet calibrated.");
             //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
-            EnabledLighting = Config.Bind(category, "Enable", true, "Enable the module. With this turned off, AIs are only affected by randomness and foliages.");
+            EnabledLighting = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are only affected by randomness and foliages.", null, new ConfigurationManagerAttributes() { Order = 100 }));
             DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, "Scale how AI noticing players slower due to darkness.");
             BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, "Scale how AI noticing players faster due to brightness.");
-            EnableFactoryDay = Config.Bind(category, "Factory (Day)", false, "Enable darkness/brightness on the map.");
             EnableFactoryNight = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
             EnableLighthouse = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
             EnableShoreline = Config.Bind(category, "Shoreline", true, "Enable darkness/brightness on the map.");
@@ -122,9 +120,7 @@ namespace ThatsLit
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
         public static ConfigEntry<bool> LessFoliageCheck { get; private set; }
         public static ConfigEntry<bool> LessEquipmentCheck { get; private set; }
-        public static ConfigEntry<bool> EnableUncalibratedMaps { get; private set; }
         public static ConfigEntry<bool> EnableLighthouse { get; private set; }
-        public static ConfigEntry<bool> EnableFactoryDay { get; private set; }
         public static ConfigEntry<bool> EnableFactoryNight { get; private set; }
         public static ConfigEntry<bool> EnableReserve { get; private set; }
         public static ConfigEntry<bool> EnableCustoms { get; private set; }

@@ -369,6 +369,7 @@ namespace ThatsLit.Components
             if (disabledLit && Time.time - awakeAt < 30f)
             {
                 GUILayout.Label("[That's Lit] The map is not yet ready or disabled in configs.");
+                GUILayout.Label("[That's Lit] The map is not supported or disabled in configs.");
                 if (!ThatsLitPlugin.DebugInfo.Value) return;
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
