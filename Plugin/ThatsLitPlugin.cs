@@ -85,29 +85,29 @@ namespace ThatsLit
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             EnableHideout = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
-            DevMode = Config.Bind(category, "Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            DevModeInvisible = Config.Bind(category, "Dev Mode Invisible", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            NoGPUReq = Config.Bind(category, "NoGPUReq", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideMinBaseAmbienceScore = Config.Bind(category, "MinBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideMaxBaseAmbienceScore = Config.Bind(category, "MaxBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideMinAmbienceLum = Config.Bind(category, "MinAmbienceLum", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideMaxAmbienceLum = Config.Bind(category, "MaxAmbienceLum", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverridePixelLumScoreScale = Config.Bind(category, "PixelLumScoreScale", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideMaxSunLightScore = Config.Bind(category, "MaxSunLightScore", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideMaxMoonLightScore = Config.Bind(category, "MaxMoonLightScore", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideScore0 = Config.Bind(category, "Score0", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideScore1 = Config.Bind(category, "Score1", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideScore2 = Config.Bind(category, "Score2", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideScore3 = Config.Bind(category, "Score3", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideScore4 = Config.Bind(category, "Score4", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideScore5 = Config.Bind(category, "Score5", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideScore6 = Config.Bind(category, "Score6", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideThreshold0 = Config.Bind(category, "Threshold0", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideThreshold1 = Config.Bind(category, "Threshold1", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideThreshold2 = Config.Bind(category, "Threshold2", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideThreshold3 = Config.Bind(category, "Threshold3", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideThreshold4 = Config.Bind(category, "Threshold4", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            OverrideThreshold5 = Config.Bind(category, "Threshold5", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // DevMode = Config.Bind(category, "Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // DevModeInvisible = Config.Bind(category, "Dev Mode Invisible", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // NoGPUReq = Config.Bind(category, "NoGPUReq", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideMinBaseAmbienceScore = Config.Bind(category, "MinBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideMaxBaseAmbienceScore = Config.Bind(category, "MaxBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideMinAmbienceLum = Config.Bind(category, "MinAmbienceLum", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideMaxAmbienceLum = Config.Bind(category, "MaxAmbienceLum", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverridePixelLumScoreScale = Config.Bind(category, "PixelLumScoreScale", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideMaxSunLightScore = Config.Bind(category, "MaxSunLightScore", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideMaxMoonLightScore = Config.Bind(category, "MaxMoonLightScore", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideScore0 = Config.Bind(category, "Score0", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideScore1 = Config.Bind(category, "Score1", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideScore2 = Config.Bind(category, "Score2", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideScore3 = Config.Bind(category, "Score3", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideScore4 = Config.Bind(category, "Score4", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideScore5 = Config.Bind(category, "Score5", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideScore6 = Config.Bind(category, "Score6", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideThreshold0 = Config.Bind(category, "Threshold0", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideThreshold1 = Config.Bind(category, "Threshold1", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideThreshold2 = Config.Bind(category, "Threshold2", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideThreshold3 = Config.Bind(category, "Threshold3", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideThreshold4 = Config.Bind(category, "Threshold4", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            // OverrideThreshold5 = Config.Bind(category, "Threshold5", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
         }
 
         public static ConfigEntry<bool> ScoreInfo { get; private set; }
@@ -133,29 +133,29 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableWoods { get; private set; }
         public static ConfigEntry<bool> EnableHideout { get; private set; }
         public static ConfigEntry<bool> LowResMode { get; private set; }
-        public static ConfigEntry<bool> DevMode { get; private set; }
-        public static ConfigEntry<bool> DevModeInvisible { get; private set; }
-        public static ConfigEntry<bool> NoGPUReq { get; private set; }
-        public static ConfigEntry<float> OverrideMinBaseAmbienceScore { get; private set; }
-        public static ConfigEntry<float> OverrideMaxBaseAmbienceScore { get; private set; }
-        public static ConfigEntry<float> OverrideMinAmbienceLum { get; private set; }
-        public static ConfigEntry<float> OverrideMaxAmbienceLum { get; private set; }
-        public static ConfigEntry<float> OverridePixelLumScoreScale { get; private set; }
-        public static ConfigEntry<float> OverrideMaxSunLightScore { get; private set; }
-        public static ConfigEntry<float> OverrideMaxMoonLightScore { get; private set; }
-        public static ConfigEntry<float> OverrideScore0 { get; private set; }
-        public static ConfigEntry<float> OverrideScore1 { get; private set; }
-        public static ConfigEntry<float> OverrideScore2 { get; private set; }
-        public static ConfigEntry<float> OverrideScore3 { get; private set; }
-        public static ConfigEntry<float> OverrideScore4 { get; private set; }
-        public static ConfigEntry<float> OverrideScore5 { get; private set; }
-        public static ConfigEntry<float> OverrideScore6 { get; private set; }
-        public static ConfigEntry<float> OverrideThreshold0 { get; private set; }
-        public static ConfigEntry<float> OverrideThreshold1 { get; private set; }
-        public static ConfigEntry<float> OverrideThreshold2 { get; private set; }
-        public static ConfigEntry<float> OverrideThreshold3 { get; private set; }
-        public static ConfigEntry<float> OverrideThreshold4 { get; private set; }
-        public static ConfigEntry<float> OverrideThreshold5 { get; private set; }
+        // public static ConfigEntry<bool> DevMode { get; private set; }
+        // public static ConfigEntry<bool> DevModeInvisible { get; private set; }
+        // public static ConfigEntry<bool> NoGPUReq { get; private set; }
+        // public static ConfigEntry<float> OverrideMinBaseAmbienceScore { get; private set; }
+        // public static ConfigEntry<float> OverrideMaxBaseAmbienceScore { get; private set; }
+        // public static ConfigEntry<float> OverrideMinAmbienceLum { get; private set; }
+        // public static ConfigEntry<float> OverrideMaxAmbienceLum { get; private set; }
+        // public static ConfigEntry<float> OverridePixelLumScoreScale { get; private set; }
+        // public static ConfigEntry<float> OverrideMaxSunLightScore { get; private set; }
+        // public static ConfigEntry<float> OverrideMaxMoonLightScore { get; private set; }
+        // public static ConfigEntry<float> OverrideScore0 { get; private set; }
+        // public static ConfigEntry<float> OverrideScore1 { get; private set; }
+        // public static ConfigEntry<float> OverrideScore2 { get; private set; }
+        // public static ConfigEntry<float> OverrideScore3 { get; private set; }
+        // public static ConfigEntry<float> OverrideScore4 { get; private set; }
+        // public static ConfigEntry<float> OverrideScore5 { get; private set; }
+        // public static ConfigEntry<float> OverrideScore6 { get; private set; }
+        // public static ConfigEntry<float> OverrideThreshold0 { get; private set; }
+        // public static ConfigEntry<float> OverrideThreshold1 { get; private set; }
+        // public static ConfigEntry<float> OverrideThreshold2 { get; private set; }
+        // public static ConfigEntry<float> OverrideThreshold3 { get; private set; }
+        // public static ConfigEntry<float> OverrideThreshold4 { get; private set; }
+        // public static ConfigEntry<float> OverrideThreshold5 { get; private set; }
 
         private void Patches()
         {

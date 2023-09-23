@@ -12,46 +12,46 @@ namespace ThatsLit.Components
         float scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
         public ScoreCalculator()
         {
-            ThatsLitPlugin.DevMode.Value = false;
-            ThatsLitPlugin.DevMode.SettingChanged += (ev, args) =>
-            {
-                if (ThatsLitPlugin.DevMode.Value)
-                {
-                    ThatsLitPlugin.OverrideMaxAmbienceLum.Value = MaxAmbienceLum;
-                    ThatsLitPlugin.OverrideMinAmbienceLum.Value = MinAmbienceLum;
-                    ThatsLitPlugin.OverrideMaxBaseAmbienceScore.Value = MaxBaseAmbienceScore;
-                    ThatsLitPlugin.OverrideMinBaseAmbienceScore.Value = MinBaseAmbienceScore;
-                    ThatsLitPlugin.OverrideMaxSunLightScore.Value = MaxSunlightScore;
-                    ThatsLitPlugin.OverrideMaxMoonLightScore.Value = MaxMoonlightScore;
-                    ThatsLitPlugin.OverridePixelLumScoreScale.Value = PixelLumScoreScale;
-                    ThatsLitPlugin.OverrideThreshold0.Value = ThresholdShine;
-                    ThatsLitPlugin.OverrideThreshold1.Value = ThresholdHigh;
-                    ThatsLitPlugin.OverrideThreshold2.Value = ThresholdHighMid;
-                    ThatsLitPlugin.OverrideThreshold3.Value = ThresholdMid;
-                    ThatsLitPlugin.OverrideThreshold4.Value = ThresholdMidLow;
-                    ThatsLitPlugin.OverrideThreshold5.Value = ThresholdLow;
-                    ThatsLitPlugin.OverrideScore0.Value = ScoreShine;
-                    ThatsLitPlugin.OverrideScore1.Value = ScoreHigh;
-                    ThatsLitPlugin.OverrideScore2.Value = ScoreHighMid;
-                    ThatsLitPlugin.OverrideScore3.Value = ScoreMid;
-                    ThatsLitPlugin.OverrideScore4.Value = ScoreMidLow;
-                    ThatsLitPlugin.OverrideScore5.Value = ScoreLow;
-                    ThatsLitPlugin.OverrideScore5.Value = ScoreDark;
-                }
-            };
+            // ThatsLitPlugin.DevMode.Value = false;
+            // ThatsLitPlugin.DevMode.SettingChanged += (ev, args) =>
+            // {
+            //     if (ThatsLitPlugin.DevMode.Value)
+            //     {
+            //         ThatsLitPlugin.OverrideMaxAmbienceLum.Value = MaxAmbienceLum;
+            //         ThatsLitPlugin.OverrideMinAmbienceLum.Value = MinAmbienceLum;
+            //         ThatsLitPlugin.OverrideMaxBaseAmbienceScore.Value = MaxBaseAmbienceScore;
+            //         ThatsLitPlugin.OverrideMinBaseAmbienceScore.Value = MinBaseAmbienceScore;
+            //         ThatsLitPlugin.OverrideMaxSunLightScore.Value = MaxSunlightScore;
+            //         ThatsLitPlugin.OverrideMaxMoonLightScore.Value = MaxMoonlightScore;
+            //         ThatsLitPlugin.OverridePixelLumScoreScale.Value = PixelLumScoreScale;
+            //         ThatsLitPlugin.OverrideThreshold0.Value = ThresholdShine;
+            //         ThatsLitPlugin.OverrideThreshold1.Value = ThresholdHigh;
+            //         ThatsLitPlugin.OverrideThreshold2.Value = ThresholdHighMid;
+            //         ThatsLitPlugin.OverrideThreshold3.Value = ThresholdMid;
+            //         ThatsLitPlugin.OverrideThreshold4.Value = ThresholdMidLow;
+            //         ThatsLitPlugin.OverrideThreshold5.Value = ThresholdLow;
+            //         ThatsLitPlugin.OverrideScore0.Value = ScoreShine;
+            //         ThatsLitPlugin.OverrideScore1.Value = ScoreHigh;
+            //         ThatsLitPlugin.OverrideScore2.Value = ScoreHighMid;
+            //         ThatsLitPlugin.OverrideScore3.Value = ScoreMid;
+            //         ThatsLitPlugin.OverrideScore4.Value = ScoreMidLow;
+            //         ThatsLitPlugin.OverrideScore5.Value = ScoreLow;
+            //         ThatsLitPlugin.OverrideScore5.Value = ScoreDark;
+            //     }
+            // };
         }
         
         public float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
         {
             float minAmbienceLum = MinAmbienceLum;
-            if (ThatsLitPlugin.DevMode.Value)
-                minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
             float maxAmbienceLum = MaxAmbienceLum;
-            if (ThatsLitPlugin.DevMode.Value)
-                maxAmbienceLum = ThatsLitPlugin.OverrideMaxAmbienceLum.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     maxAmbienceLum = ThatsLitPlugin.OverrideMaxAmbienceLum.Value;
             float lumScoreScale = PixelLumScoreScale;
-            if (ThatsLitPlugin.DevMode.Value)
-                lumScoreScale = ThatsLitPlugin.OverridePixelLumScoreScale.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     lumScoreScale = ThatsLitPlugin.OverridePixelLumScoreScale.Value;
 
 
             frame5 = frame4;
@@ -116,7 +116,7 @@ namespace ThatsLit.Components
             // For exmaple, lights on the floor contributes not much to the score but should make one much more visible
             var avgLumContrast = topAvgLumMultiFrames - bottomAvgLumMultiFrames; // a.k.a all sides contrast
             avgLumContrast = Mathf.Clamp01(avgLumContrast);
-            var compensationTarget = avgLumContrast * avgLumContrast + lowAmbienceScoreFactor * 0.5f; // 0.1 -> 0.01 -> 0.5 -> 0.25
+            var compensationTarget = avgLumContrast * avgLumContrast + lowAmbienceScoreFactor * 0.5f; // 0.1 -> 0.01, 0.5 -> 0.25
             compensationTarget *= 1 + hightLightedPixelFactor * lowAmbienceScoreFactor;
             var expectedFinalScore = lumScore + ambienceScore;
             var compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2); // contrast:0.1 -> final toward 0.1, contrast:0.5 -> final toward 0.25
@@ -300,16 +300,16 @@ namespace ThatsLit.Components
         }
         protected virtual void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
         {
-            if (ThatsLitPlugin.DevMode.Value)
-            {
-                thresholdShine = ThatsLitPlugin.OverrideThreshold0.Value;
-                thresholdHigh = ThatsLitPlugin.OverrideThreshold1.Value;
-                thresholdHighMid = ThatsLitPlugin.OverrideThreshold2.Value;
-                thresholdMid = ThatsLitPlugin.OverrideThreshold3.Value;
-                thresholdMidLow = ThatsLitPlugin.OverrideThreshold4.Value;
-                thresholdLow = ThatsLitPlugin.OverrideThreshold5.Value;
-                return;
-            }
+            // if (ThatsLitPlugin.DevMode.Value)
+            // {
+            //     thresholdShine = ThatsLitPlugin.OverrideThreshold0.Value;
+            //     thresholdHigh = ThatsLitPlugin.OverrideThreshold1.Value;
+            //     thresholdHighMid = ThatsLitPlugin.OverrideThreshold2.Value;
+            //     thresholdMid = ThatsLitPlugin.OverrideThreshold3.Value;
+            //     thresholdMidLow = ThatsLitPlugin.OverrideThreshold4.Value;
+            //     thresholdLow = ThatsLitPlugin.OverrideThreshold5.Value;
+            //     return;
+            // }
             thresholdShine = 0.64f;
             thresholdHigh = 0.32f;
             thresholdHighMid = 0.16f;
@@ -319,17 +319,17 @@ namespace ThatsLit.Components
         }
         protected virtual void GetPixelScores(float tlf, out float scoreShine, out float scoreHigh, out float scoreHighMid, out float scoreMid, out float scoreMidLow, out float scoreLow, out float scoreDark)
         {
-            if (ThatsLitPlugin.DevMode.Value)
-            {
-                scoreShine = ThatsLitPlugin.OverrideScore0.Value;
-                scoreHigh = ThatsLitPlugin.OverrideScore1.Value;
-                scoreHighMid = ThatsLitPlugin.OverrideScore2.Value;
-                scoreMid = ThatsLitPlugin.OverrideScore3.Value;
-                scoreMidLow = ThatsLitPlugin.OverrideScore4.Value;
-                scoreLow = ThatsLitPlugin.OverrideScore5.Value;
-                scoreDark = ThatsLitPlugin.OverrideScore6.Value;
-                return;
-            }
+            // if (ThatsLitPlugin.DevMode.Value)
+            // {
+            //     scoreShine = ThatsLitPlugin.OverrideScore0.Value;
+            //     scoreHigh = ThatsLitPlugin.OverrideScore1.Value;
+            //     scoreHighMid = ThatsLitPlugin.OverrideScore2.Value;
+            //     scoreMid = ThatsLitPlugin.OverrideScore3.Value;
+            //     scoreMidLow = ThatsLitPlugin.OverrideScore4.Value;
+            //     scoreLow = ThatsLitPlugin.OverrideScore5.Value;
+            //     scoreDark = ThatsLitPlugin.OverrideScore6.Value;
+            //     return;
+            // }
             scoreShine = ScoreShine;
             scoreHigh = ScoreHigh;
             scoreHighMid = ScoreHighMid;
@@ -397,15 +397,15 @@ namespace ThatsLit.Components
         // The visual brightness during the darkest hours with cloudiness 1... This is the base brightness of the map without any interference (e.g. sun/moon light)
         protected virtual float GetMinBaseAmbienceLitScore (string locationId, float time)
         {
-            if (ThatsLitPlugin.DevMode.Value)
-                return ThatsLitPlugin.OverrideMinBaseAmbienceScore.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     return ThatsLitPlugin.OverrideMinBaseAmbienceScore.Value;
             return MinBaseAmbienceScore;
         }
         // The visual brightness during the brightest hours with cloudiness 1... This is the base brightness of the map without any interference (e.g. sun/moon light)
         protected virtual float GetMaxBaseAmbienceLitScore(string locationId, float time)
         {
-            if (ThatsLitPlugin.DevMode.Value)
-                return ThatsLitPlugin.OverrideMaxBaseAmbienceScore.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     return ThatsLitPlugin.OverrideMaxBaseAmbienceScore.Value;
             return MaxBaseAmbienceScore;
         }
         protected virtual float GetMapAmbienceCoef(string locationId, float time)
@@ -467,15 +467,15 @@ namespace ThatsLit.Components
         protected virtual float GetMinAmbianceLum()
         {
             float minAmbienceLum = MinAmbienceLum;
-            if (ThatsLitPlugin.DevMode.Value)
-                minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
             return minAmbienceLum;
         }
         protected virtual float GetMaxAmbianceLum()
         {
             float maxAmbienceLum = MaxAmbienceLum;
-            if (ThatsLitPlugin.DevMode.Value)
-                maxAmbienceLum = ThatsLitPlugin.OverrideMaxAmbienceLum.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     maxAmbienceLum = ThatsLitPlugin.OverrideMaxAmbienceLum.Value;
             return maxAmbienceLum;
         }
         protected virtual float GetAmbianceLumRange()
@@ -485,15 +485,15 @@ namespace ThatsLit.Components
         protected virtual float GetMaxSunlightScore()
         {
             float maxSunlightScore = MaxSunlightScore;
-            if (ThatsLitPlugin.DevMode.Value)
-                maxSunlightScore = ThatsLitPlugin.OverrideMaxSunLightScore.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     maxSunlightScore = ThatsLitPlugin.OverrideMaxSunLightScore.Value;
             return maxSunlightScore;
         }
         protected virtual float GetMaxMoonlightScore()
         {
             float maxMoonlightScore = MaxMoonlightScore;
-            if (ThatsLitPlugin.DevMode.Value)
-                maxMoonlightScore = ThatsLitPlugin.OverrideMaxMoonLightScore.Value;
+            // if (ThatsLitPlugin.DevMode.Value)
+            //     maxMoonlightScore = ThatsLitPlugin.OverrideMaxMoonLightScore.Value;
             return maxMoonlightScore;
         }
         protected virtual float MinBaseAmbienceScore { get => -0.9f; }
