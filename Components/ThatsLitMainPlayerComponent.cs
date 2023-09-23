@@ -90,7 +90,7 @@ namespace ThatsLit.Components
 
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
             activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
-            if (!IsMapEnabled())
+            if (!ThatsLitPlugin.EnabledLighting.Value || !IsMapEnabled())
             {
                 disabledLit = true;
                 return;

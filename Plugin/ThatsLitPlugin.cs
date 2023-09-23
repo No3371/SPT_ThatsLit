@@ -59,6 +59,7 @@ namespace ThatsLit
             //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
+            EnabledLighting = Config.Bind(category, "Enable", true, "Enable the module. With this turned off, AIs are only affected by randomness and foliages.");
             DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, "Scale how AI noticing players slower due to darkness.");
             BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, "Scale how AI noticing players faster due to brightness.");
             EnableFactoryDay = Config.Bind(category, "Factory (Day)", false, "Enable darkness/brightness on the map.");
@@ -92,6 +93,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> EnabledMod { get; private set; }
+        public static ConfigEntry<bool> EnabledLighting { get; private set; }
         public static ConfigEntry<float> ScoreOffset { get; private set; }
         public static ConfigEntry<float> DarknessImpactScale { get; private set; }
         public static ConfigEntry<float> BrightnessImpactScale { get; private set; }
