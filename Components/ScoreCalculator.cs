@@ -411,7 +411,7 @@ namespace ThatsLit.Components
         protected virtual float GetMapAmbienceCoef(string locationId, float time)
         {
             if (time >= 5 && time < 7.5f) // 0 ~ 0.5f
-                return 0.5f * GetTimeProgress(time, 5, 12);
+                return 0.5f * GetTimeProgress(time, 5, 7.5f);
             else if (time >= 7.5f && time < 12f) // 0.5f ~ 1
                 return 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12);
             else if (time >= 12 && time < 15) // 1 ~ 1
@@ -420,6 +420,10 @@ namespace ThatsLit.Components
                 return (1f - GetTimeProgress(time, 15, 21.5f));
             else if (time >= 0 && time < 2) // 0 ~ 0.1
                 return 0.1f * GetTimeProgress(time, 0, 2);
+            else if (time >= 2 && time < 3) // 0.1
+                return 0.1f;
+            else if (time >= 3 && time < 5) // 0.1 ~ 0
+                return 0.1f * GetTimeProgress(time, 3, 5);
             else return 0;
         }
 
@@ -585,15 +589,41 @@ namespace ThatsLit.Components
 
     public class StreetsScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.85f;
-        protected override void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
+        protected override float MinBaseAmbienceScore => -0.8f;
+        protected override float MaxSunlightScore { get => 0.05f; }
+        protected override float MaxMoonlightScore { get => 0.1f; }
+        protected override float MinAmbienceLum { get => 0.011f; }
+        protected override float MaxAmbienceLum { get => 0.111f; }
+        protected override float ThresholdShine { get => 0.2f; }
+        protected override float ThresholdHigh { get => 0.1f; }
+        protected override float ThresholdHighMid { get => 0.05f; }
+        protected override float ThresholdMid { get => 0.02f; }
+        protected override float ThresholdMidLow { get => 0.01f; }
+        protected override float ThresholdLow { get => 0.005f; }
+        protected override float PixelLumScoreScale { get => 3f; }
+
+        protected override float GetMapAmbienceCoef(string locationId, float time)
         {
-            thresholdShine = 0.5f;
-            thresholdHigh = 0.35f;
-            thresholdHighMid = 0.2f;
-            thresholdMid = 0.1f;
-            thresholdMidLow = 0.025f;
-            thresholdLow = 0.005f;
+            float result = base.GetMapAmbienceCoef(locationId, time);
+
+            if (time >= 6 && time < 7.5f) // 0 ~ 0.35f
+                result = 0.35f * GetTimeProgress(time, 6, 7.5f);
+            else if (time >= 7.5f && time < 12f) // 0.5f ~ 1
+                result = 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12);
+            else if (time >= 12 && time < 18) // 1 ~ 1
+                result = 1;
+            else if (time >= 18 && time < 20) // 1 ~ 0.3f
+                result = 1f - 0.7f * GetTimeProgress(time, 18, 20);
+            else if (time >= 20 && time < 21.5f) // 0.3 ~ 0
+                result = 0.3f - 0.3f * GetTimeProgress(time, 20, 21.5f);
+            else if (time >= 0 && time < 2) // 0 ~ 0.1
+                result = 0.1f * GetTimeProgress(time, 0, 2);
+            else if (time >= 2 && time < 3) // 0.1
+                result = 0.1f;
+            else if (time >= 3 && time < 5) // 0.1 ~ 0
+                result = 0.1f * GetTimeProgress(time, 3, 5);
+            else result = 0;
+            return result;
         }
     }
 
@@ -633,15 +663,12 @@ namespace ThatsLit.Components
         protected override float MinAmbienceLum { get => 0.002f; }
         protected override float MaxAmbienceLum { get => 0.002f; }
         protected override float PixelLumScoreScale { get => 7f; }
-        protected override void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
-        {
-            thresholdShine = 0.5f;
-            thresholdHigh = 0.35f;
-            thresholdHighMid = 0.2f;
-            thresholdMid = 0.1f;
-            thresholdMidLow = 0.025f;
-            thresholdLow = 0.005f;
-        }
+        protected override float ThresholdShine { get => 0.5f; }
+        protected override float ThresholdHigh { get => 0.35f; }
+        protected override float ThresholdHighMid { get => 0.2f; }
+        protected override float ThresholdMid { get => 0.1f; }
+        protected override float ThresholdMidLow { get => 0.025f; }
+        protected override float ThresholdLow { get => 0.005f; }
 
         protected override void GetPixelScores(float tlf, out float scoreShine, out float scoreHigh, out float scoreHighMid, out float scoreMid, out float scoreMidLow, out float scoreLow, out float scoreDark)
         {

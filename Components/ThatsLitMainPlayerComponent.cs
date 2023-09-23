@@ -100,7 +100,7 @@ namespace ThatsLit.Components
                     case "interchange":
                         if (ThatsLitPlugin.EnableInterchange.Value) scoreCalculator = new InterchangeScoreCalculator();
                         break;
-                    case "tarkovstreets":
+                    case "TarkovStreets":
                         if (ThatsLitPlugin.EnableStreets.Value) scoreCalculator = new StreetsScoreCalculator();
                         break;
                     case "shoreline":
