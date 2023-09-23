@@ -48,8 +48,8 @@ namespace ThatsLit.Patches.Vision
                 if (mainPlayer) mainPlayer.calcedLastFrame = 0;
             }
 
-            Vector3 to = enemy.position - BotTransform.position;
-            var dis = to.magnitude;
+            Vector3 DirToPlayer = enemy.position - BotTransform.position;
+            var dis = DirToPlayer.magnitude;
             var disFactor = Mathf.Clamp01((dis - 10) / 100f);
             // To scale down various sneaking bonus
             // The bigger the distance the bigger it is, capped to 110m
@@ -118,9 +118,11 @@ namespace ThatsLit.Patches.Vision
 
                 }
 
+                var foliageImpact = mainPlayer.foliageScore * (1.25f - factor);
+                foliageImpact *= 1 - Mathf.Clamp01(Vector2.Angle(new Vector2(-DirToPlayer.x, -DirToPlayer.z), mainPlayer.foliageDir) / 90f); // 0deg -> 1, 90+deg -> 0
                 // Maybe randomly lose vision for foliages
                 // Pose higher than half will reduce the change
-                if (UnityEngine.Random.Range(0f, 1f) < disFactor * mainPlayer.foliageScore * (1 - factor) * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(0.75f - poseFactor) / 0.75f) // Among bushes, from afar
+                if (UnityEngine.Random.Range(0f, 1f) < disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(0.75f - poseFactor) / 0.75f) // Among bushes, from afar
                 {
                     __result *= 10f;
                     if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;

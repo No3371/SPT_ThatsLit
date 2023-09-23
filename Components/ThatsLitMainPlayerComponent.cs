@@ -39,6 +39,8 @@ namespace ThatsLit.Components
         public float cloudinessCompensationScale = 0.5f;
 
         public float foliageScore;
+        int foliageCount;
+        internal Vector2 foliageDir;
         Collider[] collidersCache;
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
         // PlayerSpiritAura is Visceral Bodies compat
@@ -326,20 +328,30 @@ namespace ThatsLit.Components
                 for (int i = 0; i < collidersCache.Length; i++)
                     collidersCache[i] = null;
 
-                float count = Physics.OverlapSphereNonAlloc(bodyPos, 3f, collidersCache, foliageLayerMask);
+                int count = Physics.OverlapSphereNonAlloc(bodyPos, 3f, collidersCache, foliageLayerMask);
+                float closet = 9999f;
 
                 for (int i = 0; i < count; i++)
                 {
-                    float dis = (collidersCache[i].transform.position - bodyPos).magnitude;
+                    Vector3 dir = (collidersCache[i].transform.position - bodyPos);
+                    float dis = dir.magnitude;
                     if (dis < 0.25f) foliageScore += 3f;
-                    else if (dis < 0.4f) foliageScore += 2f;
-                    else if (dis < 0.6f) foliageScore += 1f;
+                    else if (dis < 0.4f) foliageScore += 1f;
+                    else if (dis < 0.6f) foliageScore += 0.5f;
                     else if (dis < 1f) foliageScore += 0.3f;
                     else if (dis < 2f) foliageScore += 0.15f;
                     else foliageScore += 0.05f;
+
+                    if (dis < closet)
+                    {
+                        closet = dis;
+                        foliageDir = new Vector2(dir.x, dir.z);
+                    }
                 }
 
-                if (count > 0) foliageScore /= count;
+                foliageCount = count;
+
+                if (count > 0) foliageScore /= (float) count;
                 if (count == 1) foliageScore /= 2f;
                 if (count == 2) foliageScore /= 1.5f;
             }
