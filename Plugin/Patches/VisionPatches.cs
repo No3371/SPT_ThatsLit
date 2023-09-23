@@ -133,7 +133,7 @@ namespace ThatsLit.Patches.Vision
                 if (!mainPlayer.disabledLit)
                 {
 
-                    if (factor < 0) factor *= 2 * disFactor * (mainPlayer.fog / 0.35f);
+                    if (factor < 0) factor *= 1 + disFactor * (mainPlayer.fog / 0.35f);
 
                     if (factor < 0 && __instance.Owner.NightVision.UsingNow)
                         factor *= 0.1f; // Negative factor is reduced to only 10% regardless distance
