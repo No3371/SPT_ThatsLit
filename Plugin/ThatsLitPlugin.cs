@@ -79,7 +79,7 @@ namespace ThatsLit
             category = "5. Performance";
             LessFoliageCheck = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
             LessEquipmentCheck = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
-            LowResMode = Config.Bind(category, "Low Res Mode", false, "Can reduce CPU time of calculation, may or may not lower the lighting detection accuracy.");
+            LowResMode = Config.Bind(category, "Low Res Mode", false, "Can reduce CPU time of calculation, may reduce lighting detection accuracy.");
 
             category = "6. Debug";
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");

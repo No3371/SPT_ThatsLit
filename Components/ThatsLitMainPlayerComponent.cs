@@ -68,6 +68,7 @@ namespace ThatsLit.Components
         public float fog, rain, cloud;
 
         ScoreCalculator scoreCalculator;
+        AsyncGPUReadbackRequest gquReq;
         // float benchMark1, benchMark2;
         public void Awake()
         {
@@ -298,23 +299,11 @@ namespace ThatsLit.Components
                     }
             }
 
-            AsyncGPUReadback.Request(rt, 0, req =>
+            if (gquReq.done || gquReq.hasError) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
             {
                 if (req.hasError)
                     return;
-
-                // if (Time.frameCount % 53 == 0)
-                // {
-                //     var t = System.Diagnostics.Stopwatch.GetTimestamp();
-                //     observed = req.GetData<Color32>();
-                //     benchMark2 = (System.Diagnostics.Stopwatch.GetTimestamp() - t) / (float) System.TimeSpan.TicksPerMillisecond;
-                // }
-                // else
-                // {
-                    observed = req.GetData<Color32>();
-                // }
-                //if (data.Length != RESOLUTION * RESOLUTION * 4) // RGBA32 -> 32 bits per pixel
-                //    Debug.LogFormat("Data length mismatch: {0} / {1}", data.Length, RESOLUTION * RESOLUTION * 4);
+                observed = req.GetData<Color32>();
             });
 
             if (ThatsLitPlugin.DebugTexture.Value && envCam)
