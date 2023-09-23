@@ -114,7 +114,8 @@ namespace ThatsLit.Patches.Vision
                 }
 
                 // Maybe randomly lose vision for foliages
-                if (UnityEngine.Random.Range(0f, 1f) < disFactor * mainPlayer.foliageScore * (1 - factor) * ThatsLitPlugin.FoliageImpactScale.Value) // Among bushes, from afar
+                // Pose higher than half will reduce the change
+                if (UnityEngine.Random.Range(0f, 1f) < disFactor * mainPlayer.foliageScore * (1 - factor) * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(0.75f - poseFactor) / 0.75f) // Among bushes, from afar
                 {
                     __result *= 10f;
                     if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;
