@@ -45,8 +45,6 @@ namespace ThatsLit
                 throw new Exception("Invalid EFT Version");
             }
 
-            //new DefaultBrainsClass();
-
             BindConfigs();
             Patches();
         }

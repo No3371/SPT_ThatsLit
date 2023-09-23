@@ -552,8 +552,9 @@ namespace ThatsLit.Components
                         //highMidLightScoreApplied *= 1.2f;
                         //highLightScoreApplied *= 1.3f;
                         break;
-                    case "Lighthouse": // NIGHT, thresholds compressed
-                        lowLightScoreApplied *= 3f + 5 * (1 - cloud);
+                    case "Lighthouse": // NIGHT
+                        darkScoreApplied *= 3f + 5f * Mathf.Clamp01(cloud);
+                        lowLightScoreApplied *= 2f;
                         break;
                 }
             }
@@ -612,6 +613,9 @@ namespace ThatsLit.Components
                         midLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 3f;
 
                         break;
+                    case "Lighthouse": // DAY
+                        lowLightScoreApplied *= 1 + GetTimeLighingFactor() / 6f;
+                        break;
                 }
             }
 
@@ -627,17 +631,10 @@ namespace ThatsLit.Components
             lastValidPixels = validPixels;
 
             var lowAndDarkRatio = (lowLightPixels + darkPixels) / (float) validPixels;
-            var lowLightRatio = lowLightPixels / (float) validPixels;
-            var lowLightRatioLit = lowLightPixels / (float) litPixels;
 
 
-            float avgLowLightPixelsRatioMultiFrames = lowLightPixels / (float)validPixels + frame1.ratioLowLightPixels + frame2.ratioLowLightPixels + frame3.ratioLowLightPixels + frame4.ratioLowLightPixels + frame5.ratioLowLightPixels;
-            float avgDarkPixelsRatioMultiFrames = darkPixels / (float)validPixels + frame1.ratioDarkPixels + frame2.ratioDarkPixels + frame3.ratioDarkPixels + frame4.ratioDarkPixels + frame5.ratioDarkPixels;
-            float avgDarkerPixelsRatioMultiFrames = darkerPixels / (float)validPixels + frame1.darkerPixels / (float)frame1.validPixels + frame2.darkerPixels / (float)frame2.validPixels + frame3.darkerPixels / (float)frame3.validPixels + frame4.darkerPixels / (float)frame4.validPixels + frame5.darkerPixels / (float)frame5.validPixels;
-            float avgLumMultiFrames = avgLum + frame1.avgLumMultiFrames + frame2.avgLumMultiFrames + frame3.avgLumMultiFrames + frame4.avgLumMultiFrames + frame5.avgLumMultiFrames;
-            avgLowLightPixelsRatioMultiFrames /= 6f;
-            avgDarkPixelsRatioMultiFrames /= 6f;
-            avgDarkerPixelsRatioMultiFrames /= 6f;
+            float avgLumMultiFrames = avgLum + frame1.avgLum + frame2.avgLum + frame3.avgLum + frame4.avgLum + frame5.avgLum;
+
             avgLumMultiFrames /= 6f;
             multiAvgLum = avgLumMultiFrames;
 
