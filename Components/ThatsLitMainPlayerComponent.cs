@@ -321,6 +321,7 @@ namespace ThatsLit.Components
         {
             lastCheckedFoliages = Time.time;
             foliageScore = 0;
+            foliageDir = Vector2.zero;
 
             if (!skipFoliageCheck)
             {
