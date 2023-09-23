@@ -146,17 +146,17 @@ namespace ThatsLit.Components
 
             if (ThatsLitPlugin.DebugTexture.Value)
             {
-                debugTex = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
+                //debugTex = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
                 display = new GameObject().AddComponent<RawImage>();
                 display.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
                 display.RectTransform().sizeDelta = new Vector2(160, 160);
-                display.texture = debugTex;
+                display.texture = rt;
                 display.RectTransform().anchoredPosition = new Vector2(-720, -360);
 
 
-                envRt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
-                envRt.filterMode = FilterMode.Point;
-                envRt.Create();
+                //envRt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
+                //envRt.filterMode = FilterMode.Point;
+                //envRt.Create();
 
                 //envTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
 
@@ -267,20 +267,24 @@ namespace ThatsLit.Components
                     }
             }
 
-            if (ThatsLitPlugin.ExperimentalGPUReadback.Value)
+            AsyncGPUReadback.Request(rt, 0, req =>
             {
-                AsyncGPUReadback.Request(rt, 0, req =>
-                {
-                    if (req.hasError)
-                        return;
+                if (req.hasError)
+                    return;
 
-                    NativeArray<byte> data = req.GetData<byte>();
-                    //if (data.Length != RESOLUTION * RESOLUTION * 4) // RGBA32 -> 32 bits per pixel
-                    //    Debug.LogFormat("Data length mismatch: {0} / {1}", data.Length, RESOLUTION * RESOLUTION * 4);
-                    tex.LoadRawTextureData(data);
-                    tex.Apply();
-                });
-            }
+                // if (Time.frameCount % 53 == 0)
+                // {
+                //     var t = System.Diagnostics.Stopwatch.GetTimestamp();
+                //     observed = req.GetData<Color32>();
+                //     benchMark2 = (System.Diagnostics.Stopwatch.GetTimestamp() - t) / (float) System.TimeSpan.TicksPerMillisecond;
+                // }
+                // else
+                // {
+                    observed = req.GetData<Color32>();
+                // }
+                //if (data.Length != RESOLUTION * RESOLUTION * 4) // RGBA32 -> 32 bits per pixel
+                //    Debug.LogFormat("Data length mismatch: {0} / {1}", data.Length, RESOLUTION * RESOLUTION * 4);
+            });
 
             if (ThatsLitPlugin.DebugTexture.Value && envCam)
             {
@@ -357,6 +361,12 @@ namespace ThatsLit.Components
         {
             if (disabledLit) return;
             GetWeatherStats(out fog, out rain, out cloud);
+
+            //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
+            if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
+
+            scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId);
+
             frame5 = frame4;
             frame4 = frame3;
             frame3 = frame2;
@@ -408,53 +418,56 @@ namespace ThatsLit.Components
             multiAvgLum = 0f;
             avgLum = 0.0f;
 
-            CountPixels(tex, ref shinePixels, ref highLightPixels, ref highMidLightPixels, ref midLightPixels, ref midLowLightPixels, ref lowLightPixels, ref darkPixels, ref avgLum, ref validPixels);
-
-            void CountPixels (Texture2D tex,  ref int shine, ref int high, ref int highMid, ref int mid, ref int midLow, ref int low, ref int dark, ref float lum, ref int valid)
+            // if (Time.frameCount % 61 == 0)
+            // {
+            //     var t = System.Diagnostics.Stopwatch.GetTimestamp();
+            //     CountPixels(observed, ref shinePixels, ref highLightPixels, ref highMidLightPixels, ref midLightPixels, ref midLowLightPixels, ref lowLightPixels, ref darkPixels, ref avgLum, ref validPixels);
+            //     benchMark1 = (System.Diagnostics.Stopwatch.GetTimestamp() - t) / (float) System.TimeSpan.TicksPerMillisecond;
+            // }
+            CountPixels(observed, ref shinePixels, ref highLightPixels, ref highMidLightPixels, ref midLightPixels, ref midLowLightPixels, ref lowLightPixels, ref darkPixels, ref avgLum, ref validPixels);
+            void CountPixels (Unity.Collections.NativeArray<Color32> tex,  ref int shine, ref int high, ref int highMid, ref int mid, ref int midLow, ref int low, ref int dark, ref float lum, ref int valid)
             {
-                for (int x = 0; x < RESOLUTION; x++)
+                if (!tex.IsCreated) return;
+                for (int i = 0; i < RESOLUTION * RESOLUTION; i++)
                 {
-                    for (int y = 0; y < RESOLUTION; y++)
+                    var c = tex[i];
+                    if (c == Color.white)
                     {
-                        var c = tex.GetPixel(x, y);
-                        if (c == Color.white)
-                        {
-                            continue;
-                        }
-                        var pLum = (c.r + c.g + c.b) / 3f;
-                        lum += pLum;
-
-                        float v = GetTimeLighingFactor();
-                        float thresholdShine, thresholdHigh, thresholdHighMid, thresholdMid, thresholdMidLow, thresholdLow;
-                        GetThresholds(v, out thresholdShine, out thresholdHigh, out thresholdHighMid, out thresholdMid, out thresholdMidLow, out thresholdLow);
-                        if (v < 0) // Night
-                        {
-                            if (pLum > thresholdShine) shine += 1;
-                            else if (pLum > thresholdHigh) high += 1;
-                            else if (pLum > thresholdHighMid) highMid += 1;
-                            else if (pLum > thresholdMid) mid += 1;
-                            else if (pLum > thresholdMidLow) midLow += 1;
-                            else if (pLum > thresholdLow) low += 1;
-                            else dark += 1;
-                        }
-                        else
-                        {
-                            if (pLum > thresholdShine) shine += 1;
-                            else if (pLum > thresholdHigh) high += 1;
-                            else if (pLum > thresholdHighMid) highMid += 1;
-                            else if (pLum > thresholdMid) mid += 1;
-                            else if (pLum > thresholdMidLow) midLow += 1;
-                            else if (pLum > thresholdLow) low += 1;
-                            else dark += 1;
-                        }
-
-                        valid++;
+                        continue;
                     }
+                    var pLum = (c.r + c.g + c.b) / 765f;
+                    lum += pLum;
+
+                    float v = GetTimeLighingFactor();
+                    float thresholdShine, thresholdHigh, thresholdHighMid, thresholdMid, thresholdMidLow, thresholdLow;
+                    GetThresholds(v, out thresholdShine, out thresholdHigh, out thresholdHighMid, out thresholdMid, out thresholdMidLow, out thresholdLow);
+                    if (v < 0) // Night
+                    {
+                        if (pLum > thresholdShine) shine += 1;
+                        else if (pLum > thresholdHigh) high += 1;
+                        else if (pLum > thresholdHighMid) highMid += 1;
+                        else if (pLum > thresholdMid) mid += 1;
+                        else if (pLum > thresholdMidLow) midLow += 1;
+                        else if (pLum > thresholdLow) low += 1;
+                        else dark += 1;
+                    }
+                    else
+                    {
+                        if (pLum > thresholdShine) shine += 1;
+                        else if (pLum > thresholdHigh) high += 1;
+                        else if (pLum > thresholdHighMid) highMid += 1;
+                        else if (pLum > thresholdMid) mid += 1;
+                        else if (pLum > thresholdMidLow) midLow += 1;
+                        else if (pLum > thresholdLow) low += 1;
+                        else dark += 1;
+                    }
+
+                    valid++;
                 }
             }
 
-            if (validPixels == 0) validPixels = RESOLUTION * RESOLUTION; // Not sure if the RenderTexture will be empty (fully white) or not at the very begining
-
+            if (validPixels == 0) validPixels = observed.Length == 0 ? RESOLUTION * RESOLUTION : observed.Length; // Not sure if the RenderTexture will be empty (fully white) or not at the very begining
+            observed.Dispose();
             brighterPixels = shinePixels + highLightPixels + highMidLightPixels + midLightPixels / 2;
             var litPixels = validPixels - darkPixels;
             var darkerLitPixels = midLightPixels / 2 + midLowLightPixels + lowLightPixels;
