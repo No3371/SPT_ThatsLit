@@ -54,7 +54,7 @@ namespace ThatsLit
         private void BindConfigs()
         {
             string category = "1. Main";
-            Enabled = Config.Bind(category, "Enable", true, "Enable the mod");
+            EnabledMod = Config.Bind(category, "Enable", true, "Enable the mod. Can not be turned back on in-raid.");
             EnableUncalibratedMaps = Config.Bind(category, "Enable Uncalibrated Maps", false, "Every map need specific parameter to prevent incorrect lighting detection, by default That's Lit is disabled on maps not yet calibrated.");
             //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
@@ -91,7 +91,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> ScoreInfo { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
-        public static ConfigEntry<bool> Enabled { get; private set; }
+        public static ConfigEntry<bool> EnabledMod { get; private set; }
         public static ConfigEntry<float> ScoreOffset { get; private set; }
         public static ConfigEntry<float> DarknessImpactScale { get; private set; }
         public static ConfigEntry<float> BrightnessImpactScale { get; private set; }

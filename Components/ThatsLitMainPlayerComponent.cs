@@ -77,6 +77,11 @@ namespace ThatsLit.Components
         public float fog, rain, cloud;
         public void Awake()
         {
+            if (!ThatsLitPlugin.EnabledMod.Value)
+            {
+                this.enabled = false;
+                return;
+            }
             awakeAt = Time.time;
             collidersCache = new Collider[16];
 
@@ -183,6 +188,15 @@ namespace ThatsLit.Components
 
         private void Update()
         {
+            if (!ThatsLitPlugin.EnabledMod.Value)
+            {
+                if (cam?.enabled ?? false) GameObject.Destroy(cam.gameObject);
+                if (rt != null) rt.Release();
+                if (display?.enabled ?? false) GameObject.Destroy(display);
+                this.enabled = false;
+                return;
+            }
+
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
             if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.75f : 0.4f))
             {

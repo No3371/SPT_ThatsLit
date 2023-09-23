@@ -31,7 +31,7 @@ namespace ThatsLit.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(GClass478 __instance, BifacialTransform BotTransform, BifacialTransform enemy, ref float __result)
         {
-            if (__result == 8888 || !ThatsLitPlugin.Enabled.Value) return;
+            if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value) return;
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
 
             var original = __result;
