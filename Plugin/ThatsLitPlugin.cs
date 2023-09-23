@@ -57,8 +57,8 @@ namespace ThatsLit
 
             category = "2. Darkness / Brightness";
             EnabledLighting = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are only affected by randomness and foliages.", null, new ConfigurationManagerAttributes() { Order = 100 }));
-            DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, "Scale how AI noticing players slower due to darkness.");
-            BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, "Scale how AI noticing players faster due to brightness.");
+            DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players slower due to darkness.", null, new ConfigurationManagerAttributes() { Order = 95 }));
+            BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", null, new ConfigurationManagerAttributes() { Order = 94 }));
             EnableFactoryNight = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
             EnableLighthouse = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
             EnableShoreline = Config.Bind(category, "Shoreline", true, "Enable darkness/brightness on the map.");
@@ -83,10 +83,11 @@ namespace ThatsLit
 
             category = "6. Debug";
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
-            DebugTexture = Config.Bind(category, "Debug Texture", false, "Shows how the mod observes the player.");
+            DebugTexture = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             EnableHideout = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
             DevMode = Config.Bind(category, "Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             DevModeInvisible = Config.Bind(category, "Dev Mode Invisible", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            NoGPUReq = Config.Bind(category, "NoGPUReq", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             OverrideMinBaseAmbienceScore = Config.Bind(category, "MinBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             OverrideMaxBaseAmbienceScore = Config.Bind(category, "MaxBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             OverrideMinAmbienceLum = Config.Bind(category, "MinAmbienceLum", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
@@ -134,6 +135,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> LowResMode { get; private set; }
         public static ConfigEntry<bool> DevMode { get; private set; }
         public static ConfigEntry<bool> DevModeInvisible { get; private set; }
+        public static ConfigEntry<bool> NoGPUReq { get; private set; }
         public static ConfigEntry<float> OverrideMinBaseAmbienceScore { get; private set; }
         public static ConfigEntry<float> OverrideMaxBaseAmbienceScore { get; private set; }
         public static ConfigEntry<float> OverrideMinAmbienceLum { get; private set; }

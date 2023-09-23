@@ -267,7 +267,7 @@ namespace ThatsLit.Components
                     }
             }
 
-            if (gquReq.done || gquReq.hasError) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
+            if (gquReq.done && !ThatsLitPlugin.NoGPUReq.Value) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
             {
                 if (req.hasError)
                     return;
@@ -365,6 +365,7 @@ namespace ThatsLit.Components
             //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
             if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
+            calcedLastFrame = 0;
             MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
         }
 
@@ -380,13 +381,13 @@ namespace ThatsLit.Components
         {
             if (disabledLit && Time.time - awakeAt < 30f)
             {
-                GUILayout.Label("[That's Lit] The map is not yet ready or disabled in configs.");
                 GUILayout.Label("[That's Lit] The map is not supported or disabled in configs.");
                 if (!ThatsLitPlugin.DebugInfo.Value) return;
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
-                scoreCalculator?.CalledOnGUI();
+                Utility.GUILayoutDrawAsymetricMeter((int) (MultiFrameLitScore / 0.0999f));
+                Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
                 if (foliageScore > 0.3f)
                     GUILayout.Label("[FOLIAGE+++]");
                 else if (foliageScore > 0.2f)
@@ -399,13 +400,14 @@ namespace ThatsLit.Components
                     GUILayout.Label("[That's Lit HUD] Can be disabled in plugin settings.");
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
+            scoreCalculator?.CalledOnGUI();
             GUILayout.Label(string.Format("IMPACT: {0:0.00} -> {1:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo));
             //GUILayout.Label(text: "PIXELS:");
             //GUILayout.Label(lastValidPixels.ToString());
             GUILayout.Label(string.Format("AFFECTED: {0} (+{1})", calced, calcedLastFrame));
 
-            GUILayout.Label(string.Format("FOLIAGE: {0:0.000}", foliageScore));
-            GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / {3} -> TIME_LIGHT: {4:0.00}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), GetTimeLighingFactor()));
+            GUILayout.Label(string.Format("FOLIAGE: {0:0.000} ({1})", foliageScore, foliageCount));
+            GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
             GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", vLight? "V" : irLight? "I" : "-", vLaser ? "V" : irLaser ? "I" : "-", vLightSub ? "V" : irLightSub ? "I" : "-", vLaserSub ? "V" : irLaserSub ? "I" : "-"));
 GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
