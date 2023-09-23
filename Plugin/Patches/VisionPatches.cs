@@ -53,6 +53,7 @@ namespace ThatsLit.Patches.Vision
             if (__instance.Owner.WeaponManager.ShootController.IsAiming)
             {
                 float v = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 100;
+                if (__instance.Owner.NightVision.UsingNow) Mathf.Min(v, 100); // AIs using NVGs does not get the scope buff
                 disFactor *= 1 + 0.1f * (300 - v) / 100;
                 disFactor = Mathf.Clamp01(disFactor);
                 // 10m sight? => 1.29x... 10m -> 0, 110m -> 1.032
