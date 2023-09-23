@@ -163,7 +163,11 @@ namespace ThatsLit.Patches.Vision
                     else if (factor > 0f) __result /= (1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value); // 0.66x at 100% score
                 }
 
-                if (factor < 0) __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(Time.time - __instance.PersonalSeenTime) / 0.1f); // just seen (0s) => original, 0.1s => modified
+                if (factor < 0)
+                {
+                    float sinceSeen = Time.time - __instance.PersonalSeenTime;
+                    __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(sinceSeen / 0.1f)); // just seen (0s) => original, 0.1s => modified
+                }
                 // This probably will let bots stay unaffected until losing the visual
 
                 __result += ThatsLitPlugin.FinalOffset.Value;
