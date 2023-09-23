@@ -222,9 +222,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComponentHelpers.cs" />
+    <Compile Include="Components\FrameStats.cs" />
     <Compile Include="Components\ScoreCalculator.cs" />
     <Compile Include="Components\ThatsLitMainPlayerComponent.cs" />
     <Compile Include="Components\ThatsLitGameworldComponent.cs" />
+    <Compile Include="Components\Utility.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Plugin\GameWorldHandler.cs" />
     <Compile Include="Plugin\Patches\VisionPatches.cs" />
