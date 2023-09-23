@@ -548,8 +548,8 @@ namespace ThatsLit.Components
     }
     public class CustomsScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.9f;
-        protected override float NonCloudinessBaseAmbienceScoreImpact { get => 0.1f; }
+        protected override float MinBaseAmbienceScore => -0.75f;
+        protected override float NonCloudinessBaseAmbienceScoreImpact { get => 0.2f; }
     }
     public class InterchangeScoreCalculator : ScoreCalculator
     {
@@ -660,7 +660,7 @@ namespace ThatsLit.Components
         protected override float MinBaseAmbienceScore => -0.1f;
         protected override float MaxMoonlightScore => 0;
         protected override float MaxSunlightScore => 0;
-        protected override float MinAmbienceLum => 0.008f;
-        protected override float MaxAmbienceLum => 0.008f;
+        protected override float MinAmbienceLum => 0.01f;
+        protected override float MaxAmbienceLum => 0.01f;
     }
 }

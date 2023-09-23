@@ -129,6 +129,8 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableReserve { get; private set; }
         public static ConfigEntry<bool> EnableCustoms { get; private set; }
         public static ConfigEntry<bool> EnableShoreline { get; private set; }
+        public static ConfigEntry<bool> EnableInterchange { get; private set; }
+        public static ConfigEntry<bool> EnableStreets { get; private set; }
         public static ConfigEntry<bool> EnableWoods { get; private set; }
         public static ConfigEntry<bool> EnableHideout { get; private set; }
         public static ConfigEntry<bool> LowResMode { get; private set; }

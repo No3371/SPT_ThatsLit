@@ -105,7 +105,7 @@ namespace ThatsLit.Patches.Vision
                 }
                 else
                 {
-                    score = mainPlayer.multiFrameLitScore; // -1 ~ 1
+                    score = mainPlayer.MultiFrameLitScore; // -1 ~ 1
                     if (!mainPlayer.disabledLit && score < 0 && __instance.Owner.NightVision.UsingNow) // The score was not reduced (toward 0) for IR lights, process the score here
                     {
                         if (mainPlayer.irLight) score /= 2;

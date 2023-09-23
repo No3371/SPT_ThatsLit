@@ -28,21 +28,7 @@ namespace ThatsLit.Components
         int currentCamPos = 0;
         public Texture2D envTex, envDebugTex;
         Unity.Collections.NativeArray<Color32> observed;
-        public FrameStats frame1, frame2, frame3, frame4, frame5;
-        public float multiFrameLitScore;
-        public float multiFrameLitScoreSample;
-        public int shinePixels, highLightPixels, highMidLightPixels, midLightPixels, midLowLightPixels, lowLightPixels, darkPixels;
-        public int brighterPixels, darkerPixels;
-        public float shinePixelsRatioSample, highLightPixelsRatioSample, highMidLightPixelsRatioSample, midLightPixelsRatioSample, midLowLightPixelsRatioSample, lowLightPixelsRatioSample, darkPixelsRatioSample;
-        public float shineScore = 10f, highLightScore = 5f, highMidLightScore = 2f , midLightScore = 1f, midLowLightScore = 0.75f, lowLightScore = 0.4f, darkScore = 0.01f;
-        public float shineScoreApplied = 10f, highLightScoreApplied = 5f, highMidLightScoreApplied = 2f, midLightScoreApplied = 1f, midLowLightScoreApplied = 0.75f, lowLightScoreApplied = 0.4f, darkScoreApplied = 0.01f;
-        public float frameLitScore, frameLitScoreRaw0, frameLitScoreRaw1, frameLitScoreRaw2, frameLitScoreRaw3, frameLitScoreRaw4;
-        public float frameLitScoreSample, frameitScoreRawSample0, frameitScoreRawSample1, frameitScoreRawSample2, frameitScoreRawSample3, frameitScoreRawSample4;
-        public float brightestFrameScore, darkestFrameScore;
-        public float lastBrightestSample, lastDarkestSample;
         public float lastCalcFrom, lastCalcTo;
-        public float avgLum, multiAvgLum, avgLumSample, multiAvgLumSample;
-        public float envLumEsti, envLumEstiFast, envLumEstiSlow, globalLumEsti = 0.05f;
         public int calced = 0, calcedLastFrame = 0;
         public int lockPos = -1;
         public int lastValidPixels = RESOLUTION * RESOLUTION;
@@ -66,6 +52,7 @@ namespace ThatsLit.Components
         public RaidSettings activeRaidSettings;
         bool skipFoliageCheck;
         public float fog, rain, cloud;
+        public float MultiFrameLitScore { get; private set; }
 
         ScoreCalculator scoreCalculator;
         AsyncGPUReadbackRequest gquReq;
@@ -85,74 +72,51 @@ namespace ThatsLit.Components
 
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
             activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
-            if (!ThatsLitPlugin.EnabledLighting.Value || !IsMapEnabled())
+
+            if (ThatsLitPlugin.EnabledLighting.Value)
             {
-                disabledLit = true;
-                return;
-            }
-
-
-            if (ThatsLitPlugin.DebugInfo.Value)
                 switch (activeRaidSettings?.LocationId)
                 {
                     case "Lighthouse":
-                        scoreCalculator = new LighthouseScoreCalculator();
+                        if (ThatsLitPlugin.EnableLighthouse.Value) scoreCalculator = new LighthouseScoreCalculator();
                         break;
                     case "Woods":
-                        scoreCalculator = new WoodsScoreCalculator();
+                        if (ThatsLitPlugin.EnableWoods.Value) scoreCalculator = new WoodsScoreCalculator();
                         break;
                     case "factory4_night":
-                        scoreCalculator = GetInGameDayTime() > 12 ? null : new NightFactoryScoreCalculator();
+                        if (ThatsLitPlugin.EnableFactoryNight.Value) scoreCalculator = GetInGameDayTime() > 12 ? null : new NightFactoryScoreCalculator();
+                        skipFoliageCheck = true;
                         break;
                     case "factory4_day":
                         scoreCalculator = null;
+                        skipFoliageCheck = true;
                         break;
                     case "bigmap": // Customs
-                        scoreCalculator = new CustomsScoreCalculator();
+                        if (ThatsLitPlugin.EnableCustoms.Value) scoreCalculator = new CustomsScoreCalculator();
                         break;
                     case "RezervBase": // Reserve
-                        scoreCalculator = new ReserveScoreCalculator();
+                        if (ThatsLitPlugin.EnableReserve.Value) scoreCalculator = new ReserveScoreCalculator();
                         break;
                     case "interchange":
+                        if (ThatsLitPlugin.EnableInterchange.Value) scoreCalculator = new InterchangeScoreCalculator();
+                        break;
                     case "tarkovstreets":
-                        scoreCalculator = new StreetsScoreCalculator();
+                        if (ThatsLitPlugin.EnableStreets.Value) scoreCalculator = new StreetsScoreCalculator();
                         break;
                     case "shoreline":
-                        scoreCalculator = new ShorelineScoreCalculator();
+                        if (ThatsLitPlugin.EnableShoreline.Value) scoreCalculator = new ShorelineScoreCalculator();
                         break;
                     case "laboratory":
                         scoreCalculator = new LabScoreCalculator();
+                        skipFoliageCheck = true;
                         break;
                     case null:
-                        scoreCalculator = new HideoutScoreCalculator();
+                        if (ThatsLitPlugin.EnableHideout.Value) scoreCalculator = new HideoutScoreCalculator();
+                        skipFoliageCheck = true;
                         break;
                     default:
-                        scoreCalculator = new ScoreCalculator();
+                        if (ThatsLitPlugin.EnableUncalibratedMaps.Value) scoreCalculator = new ScoreCalculator();
                         break;
-                }
-
-            bool IsMapEnabled ()
-            {
-                switch (activeRaidSettings?.SelectedLocation?.Name)
-                {
-                    case "Woods":
-                        return ThatsLitPlugin.EnableWoods.Value;
-                    case "Shoreline":
-                        return ThatsLitPlugin.EnableShoreline.Value;
-                    case "ReserveBase":
-                        return ThatsLitPlugin.EnableReserve.Value;
-                    case "Customs":
-                        return ThatsLitPlugin.EnableCustoms.Value;
-                    case "Lighthouse":
-                        return ThatsLitPlugin.EnableLighthouse.Value;
-                    case "Factory":
-                        return GetInGameDayTime() > 12? false : ThatsLitPlugin.EnableFactoryNight.Value;
-                    case "Streets of Tarkov":
-                        return false;
-                    case null:
-                        return ThatsLitPlugin.EnableHideout.Value;
-                    default:
-                        return ThatsLitPlugin.EnableUncalibratedMaps.Value || EnabledMaps.Contains(activeRaidSettings.SelectedLocation.Name);
                 }
             }
 
@@ -212,9 +176,6 @@ namespace ThatsLit.Components
                 //displayEnv.texture = envDebugTex;
                 //displayEnv.RectTransform().anchoredPosition = new Vector2(-560, -360);
             }
-
-            globalLumEsti = 0.05f + 0.04f * GetTimeLighingFactor();
-            skipFoliageCheck = activeRaidSettings?.SelectedLocation?.Name == "Factory" || activeRaidSettings == null;
         }
 
 
@@ -303,6 +264,7 @@ namespace ThatsLit.Components
             {
                 if (req.hasError)
                     return;
+                
                 observed = req.GetData<Color32>();
             });
 
@@ -386,551 +348,7 @@ namespace ThatsLit.Components
             //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
             if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
-            scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId);
-
-            frame5 = frame4;
-            frame4 = frame3;
-            frame3 = frame2;
-            frame2 = frame1;
-            frame1 = new FrameStats
-            {
-                pxS = shinePixels,
-                pxH = highLightPixels,
-                pxHM = highMidLightPixels,
-                pxM = midLightPixels,
-                pxML = midLowLightPixels,
-                pxL = lowLightPixels,
-                pxD = darkPixels,
-                avgLum = avgLum,
-                avgLumMultiFrames = multiAvgLum,
-                score = frameLitScore,
-                pixels = lastValidPixels,
-                darkerPixels = darkerPixels,
-            };
-            frameLitScore = shinePixels = highLightPixels = highMidLightPixels = midLightPixels = midLowLightPixels = lowLightPixels = darkPixels = 0;
-
-            var validPixels = 0;
-            multiAvgLum = 0f;
-            avgLum = 0.0f;
-
-            // if (Time.frameCount % 61 == 0)
-            // {
-            //     var t = System.Diagnostics.Stopwatch.GetTimestamp();
-            //     CountPixels(observed, ref shinePixels, ref highLightPixels, ref highMidLightPixels, ref midLightPixels, ref midLowLightPixels, ref lowLightPixels, ref darkPixels, ref avgLum, ref validPixels);
-            //     benchMark1 = (System.Diagnostics.Stopwatch.GetTimestamp() - t) / (float) System.TimeSpan.TicksPerMillisecond;
-            // }
-            CountPixels(observed, ref shinePixels, ref highLightPixels, ref highMidLightPixels, ref midLightPixels, ref midLowLightPixels, ref lowLightPixels, ref darkPixels, ref avgLum, ref validPixels);
-            void CountPixels (Unity.Collections.NativeArray<Color32> tex,  ref int shine, ref int high, ref int highMid, ref int mid, ref int midLow, ref int low, ref int dark, ref float lum, ref int valid)
-            {
-                if (!tex.IsCreated) return;
-                for (int i = 0; i < RESOLUTION * RESOLUTION; i++)
-                {
-                    var c = tex[i];
-                    if (c == Color.white)
-                    {
-                        continue;
-                    }
-                    var pLum = (c.r + c.g + c.b) / 765f;
-                    lum += pLum;
-
-                    float v = GetTimeLighingFactor();
-                    float thresholdShine, thresholdHigh, thresholdHighMid, thresholdMid, thresholdMidLow, thresholdLow;
-                    GetThresholds(v, out thresholdShine, out thresholdHigh, out thresholdHighMid, out thresholdMid, out thresholdMidLow, out thresholdLow);
-                    if (v < 0) // Night
-                    {
-                        if (pLum > thresholdShine) shine += 1;
-                        else if (pLum > thresholdHigh) high += 1;
-                        else if (pLum > thresholdHighMid) highMid += 1;
-                        else if (pLum > thresholdMid) mid += 1;
-                        else if (pLum > thresholdMidLow) midLow += 1;
-                        else if (pLum > thresholdLow) low += 1;
-                        else dark += 1;
-                    }
-                    else
-                    {
-                        if (pLum > thresholdShine) shine += 1;
-                        else if (pLum > thresholdHigh) high += 1;
-                        else if (pLum > thresholdHighMid) highMid += 1;
-                        else if (pLum > thresholdMid) mid += 1;
-                        else if (pLum > thresholdMidLow) midLow += 1;
-                        else if (pLum > thresholdLow) low += 1;
-                        else dark += 1;
-                    }
-
-                    valid++;
-                }
-            }
-
-            if (validPixels == 0) validPixels = observed.Length == 0 ? RESOLUTION * RESOLUTION : observed.Length; // Not sure if the RenderTexture will be empty (fully white) or not at the very begining
-            observed.Dispose();
-            brighterPixels = shinePixels + highLightPixels + highMidLightPixels + midLightPixels / 2;
-            var litPixels = validPixels - darkPixels;
-            var darkerLitPixels = midLightPixels / 2 + midLowLightPixels + lowLightPixels;
-            darkerPixels = validPixels - brighterPixels;
-
-            shineScoreApplied = shineScore;
-            highLightScoreApplied = highLightScore;
-            highMidLightScoreApplied = highMidLightScore;
-            midLightScoreApplied = midLightScore;
-            midLowLightScoreApplied = midLowLightScore;
-            lowLightScoreApplied = lowLightScore;
-            darkScoreApplied = darkScore;
-
-            // CLOUDINESS is blocking skylight
-            if (GetTimeLighingFactor() < 0) // NIGHT
-            {
-                // Nights looks overally brighter when the weather is clear and vice versa, try to match the visual (cloudiness seems to be -1 (clear) ~ 1.5)
-                highMidLightScoreApplied *= 1 - GetTimeLighingFactor() / 5f;
-                midLightScoreApplied *= 1 - GetTimeLighingFactor() / 6f;
-                midLowLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f; // The cloudiness is scaled by darkness at the time
-                lowLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
-                // cloud = 0.4, time = -1 (night) => 0.8x (cloudy night)
-                // cloud = -0.4, time = -1 (night) => 1.2x (clear night)
-                // cloud = -1, time = -1 (night) => 1.5x
-                switch (activeRaidSettings?.SelectedLocation?.Name)
-                {
-                    default: // Hideout
-                        break;
-                    //case "Streets of Tarkov": // The streets tend to be showered with a dim ambience light
-                        //darkScoreApplied *= 1 + 5f * Mathf.Clamp01(cloud); // When cloudy, 
-                        // c-1~c0 has no difference, 0:00~04:30 change either
-                        //midLightScoreApplied = midLightScore;
-                        //midLowLightScoreApplied = midLowLightScore;
-                        //lowLightScoreApplied = lowLightScore;
-
-                        //break;
-                    case "Woods": // The woods looks quite dark in the night, lowering the score
-                        darkScoreApplied = 0;
-                        lowLightScoreApplied *= 0.4f;
-                        midLowLightScoreApplied *= 0.5f;
-                        break;
-                    case "Shoreline": // Shoreline night visual is very responsive to cloudiness
-                        // Visual estimation -> 0:00 c0, -0.95 / 0:00 c0, -0.8 / 0:00, c-1, -0.5
-                        var cloudFactor = cloud < 0 ? cloud / 2f : cloud;
-                        darkScoreApplied = 0.12f - 0.1f * cloudFactor;
-                        break;
-                    case "ReserveBase":  // Reserve night visual is very responsive to cloudiness too
-                        // 2:30, c1, can barely see and -100% (expect -90%) / 2:30, c0, score -100% (expect -50%) / 2:30, c-1, can very clearly see and the score is 0% (good)
-                        // 0:00, c1, can barely see and -100% (expect -90%) / 2:30, c0, score -100% (expect -75%) / 0:00, c-0.2, score -20% (good) / 0:00, c-1, score -20% (good)
-                        // Observation: estimated ambience skylight at 0:00 c-1 -20%, ML 10% - L40% - D 50% <DARKEST>
-                        // Observation: estimated ambience skylight at 0:00 c1 -85%, ML 0% - L1% - D 99%
-                        // Observation: estimated ambience skylight at 2:00 c1 -85%, ML 0% - L1% - D 99%
-                        // Observation: estimated ambience skylight at 2:00 c-1 0%, ML 20% - L35% - D 45% <BRIGHTEST>
-                        // Scaling final score by 0.9 for negative score
-                        cloudFactor = Mathf.Clamp01(cloud - -0.2f) / 0.8f; // Compensate the score up to c0.6
-                        darkScoreApplied *= 1 + cloudFactor;
-
-                        // The low light pixels disappear when the cloud 
-                        lowLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
-                        break;
-                    case "Customs":
-                        if (cloud > 0)
-                        {
-                            // compensate dark score for c0 ~ c1
-                            darkScoreApplied += 0.06f * cloud;
-                        }
-                        break;
-                    case "Factory": // NIGHT, thresholds compressed
-                        highLightScoreApplied *= 1.3f;
-                        highMidLightScoreApplied *= 1.2f;
-                        midLightScoreApplied *= 1.1f;
-                        midLowLightScoreApplied *= 0.75f;
-                        lowLightScoreApplied *= 0.75f;
-                        break;
-                    case "Streets of Tarkov": // NIGHT, thresholds smoothly compressed
-                                              // The streets is impacted by c0 ~ c1 a lot
-                                              // The streets is very weird, on clear (-1) days, L and L+ disappear starting from 20:45 and reappear at 23:45, both without matching visual change
-
-                        darkScoreApplied *= 5 + 5f * Mathf.Clamp01(cloud + 0.266f);
-                        midLowLightScoreApplied = 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
-                        midLightScoreApplied = 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 3f;
-                        //highMidLightScoreApplied *= 1.2f;
-                        //highLightScoreApplied *= 1.3f;
-                        break;
-                    case "Lighthouse": // NIGHT
-                        darkScoreApplied *= 3f + 5f * Mathf.Clamp01(cloud);
-                        lowLightScoreApplied *= 2f;
-                        break;
-                }
-            }
-            else // DAY
-            {
-                // Days looks dimmer when the weather is cloudy and vice versa, try to match the visual
-                // modifiedMidLowScore *= 1 + Mathf.Abs(cloud * GetTimeLighingFactor() / 2f);
-                lowLightScoreApplied *= 1 - cloud * GetTimeLighingFactor() / 6f + GetTimeLighingFactor() / 6f;
-                // The captured character is way dimmer when cloudy...
-                // cloud = 0.4, time = 1 (day) => 0.8x (cloudy day)
-
-                // cloud = -0.4, time = 1 (day) => 1.2x (clear day)
-                switch (activeRaidSettings?.SelectedLocation?.Name)
-                {
-                    default: // Hideout
-                        break;
-                    case "Shoreline": // The shoreline works fine when it's clear, but when it get cloudy, the score dip too fast (because the env response strongly to cloudiness) 
-                        var factor = Mathf.Clamp01((0.5f - cloud) / 0.68f);
-                        darkScoreApplied = 0.01f + 0.25f * factor;
-                        factor = Mathf.Clamp01(-cloud);
-                        lowLightScoreApplied *= 1 + factor / 10f; // at -1 (clear), low light score +10%;
-                        break;
-                    case "ReserveBase":
-                        factor = Mathf.Clamp01((cloud - -0.1f) / 0.5f); // compensate dark score for c-0.1 ~ c0.4
-                        darkScoreApplied = 0.01f + 0.2f * factor;
-                        factor = Mathf.Clamp01(-cloud);
-                        lowLightScoreApplied *= 1 + factor / 10f; // at -1 (clear), low light score +10%;
-                        break;
-                    case "Customs": // Cloudiness has too much impact on score during daytime, ML disappear at c1, like L40% - D60%
-                    //case "Streets of Tarkov":
-                        // compensate dark score for c0 ~ c1
-                        if (cloud < 0)
-                        {
-                            midLowLightScoreApplied *= 1 - cloud / 10f; // at -1 (clear), +10%;
-                            lowLightScoreApplied *= 1f + cloud / 10f; // at -1 (clear), +10%;
-                        }
-                        else
-                        {
-                            darkScoreApplied *= 1f + cloud; // at 1 (clear), low light score +100%;
-                            lowLightScoreApplied *= 1f + cloud / 10f; // at 1 (clear), low light score +10%;
-                        }
-                        break;
-                    case "Factory": // NIGHT, thresholds compressed
-                        lowLightScoreApplied = lowLightScore * 0.7f;
-                        highMidLightScoreApplied *= 0.5f;
-                        highLightScoreApplied *= 0.5f;
-                        break;
-                    case "Streets of Tarkov":
-                                              // The streets is impacted by c0 ~ c1 a lot
-                                              // The streets is very weird, on clear (-1) days, L and L+ disappear starting from 20:45 and reappear at 23:45, both without matching visual change
-
-                        // Visibility on the streets is not really affected by cloudiness in day time
-                        // But pixels drop
-                        darkScoreApplied *= 5 + 5f * Mathf.Clamp01(cloud + 0.266f);
-                        midLowLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 5f;
-                        midLightScoreApplied *= 1 + cloud * GetTimeLighingFactor() / 4f - GetTimeLighingFactor() / 3f;
-
-                        break;
-                    case "Lighthouse": // DAY
-                        lowLightScoreApplied *= 1 + GetTimeLighingFactor() / 6f;
-                        break;
-                }
-            }
-
-            frameLitScore = shinePixels * shineScore
-                          + highLightPixels * highLightScore
-                          + highMidLightPixels * highMidLightScoreApplied
-                          + midLightPixels * midLightScoreApplied
-                          + midLowLightPixels * midLowLightScoreApplied
-                          + lowLightPixels * lowLightScoreApplied
-                          + darkPixels * darkScoreApplied;
-
-            avgLum /= (float)validPixels;
-            lastValidPixels = validPixels;
-
-            var lowAndDarkRatio = (lowLightPixels + darkPixels) / (float) validPixels;
-
-
-            float avgLumMultiFrames = avgLum + frame1.avgLum + frame2.avgLum + frame3.avgLum + frame4.avgLum + frame5.avgLum;
-
-            avgLumMultiFrames /= 6f;
-            multiAvgLum = avgLumMultiFrames;
-
-            // Slowly moving towards current ratio or low and dark pixels
-            //movingLowLightAndDarkRatio = Mathf.Lerp(movingLowLightAndDarkRatio, (avgDarkPixelsRatioMultiFrames + avgLowLightPixelsRatioMultiFrames), 1 / 6f);
-
-            envLumEstiFast = Mathf.Lerp(envLumEstiFast, avgLumMultiFrames, Time.deltaTime);
-            envLumEsti = Mathf.Lerp(envLumEsti, avgLumMultiFrames, Time.deltaTime / 3f);
-            envLumEstiSlow = Mathf.Lerp(envLumEstiSlow, avgLumMultiFrames, Time.deltaTime / 10f);
-
-            switch (activeRaidSettings?.SelectedLocation?.Name)
-            {
-                default:
-                    if (Time.time - awakeAt > 20f)
-                        globalLumEsti = Mathf.Lerp(globalLumEsti, avgLumMultiFrames, Time.deltaTime / (1 + Mathf.Min((Time.time - 20 - awakeAt) * 2f, 300f)));
-
-                    break;
-                case "Factory":
-                    if (GetTimeLighingFactor() < 0) globalLumEsti = 0.005f;
-                    break;
-            }
-
-            frameLitScore /= (float) validPixels;
-            // Transform to -1 ~ 1
-            // ↑ 0 ~ 1
-            frameLitScore = Mathf.Clamp01(frameLitScore);
-            frameLitScore -= 0.5f;
-            frameLitScore *= 2f;
-
-            frameLitScoreRaw0 = frameLitScore;
-            // ↓ -1 ~ 1
-
-            // Suppress highlight score for likely bright env (daylight)
-            if (globalLumEsti > 0.05f && frameLitScore > 0)
-            {
-                var daylightSurpressFactor = (globalLumEsti - 0.05f) / 0.15f;
-
-                // If the avg lum is high but low and dark pixels are few than it means it's so fucking bright that most pixels are midLow+
-                // So the fewer the low and dark pixels (50% base), the stronger the suppression
-                //daylightSurpressFactor *= 1 + Mathf.Clamp01(0.5f - (lowLightPixels + darkPixels) / validPixels) / 1f; // 50% low+dark => 1x, 0% low+dark => 1.5x
-
-                daylightSurpressFactor = Mathf.Clamp01(daylightSurpressFactor);
-                daylightSurpressFactor *= daylightSurpressFactor;
-                if (daylightSurpressFactor > 0)
-                {
-                    //frameLitScore -= highLightPixels * highLightScore;
-                    //frameLitScore -= highMidLightPixels * highMidLightScore * 2 / 3;
-                    //frameLitScore -= midLowLightPixels * midLowLightScore * 1 / 5 * daylightSurpressFactor;
-                    frameLitScore /= 1 + daylightSurpressFactor / 2f;
-                }
-            }
-
-            frameLitScoreRaw1 = frameLitScore;
-
-            // Raise score for flashing lights especially in darker env
-            var recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - envLumEsti) / 0.2f);
-            frameLitScore += recentChangeFactor * (1 - Mathf.Clamp01(envLumEstiSlow / 0.1f));
-            frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
-
-            // Reduce the score when the lum is stable
-            recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - envLumEsti) / 0.2f); // (avgLumMultiFrames - envLumEstiSlow) is always approaching zero when the environment lighting is stable
-            if (frameLitScore > 0f) frameLitScore /= 1 + 0.3f * (1 - recentChangeFactor); // The bigger the difference, the more it should be suppressed
-            else if (frameLitScore < 0f) frameLitScore *= 1 + 0.1f * (1 - recentChangeFactor);
-
-            recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - envLumEstiSlow) / 0.2f); // (avgLumMultiFrames - envLumEstiSlow) is always approaching zero when the environment lighting is stable
-            if (frameLitScore > 0f) frameLitScore /= 1 + 0.1f * (1 - recentChangeFactor); // The bigger the difference, the more it should be suppressed
-            else if (frameLitScore < 0f) frameLitScore *= 1 + 0.1f * (1 - recentChangeFactor);
-
-            recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - globalLumEsti) / 0.1f);
-            if (frameLitScore > 0f) frameLitScore /= 1 + 0.1f * (1 - recentChangeFactor);
-            else if (frameLitScore < 0f) frameLitScore *= 1 + 0.05f * (1 - recentChangeFactor);
-
-            //// Overally lit but mostly low light pixels, probably in the day light or cloudy days and not receiving any additional lights
-            //// In this case the score will be a bit too low (negative)
-            //// Let's bring it closer to neutral
-            //if (frameLitScore < 0.1f && lowAndDarkRatio > 0.5f && lowLightRatioLit > 0.75f && darkPixels / validPixels < 0.5f)
-            //{
-            //    frameLitScore = Mathf.Lerp(frameLitScore, 0.1f, (1 - darkPixels / validPixels));
-            //}
-            //// Overally lit and not mostyly just low light pixels, probably in the day light
-            //// In this case the score will be a bit too high
-            //// Let's bring it closer to 0.1 (neutral)
-            //if (frameLitScore > 0.1f && darkerPixels > validPixels * 0.8f && lowAndDarkRatio < 0.5f)
-            //{
-            //    frameLitScore = Mathf.Lerp(frameLitScore, 0.1f, 0.5f - lowAndDarkRatio);
-            //}
-
-            frameLitScore = Mathf.Clamp(frameLitScore , - 1, 1);
-
-            frameLitScoreRaw2 = frameLitScore;
-
-            brightestFrameScore = frameLitScore;
-            if (frame1.score > brightestFrameScore) brightestFrameScore = frame1.score;
-            if (frame2.score > brightestFrameScore) brightestFrameScore = frame2.score;
-            if (frame3.score > brightestFrameScore) brightestFrameScore = frame3.score;
-            if (frame4.score > brightestFrameScore) brightestFrameScore = frame4.score;
-            if (frame5.score > brightestFrameScore) brightestFrameScore = frame5.score;
-            darkestFrameScore = frameLitScore;
-            if (frame1.score < darkestFrameScore) darkestFrameScore = frame1.score;
-            if (frame2.score < darkestFrameScore) darkestFrameScore = frame2.score;
-            if (frame3.score < darkestFrameScore) darkestFrameScore = frame3.score;
-            if (frame4.score < darkestFrameScore) darkestFrameScore = frame4.score;
-            if (frame5.score < darkestFrameScore) darkestFrameScore = frame5.score;
-
-            // Max contrast between all frames (sides)
-            float contrast = brightestFrameScore - darkestFrameScore;
-            if (contrast < 0.3f) // Low contrast, enhance darkness
-            {
-                if (frameLitScore < 0 && (darkerPixels > 0.75f * validPixels || lowAndDarkRatio > 0.8f))
-                {
-                    var enhacement = 2 * contrast * contrast;
-                    enhacement *= (1 - (brighterPixels + midLightPixels / 2) / validPixels); // Any percentage of pixels brighter than mid scales the effect down
-                    frameLitScore *= (1 + enhacement);
-                }
-            }
-
-            frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
-
-
-            //The average score of other frames(sides)
-            var avgScorePrevFrames = (frame1.score + frame2.score + frame3.score + frame4.score + frame5.score) / 5f;
-            // The contrast between the brightest frame and average
-            var avgContrastFactor = frameLitScore - avgScorePrevFrames; // could be up to 2
-            if (avgContrastFactor > 0) // Brighter than avg
-            {
-                // Extra score for higher contrast (Easier to notice)
-                avgContrastFactor /= 2f; // Compress to 0 ~ 1
-                frameLitScore += avgContrastFactor / 10f;
-                avgContrastFactor = Mathf.Pow(1.1f * avgContrastFactor, 2); // Curve
-                frameLitScore = Mathf.Lerp(frameLitScore, brightestFrameScore, Mathf.Clamp(avgContrastFactor, 0, 1));
-            }
-            //Darker than avg? Doesn't matter
-
-            frameLitScoreRaw3 = frameLitScore;
-
-            //frameLitScore = (frameLitScore + brightest) / 2f;
-
-            // Contrast this frame (side), makes the player slightly more visible
-            var frameContrastFactor = Mathf.Pow(((lowLightPixels + darkPixels) / validPixels) * 0.5f, 2) * Mathf.Pow(brighterPixels / validPixels, 2);
-            if (frameLitScore < 0) frameLitScore /= 1 + frameContrastFactor / 2f; // low + dark tends to be pretty high in already dark env
-            else frameLitScore *= 1 + frameContrastFactor / 3f;
-
-
-
-            //if (brighterPixels / darkerPixels > 0.05f && darkerPixels > validPixels * 0.2f && lowLightPixels > validPixels * 0.2f)
-            //{
-            //    frameLitScore *= (1 + brighterPixels / darkerPixels);
-            //    frameLitScore = Mathf.Lerp(frameLitScore, brightest, Mathf.Pow(brighterPixels / darkerPixels, 2));
-            //}
-            //if (highMidLightPixels / darkerPixels > 0 && darkerPixels > validPixels * 0.2f && lowLightPixels > validPixels * 0.2f)
-            //{
-            //    frameLitScore *= (1 + highMidLightPixels * 2 / darkerPixels);
-            //    frameLitScore = Mathf.Lerp(frameLitScore, brightest, Mathf.Pow(highMidLightPixels * 3 / darkerPixels, 2));
-            //}
-            //if (highLightPixels / darkerPixels > 0 && darkerPixels > validPixels * 0.2f && lowLightPixels > validPixels * 0.2f)
-            //{
-            //    frameLitScore *= (1 + highLightPixels * 4 / darkerPixels);
-            //    frameLitScore = Mathf.Lerp(frameLitScore, brightest, Mathf.Pow(highLightPixels * 10 / darkerPixels, 2));
-            //}
-
-
-            if (MainPlayer.AIData.GetFlare) frameLitScore = Mathf.Max(frameLitScore, Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(-GetTimeLighingFactor())));
-            if (frameLitScore < 0)
-            {
-                if (vLight) frameLitScore /= 2;
-                else if (vLaser) frameLitScore /= 1.5f;
-                else if (vLightSub) frameLitScore /= 1.3f;
-                else if (vLaserSub) frameLitScore /= 1.1f;
-            }
-
-            var equipmentShineFactorByTime = Mathf.Clamp01(-GetTimeLighingFactor()) + (1 - Mathf.Clamp01(GetTimeLighingFactor())) * 0.15f; // ~0.15 in daytime
-            if (vLight) frameLitScore += equipmentShineFactorByTime * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
-            else if (vLaser) frameLitScore += 0.5f * equipmentShineFactorByTime * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
-            else if (vLightSub) frameLitScore += 0.3f * equipmentShineFactorByTime * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
-            else if (vLaserSub) frameLitScore += 0.1f * equipmentShineFactorByTime * Mathf.Clamp01(0.02f - envLumEsti) / 0.02f;
-            frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
-
-            //Cloudy?
-            //if (cloud > 0 && frameLitScore < 0)
-            //{
-            //    if (GetTimeLighingFactor() > 0)
-            //        frameLitScore = Mathf.Lerp(frameLitScore, -1, cloud * cloudinessCompensationScale * 0.5f * GetTimeLighingFactor());
-            //    else
-            //        frameLitScore = Mathf.Lerp(frameLitScore, 0, cloud * cloudinessCompensationScale);
-            //}
-
-            frameLitScoreRaw4 = frameLitScore;
-            switch (activeRaidSettings?.SelectedLocation?.Name)
-            {
-                default: // Hideout
-                    break;
-                case "Lighthouse":
-                    if (GetTimeLighingFactor() < 0) frameLitScore *= 0.9f;
-                    break;
-                case "Shoreline": // The shoreline is very responsive to cloudiness, but when it get cloudy, the score dip too fast (because the env response strongly to cloudiness) 
-                    // The score is so fricking low even in daytime, while it looks fine on screen
-                    if (GetTimeLighingFactor() > 0.25f && frameLitScore < 0)
-                    {
-                        frameLitScore /= 10f;
-                        var daylightFactor = (GetTimeLighingFactor() - 0.25f) / 0.75f;
-                        daylightFactor *= Mathf.Clamp01(cloud);
-                        frameLitScore += 0.1f * daylightFactor;
-                    }
-                    break;
-                case "ReserveBase":
-                    // The score is so fricking low even in daytime, while it looks fine on screen
-                    if (GetTimeLighingFactor() > 0.25f && frameLitScore < 0)
-                    {
-                        frameLitScore /= 10f;
-                        frameLitScore += 0.3f * (GetTimeLighingFactor() - 0.25f) / 0.75f;
-                    }
-                    else if (GetTimeLighingFactor() < 0 && frameLitScore < 0)
-                    {
-                        frameLitScore *= 0.9f + Mathf.Clamp01(cloud) * 0.5f; // Cap to -0.9 ~ -0.95(cloud)
-                    }
-                    break;
-                case "Customs":
-                    if (GetTimeLighingFactor() > 0) // Limit cloud impact during daytime
-                    {
-                        if (cloud > 0 && frameLitScore < 0) frameLitScore *= 1 - Mathf.Clamp01(cloud); // Scale down to -0.9 ~ -0.95(cloud)
-                    }
-                    else if (GetTimeLighingFactor() < 0 && frameLitScore < 0)
-                    {
-                        frameLitScore *= 0.8f + Mathf.Clamp01(cloud) * 0.1f; // Scale down to -0.7 (clear) ~ -0.95(cloud)
-                    }
-                    break;
-                case "Streets of Tarkov":
-                    if (GetTimeLighingFactor() < 0 && frameLitScore < -0.5f) frameLitScore = -0.5f + ((frameLitScore + 0.5f) * 0.8f); // The street has a dim light vision even with 1.0 cloud during the darkest hours
-                    break;
-            }
-
-            frameLitScore = Mathf.Clamp(frameLitScore, -1, 1);
-
-            multiFrameLitScore = (brightestFrameScore * 2f
-                                + frameLitScore
-                                + frame1.score
-                                + frame2.score
-                                + frame3.score
-                                + frame4.score
-                                + frame5.score
-                                - darkestFrameScore) / 7f;
-
-            // In bright map, move toward 0
-            multiFrameLitScore = Mathf.Lerp(multiFrameLitScore, 0, Mathf.Clamp01((globalLumEsti - 0.09f) / 0.05f) * 0.5f);
-
-            void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
-            {
-                thresholdShine = 0.8f;
-                thresholdHigh = 0.5f;
-                thresholdHighMid = 0.25f;
-                thresholdMid = 0.13f;
-                thresholdMidLow = 0.055f;
-                thresholdLow = 0.015f;
-                if (tlf < 0) // Night
-                {
-                    switch (activeRaidSettings?.SelectedLocation?.Name)
-                    {
-                        case "Factory":
-                            thresholdShine *= 0.8f;
-                            thresholdHigh *= 0.8f;
-                            thresholdHighMid *= 0.8f;
-                            thresholdMid *= 0.8f;
-                            thresholdMidLow *= 0.8f;
-                            break;
-                        case "Streets of Tarkov":
-                            thresholdShine *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.3f;
-                            thresholdHigh *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.3f;
-                            thresholdHighMid *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.35f;
-                            thresholdMid *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.35f;
-                            thresholdMidLow *= 1 + tlf * 0.2f - Mathf.Clamp01(cloud) * 0.35f;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                    switch (activeRaidSettings?.SelectedLocation?.Name)
-                    {
-                        case "Shoreline":
-                            thresholdShine = 0.8f;
-                            thresholdHigh = 0.5f;
-                            thresholdHighMid = 0.25f;
-                            thresholdMid = 0.13f;
-                            thresholdMidLow = 0.055f - 0.02f * tlf * (cloud - 0.05f) / 1.05f;
-                            thresholdLow = 0.015f;
-                            break;
-                        // Visibility on the streets is not really affected by cloudiness in day time
-                        // But pixels drop
-                        case "Streets of Tarkov":
-                            thresholdShine *= 1 - Mathf.Clamp01(cloud) * 0.3f;
-                            thresholdHigh *= 1 - Mathf.Clamp01(cloud) * 0.3f;
-                            thresholdHighMid *= 1 - Mathf.Clamp01(cloud) * 0.35f;
-                            thresholdMid *= 1 - Mathf.Clamp01(cloud) * 0.35f;
-                            thresholdMidLow *= 1 - Mathf.Clamp01(cloud) * 0.35f;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
+            MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
         }
 
         private void OnDestroy()
@@ -950,8 +368,7 @@ namespace ThatsLit.Components
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
-                Utility.GUILayoutDrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));
-                Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(multiFrameLitScore, POWER) / 0.0999f));
+                scoreCalculator?.CalledOnGUI();
                 if (foliageScore > 0.3f)
                     GUILayout.Label("[FOLIAGE+++]");
                 else if (foliageScore > 0.2f)
@@ -964,43 +381,6 @@ namespace ThatsLit.Components
                     GUILayout.Label("[That's Lit HUD] Can be disabled in plugin settings.");
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
-            if (Time.frameCount % 41 == 0)
-            {
-                shinePixelsRatioSample = (shinePixels / (float)lastValidPixels + frame1.RatioShinePixels + frame2.RatioShinePixels + frame3.RatioShinePixels + frame4.RatioShinePixels + frame5.RatioShinePixels) / 6f;
-                highLightPixelsRatioSample = (highLightPixels / (float)lastValidPixels + frame1.RatioHighPixels + frame2.RatioHighPixels + frame3.RatioHighPixels + frame4.RatioHighPixels + frame5.RatioHighPixels) / 6f;
-                highMidLightPixelsRatioSample = (highMidLightPixels / (float)lastValidPixels + frame1.RatioHighMidPixels + frame2.RatioHighMidPixels + frame3.RatioHighMidPixels + frame4.RatioHighMidPixels + frame5.RatioHighMidPixels) / 6f;
-                midLightPixelsRatioSample = (midLightPixels / (float)lastValidPixels + frame1.RatioMidPixels + frame2.RatioMidPixels + frame3.RatioMidPixels + frame4.RatioMidPixels + frame5.RatioMidPixels) / 6f;
-                midLowLightPixelsRatioSample = (midLowLightPixels / (float)lastValidPixels + frame1.RatioMidLowPixels + frame2.RatioMidLowPixels + frame3.RatioMidLowPixels + frame4.RatioMidLowPixels + frame5.RatioMidLowPixels) / 6f;
-                lowLightPixelsRatioSample = (lowLightPixels / (float)lastValidPixels + frame1.RatioLowPixels + frame2.RatioLowPixels + frame3.RatioLowPixels + frame4.RatioLowPixels + frame5.RatioLowPixels) / 6f;
-                darkPixelsRatioSample = (darkPixels / (float)lastValidPixels + frame1.RatioDarkPixels + frame2.RatioDarkPixels + frame3.RatioDarkPixels + frame4.RatioDarkPixels + frame5.RatioDarkPixels) / 6f;
-
-                frameLitScoreSample = frameLitScore;
-                frameitScoreRawSample0 = frameLitScoreRaw0;
-                frameitScoreRawSample1 = frameLitScoreRaw1;
-                frameitScoreRawSample2 = frameLitScoreRaw2;
-                frameitScoreRawSample3 = frameLitScoreRaw3;
-                frameitScoreRawSample4 = frameLitScoreRaw4;
-                multiFrameLitScoreSample = multiFrameLitScore;
-                lastDarkestSample = darkestFrameScore;
-                lastBrightestSample = brightestFrameScore;
-                avgLumSample = avgLum;
-                multiAvgLumSample = multiAvgLum;
-            }
-            GUILayout.Label(string.Format("PIXELS: {0:000} - {1:000} - {2:000} - {3:0000} - {4:0000} - {5:0000} - {6:0000}", shinePixels, highLightPixels, highMidLightPixels, midLightPixels, midLowLightPixels, lowLightPixels, darkPixels));
-            GUILayout.Label(string.Format("PIXELS: {0:000}% - {1:000}% - {2:000}% - {3:000}% - {4:000}% - {5:000}% - {6:000}% (AVG Sample)", shinePixelsRatioSample * 100, highLightPixelsRatioSample * 100, highMidLightPixelsRatioSample * 100, midLightPixelsRatioSample * 100, midLowLightPixelsRatioSample * 100, lowLightPixelsRatioSample * 100, darkPixelsRatioSample * 100));
-            
-            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} -> {4:＋0.00;－0.00;+0.00} -> {5:＋0.00;－0.00;+0.00} (FRAME) ", frameLitScoreRaw0, frameLitScoreRaw1, frameLitScoreRaw2, frameLitScoreRaw3, frameLitScoreRaw4, frameLitScore));
-            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} -> {4:＋0.00;－0.00;+0.00} -> {5:＋0.00;－0.00;+0.00} (FRAME) (SAMPLE)", frameitScoreRawSample0, frameitScoreRawSample1, frameitScoreRawSample2, frameitScoreRawSample3, frameitScoreRawSample4, frameLitScoreSample));
-            Utility.GUILayoutDrawAsymetricMeter((int)(frameLitScore / 0.0999f));
-
-            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋000.0;－000.0;+000.0}% (MULTI)", multiFrameLitScore, Mathf.Pow(multiFrameLitScore, POWER) * 100));
-            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋000.0;－000.0;+000.0}% (MULTI) (SAMPLE)", multiFrameLitScoreSample, Mathf.Pow(multiFrameLitScoreSample, POWER) * 100));
-            Utility.GUILayoutDrawAsymetricMeter((int)(multiFrameLitScore / 0.0999f));
-            // Factor
-            Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(multiFrameLitScore, POWER) / 0.0999f));
-            GUILayout.Label(string.Format("CONTRA: {0:＋0.00;－0.00} <-> {1:＋0.00;－0.00} ({2:0.00}) (SAMPLE)", lastDarkestSample, lastBrightestSample, lastBrightestSample - lastDarkestSample));
-            GUILayout.Label(string.Format("AVGLUM: {0:＋0.000;－0.000} (SAMPLE) / {1:＋0.000;－0.000} (MULTI)", avgLumSample, multiAvgLum));
-            GUILayout.Label(string.Format("ENVLUM: {0:＋0.000;－0.000} (1s) {1:＋0.000;－0.000} (3s) / {2:＋0.000;－0.000} (10s) / {3:＋0.000;－0.000} (5m)", envLumEstiFast, envLumEsti, envLumEstiSlow, globalLumEsti));
             GUILayout.Label(string.Format("IMPACT: {0:0.00} -> {1:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo));
             //GUILayout.Label(text: "PIXELS:");
             //GUILayout.Label(lastValidPixels.ToString());
@@ -1009,12 +389,8 @@ namespace ThatsLit.Components
             GUILayout.Label(string.Format("FOLIAGE: {0:0.000}", foliageScore));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / {3} -> TIME_LIGHT: {4:0.00}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), GetTimeLighingFactor()));
             GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", vLight? "V" : irLight? "I" : "-", vLaser ? "V" : irLaser ? "I" : "-", vLightSub ? "V" : irLightSub ? "I" : "-", vLaserSub ? "V" : irLaserSub ? "I" : "-"));
-
-            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:0.00} | {2:0.00} | {3:0.00} | {4:0.00} | {5:0.00} | {6:0.00}", shineScoreApplied, highLightScoreApplied, highMidLightScoreApplied, midLightScore, midLowLightScoreApplied, lowLightScoreApplied, darkScoreApplied));
-            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} | {1:＋0.00;－0.00;+0.00} | {2:＋0.00;－0.00;+0.00} | {3:＋0.00;－0.00;+0.00} | {4:＋0.00;－0.00;+0.00} | {5:＋0.00;－0.00;+0.00} | {6:＋0.00;－0.00;+0.00}", shineScoreApplied - shineScore, highLightScoreApplied - highLightScore, highMidLightScoreApplied - highMidLightScore, midLightScore - midLightScoreApplied, midLowLightScoreApplied - midLowLightScore, lowLightScoreApplied - lowLightScore, darkScoreApplied - darkScore));
-            GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
+GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
-            scoreCalculator?.CalledOnGUI();
 
         }
 
