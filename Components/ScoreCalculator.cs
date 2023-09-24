@@ -544,6 +544,13 @@ namespace ThatsLit.Components
         protected override float MinBaseAmbienceScore => -0.85f;
         protected override float MinAmbienceLum => 0.011f;
         protected override float MaxAmbienceLum => 0.011f;
+        protected override float ThresholdShine { get => 0.4f; }
+        protected override float ThresholdHigh { get => 0.3f; }
+        protected override float ThresholdHighMid { get => 0.2f; }
+        protected override float ThresholdMid { get => 0.1f; }
+        protected override float ThresholdMidLow { get => 0.04f; }
+        protected override float ThresholdLow { get => 0.015f; }
+        protected override float PixelLumScoreScale { get => 1.5f; }
     }
 
     public class WoodsScoreCalculator : ScoreCalculator
