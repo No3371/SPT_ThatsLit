@@ -42,7 +42,7 @@ namespace ThatsLit.Components
         int foliageCount;
         internal Vector2 foliageDir;
         Collider[] collidersCache;
-        public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
+        public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass")| 1 << LayerMask.NameToLayer("PlayerSpiritAura");
         // PlayerSpiritAura is Visceral Bodies compat
 
         float awakeAt, lastCheckedLights, lastCheckedFoliages;
@@ -334,6 +334,7 @@ namespace ThatsLit.Components
 
                 for (int i = 0; i < count; i++)
                 {
+                    if (collidersCache[i].gameObject.HasTagInParent("Player")) continue; // Somehow on Lighthouse player spines are tagged PlayerSpiritAura, VB or vanilla?
                     Vector3 dir = (collidersCache[i].transform.position - bodyPos);
                     float dis = dir.magnitude;
                     if (dis < 0.25f) foliageScore += 3f;
@@ -408,6 +409,7 @@ namespace ThatsLit.Components
             GUILayout.Label(string.Format("AFFECTED: {0} (+{1})", calced, calcedLastFrame));
 
             GUILayout.Label(string.Format("FOLIAGE: {0:0.000} ({1})", foliageScore, foliageCount));
+            GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
             GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", vLight? "V" : irLight? "I" : "-", vLaser ? "V" : irLaser ? "I" : "-", vLightSub ? "V" : irLightSub ? "I" : "-", vLaserSub ? "V" : irLaserSub ? "I" : "-"));
             GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
