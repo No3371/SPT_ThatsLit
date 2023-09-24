@@ -388,8 +388,8 @@ namespace ThatsLit.Components
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
-                Utility.GUILayoutDrawAsymetricMeter((int) (MultiFrameLitScore / 0.0999f));
-                Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
+                if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int) (MultiFrameLitScore / 0.0999f));
+                if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
                 if (foliageScore > 0.3f)
                     GUILayout.Label("[FOLIAGE+++]");
                 else if (foliageScore > 0.2f)
