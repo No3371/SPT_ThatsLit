@@ -99,7 +99,7 @@ namespace ThatsLit.Components
                     case "RezervBase": // Reserve
                         if (ThatsLitPlugin.EnableReserve.Value) scoreCalculator = new ReserveScoreCalculator();
                         break;
-                    case "interchange":
+                    case "Interchange":
                         if (ThatsLitPlugin.EnableInterchange.Value) scoreCalculator = new InterchangeScoreCalculator();
                         break;
                     case "TarkovStreets":
