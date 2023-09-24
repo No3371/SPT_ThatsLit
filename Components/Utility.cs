@@ -77,10 +77,10 @@ namespace ThatsLit.Components
                 {
                     if (light == null || !light.IsActive) continue;
                     MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
-                    if (thisLight && !thisLightIsIR) if (active == primary1) vLight = true; else vLightSub = true;
-                    if (thisLight && thisLightIsIR) if (active == primary1) irLight = true; else irLightSub = true;
-                    if (thisLaser && !thisLaserIsIR) if (active == primary1) vLaser = true; else vLaserSub = true;
-                    if (thisLaser && thisLaserIsIR) if (active == primary1) irLaser = true; else irLaserSub = true;
+                    if (thisLight && !thisLightIsIR) vLightSub = true;
+                    if (thisLight && thisLightIsIR) irLightSub = true;
+                    if (thisLaser && !thisLaserIsIR) vLaserSub = true;
+                    if (thisLaser && thisLaserIsIR)  irLaserSub = true;
                 }
             }
 
@@ -88,16 +88,15 @@ namespace ThatsLit.Components
             if (active != holstered && holstered != null)
             {
                 Weapon weapon = holstered as Weapon;
-                if (weapon != null) 
+                if (weapon != null)
                 foreach (var light in FindComponents<LightComponent>(weapon))
                 {
                     if (light == null || !light.IsActive) continue;
                     MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
-                    if (thisLight && !thisLightIsIR) if (active == holstered) vLight = true; else vLightSub = true;
-                    if (thisLight && thisLightIsIR) if (active == holstered) irLight = true; else irLightSub = true;
-                    if (thisLaser && !thisLaserIsIR) if (active == holstered) vLaser = true; else vLaserSub = true;
-                    if (thisLaser && thisLaserIsIR) if (active == holstered) irLaser = true; else irLaserSub = true;
-                    if (vLight) return; // Early exit for main visible light because that's enough to decrease score
+                    if (thisLight && !thisLightIsIR) vLightSub = true;
+                    if (thisLight && thisLightIsIR) irLightSub = true;
+                    if (thisLaser && !thisLaserIsIR) vLaserSub = true;
+                    if (thisLaser && thisLaserIsIR) irLaserSub = true;
                 }
             }
 
@@ -110,11 +109,10 @@ namespace ThatsLit.Components
                 {
                     if (light == null || !light.IsActive) continue;
                     MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
-                    if (thisLight && !thisLightIsIR) if (active == secondary) vLight = true; else vLightSub = true;
-                    if (thisLight && thisLightIsIR) if (active == secondary) irLight = true; else irLightSub = true;
-                    if (thisLaser && !thisLaserIsIR) if (active == secondary) vLaser = true; else vLaserSub = true;
-                    if (thisLaser && thisLaserIsIR) if (active == secondary) irLaser = true; else irLaserSub = true;
-                    if (vLight) return; // Early exit for main visible light because that's enough to decrease score
+                    if (thisLight && !thisLightIsIR) vLightSub = true;
+                    if (thisLight && thisLightIsIR) irLightSub = true;
+                    if (thisLaser && !thisLaserIsIR) vLaserSub = true;
+                    if (thisLaser && thisLaserIsIR) irLaserSub = true;
                 }
             }
             // GClass2550 544909bb4bdc2d6f028b4577 x item tactical_all_insight_anpeq15 2457 / V + IR + IRL / MODES: 4  V -> IR -> IRL -> IR+IRL
