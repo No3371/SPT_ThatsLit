@@ -79,10 +79,9 @@ namespace ThatsLit.Components
             float lowAmbienceScoreFactor = (1f - ambienceScore) / 2f;
             float lumScore = (thisFrame.avgLum - minAmbienceLum) * lumScoreScale / lowAmbienceScoreFactor;
             float hightLightedPixelFactor = 1f * thisFrame.RatioShinePixels + 0.75f * thisFrame.RatioHighPixels + 0.4f * thisFrame.RatioHighMidPixels + 0.15f * thisFrame.RatioMidPixels;
-            if (Time.frameCount % 47 == 0) scoreRaw1 = lumScore + ambienceScore;
             lumScore *= 1 + hightLightedPixelFactor;
             lumScore = Mathf.Clamp(lumScore, 0, 2);
-            if (Time.frameCount % 47 == 0) scoreRaw2 = lumScore + ambienceScore;
+            if (Time.frameCount % 47 == 0) scoreRaw1 = lumScore + ambienceScore;
 
             //var topScoreMultiFrames = FindHighestScoreRecentFrame(true, score);
             //var bottomScoreMultiFrames = FindLowestScoreRecentFrame(true, score);
@@ -110,7 +109,7 @@ namespace ThatsLit.Components
 
 
             lumScore += CalculateChangingLumModifier(thisFrame.avgLumMultiFrames, lum1s, lum3s, ambienceScore);
-            if (Time.frameCount % 47 == 0) scoreRaw3 = lumScore + ambienceScore;
+            if (Time.frameCount % 47 == 0) scoreRaw2 = lumScore + ambienceScore;
 
             // Extra score for multi frames(sides) contrast in darkness
             // For exmaple, lights on the floor contributes not much to the score but should make one much more visible
@@ -122,7 +121,7 @@ namespace ThatsLit.Components
             var expectedFinalScore = lumScore + ambienceScore;
             var compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2); // contrast:0.1 -> final toward 0.1, contrast:0.5 -> final toward 0.25
             lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor; // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
-            if (Time.frameCount % 47 == 0) scoreRaw4 = lumScore + ambienceScore;
+            if (Time.frameCount % 47 == 0) scoreRaw3 = lumScore + ambienceScore;
 
             //The average score of other frames(sides)
             //var avgScorePrevFrames = (frame1.score + frame2.score + frame3.score + frame4.score + frame5.score) / 5f;
@@ -149,6 +148,7 @@ namespace ThatsLit.Components
                 compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2);
                 lumScore += compensation * (lowAmbienceScoreFactor + 0.1f);
             }
+            if (Time.frameCount % 47 == 0) scoreRaw4 = lumScore + ambienceScore;
 
             lumScore += ambienceScore;
             lumScore = Mathf.Clamp(lumScore, -1, 1);

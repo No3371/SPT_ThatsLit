@@ -89,13 +89,6 @@ namespace ThatsLit.Patches.Vision
                 if (!mainPlayer) return;
                 if (mainPlayer.disableVisionPatch) return;
 
-                bool foundCloser = false;
-                if (dis < closetLastFrame)
-                {
-                    closetLastFrame = dis;
-                    foundCloser = true;
-                    if (Time.frameCount % 30 == 0) mainPlayer.lastCalcFrom = original;
-                }
 
                 float score, factor;
 
@@ -118,16 +111,32 @@ namespace ThatsLit.Patches.Vision
 
                 }
 
-                var foliageImpact = mainPlayer.foliageScore * (1.25f - factor);
+                bool foundCloser = false;
+                if (dis < closetLastFrame)
+                {
+                    closetLastFrame = dis;
+                    foundCloser = true;
+                    if (Time.frameCount % 47 == 0)
+                    {
+                        mainPlayer.lastCalcFrom = original;
+                        mainPlayer.lastScore = score;
+                        mainPlayer.lastFactor1 = factor;
+                    }
+                }
+
+                var foliageImpact = mainPlayer.foliageScore * (1f - factor);
                 if (mainPlayer.foliageDir != Vector2.zero) foliageImpact *= 1 - Mathf.Clamp01(Vector2.Angle(new Vector2(-DirToPlayer.x, -DirToPlayer.z), mainPlayer.foliageDir) / 90f); // 0deg -> 1, 90+deg -> 0
                 // Maybe randomly lose vision for foliages
                 // Pose higher than half will reduce the change
                 if (UnityEngine.Random.Range(0f, 1f) < disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(0.75f - poseFactor) / 0.75f) // Among bushes, from afar
                 {
                     __result *= 10f;
-                    if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;
+                    if (Time.frameCount % 47 == 0 && foundCloser)
+                    {
+                        mainPlayer.lastCalcTo = __result;
+                        mainPlayer.lastFactor2 = factor;
+                    }
                     __result += ThatsLitPlugin.FinalOffset.Value;
-                    return;
                 }
 
                 if (!mainPlayer.disabledLit)
@@ -151,7 +160,7 @@ namespace ThatsLit.Patches.Vision
                     factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 
                     // Absoulute offset
-                    // factor: -0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (6.5m)
+                    // factor: -0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (6m)
                     // f-1, 1m => 
                     var reducingSeconds = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqb, 1f - 0.5f*cqb);
                     reducingSeconds *= factor < 0 ? 1 : 0.1f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
@@ -180,10 +189,14 @@ namespace ThatsLit.Patches.Vision
                 __result += ThatsLitPlugin.FinalOffset.Value;
                 if (__result < 0.001f) __result = 0.001f;
 
-                if (Time.frameCount % 30 == 0 && foundCloser) mainPlayer.lastCalcTo = __result;
+                if (Time.frameCount % 47 == 0 && foundCloser)
+                {
+                    mainPlayer.lastCalcTo = __result;
+                    mainPlayer.lastFactor2 = factor;
+                }
                 mainPlayer.calced++;
                 mainPlayer.calcedLastFrame++;
-
+    
             }
         }
     }

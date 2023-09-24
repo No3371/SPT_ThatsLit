@@ -28,7 +28,7 @@ namespace ThatsLit.Components
         int currentCamPos = 0;
         public Texture2D envTex, envDebugTex;
         Unity.Collections.NativeArray<Color32> observed;
-        public float lastCalcFrom, lastCalcTo;
+        public float lastCalcFrom, lastCalcTo, lastScore, lastFactor1, lastFactor2;
         public int calced = 0, calcedLastFrame = 0;
         public int lockPos = -1;
         public int lastValidPixels = RESOLUTION * RESOLUTION;
@@ -403,16 +403,17 @@ namespace ThatsLit.Components
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
             scoreCalculator?.CalledOnGUI();
-            GUILayout.Label(string.Format("IMPACT: {0:0.00} -> {1:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo));
+            GUILayout.Label(string.Format("IMPACT: {0:0.00} -> {1:0.00} ({2:0.00}% <- {3:0.00}% <- {4:0.00}) (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore));
             //GUILayout.Label(text: "PIXELS:");
             //GUILayout.Label(lastValidPixels.ToString());
             GUILayout.Label(string.Format("AFFECTED: {0} (+{1})", calced, calcedLastFrame));
 
             GUILayout.Label(string.Format("FOLIAGE: {0:0.000} ({1})", foliageScore, foliageCount));
-            GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
+            GUILayout.Label(string.Format("POSE: {0:0.000}", MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel));
+            // GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
             GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", vLight? "V" : irLight? "I" : "-", vLaser ? "V" : irLaser ? "I" : "-", vLightSub ? "V" : irLightSub ? "I" : "-", vLaserSub ? "V" : irLaserSub ? "I" : "-"));
-            GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
+            // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
 
         }
