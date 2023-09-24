@@ -430,7 +430,7 @@ namespace ThatsLit.Components
             else if (time >= 2 && time < 3) // 0.1
                 return 0.1f;
             else if (time >= 3 && time < 5) // 0.1 ~ 0
-                return 0.1f * GetTimeProgress(time, 3, 5);
+                return 0.1f - 0.1f * GetTimeProgress(time, 3, 5);
             else return 0;
         }
 
@@ -454,7 +454,7 @@ namespace ThatsLit.Components
         {
             cloudiness = 1 - cloudiness; // difference from 1
             float maxSunlightScore = GetMaxSunlightScore();
-            if (time > 5 && time < 8) // 0 ~ 0.3
+            if (time >= 5 && time < 8) // 0 ~ 0.3
                 return cloudiness * maxSunlightScore * GetTimeProgress(time, 5, 8) * 0.4f;
             else if (time >= 8 && time < 12) // 0.3 ~ 1
                 return cloudiness * maxSunlightScore * GetTimeProgress(time, 8, 12) * 0.6f;
