@@ -45,7 +45,6 @@ namespace ThatsLit.Components
                     if (thisLight && thisLightIsIR) irLight = true;
                     if (thisLaser && !thisLaserIsIR) vLaser = true;
                     if (thisLaser && thisLaserIsIR) irLaser = true;
-                    if (vLight) return; // Early exit for main visible light because that's enough to decrease score
                 }
             }
 
@@ -64,7 +63,6 @@ namespace ThatsLit.Components
                     if (thisLight && thisLightIsIR) irLight = true;
                     if (thisLaser && !thisLaserIsIR) vLaser = true;
                     if (thisLaser && thisLaserIsIR) irLaser = true;
-                    if (vLight) return; // Early exit for main visible light because that's enough to decrease score
                 }
             }
 
