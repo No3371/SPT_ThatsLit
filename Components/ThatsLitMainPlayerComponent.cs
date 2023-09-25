@@ -337,9 +337,9 @@ namespace ThatsLit.Components
                     if (collidersCache[i].gameObject.HasTagInParent("Player")) continue; // Somehow on Lighthouse player spines are tagged PlayerSpiritAura, VB or vanilla?
                     Vector3 dir = (collidersCache[i].transform.position - bodyPos);
                     float dis = dir.magnitude;
-                    if (dis < 0.25f) foliageScore += 3f;
-                    else if (dis < 0.4f) foliageScore += 1f;
-                    else if (dis < 0.6f) foliageScore += 0.5f;
+                    if (dis < 0.4f) foliageScore += 3f;
+                    else if (dis < 0.55f) foliageScore += 1f;
+                    else if (dis < 0.7f) foliageScore += 0.6f;
                     else if (dis < 1f) foliageScore += 0.3f;
                     else if (dis < 2f) foliageScore += 0.15f;
                     else foliageScore += 0.05f;
