@@ -209,9 +209,8 @@ namespace ThatsLit.Patches.Vision
                     if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f); // Darkness will be far more effective from afar
                     else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
 
-                    var cqb = 1 - Mathf.Clamp01((dis - 1f) / 5f); // 6+ -> 0, 1f -> 1
+                    var cqb = 1f - Mathf.Clamp01((dis - 1f) / 5f); // 6+ -> 0, 1f -> 1
                     // Fix for blind bots who are already touching us
-                    factor *= 1 - cqb; // linear ineffectiveness within 6m
 
                     var cqbSmooth = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
                     cqbSmooth *= cqbSmooth; // 6m -> 25%, 1m -> 100%
