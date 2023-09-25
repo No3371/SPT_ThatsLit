@@ -556,9 +556,15 @@ namespace ThatsLit.Components
 
     public class WoodsScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.95f;
+        protected override float MinBaseAmbienceScore => -0.87f;
         protected override float MinAmbienceLum => 0.015f;
         protected override float MaxAmbienceLum => 0.017f;
+        protected override float ThresholdShine { get => 0.2f; }
+        protected override float ThresholdHigh { get => 0.1f; }
+        protected override float ThresholdHighMid { get => 0.05f; }
+        protected override float ThresholdMid { get => 0.02f; }
+        protected override float ThresholdMidLow { get => 0.01f; }
+        protected override float ThresholdLow { get => 0.005f; }
     }
 
     public class LighthouseScoreCalculator : ScoreCalculator
