@@ -229,7 +229,7 @@ namespace ThatsLit.Patches.Vision
                     // The scaling here allows the player to stay in the dark without being seen
                     // The reason why scaling is needed is because SeenCoef will change dramatically depends on vision angles
                     // Absolute offset alone won't work for different vision angles
-                    if (factor < 0 && UnityEngine.Random.Range(-1, 0) > factor * Mathf.Clamp01(1 - cqbSmooth - cqb)) __result = 8888f;
+                    if (factor < 0 && UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1 - cqbSmooth - cqb)) __result = 8888f;
                     else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor) __result *= (1f - factor * 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value); // Half the reaction time regardles angle half of the time at 100% score
                     else if (factor < -0.9f) __result *= 1 - (factor * (2f - cqb - cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
                     else if (factor < -0.5f) __result *= 1 - (factor * (1.5f - 0.75f * cqb - 0.75f * cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
