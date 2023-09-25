@@ -99,48 +99,56 @@ namespace ThatsLit.Patches.Vision
                 closetLastFrame = float.MaxValue;
                 if (mainPlayer) mainPlayer.calcedLastFrame = 0;
             }
-
-            Vector3 DirToPlayer = enemy.position - BotTransform.position;
-            var dis = DirToPlayer.magnitude;
-            var disFactor = Mathf.Clamp01((dis - 10) / 100f);
-            // To scale down various sneaking bonus
-            // The bigger the distance the bigger it is, capped to 110m
-            disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0
-
-            if (__instance.Owner.WeaponManager.ShootController.IsAiming)
-            {
-                float v = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 100;
-                if (__instance.Owner.NightVision.UsingNow) Mathf.Min(v, 100); // AIs using NVGs does not get the scope buff
-                disFactor *= 1 + 0.1f * (300 - v) / 100;
-                disFactor = Mathf.Clamp01(disFactor);
-                // 10m sight? => 1.29x... 10m -> 0, 110m -> 1.032
-                // 50m sight => 1.25x... 10m -> 0, 110m -> 1
-                // 100m sight => 1.2x... 10m -> 0, 110m -> 0.96
-                // 300m sight => 1x... 110m -> 0.8
-                // 600m sight => 0.8x... 110m -> 0.64
-                // 1000m sight => 0.3x... 110m -> 0.24
-            }
-
-            var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel;
-            // The chance to overlook considering only the pose and the distance
-            // = the chance even the player is standing in some wild flat zone
-            float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value);
-            if (UnityEngine.Random.Range(0f, 1f) < globalOverlookChance * disFactor / poseFactor)
-            {
-                __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
-                // prone, 110m, about 8% 
-                // prone, 50m, about 1.08%
-                // prone, 10m, 0
-                // stand, 110m, about 0.8% 
-                // stand, 50m, about 0.108%
-                // prone, 10m, 0
-            }
-
-            if (EFTInfo.IsPlayerMainPlayer(__instance.Person))
+            if (__instance.Person.IsYourPlayer)
             {
                 if (!mainPlayer) return;
                 if (mainPlayer.disableVisionPatch) return;
 
+                Vector3 DirToPlayer = enemy.position - BotTransform.position;
+                var dis = DirToPlayer.magnitude;
+                var disFactor = Mathf.Clamp01((dis  - 10) / 100f);
+                // To scale down various sneaking bonus
+                // The bigger the distance the bigger it is, capped to 110m
+                disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0
+
+                bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
+                if (isGoalEnemy && __instance.Owner.WeaponManager.ShootController.IsAiming)
+                {
+                    float v = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 50;
+                    if (__instance.Owner.NightVision.UsingNow) Mathf.Min(v, 50); // AIs using NVGs does not get the scope buff
+                    disFactor *= 1 + 0.1f * (300 - v) / 100;
+                    disFactor = Mathf.Clamp01(disFactor);
+                    // 10m sight? => 1.29x... 10m -> 0, 110m -> 1.29x
+                    // 50m sight => 1.25x... 10m -> 0, 110m -> 1.25x
+                    // 100m sight => 1.2x... 10m -> 0, 110m -> 1.2x
+                    // 300m sight => 1x... 110m -> 0.8
+                    // 600m sight => 0.8x... 110m -> 0.64
+                    // 1000m sight => 0.3x... 110m -> 0.24
+                }
+
+                Vector3 from = BotTransform.rotation * Vector3.forward;
+                Vector3 to = enemy.position - BotTransform.position;
+                var angle = Vector3.Angle(from, to);
+
+                var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f;
+                if (__instance.Person.AIData.Player.IsInPronePose) poseFactor -= 0.4f;
+                poseFactor += 0.05f; // base
+                float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
+                if (isGoalEnemy)
+                {
+                    if (Time.time - __instance.TimeLastSeen < 5f) globalOverlookChance = 0;
+                    else globalOverlookChance *= UnityEngine.Random.Range(0.1f, 0.5f);
+                }
+                if (UnityEngine.Random.Range(0f, 1f) < globalOverlookChance)
+                {
+                    __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
+                    // prone, 110m, about 8% 
+                    // prone, 50m, about 1.08%
+                    // prone, 10m, 0
+                    // stand, 110m, about 0.8% 
+                    // stand, 50m, about 0.108%
+                    // prone, 10m, 0
+                }
 
                 float score, factor;
 
