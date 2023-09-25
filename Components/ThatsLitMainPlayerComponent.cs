@@ -367,7 +367,6 @@ namespace ThatsLit.Components
             //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
             if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
-            calcedLastFrame = 0;
             MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
         }
 
@@ -383,7 +382,7 @@ namespace ThatsLit.Components
         {
             if (disabledLit && Time.time - awakeAt < 30f)
             {
-                GUILayout.Label("[That's Lit] The map is not supported or disabled in configs.");
+                GUILayout.Label("[That's Lit] Lit detection on this map is not supported or disabled in configs.");
                 if (!ThatsLitPlugin.DebugInfo.Value) return;
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
@@ -403,7 +402,7 @@ namespace ThatsLit.Components
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
             scoreCalculator?.CalledOnGUI();
-            GUILayout.Label(string.Format("IMPACT: {0:0.00} -> {1:0.00} ({2:0.00}% <- {3:0.00}% <- {4:0.00}) (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore));
+            GUILayout.Label(string.Format("IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore));
             //GUILayout.Label(text: "PIXELS:");
             //GUILayout.Label(lastValidPixels.ToString());
             GUILayout.Label(string.Format("AFFECTED: {0} (+{1})", calced, calcedLastFrame));
