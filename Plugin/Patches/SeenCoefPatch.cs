@@ -82,6 +82,7 @@ namespace ThatsLit.Patches.Vision
                 var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
                 if (__instance.Person.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
                 poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
+                poseFactor = Mathf.Clamp01(poseFactor);
                 float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
                 if (isGoalEnemy)
                 {
