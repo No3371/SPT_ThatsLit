@@ -594,6 +594,8 @@ namespace ThatsLit.Components
         protected override float MinAmbienceLum => 0.008f;
         protected override float MaxAmbienceLum => 0.008f;
         protected override float NonCloudinessBaseAmbienceScoreImpact => 0.1f;
+        protected override float PixelLumScoreScale { get => 2f; }
+        protected override float IndoorAmbienceScale => 0.9f;
     }
     public class ShorelineScoreCalculator : ScoreCalculator
     {
