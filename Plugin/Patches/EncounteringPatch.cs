@@ -26,8 +26,9 @@ namespace ThatsLit.Patches.Vision
         [PatchPrefix]
         public static bool PatchPrefix(GClass478 __instance, bool value, ref State __state)
         {
-            if (__instance.Person.IsYourPlayer && value && Time.time - __instance.PersonalSeenTime > 10f)
+            if (__instance.Person.IsYourPlayer && value && Time.time - __instance.PersonalSeenTime > 10f && (!__instance.HaveSeen || (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 49f))
             {
+                Singleton<ThatsLitMainPlayerComponent>.Instance.encounter++;
                 __state = new State () { triggered = true, unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f * UnityEngine.Random.Range(1, 2f), sprinting = __instance.Owner.Mover.Sprinting };
             }
             return true;
@@ -37,7 +38,6 @@ namespace ThatsLit.Patches.Vision
         {
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;
-            if (__state.triggered) Singleton<ThatsLitMainPlayerComponent>.Instance.seen++;
             if (__state.triggered && __instance.Owner.Memory.GoalEnemy == __instance)
             {
                 Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
