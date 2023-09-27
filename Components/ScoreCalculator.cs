@@ -566,6 +566,26 @@ namespace ThatsLit.Components
         protected override float ThresholdMid { get => 0.02f; }
         protected override float ThresholdMidLow { get => 0.01f; }
         protected override float ThresholdLow { get => 0.005f; }
+        protected override float GetMapAmbienceCoef(string locationId, float time)
+        {
+            if (time >= 5 && time < 7.5f) // 0 ~ 0.5f
+                return 0.5f * GetTimeProgress(time, 5, 7.5f);
+            else if (time >= 7.5f && time < 12f) // 0.5f ~ 1
+                return 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12);
+            else if (time >= 12 && time < 18) // 1 ~ 1
+                return 1;
+            else if (time >= 18 && time < 20f) // 1 ~ 0.35
+                return 1f - GetTimeProgress(time, 18, 20f) * 0.65f;
+            else if (time >= 20 && time < 21.5f) // 1 ~ 0
+                return 0.35f - 0.35f * GetTimeProgress(time, 20, 21.5f);
+            else if (time >= 0 && time < 2) // 0 ~ 0.1
+                return 0.1f * GetTimeProgress(time, 0, 2);
+            else if (time >= 2 && time < 3) // 0.1
+                return 0.1f;
+            else if (time >= 3 && time < 5) // 0.1 ~ 0
+                return 0.1f - 0.1f * GetTimeProgress(time, 3, 5);
+            else return 0;
+        }
     }
 
     public class LighthouseScoreCalculator : ScoreCalculator
