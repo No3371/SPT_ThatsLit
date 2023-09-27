@@ -268,17 +268,20 @@ namespace ThatsLit.Patches.Vision
                     if (foliageCloaking && overallFactor > 0)
                     {
                         var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
-                        cqb = cqbSmooth = 0;
                         __result = Mathf.Max(__result, dis);
                         switch (caution)
                         {
                             case 0:
                                 if (UnityEngine.Random.Range(0f, 1f) > 0.01f) __result *= 1 + 5 * overallFactor * UnityEngine.Random.Range(0.2f, 0.4f);
+                                cqb *= 1 - overallFactor * 0.5f;
+                                cqbSmooth *= 1 - overallFactor * 0.5f;
                                 break;
                             case 1:
                             case 3:
                             case 2:
                                 if (UnityEngine.Random.Range(0f, 1f) > 0.005f)__result *= 1 + 6 * overallFactor * UnityEngine.Random.Range(0.3f, 0.65f);
+                                cqb *= 1 - overallFactor * 0.8f;
+                                cqbSmooth *= 1 - overallFactor * 0.8f;
                                 break;
                             case 4:
                             case 5:
@@ -286,6 +289,8 @@ namespace ThatsLit.Patches.Vision
                             case 7:
                             case 8:
                                 if (UnityEngine.Random.Range(0f, 1f) > 0.001f)__result *= 1 + 7 * overallFactor * UnityEngine.Random.Range(0.5f, 1.0f);
+                                cqb *= 1 - overallFactor;
+                                cqbSmooth *= 1 - overallFactor;
                                 break;
                         }
                     }
