@@ -84,7 +84,7 @@ namespace ThatsLit.Patches.Vision
                     var overheadFactor = angleFactor * (Mathf.Clamp01(visionAngleDelta - 15f) / 75f) * (1 - poseFactor * 1.5f); // 2.5+ (0%) ~ 10+ (100%) ... prone: 92.5%, crouch: 32.5%
                     overheadFactor *= Mathf.Clamp01((sinceSeen - 30) / 30f);
                     overheadFactor *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 12f);
-                    if (UnityEngine.Random.Range(0f, 1f) <  Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * 20f * overheadFactor * (1f - disFactor))
+                    if (UnityEngine.Random.Range(0f, 1f) <  Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * 20f * overheadFactor * (1f - disFactor)) // mainly for "close but high" scenarios
                     {
                         __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                     }
@@ -195,8 +195,8 @@ namespace ThatsLit.Patches.Vision
                             angleFactor = 1; 
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.8f) / 0.7f); 
                             enemyDisFactor = Mathf.Clamp01(dis / 2.5f); // 100% at 2.5m+
-                            poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.55f); 
-                            yDeltaFactor = 1f - Mathf.Clamp01(-angleVertical / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
+                            poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.55f); // 100% at crouch
+                            yDeltaFactor = 1f - Mathf.Clamp01(-angleVertical / 60f); // +60deg => 1, 0deg => 1, -30deg => 0.5f, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                             break;
                         case "filbert_big02":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 20f);
@@ -296,11 +296,12 @@ namespace ThatsLit.Patches.Vision
                 {
                     if (factor < 0) factor *= 1 + disFactor * (mainPlayer.fog / 0.35f);
 
+                    if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight? 0.3f : 1f); // Darkness will be far more effective from afar
+                    else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
+
                     if (factor < 0 && __instance.Owner.NightVision.UsingNow)
                         factor *= UnityEngine.Random.Range(0.15f, 0.3f); // Negative factor is reduced to only 10% regardless distance
 
-                    if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight? 0.3f : 1f); // Darkness will be far more effective from afar
-                    else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
                     factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 
                     // Absoulute offset
