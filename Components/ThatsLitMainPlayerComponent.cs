@@ -50,7 +50,6 @@ namespace ThatsLit.Components
 
         float awakeAt, lastCheckedLights, lastCheckedFoliages;
         // Note: If vLight > 0, other counts may be skipped
-        public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
 
         public Vector3 envCamOffset = new Vector3(0, 2, 0);
 
@@ -142,6 +141,7 @@ namespace ThatsLit.Components
             cam.transform.SetParent(MainPlayer.Transform.Original);
 
             cam.nearClipPlane = 0.001f;
+            cam.farClipPlane = 10f;
 
             cam.cullingMask = LayerMaskClass.PlayerMask;
             cam.fieldOfView = 44;
@@ -327,7 +327,6 @@ namespace ThatsLit.Components
 
             if (!skipFoliageCheck)
             {
-
                 for (int i = 0; i < collidersCache.Length; i++)
                     collidersCache[i] = null;
 
@@ -418,10 +417,13 @@ namespace ThatsLit.Components
             GUILayout.Label(string.Format("IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore));
             //GUILayout.Label(text: "PIXELS:");
             //GUILayout.Label(lastValidPixels.ToString());
-            GUILayout.Label(string.Format("AFFECTED: {0} (+{1})", calced, calcedLastFrame));
+            GUILayout.Label(string.Format("AFFECTED: {0} (+{1}) / SEEN: {2}", calced, calcedLastFrame, seen));
 
-            GUILayout.Label(string.Format("FOLIAGE: {0:0.000} ({1})", foliageScore, foliageCount));
-            GUILayout.Label(string.Format("POSE: {0:0.000}", MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel));
+            GUILayout.Label(string.Format("FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
+                var poseFactor = MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
+                if (MainPlayer.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
+                poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
+            GUILayout.Label(string.Format("POSE: {0:0.000}", poseFactor));
             // GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
             if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight? "V" : scoreCalculator.irLight? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
