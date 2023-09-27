@@ -216,8 +216,8 @@ namespace ThatsLit.Components
 
         protected virtual float CalculateChangingLumModifier(float avgLumMultiFrames, float lum1s, float lum3s, float ambienceScore)
         {
-            var recentChange = Mathf.Clamp(Mathf.Abs(avgLumMultiFrames - lum1s), 0, 0.05f) * 10f * Mathf.Clamp01(-ambienceScore + 0.2f); // When ambience score is -1 ~ 0
-            recentChange += Mathf.Clamp(Mathf.Abs(avgLumMultiFrames - lum3s), 0, 0.025f) * 3f * Mathf.Clamp01(-ambienceScore + 0.1f) * 0.5f; // When ambience score is -1 ~ 0
+            var recentChange = Mathf.Clamp(Mathf.Abs(avgLumMultiFrames - lum1s), 0, 0.05f) * 10f * (Mathf.Clamp01(-ambienceScore) + 0.2f); // When ambience score is -1 ~ 0
+            recentChange += Mathf.Clamp(Mathf.Abs(avgLumMultiFrames - lum3s), 0, 0.025f) * 3f * (Mathf.Clamp01(-ambienceScore) + 0.1f); // When ambience score is -1 ~ 0
             return recentChange;
         }
 
