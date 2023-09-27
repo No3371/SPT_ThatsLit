@@ -170,7 +170,7 @@ namespace ThatsLit.Patches.Vision
                             angleFactor = 1; 
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.8f) / 0.7f); 
                             enemyDisFactor = Mathf.Clamp01(disToEnemy / 2.5f); // 100% at 2.5m+
-                            poseScale = 1 - Mathf.Clamp01((poseFactor - 0.05f) / 0.6f); 
+                            poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.55f); 
                             break;
                         case "filbert_big02":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 20f);
@@ -190,17 +190,41 @@ namespace ThatsLit.Patches.Vision
                             enemyDisFactor = Mathf.Clamp01(disToEnemy / 10f);
                             poseScale = poseFactor == 0.45f? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
                             break;
+                        case "filbert_small02":
+                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 25f); 
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.15f) / 0.15f); 
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 8f);
+                            poseScale = poseFactor == 0.45f? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
+                            break;
                         case "filbert_small03":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 40f); 
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.1f) / 0.15f); 
                             enemyDisFactor = Mathf.Clamp01(disToEnemy / 10f);
                             poseScale = poseFactor == 0.45f? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
                             break;
-                        case "tree_02":
+                        case "bush_dry02":
+                            angleFactor = 1;
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 1f) / 0.4f); 
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 10f); // 100% at 2.5m+
+                            poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.1f); 
+                            break;
+                        case "tree02":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 45f); // 0deg -> 0, 75 deg -> 1
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.5f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
                             enemyDisFactor = Mathf.Clamp01(disToEnemy / 20f);
                             poseScale = poseFactor == 0.05f? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                            break;
+                        case "pine01":
+                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 30f); // 0deg -> 0, 75 deg -> 1
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.5f) / 0.35f); // 0.3 -> 100%, 0.55 -> 0%
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 25f);
+                            poseScale = poseFactor == 0.05f? 0 : 0.5f + (poseFactor - 0.45f) / 0.55f * 0.5f; // standing is better with this tall one
+                            break;
+                        case "fern01":
+                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 25f); // 0deg -> 0, 75 deg -> 1
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.1f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 20f);
+                            poseScale = poseFactor == 0.05f? 1 : 0; // standing is better with this tall one
                             break;
                         default:
                             foliageCloaking = false;
