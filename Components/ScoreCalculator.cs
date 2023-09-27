@@ -591,13 +591,13 @@ namespace ThatsLit.Components
     {
         protected override float MinBaseAmbienceScore => -0.92f;
         protected override float NonCloudinessBaseAmbienceScoreImpact => 0.05f;
-        protected override float PixelLumScoreScale { get => 1.5f; }
-        protected override float ThresholdShine { get => 0.7f; }
-        protected override float ThresholdHigh { get => 0.5f; }
-        protected override float ThresholdHighMid { get => 0.25f; }
+        protected override float PixelLumScoreScale { get => 2.5f; }
+        protected override float ThresholdShine { get => 0.4f; }
+        protected override float ThresholdHigh { get => 0.3f; }
+        protected override float ThresholdHighMid { get => 0.2f; }
         protected override float ThresholdMid { get => 0.1f; }
-        protected override float ThresholdMidLow { get => 0.025f; }
-        protected override float ThresholdLow { get => 0.01f; }
+        protected override float ThresholdMidLow { get => 0.04f; }
+        protected override float ThresholdLow { get => 0.015f; }
     }
     public class CustomsScoreCalculator : ScoreCalculator
     {
