@@ -383,7 +383,7 @@ namespace ThatsLit.Components
         protected virtual float CalculateAmbienceScore (string locationId, float time, float cloudiness, float insideTime = 0)
         {
             float insideCoef = Mathf.Clamp01((insideTime - 2) / 10f); // 0 ~ 2 sec => 0%, 12 sec => 100%
-            float ambience = CalculateBaseAmbienceScore(locationId, time) * Mathf.Lerp(1, IndoorAmbienceScale, insideCoef);
+            float ambience = CalculateBaseAmbienceScore(locationId, time) * Mathf.Lerp(1, IndoorAmbienceScale, insideCoef * CalculateSunLightTimeFactor(locationId, time)); // Consider the brighter ambience comes from the sun, scale the indoor impact down with sunlight time factor
             ambience += Mathf.Clamp01((cloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact;
             return ambience + CalculateMoonLight(locationId, time, cloudiness) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef) + CalculateSunLight(locationId, time, cloudiness) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef);
         }
@@ -446,16 +446,23 @@ namespace ThatsLit.Components
         {
             cloudiness = 1 - cloudiness; // difference from 1
             float maxSunlightScore = GetMaxSunlightScore();
+            return cloudiness * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
+        }
+
+        // The increased visual brightness when sun is up (5~22) hours when c < 1
+        // cloudiness blocks sun light
+        protected virtual float CalculateSunLightTimeFactor(string locationId, float time)
+        {
             if (time >= 5 && time < 8) // 0 ~ 0.3
-                return cloudiness * maxSunlightScore * GetTimeProgress(time, 5, 8) * 0.4f;
+                return GetTimeProgress(time, 5, 8) * 0.3f;
             else if (time >= 8 && time < 12) // 0.3 ~ 1
-                return cloudiness * maxSunlightScore * GetTimeProgress(time, 8, 12) * 0.6f;
+                return 0.3f + GetTimeProgress(time, 8, 12) * 0.7f;
             else if (time >= 12 && time < 15) // 1 ~ 1
-                return cloudiness * maxSunlightScore;
+                return 1;
             else if (time >= 15 && time < 19) // 1 ~ 0.5f
-                return cloudiness * maxSunlightScore * (1f - GetTimeProgress(time, 15, 19) * 0.5f);
-            else if (time >= 19 && time < 21.5f) // 0.5 ~ 0.5f
-                return cloudiness * maxSunlightScore * (1f - GetTimeProgress(time, 19, 21.5f) * 0.5f);
+                return 1f - GetTimeProgress(time, 15, 19) * 0.5f;
+            else if (time >= 19 && time < 21.5f) // 0.5 ~ 0f
+                return 0.5f - GetTimeProgress(time, 19, 21.5f) * 0.5f;
             else return 0;
         }
 
@@ -505,7 +512,7 @@ namespace ThatsLit.Components
         protected virtual float MaxMoonlightScore { get => 0.3f; }
         protected virtual float MaxSunlightScore { get => 0.1f; }
         protected virtual float IndoorSunMoonScale { get => 0.5f; }
-        protected virtual float IndoorAmbienceScale { get => 1f; }
+        protected virtual float IndoorAmbienceScale { get => 0.9f; }
         protected virtual float MinAmbienceLum { get => 0.01f; }
         protected virtual float MaxAmbienceLum { get => 0.1f; }
         protected virtual float PixelLumScoreScale => 1f;
