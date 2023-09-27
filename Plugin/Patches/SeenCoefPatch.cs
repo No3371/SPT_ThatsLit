@@ -70,8 +70,13 @@ namespace ThatsLit.Patches.Vision
                 Vector3 from = BotTransform.rotation * Vector3.forward;
                 var visionAngleDelta = Vector3.Angle(from, to);
 
+                var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
+                if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
+                var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
+                if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
+
                 float sinceSeen = Time.time - __instance.TimeLastSeen;
-                if (sinceSeen > 15f)
+                if (sinceSeen > 15f && !canSeeLight)
                 {
                     // Overlook close enemies at higher attitude and in low pose
                     var overheadFactor = Mathf.Clamp01((to.y - 2.5f) / 7.5f) * (Mathf.Clamp01(visionAngleDelta - 15f) / 30f) * (1 - poseFactor * 1.5f); // 2.5+ (0%) ~ 10+ (100%) ... prone: 92.5%, crouch: 32.5%
@@ -97,11 +102,6 @@ namespace ThatsLit.Patches.Vision
                     // 600m sight => 0.8x... 110m -> 0.64
                     // 1000m sight => 0.3x... 110m -> 0.24
                 }
-
-                var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
-                if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
-                var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
-                if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
 
 
                 float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
