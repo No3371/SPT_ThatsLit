@@ -176,7 +176,7 @@ namespace ThatsLit.Patches.Vision
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 20f);
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.5f) / 0.1f); // 0.3 -> 100%, 0.55 -> 0%
                             enemyDisFactor = Mathf.Clamp01(disToEnemy / 10f);
-                            poseScale = poseFactor == 0.05f? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                            poseScale = poseFactor == 0.05f? 0.7f : 1f; // 
                             break;
                         case "filbert_big03":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 20f);
