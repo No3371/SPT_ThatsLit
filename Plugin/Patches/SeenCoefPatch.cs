@@ -69,6 +69,7 @@ namespace ThatsLit.Patches.Vision
 
                 Vector3 from = BotTransform.rotation * Vector3.forward;
                 var visionAngleDelta = Vector3.Angle(from, to);
+                var angleVertical = Vector3.Angle(new Vector3(to.x, 0, to.z), to) * (to.y >= 0? 1f : -1f);
 
                 var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
                 if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
@@ -184,7 +185,7 @@ namespace ThatsLit.Patches.Vision
                  && mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
                  && (!__instance.HaveSeen || lastPosDisSqr > 3000f || sinceSeen > 300f && lastPosDisSqr > 100f))
                 {
-                    float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0;
+                    float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
                     bool foliageCloaking = true;
 
                     switch (mainPlayer.foliage)
@@ -194,6 +195,7 @@ namespace ThatsLit.Patches.Vision
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.8f) / 0.7f); 
                             enemyDisFactor = Mathf.Clamp01(dis / 2.5f); // 100% at 2.5m+
                             poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.55f); 
+                            yDeltaFactor = 1f - Mathf.Clamp01(-angleVertical / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                             break;
                         case "filbert_big02":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 20f);
@@ -236,6 +238,7 @@ namespace ThatsLit.Patches.Vision
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 1f) / 0.4f); 
                             enemyDisFactor = Mathf.Clamp01(dis / 10f); // 100% at 2.5m+
                             poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.1f); 
+                            yDeltaFactor = 1f - Mathf.Clamp01(-angleVertical / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                             break;
                         case "tree02":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 45f); // 0deg -> 0, 75 deg -> 1
@@ -259,7 +262,7 @@ namespace ThatsLit.Patches.Vision
                             foliageCloaking = false;
                             break;
                     }
-                    var overallFactor = angleFactor * foliageDisFactor * enemyDisFactor * poseScale;
+                    var overallFactor = angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor;
                     if (closetAI && overallFactor > 0.05f) mainPlayer.foliageCloaking = foliageCloaking;
                     if (foliageCloaking && overallFactor > 0)
                     {
