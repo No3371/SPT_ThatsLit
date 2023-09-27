@@ -605,6 +605,7 @@ namespace ThatsLit.Components
         protected override float NonCloudinessBaseAmbienceScoreImpact { get => 0.2f; }
         protected override float MaxSunlightScore => 0;
         protected override float MaxMoonlightScore => 0.2f;
+        protected override float PixelLumScoreScale { get => 2.2f; }
     }
     public class InterchangeScoreCalculator : ScoreCalculator
     {
