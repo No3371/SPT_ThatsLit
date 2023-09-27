@@ -40,20 +40,20 @@ namespace ThatsLit.Patches.Vision
             if (__state.triggered) Singleton<ThatsLitMainPlayerComponent>.Instance.seen++;
             if (__state.triggered && __instance.Owner.Memory.GoalEnemy == __instance)
             {
+                Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
+                Vector3 to = __instance.Person.Transform.position - __instance.Owner.Transform.position;
+                var angle = Vector3.Angle(from, to);
                 if (__state.sprinting)
                 {
-                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0.2f, 1f) * (__state.unexpected? 1f : 0.5f));
-                    if (UnityEngine.Random.Range(0f, 1f) < 0.2f  * (__state.unexpected? 1f : 0.5f)) aim.NextShotMiss();
+                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 1f) * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(angle/15f));
+                    if (UnityEngine.Random.Range(0f, 1f) < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(angle/15f)) aim.NextShotMiss();
                 }
                 else if (__state.unexpected)
                 {
-                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.25f));
+                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.25f) * Mathf.Clamp01(angle/15f));
                 }
                 if (__instance.Owner.AimingData is GClass463 g463 && !__instance.Owner.WeaponManager.ShootController.IsAiming)
                 {
-                    Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
-                    Vector3 to = __instance.Person.Transform.position - __instance.Owner.Transform.position;
-                    var angle = Vector3.Angle(from, to);
                     g463.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.35f) * Mathf.Clamp01((angle - 15f)/45f);
                 }
             }
