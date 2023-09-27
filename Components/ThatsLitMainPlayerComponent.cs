@@ -397,7 +397,9 @@ namespace ThatsLit.Components
             {
                 if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int) (MultiFrameLitScore / 0.0999f));
                 if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
-                if (foliageScore > 0.3f)
+                if (foliageCloaking)
+                    GUILayout.Label("[FOLIAGE###]");
+                else if (foliageScore > 0.3f)
                     GUILayout.Label("[FOLIAGE+++]");
                 else if (foliageScore > 0.2f)
                     GUILayout.Label("[FOLIAGE++]");
@@ -405,9 +407,6 @@ namespace ThatsLit.Components
                     GUILayout.Label("[FOLIAGE+]");
                 else if (foliageScore > 0.05f)
                     GUILayout.Label("[FOLIAGE]");
-
-                if (foliageCloaking)
-                    GUILayout.Label("[#FOLIAGE#]");
 
                 if (Time.time < awakeAt + 10)
                     GUILayout.Label("[That's Lit HUD] Can be disabled in plugin settings.");

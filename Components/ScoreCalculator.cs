@@ -196,7 +196,7 @@ namespace ThatsLit.Components
             }
             GUILayout.Label(string.Format("PIXELS: {0:000}% - {1:000}% - {2:000}% - {3:000}% - {4:000}% - {5:000}% | {6:000}% (AVG Sample)", shinePixelsRatioSample * 100, highLightPixelsRatioSample * 100, highMidLightPixelsRatioSample * 100, midLightPixelsRatioSample * 100, midLowLightPixelsRatioSample * 100, lowLightPixelsRatioSample * 100, darkPixelsRatioSample * 100));
             GUILayout.Label(string.Format("AvgLumMF: {0:0.000} / {1:0.000} ~ {2:0.000} ({3:0.000})", frame0.avgLumMultiFrames, GetMinAmbianceLum(), GetMaxAmbianceLum(), GetAmbianceLumRange()));
-            GUILayout.Label(string.Format("Sun: {0:0.000}/{1:0.000}, Moon: {2:0.000}/{3:0.000}", sunLightScore, GetMaxSunlightScore(), moonLightScore, GetMaxMoonlightScore()));
+            GUILayout.Label(string.Format("Sun: {0:0.000}/{1:0.000}, Moon: {2:0.000}/{3:0.000}, INDOOR: {4:0.00}", sunLightScore, GetMaxSunlightScore(), moonLightScore, GetMaxMoonlightScore(), Time.time - lastOutside));
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} (SAMPLE)", scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4));
         }
 

@@ -26,7 +26,7 @@ namespace ThatsLit.Patches.Vision
         }
 
         private static int lastFrame;
-        private static float closetLastFrame;
+        private static float closetThisFrame;
 
         [PatchPostfix]
         public static void PatchPostfix(GClass478 __instance, BifacialTransform BotTransform, BifacialTransform enemy, ref float __result)
@@ -44,7 +44,7 @@ namespace ThatsLit.Patches.Vision
             if (Time.frameCount != lastFrame)
             {
                 lastFrame = Time.frameCount;
-                closetLastFrame = float.MaxValue;
+                closetThisFrame = float.MaxValue;
                 if (mainPlayer) mainPlayer.calcedLastFrame = 0;
                 if (mainPlayer) mainPlayer.foliageCloaking = false;
             }
@@ -121,9 +121,9 @@ namespace ThatsLit.Patches.Vision
                 }
 
                 bool closetAI = false;
-                if (disToEnemy < closetLastFrame)
+                if (disToEnemy < closetThisFrame)
                 {
-                    closetLastFrame = disToEnemy;
+                    closetThisFrame = disToEnemy;
                     closetAI = true;
                     if (Time.frameCount % 47 == 0)
                     {
@@ -207,7 +207,7 @@ namespace ThatsLit.Patches.Vision
                             break;
                     }
                     var overallFactor = angleFactor * foliageDisFactor * enemyDisFactor * poseScale;
-                    if (closetAI && overallFactor > 0.1f) mainPlayer.foliageCloaking = foliageCloaking;
+                    if (closetAI && overallFactor > 0.05f) mainPlayer.foliageCloaking = foliageCloaking;
                     if (foliageCloaking && overallFactor > 0)
                     {
                         var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
