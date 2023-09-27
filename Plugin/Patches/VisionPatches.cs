@@ -13,58 +13,6 @@ using System.Collections.Generic;
 
 namespace ThatsLit.Patches.Vision
 {
-    public class SprintingEncounterPatch : ModulePatch
-    {
-        private static PropertyInfo _GoalEnemyProp;
-        protected override MethodBase GetTargetMethod()
-        {
-            _GoalEnemyProp = AccessTools.Property(typeof(BotMemoryClass), "GoalEnemy");
-            return AccessTools.Method(_GoalEnemyProp.PropertyType, nameof(GClass478.SetVisible));
-        }
-
-        public struct State
-        {
-            public bool triggered;
-            public bool unexpected;
-            public bool sprinting;
-        }
-
-        [PatchPrefix]
-        public static void PatchPrefix(GClass478 __instance, bool value, ref State __state)
-        {
-            var aim = __instance.Owner.AimingData as GClass547;
-
-            if (aim == null) return;
-            if (!__instance.IsVisible && value && Time.time - __instance.PersonalSeenTime > 10f)
-            {
-                __state = new State () { triggered = true, unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f * UnityEngine.Random.Range(1, 2f), sprinting = __instance.Owner.Mover.Sprinting };
-                if (__instance.Person.IsYourPlayer)
-                    Debug.LogFormat("SEEN by {0} at {1}", __instance.Owner.Id, Time.time);
-            }   
-        }
-        [PatchPostfix]
-        public static void PatchPostfix(GClass478 __instance, State __state)
-        {
-            var aim = __instance.Owner.AimingData as GClass547;
-
-            if (aim == null) return;
-            if (__state.triggered)
-            {
-                if (__instance.Person.IsYourPlayer)
-                    Debug.LogFormat("SEEN by {0} at {1}", __instance.Owner.Id, Time.time);
-                if (__state.sprinting)
-                {
-                    __instance.Owner.AimingData.SetNextAimingDelay(aim.AimingSettings.MAX_AIM_TIME * UnityEngine.Random.Range(0.2f, 1f) * (__state.unexpected? 1f : 0.5f));
-                    if (UnityEngine.Random.Range(0f, 1f) < 0.25f  * (__state.unexpected? 1f : 0.5f)) aim.NextShotMiss();
-                }
-                else if (__state.unexpected)
-                {
-                    __instance.Owner.AimingData.SetNextAimingDelay(aim.AimingSettings.MAX_AIM_TIME * UnityEngine.Random.Range(0f, 0.25f));
-                }
-            }
-        }
-    }
-
     public class SeenCoefPatch : ModulePatch
     {
         private static PropertyInfo _enemyRel;

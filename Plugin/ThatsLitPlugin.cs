@@ -160,7 +160,7 @@ namespace ThatsLit
         private void Patches()
         {
             new SeenCoefPatch().Enable();
-            new SprintingEncounterPatch().Enable();
+            new EncounteringPatch().Enable();
         }
 
         private void Update()

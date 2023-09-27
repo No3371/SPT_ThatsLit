@@ -29,7 +29,7 @@ namespace ThatsLit.Components
         public Texture2D envTex, envDebugTex;
         Unity.Collections.NativeArray<Color32> observed;
         public float lastCalcFrom, lastCalcTo, lastScore, lastFactor1, lastFactor2;
-        public int calced = 0, calcedLastFrame = 0;
+        public int calced = 0, calcedLastFrame = 0, seen;
         public int lockPos = -1;
         public int lastValidPixels = RESOLUTION * RESOLUTION;
         public RawImage display;
