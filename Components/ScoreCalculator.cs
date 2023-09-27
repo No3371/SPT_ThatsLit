@@ -139,7 +139,7 @@ namespace ThatsLit.Components
             //    score = Mathf.Lerp(score, topScoreMultiFrames, Mathf.Clamp(avgContrastFactor, 0, 1));
             //}
 
-            if (player.MainPlayer.AIData.GetFlare) lumScore = Mathf.Max(lumScore, Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(-ambienceScore)));
+            // if (player.MainPlayer.AIData.GetFlare) lumScore = Mathf.Max(lumScore, Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(-ambienceScore))); // GetFlare is not what I thought!!!!!!
 
             if (vLight || vLaser || vLightSub || vLaserSub)
             {
