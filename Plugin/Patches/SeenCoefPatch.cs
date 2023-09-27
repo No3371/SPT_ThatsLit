@@ -77,13 +77,14 @@ namespace ThatsLit.Patches.Vision
                 if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
 
                 float sinceSeen = Time.time - __instance.TimeLastSeen;
-                if (sinceSeen > 15f && !canSeeLight)
+                if (sinceSeen > 30f && !canSeeLight)
                 {
+                    var angleFactor = Mathf.Clamp01(1f * (angleVertical - 15f) / 30f) + Mathf.Clamp01(2f * (angleVertical - 45f) / 45f);
                     // Overlook close enemies at higher attitude and in low pose
-                    var overheadFactor = Mathf.Clamp01((to.y - 2.5f) / 7.5f) * (Mathf.Clamp01(visionAngleDelta - 15f) / 30f) * (1 - poseFactor * 1.5f); // 2.5+ (0%) ~ 10+ (100%) ... prone: 92.5%, crouch: 32.5%
-                    overheadFactor *= Mathf.Clamp01((sinceSeen - 15) / 15f);
-                    overheadFactor *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 10f);
-                    if (UnityEngine.Random.Range(0f, 1f) <  Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * 25f * overheadFactor * (1f - disFactor))
+                    var overheadFactor = angleFactor * (Mathf.Clamp01(visionAngleDelta - 15f) / 75f) * (1 - poseFactor * 1.5f); // 2.5+ (0%) ~ 10+ (100%) ... prone: 92.5%, crouch: 32.5%
+                    overheadFactor *= Mathf.Clamp01((sinceSeen - 30) / 30f);
+                    overheadFactor *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 12f);
+                    if (UnityEngine.Random.Range(0f, 1f) <  Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * 20f * overheadFactor * (1f - disFactor))
                     {
                         __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                     }
