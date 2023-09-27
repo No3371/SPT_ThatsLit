@@ -49,7 +49,7 @@ namespace ThatsLit.Patches.Vision
                 {
                     __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.25f));
                 }
-                if (__instance.Owner.AimingData is GClass463 g463)
+                if (__instance.Owner.AimingData is GClass463 g463 && !__instance.Owner.WeaponManager.ShootController.IsAiming)
                 {
                     Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
                     Vector3 to = __instance.Person.Transform.position - __instance.Owner.Transform.position;
