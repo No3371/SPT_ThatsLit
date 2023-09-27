@@ -315,7 +315,18 @@ namespace ThatsLit.Components
             if (Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.6f : 0.33f))
             {
                 lastCheckedLights = Time.time;
-                if (scoreCalculator != null) Utility.DetermineShiningEquipments(MainPlayer, out scoreCalculator.vLight, out scoreCalculator.vLaser, out scoreCalculator.irLight, out scoreCalculator.irLaser, out scoreCalculator.vLightSub, out scoreCalculator.vLaserSub, out scoreCalculator.irLightSub, out scoreCalculator.irLaserSub);
+                Utility.DetermineShiningEquipments(MainPlayer, out var vLight, out var vLaser, out var irLight, out var irLaser, out var vLightSub, out var vLaserSub, out var irLightSub, out var irLaserSub);
+                if (scoreCalculator != null)
+                {
+                    scoreCalculator.vLight = vLight;
+                    scoreCalculator.vLaser = vLaser;
+                    scoreCalculator.irLight = irLight;
+                    scoreCalculator.irLaser = irLaser;
+                    scoreCalculator.vLightSub = vLightSub;
+                    scoreCalculator.vLaserSub = vLaserSub;
+                    scoreCalculator.irLightSub = irLightSub;
+                    scoreCalculator.irLaserSub = irLaserSub;
+                }
             }
         }
 

@@ -75,18 +75,17 @@ namespace ThatsLit.Patches.Vision
                     // 1000m sight => 0.3x... 110m -> 0.24
                 }
 
-                Vector3 from = BotTransform.rotation * Vector3.forward;
-                Vector3 to = enemy.position - BotTransform.position;
-                var angle = Vector3.Angle(from, to);
+                var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
+                if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
+                var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
+                if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
 
-                var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
-                if (__instance.Person.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
-                poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
-                poseFactor = Mathf.Clamp01(poseFactor);
+
                 float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
+                if (canSeeLight) globalOverlookChance /= 2f;
                 if (isGoalEnemy)
                 {
-                    if (Time.time - __instance.TimeLastSeen < 5f) globalOverlookChance = 0;
+                    if (sinceSeen < 5f) globalOverlookChance = 0;
                     else globalOverlookChance *= UnityEngine.Random.Range(0.1f, 0.5f);
                 }
                 if (UnityEngine.Random.Range(0f, 1f) < globalOverlookChance)
@@ -109,10 +108,10 @@ namespace ThatsLit.Patches.Vision
                 else
                 {
                     score = mainPlayer.MultiFrameLitScore; // -1 ~ 1
-                    if (!mainPlayer.disabledLit && score < 0 && __instance.Owner.NightVision.UsingNow) // The score was not reduced (toward 0) for IR lights, process the score here
+                    if (score < 0 && __instance.Owner.NightVision.UsingNow) // The score was not reduced (toward 0) for IR lights, process the score here
                     {
                         if (mainPlayer.scoreCalculator.irLight) score /= 2;
-                        else if (mainPlayer.scoreCalculator.irLaser) score /= 2f;
+                        else if (mainPlayer.scoreCalculator.irLaser) score /= 1.75f;
                         else if (mainPlayer.scoreCalculator.irLightSub) score /= 1.3f;
                         else if (mainPlayer.scoreCalculator.irLaserSub) score /= 1.1f;
                     }
@@ -159,8 +158,9 @@ namespace ThatsLit.Patches.Vision
                 // BUSH RAT ----------------------------------------------------------------------------------------------------------------
                 float lastPosDisSqr = (__instance.EnemyLastPosition - __instance.Person.Position).sqrMagnitude;
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-                if (mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
-                 && (!__instance.HaveSeen || lastPosDisSqr > 3000f || Time.time - __instance.TimeLastSeen > 300f && lastPosDisSqr > 100f))
+                if (!canSeeLight && !(canSeeLaser && UnityEngine.Random.Range(0, 100) < 30)
+                 && mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
+                 && (!__instance.HaveSeen || lastPosDisSqr > 3000f || sinceSeen > 300f && lastPosDisSqr > 100f))
                 {
                     float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0;
                     bool foliageCloaking = true;
@@ -273,7 +273,7 @@ namespace ThatsLit.Patches.Vision
                     if (factor < 0 && __instance.Owner.NightVision.UsingNow)
                         factor *= UnityEngine.Random.Range(0.15f, 0.3f); // Negative factor is reduced to only 10% regardless distance
 
-                    if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f); // Darkness will be far more effective from afar
+                    if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight? 0.3f : 1f); // Darkness will be far more effective from afar
                     else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
                     factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 
