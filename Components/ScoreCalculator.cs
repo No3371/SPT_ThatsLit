@@ -391,7 +391,7 @@ namespace ThatsLit.Components
         /// <returns>-1 ~ 1</returns>
         protected virtual float CalculateAmbienceScore (string locationId, float time, float cloudiness, bool inside = false)
         {
-            float ambience = CalculateBaseAmbienceScore(locationId, time);
+            float ambience = CalculateBaseAmbienceScore(locationId, time) * (inside? IndoorAmbienceScale : 1);
             ambience += Mathf.Clamp01((cloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact;
             return ambience + CalculateMoonLight(locationId, time, cloudiness) * (inside? IndoorSunMoonScale : 1f) + CalculateSunLight(locationId, time, cloudiness) * (inside? IndoorSunMoonScale : 1f);
         }
@@ -512,7 +512,8 @@ namespace ThatsLit.Components
         protected virtual float NonCloudinessBaseAmbienceScoreImpact { get => 0.05f; }
         protected virtual float MaxMoonlightScore { get => 0.3f; }
         protected virtual float MaxSunlightScore { get => 0.1f; }
-        protected virtual float IndoorSunMoonScale { get => 0.75f; }
+        protected virtual float IndoorSunMoonScale { get => 0.5f; }
+        protected virtual float IndoorAmbienceScale { get => 1f; }
         protected virtual float MinAmbienceLum { get => 0.01f; }
         protected virtual float MaxAmbienceLum { get => 0.1f; }
         protected virtual float PixelLumScoreScale => 1f;
