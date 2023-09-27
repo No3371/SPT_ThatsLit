@@ -10,6 +10,7 @@ namespace ThatsLit.Components
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
         float scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
+        float lastOutside;
         public ScoreCalculator()
         {
             // ThatsLitPlugin.DevMode.Value = false;
@@ -69,8 +70,10 @@ namespace ThatsLit.Components
             thisFrame.avgLumMultiFrames = (thisFrame.avgLum + frame1.avgLum + frame2.avgLum + frame3.avgLum + frame4.avgLum + frame5.avgLum) / 6f;
             UpdateLumTrackers(thisFrame.avgLumMultiFrames);
 
+            if (!player.MainPlayer.AIData.IsInside) lastOutside = Time.time;
+
             baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
-            ambienceScore = CalculateAmbienceScore(locationId, time, cloud, player.MainPlayer.AIData.IsInside); // The base brightness with sun/moon/cloud
+            ambienceScore = CalculateAmbienceScore(locationId, time, cloud, Time.time - lastOutside); // The base brightness with sun/moon/cloud
             sunLightScore = CalculateSunLight(locationId, time, cloud);
             moonLightScore = CalculateMoonLight(locationId, time, cloud);
 
@@ -377,11 +380,12 @@ namespace ThatsLit.Components
         }
 
         /// <returns>-1 ~ 1</returns>
-        protected virtual float CalculateAmbienceScore (string locationId, float time, float cloudiness, bool inside = false)
+        protected virtual float CalculateAmbienceScore (string locationId, float time, float cloudiness, float insideTime = 0)
         {
-            float ambience = CalculateBaseAmbienceScore(locationId, time) * (inside? IndoorAmbienceScale : 1);
+            float insideCoef = Mathf.Clamp01((insideTime - 2) / 10f); // 0 ~ 2 sec => 0%, 12 sec => 100%
+            float ambience = CalculateBaseAmbienceScore(locationId, time) * Mathf.Lerp(1, IndoorAmbienceScale, insideCoef);
             ambience += Mathf.Clamp01((cloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact;
-            return ambience + CalculateMoonLight(locationId, time, cloudiness) * (inside? IndoorSunMoonScale : 1f) + CalculateSunLight(locationId, time, cloudiness) * (inside? IndoorSunMoonScale : 1f);
+            return ambience + CalculateMoonLight(locationId, time, cloudiness) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef) + CalculateSunLight(locationId, time, cloudiness) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef);
         }
 
         protected virtual float CalculateBaseAmbienceScore(string locationId, float time)
