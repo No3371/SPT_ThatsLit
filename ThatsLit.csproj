@@ -227,13 +227,14 @@
     <Compile Include="Components\ThatsLitMainPlayerComponent.cs" />
     <Compile Include="Components\ThatsLitGameworldComponent.cs" />
     <Compile Include="Components\Utility.cs" />
+    <Compile Include="EncounteringPatch.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Plugin\GameWorldHandler.cs" />
-    <Compile Include="Plugin\Patches\VisionPatches.cs" />
     <Compile Include="Properties\ConfigurationManagerAttributes.cs" />
     <Compile Include="Plugin\ThatsLitPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Plugin\VersionChecker\VersionChecker.cs" />
+    <Compile Include="SeenCoefPatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -242,7 +243,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Plugin\Patches\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
