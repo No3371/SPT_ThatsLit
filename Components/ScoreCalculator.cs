@@ -197,18 +197,6 @@ namespace ThatsLit.Components
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} (SAMPLE)", scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4));
         }
 
-        internal void UpdateEquipmentLights (bool vLight, bool vLaser, bool irLight, bool irLaser, bool vLightSub, bool vLaserSub, bool irLightSub, bool irLaserSub)
-        {
-            this.vLight = vLight;
-            this.vLaser = vLaser;
-            this.irLight = irLight;
-            this.irLaser = irLaser;
-            this.vLightSub = vLightSub;
-            this.vLaserSub = vLaserSub;
-            this.irLightSub = irLightSub;
-            this.irLaserSub = irLaserSub;
-        }
-
         protected virtual float FinalTransformScore (float score)
         {
             return score;

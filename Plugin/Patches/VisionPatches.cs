@@ -161,10 +161,10 @@ namespace ThatsLit.Patches.Vision
                     score = mainPlayer.MultiFrameLitScore; // -1 ~ 1
                     if (!mainPlayer.disabledLit && score < 0 && __instance.Owner.NightVision.UsingNow) // The score was not reduced (toward 0) for IR lights, process the score here
                     {
-                        if (mainPlayer.irLight) score /= 2;
-                        else if (mainPlayer.irLaser) score /= 2f;
-                        else if (mainPlayer.irLightSub) score /= 1.3f;
-                        else if (mainPlayer.irLaserSub) score /= 1.1f;
+                        if (mainPlayer.scoreCalculator.irLight) score /= 2;
+                        else if (mainPlayer.scoreCalculator.irLaser) score /= 2f;
+                        else if (mainPlayer.scoreCalculator.irLightSub) score /= 1.3f;
+                        else if (mainPlayer.scoreCalculator.irLaserSub) score /= 1.1f;
                     }
 
                     factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3

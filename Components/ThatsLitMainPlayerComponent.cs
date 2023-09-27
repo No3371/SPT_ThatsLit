@@ -56,7 +56,7 @@ namespace ThatsLit.Components
         public float fog, rain, cloud;
         public float MultiFrameLitScore { get; private set; }
 
-        ScoreCalculator scoreCalculator;
+        internal ScoreCalculator scoreCalculator;
         AsyncGPUReadbackRequest gquReq;
         // float benchMark1, benchMark2;
         public void Awake()
@@ -312,8 +312,7 @@ namespace ThatsLit.Components
             if (Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.6f : 0.33f))
             {
                 lastCheckedLights = Time.time;
-                Utility.DetermineShiningEquipments(MainPlayer, out vLight, out vLaser, out irLight, out irLaser, out vLightSub, out vLaserSub, out irLightSub, out irLaserSub);
-                scoreCalculator?.UpdateEquipmentLights(vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub);
+                if (scoreCalculator != null) Utility.DetermineShiningEquipments(MainPlayer, out scoreCalculator.vLight, out scoreCalculator.vLaser, out scoreCalculator.irLight, out scoreCalculator.irLaser, out scoreCalculator.vLightSub, out scoreCalculator.vLaserSub, out scoreCalculator.irLightSub, out scoreCalculator.irLaserSub);
             }
         }
 
@@ -411,7 +410,7 @@ namespace ThatsLit.Components
             GUILayout.Label(string.Format("POSE: {0:0.000}", MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel));
             // GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
-            GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", vLight? "V" : irLight? "I" : "-", vLaser ? "V" : irLaser ? "I" : "-", vLightSub ? "V" : irLightSub ? "I" : "-", vLaserSub ? "V" : irLaserSub ? "I" : "-"));
+            if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight? "V" : scoreCalculator.irLight? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
             // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
 

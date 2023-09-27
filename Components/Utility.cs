@@ -45,6 +45,7 @@ namespace ThatsLit.Components
                     if (thisLight && thisLightIsIR) irLight = true;
                     if (thisLaser && !thisLaserIsIR) vLaser = true;
                     if (thisLaser && thisLaserIsIR) irLaser = true;
+                    if (vLight) return; // Early return
                 }
             }
 
@@ -63,6 +64,7 @@ namespace ThatsLit.Components
                     if (thisLight && thisLightIsIR) irLight = true;
                     if (thisLaser && !thisLaserIsIR) vLaser = true;
                     if (thisLaser && thisLaserIsIR) irLaser = true;
+                    if (vLight) return; // Early return
                 }
             }
 
