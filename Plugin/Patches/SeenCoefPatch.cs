@@ -179,10 +179,16 @@ namespace ThatsLit.Patches.Vision
                             poseScale = poseFactor == 0.05f? 0.7f : 1f; // 
                             break;
                         case "filbert_big03":
-                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 20f);
+                            angleFactor = 0.4f + 0.6f * Mathf.Clamp01(angle / 30f);
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.25f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
                             enemyDisFactor = Mathf.Clamp01(disToEnemy / 15f);
                             poseScale = poseFactor == 0.05f? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                            break;
+                        case "filbert_01":
+                            angleFactor = 1; 
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.35f) / 0.25f); 
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 12f); // 100% at 2.5m+
+                            poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.3f); 
                             break;
                         case "filbert_small01":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 35f); 
