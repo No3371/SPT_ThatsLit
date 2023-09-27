@@ -120,11 +120,11 @@ namespace ThatsLit.Patches.Vision
 
                 }
 
-                bool foundCloser = false;
+                bool closetAI = false;
                 if (disToEnemy < closetLastFrame)
                 {
                     closetLastFrame = disToEnemy;
-                    foundCloser = true;
+                    closetAI = true;
                     if (Time.frameCount % 47 == 0)
                     {
                         mainPlayer.lastCalcFrom = original;
@@ -140,7 +140,7 @@ namespace ThatsLit.Patches.Vision
                 if (UnityEngine.Random.Range(0f, 1f) < disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(0.75f - poseFactor) / 0.75f) // Among bushes, from afar
                 {
                     __result *= 10f;
-                    if (Time.frameCount % 47 == 0 && foundCloser)
+                    if (Time.frameCount % 47 == 0 && closetAI)
                     {
                         mainPlayer.lastCalcTo = __result;
                         mainPlayer.lastFactor2 = factor;
@@ -207,7 +207,7 @@ namespace ThatsLit.Patches.Vision
                             break;
                     }
                     var overallFactor = angleFactor * foliageDisFactor * enemyDisFactor * poseScale;
-                    if (overallFactor > 0.1f) mainPlayer.foliageCloaking = foliageCloaking;
+                    if (closetAI && overallFactor > 0.1f) mainPlayer.foliageCloaking = foliageCloaking;
                     if (foliageCloaking && overallFactor > 0)
                     {
                         var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
@@ -276,7 +276,7 @@ namespace ThatsLit.Patches.Vision
                 __result += ThatsLitPlugin.FinalOffset.Value;
                 if (__result < 0.001f) __result = 0.001f;
 
-                if (Time.frameCount % 47 == 0 && foundCloser)
+                if (Time.frameCount % 47 == 0 && closetAI)
                 {
                     mainPlayer.lastCalcTo = __result;
                     mainPlayer.lastFactor2 = factor;
