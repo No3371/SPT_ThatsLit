@@ -98,6 +98,7 @@ namespace ThatsLit.Patches.Vision
                 lastFrame = Time.frameCount;
                 closetLastFrame = float.MaxValue;
                 if (mainPlayer) mainPlayer.calcedLastFrame = 0;
+                if (mainPlayer) mainPlayer.foliageCloaking = false;
             }
             if (__instance.Person.IsYourPlayer)
             {
@@ -105,8 +106,8 @@ namespace ThatsLit.Patches.Vision
                 if (mainPlayer.disableVisionPatch) return;
 
                 Vector3 DirToPlayer = enemy.position - BotTransform.position;
-                var dis = DirToPlayer.magnitude;
-                var disFactor = Mathf.Clamp01((dis  - 10) / 100f);
+                var disToEnemy = DirToPlayer.magnitude;
+                var disFactor = Mathf.Clamp01((disToEnemy  - 10) / 100f);
                 // To scale down various sneaking bonus
                 // The bigger the distance the bigger it is, capped to 110m
                 disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0
@@ -130,9 +131,9 @@ namespace ThatsLit.Patches.Vision
                 Vector3 to = enemy.position - BotTransform.position;
                 var angle = Vector3.Angle(from, to);
 
-                var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f;
-                if (__instance.Person.AIData.Player.IsInPronePose) poseFactor -= 0.4f;
-                poseFactor += 0.05f; // base
+                var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
+                if (__instance.Person.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
+                poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
                 float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
                 if (isGoalEnemy)
                 {
@@ -172,9 +173,9 @@ namespace ThatsLit.Patches.Vision
                 }
 
                 bool foundCloser = false;
-                if (dis < closetLastFrame)
+                if (disToEnemy < closetLastFrame)
                 {
-                    closetLastFrame = dis;
+                    closetLastFrame = disToEnemy;
                     foundCloser = true;
                     if (Time.frameCount % 47 == 0)
                     {
@@ -199,6 +200,93 @@ namespace ThatsLit.Patches.Vision
                     __result += ThatsLitPlugin.FinalOffset.Value;
                 }
 
+
+                var cqb = 1f - Mathf.Clamp01((disToEnemy - 1f) / 5f); // 6+ -> 0, 1f -> 1
+                // Fix for blind bots who are already touching us
+
+                var cqbSmooth = 1 - Mathf.Clamp01((disToEnemy - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
+                cqbSmooth *= cqbSmooth; // 6m -> 25%, 1m -> 100%
+
+                // BUSH RAT ----------------------------------------------------------------------------------------------------------------
+                float lastPosDisSqr = (__instance.EnemyLastPosition - __instance.Person.Position).sqrMagnitude;
+                /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
+                if (mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
+                 && (!__instance.HaveSeen || lastPosDisSqr > 3000f || Time.time - __instance.TimeLastSeen > 300f && lastPosDisSqr > 100f))
+                {
+                    float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0;
+                    bool foliageCloaking = true;
+
+                    switch (mainPlayer.foliage)
+                    {
+                        case "filbert_big01":
+                            angleFactor = 1; 
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.8f) / 0.7f); 
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 2.5f); // 100% at 2.5m+
+                            poseScale = 1 - Mathf.Clamp01((poseFactor - 0.05f) / 0.6f); 
+                            break;
+                        case "filbert_big02":
+                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 20f);
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.5f) / 0.1f); // 0.3 -> 100%, 0.55 -> 0%
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 10f);
+                            poseScale = poseFactor == 0.05f? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                            break;
+                        case "filbert_big03":
+                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 20f);
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.25f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 15f);
+                            poseScale = poseFactor == 0.05f? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                            break;
+                        case "filbert_small01":
+                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 35f); 
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.15f) / 0.15f); 
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 10f);
+                            poseScale = poseFactor == 0.45f? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
+                            break;
+                        case "filbert_small03":
+                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 40f); 
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.1f) / 0.15f); 
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 10f);
+                            poseScale = poseFactor == 0.45f? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
+                            break;
+                        case "tree_02":
+                            angleFactor = 0.2f + 0.8f * Mathf.Clamp01(angle / 45f); // 0deg -> 0, 75 deg -> 1
+                            foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.5f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
+                            enemyDisFactor = Mathf.Clamp01(disToEnemy / 20f);
+                            poseScale = poseFactor == 0.05f? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                            break;
+                        default:
+                            foliageCloaking = false;
+                            break;
+                    }
+                    var overallFactor = angleFactor * foliageDisFactor * enemyDisFactor * poseScale;
+                    if (overallFactor > 0.1f) mainPlayer.foliageCloaking = foliageCloaking;
+                    if (foliageCloaking && overallFactor > 0)
+                    {
+                        var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
+                        cqb = cqbSmooth = 0;
+                        __result = Mathf.Max(__result, disToEnemy);
+                        switch (caution)
+                        {
+                            case 0:
+                                if (UnityEngine.Random.Range(0f, 1f) > 0.01f) __result *= 1 + 5 * overallFactor * UnityEngine.Random.Range(0.2f, 0.4f);
+                                break;
+                            case 1:
+                            case 3:
+                            case 2:
+                                if (UnityEngine.Random.Range(0f, 1f) > 0.005f)__result *= 1 + 6 * overallFactor * UnityEngine.Random.Range(0.3f, 0.65f);
+                                break;
+                            case 4:
+                            case 5:
+                            case 6:
+                            case 7:
+                            case 8:
+                                if (UnityEngine.Random.Range(0f, 1f) > 0.001f)__result *= 1 + 7 * overallFactor * UnityEngine.Random.Range(0.5f, 1.0f);
+                                break;
+                        }
+                    }
+                }
+                // BUSH RAT ----------------------------------------------------------------------------------------------------------------
+
                 if (!mainPlayer.disabledLit)
                 {
                     if (factor < 0) factor *= 1 + disFactor * (mainPlayer.fog / 0.35f);
@@ -208,13 +296,6 @@ namespace ThatsLit.Patches.Vision
 
                     if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f); // Darkness will be far more effective from afar
                     else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
-
-                    var cqb = 1f - Mathf.Clamp01((dis - 1f) / 5f); // 6+ -> 0, 1f -> 1
-                    // Fix for blind bots who are already touching us
-
-                    var cqbSmooth = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
-                    cqbSmooth *= cqbSmooth; // 6m -> 25%, 1m -> 100%
-
                     factor = Mathf.Clamp(factor, -0.95f, 0.95f);
 
                     // Absoulute offset

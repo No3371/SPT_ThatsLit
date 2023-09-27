@@ -41,6 +41,9 @@ namespace ThatsLit.Components
         public float foliageScore;
         int foliageCount;
         internal Vector2 foliageDir;
+        internal float foliageDisH, foliageDisV;
+        internal string foliage;
+        internal bool foliageCloaking;
         Collider[] collidersCache;
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass")| 1 << LayerMask.NameToLayer("PlayerSpiritAura");
         // PlayerSpiritAura is Visceral Bodies compat
@@ -330,6 +333,7 @@ namespace ThatsLit.Components
 
                 int count = Physics.OverlapSphereNonAlloc(bodyPos, 3f, collidersCache, foliageLayerMask);
                 float closet = 9999f;
+                foliage = null;
 
                 for (int i = 0; i < count; i++)
                 {
@@ -347,12 +351,18 @@ namespace ThatsLit.Components
                     {
                         closet = dis;
                         foliageDir = new Vector2(dir.x, dir.z);
+                        foliage = collidersCache[i]?.gameObject.transform.parent.gameObject.name;
                     }
                 }
 
                 foliageCount = count;
 
-                if (count > 0) foliageScore /= (float) count;
+                if (count > 0)
+                {
+                    foliageScore /= (float) count;
+                    foliageDisH = foliageDir.magnitude;
+                    foliageDisV = Mathf.Abs(foliageDir.y);
+                }
                 if (count == 1) foliageScore /= 2f;
                 if (count == 2) foliageScore /= 1.5f;
             }
@@ -396,6 +406,10 @@ namespace ThatsLit.Components
                     GUILayout.Label("[FOLIAGE+]");
                 else if (foliageScore > 0.05f)
                     GUILayout.Label("[FOLIAGE]");
+
+                if (foliageCloaking)
+                    GUILayout.Label("[#FOLIAGE#]");
+
                 if (Time.time < awakeAt + 10)
                     GUILayout.Label("[That's Lit HUD] Can be disabled in plugin settings.");
             }
