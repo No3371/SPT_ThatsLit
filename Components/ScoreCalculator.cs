@@ -552,7 +552,7 @@ namespace ThatsLit.Components
         protected override float ThresholdMid { get => 0.1f; }
         protected override float ThresholdMidLow { get => 0.04f; }
         protected override float ThresholdLow { get => 0.015f; }
-        protected override float PixelLumScoreScale { get => 1.5f; }
+        protected override float PixelLumScoreScale { get => 2f; }
     }
 
     public class WoodsScoreCalculator : ScoreCalculator
@@ -623,26 +623,6 @@ namespace ThatsLit.Components
         protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.66f;
         protected override float MinAmbienceLum => 0.008f;
         protected override float MaxAmbienceLum => 0.008f;
-    }
-    public class ReserveCalculator : ScoreCalculator
-    {
-        protected override float MinBaseAmbienceScore => -0.85f;
-        protected override float MinAmbienceLum { get => 0.01f; }
-        protected override float ThresholdShine { get => 0.5f; }
-        protected override float ThresholdHigh { get => 0.35f; }
-        protected override float ThresholdHighMid { get => 0.2f; }
-        protected override float ThresholdMid { get => 0.1f; }
-        protected override float ThresholdMidLow { get => 0.025f; }
-        protected override float PixelLumScoreScale { get => 2f; }
-        protected override void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
-        {
-            thresholdShine = 0.5f;
-            thresholdHigh = 0.35f;
-            thresholdHighMid = 0.2f;
-            thresholdMid = 0.1f;
-            thresholdMidLow = 0.025f;
-            thresholdLow = 0.005f;
-        }
     }
 
     public class StreetsScoreCalculator : ScoreCalculator
