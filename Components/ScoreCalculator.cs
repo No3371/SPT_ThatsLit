@@ -606,6 +606,12 @@ namespace ThatsLit.Components
     {
         protected override float MinBaseAmbienceScore => -0.85f;
         protected override float MinAmbienceLum { get => 0.01f; }
+        protected override float ThresholdShine { get => 0.5f; }
+        protected override float ThresholdHigh { get => 0.35f; }
+        protected override float ThresholdHighMid { get => 0.2f; }
+        protected override float ThresholdMid { get => 0.1f; }
+        protected override float ThresholdMidLow { get => 0.025f; }
+        protected override float PixelLumScoreScale { get => 2f; }
         protected override void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
         {
             thresholdShine = 0.5f;
