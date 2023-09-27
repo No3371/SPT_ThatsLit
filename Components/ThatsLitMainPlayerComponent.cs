@@ -107,7 +107,7 @@ namespace ThatsLit.Components
                     case "TarkovStreets":
                         if (ThatsLitPlugin.EnableStreets.Value) scoreCalculator = new StreetsScoreCalculator();
                         break;
-                    case "shoreline":
+                    case "Shoreline":
                         if (ThatsLitPlugin.EnableShoreline.Value) scoreCalculator = new ShorelineScoreCalculator();
                         break;
                     case "laboratory":
