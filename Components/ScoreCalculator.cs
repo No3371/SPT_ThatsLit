@@ -433,11 +433,7 @@ namespace ThatsLit.Components
         {
             cloudiness = 1 - cloudiness; // difference from 1
             float maxMoonlightScore = GetMaxMoonlightScore();
-            if (time > 0 && time < 3) // 0 ~ 1
-                return cloudiness * maxMoonlightScore * Mathf.Clamp01(time / 2f);
-            else if (time >= 3 && time < 5) // 1 ~ 0
-                return cloudiness * maxMoonlightScore * (1f - Mathf.Clamp01((time - 3) / 2f));
-            else return 0;
+            return cloudiness * maxMoonlightScore * CalculateMoonLightTimeFactor(locationId, time);
         }
 
         // The increased visual brightness when sun is up (5~22) hours when c < 1
@@ -463,6 +459,15 @@ namespace ThatsLit.Components
                 return 1f - GetTimeProgress(time, 15, 19) * 0.5f;
             else if (time >= 19 && time < 21.5f) // 0.5 ~ 0f
                 return 0.5f - GetTimeProgress(time, 19, 21.5f) * 0.5f;
+            else return 0;
+        }
+
+        protected virtual float CalculateMoonLightTimeFactor(string locationId, float time)
+        {
+            if (time > 0 && time < 3.5f) // 0 ~ 1
+                return Mathf.Clamp01(time / 2f);
+            else if (time >= 3.5f && time < 5) // 1 ~ 0
+                return (1f - Mathf.Clamp01((time - 3.5f) / 1.5f));
             else return 0;
         }
 
