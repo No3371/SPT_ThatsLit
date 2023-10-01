@@ -304,7 +304,11 @@ namespace ThatsLit.Patches.Vision
                     if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight? 0.3f : 1f); // Darkness will be far more effective from afar
                     else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
 
-                    if (factor < 0 && __instance.Owner.NightVision.UsingNow)
+                    if (factor < -0.85f && __instance.Owner.NightVision.UsingNow)
+                        factor *= UnityEngine.Random.Range(0.5f, 0.8f); // Negative factor is reduced to only 10% regardless distance
+                    else if (factor < -0.7f && __instance.Owner.NightVision.UsingNow)
+                        factor *= UnityEngine.Random.Range(0.25f, 0.45f); // Negative factor is reduced to only 10% regardless distance
+                    else if (factor < 0 && __instance.Owner.NightVision.UsingNow)
                         factor *= UnityEngine.Random.Range(0.15f, 0.3f); // Negative factor is reduced to only 10% regardless distance
 
                     factor = Mathf.Clamp(factor, -0.95f, 0.95f);
