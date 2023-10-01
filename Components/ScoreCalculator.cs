@@ -383,7 +383,8 @@ namespace ThatsLit.Components
         protected virtual float CalculateAmbienceScore (string locationId, float time, float cloudiness, float insideTime = 0)
         {
             float insideCoef = Mathf.Clamp01((insideTime - 2) / 10f); // 0 ~ 2 sec => 0%, 12 sec => 100%
-            float ambience = CalculateBaseAmbienceScore(locationId, time) * Mathf.Lerp(1, IndoorAmbienceScale, insideCoef * CalculateSunLightTimeFactor(locationId, time)); // Consider the brighter ambience comes from the sun, scale the indoor impact down with sunlight time factor
+            float ambience = CalculateBaseAmbienceScore(locationId, time);
+            ambience -= Mathf.Abs(ambience) * (1f - IndoorAmbienceScale) * insideCoef * (CalculateSunLightTimeFactor(locationId, time) + CalculateMoonLightTimeFactor(locationId, time) / 2f); // Consider the brighter ambience comes from the sun and the moon, scale the indoor impact down with sunlight time factor
             ambience += Mathf.Clamp01((cloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact;
             return ambience + CalculateMoonLight(locationId, time, cloudiness) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef) + CalculateSunLight(locationId, time, cloudiness) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef);
         }
@@ -415,8 +416,12 @@ namespace ThatsLit.Components
                 return 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12);
             else if (time >= 12 && time < 15) // 1 ~ 1
                 return 1;
-            else if (time >= 15 && time < 21.5f) // 1 ~ 0
-                return (1f - GetTimeProgress(time, 15, 21.5f));
+            else if (time >= 15 && time < 18) // 1 ~ 0.8f
+                return 1f - 0.2f * GetTimeProgress(time, 18, 20);
+            else if (time >= 18 && time < 20) // 0.8f ~ 0.3f
+                return 0.8f - 0.8f * GetTimeProgress(time, 18, 20);
+            else if (time >= 20 && time < 21.5f) // 0.3 ~ 0
+                return 0.3f - 0.3f * GetTimeProgress(time, 20, 21.5f);
             else if (time >= 0 && time < 2) // 0 ~ 0.1
                 return 0.1f * GetTimeProgress(time, 0, 2);
             else if (time >= 2 && time < 3) // 0.1
@@ -445,8 +450,6 @@ namespace ThatsLit.Components
             return cloudiness * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
         }
 
-        // The increased visual brightness when sun is up (5~22) hours when c < 1
-        // cloudiness blocks sun light
         protected virtual float CalculateSunLightTimeFactor(string locationId, float time)
         {
             if (time >= 5 && time < 8) // 0 ~ 0.3
@@ -513,11 +516,11 @@ namespace ThatsLit.Components
         /// The ambience change between c-1 and c1 during the darkest hours
         /// </summary>
         /// <value></value>
-        protected virtual float NonCloudinessBaseAmbienceScoreImpact { get => 0.05f; }
+        protected virtual float NonCloudinessBaseAmbienceScoreImpact { get => 0.1f; }
         protected virtual float MaxMoonlightScore { get => 0.3f; }
         protected virtual float MaxSunlightScore { get => 0.1f; }
         protected virtual float IndoorSunMoonScale { get => 0.5f; }
-        protected virtual float IndoorAmbienceScale { get => 0.9f; }
+        protected virtual float IndoorAmbienceScale { get => 0.75f; }
         protected virtual float MinAmbienceLum { get => 0.01f; }
         protected virtual float MaxAmbienceLum { get => 0.1f; }
         protected virtual float PixelLumScoreScale => 1f;
@@ -576,11 +579,13 @@ namespace ThatsLit.Components
                 return 0.5f * GetTimeProgress(time, 5, 7.5f);
             else if (time >= 7.5f && time < 12f) // 0.5f ~ 1
                 return 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12);
-            else if (time >= 12 && time < 18) // 1 ~ 1
+            else if (time >= 12 && time < 15) // 1 ~ 1
                 return 1;
+            else if (time >= 15 && time < 18) // 1 ~ 0.8f
+                return 1f - 0.2f * GetTimeProgress(time, 18, 20);
             else if (time >= 18 && time < 20f) // 1 ~ 0.35
-                return 1f - GetTimeProgress(time, 18, 20f) * 0.65f;
-            else if (time >= 20 && time < 21.5f) // 1 ~ 0
+                return 0.8f - 0.45f * GetTimeProgress(time, 18, 20f);
+            else if (time >= 20 && time < 21.5f)
                 return 0.35f - 0.35f * GetTimeProgress(time, 20, 21.5f);
             else if (time >= 0 && time < 2) // 0 ~ 0.1
                 return 0.1f * GetTimeProgress(time, 0, 2);
@@ -647,16 +652,18 @@ namespace ThatsLit.Components
 
         protected override float GetMapAmbienceCoef(string locationId, float time)
         {
-            float result = base.GetMapAmbienceCoef(locationId, time);
+            float result;
 
             if (time >= 6 && time < 7.5f) // 0 ~ 0.35f
                 result = 0.35f * GetTimeProgress(time, 6, 7.5f);
             else if (time >= 7.5f && time < 12f) // 0.5f ~ 1
                 result = 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12);
-            else if (time >= 12 && time < 18) // 1 ~ 1
-                result = 1;
+            else if (time >= 12 && time < 15) // 1 ~ 1
+                return 1;
+            else if (time >= 15 && time < 18) // 1 ~ 0.8f
+                return 1f - 0.2f * GetTimeProgress(time, 18, 20);
             else if (time >= 18 && time < 20) // 1 ~ 0.3f
-                result = 1f - 0.7f * GetTimeProgress(time, 18, 20);
+                result = 0.8f - 0.4f * GetTimeProgress(time, 18, 20);
             else if (time >= 20 && time < 21.5f) // 0.3 ~ 0
                 result = 0.3f - 0.3f * GetTimeProgress(time, 20, 21.5f);
             else if (time >= 0 && time < 2) // 0 ~ 0.1
@@ -725,6 +732,8 @@ namespace ThatsLit.Components
         }
         protected override float GetMapAmbienceCoef(string locationId, float time) => 0;
         protected override float CalculateMoonLight(string locationId, float time, float cloudiness) => 0;
+        protected override float CalculateMoonLightTimeFactor(string locationId, float time) => 0;
+        protected override float CalculateSunLightTimeFactor(string locationId, float time) => 0;
     }
 
     public class LabScoreCalculator : ScoreCalculator
