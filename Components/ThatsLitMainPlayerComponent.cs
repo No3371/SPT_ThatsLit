@@ -10,6 +10,8 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.Weather;
+using GPUInstancer;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
@@ -191,6 +193,7 @@ namespace ThatsLit.Components
 
         private void Update()
         {
+            GetDetail();
             if (!ThatsLitPlugin.EnabledMod.Value)
             {
                 if (cam?.enabled ?? false) GameObject.Destroy(cam.gameObject);
@@ -440,7 +443,10 @@ namespace ThatsLit.Components
             if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight? "V" : scoreCalculator.irLight? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
             // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
-
+            GUILayout.Label($"{this.terrain} {cellPos.x},{cellPos.y} - {detailPos.x},{detailPos.y} at {terrainPos.x:0.000},{terrainPos.y:0.000} H:{mappedHeight}");
+            for (int i = 0; i < detailsHere3x3.Length; i++)
+                if (detailsHere3x3[i].casted)
+                    GUILayout.Label($"{ detailsHere3x3[i].num } Detail#{i}({ detailsHere3x3[i].name }) ({detailId}/{detailsHere3x3[i].detailBlocks})");
         }
 
 
@@ -467,6 +473,133 @@ namespace ThatsLit.Components
             fog = WeatherController.Instance.WeatherCurve.Fog;
             rain = WeatherController.Instance.WeatherCurve.Rain;
             cloud = WeatherController.Instance.WeatherCurve.Cloudiness;
+        }
+
+        public Vector2 terrainPos;
+        public Vector2Int cellPos, detailPos;
+        float mappedHeight;
+        int detailId;
+        Terrain terrain;
+        Vector3 hitPos;
+        public DetailInfo[] detailsHere3x3 = new DetailInfo[24];
+        public DetailInfo[] detailsHere6x6 = new DetailInfo[24];
+        public struct DetailInfo
+        {
+            public bool casted;
+            public string name;
+            public int num;
+            public int detailX, detailY;
+            public float terrainX, terrainY;
+            public int detailMapSize, detailBlocks;
+        }
+
+        Dictionary<Terrain, GClass1079<GClass1064>> terrainSpatialPartitions = new Dictionary<Terrain, GClass1079<GClass1064>>();
+        GameObject marker;
+        void GetDetail ()
+        {
+            if (Time.frameCount % 30 == 0)
+            {
+                var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
+                Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask);
+                var terrain = hit.transform.GetComponent<Terrain>();
+                hitPos = hit.point;
+                GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
+
+                if (!terrain || !manager || !manager.isInitialized ) return;
+                if (!terrainSpatialPartitions.ContainsKey(terrain))
+                {
+                    // terrainDetailMap[terrain] = manager.GetDetailMapData();
+                    terrainSpatialPartitions[terrain] = AccessTools.Field(typeof(GPUInstancerDetailManager), "spData").GetValue(manager) as GClass1079<GClass1064>;
+                }
+                if (!terrainSpatialPartitions.ContainsKey(terrain)) return;
+                
+                Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
+                var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
+
+                GClass1079<GClass1064> spData = terrainSpatialPartitions[terrain];
+                var cellRelSize = 1f / (float) spData.cellRowAndCollumnCountPerTerrain;
+                var cellX = (int) (currentLocationOnTerrainmap.x / cellRelSize);
+                var cellY = (int) (currentLocationOnTerrainmap.y / cellRelSize);
+
+                if (!spData.GetCell(GClass1064.CalculateHash(cellX, 0, cellY), out var cell)) 
+                {
+                    EFT.UI.ConsoleScreen.Log($"No cell ({cellX},{cellY})");
+                    return;
+                }
+
+                GClass1065 gClass1065 = cell as GClass1065;
+                if (gClass1065 == null || gClass1065.detailMapData.Count < 1) return;
+                var cellResolution = (int) Mathf.Sqrt(gClass1065.detailMapData[0].Length);
+
+                var inCellOffsetXToTerrain = currentLocationOnTerrainmap.x - cellX * cellRelSize;
+                var inCellOffsetYToTerrain = currentLocationOnTerrainmap.y - cellY * cellRelSize;
+                var cellDetailX = (int) (inCellOffsetXToTerrain * cellResolution * spData.cellRowAndCollumnCountPerTerrain);
+                var cellDetailY = (int) (inCellOffsetYToTerrain * cellResolution * spData.cellRowAndCollumnCountPerTerrain);
+
+                var heightMapSize = (int) Mathf.Sqrt(gClass1065.heightMapData.Length);
+                var heightMapX = (int) (inCellOffsetXToTerrain * heightMapSize * spData.cellRowAndCollumnCountPerTerrain);
+                var heightMapY = (int) (inCellOffsetYToTerrain * heightMapSize * spData.cellRowAndCollumnCountPerTerrain);
+                List<int[]> layers = gClass1065?.detailMapData;
+                if (layers == null) return;
+
+                mappedHeight = gClass1065.heightMapData[heightMapY * heightMapSize + heightMapX];
+                cellPos = new Vector2Int(cellX, cellY);
+                detailPos = new Vector2Int(cellDetailX, cellDetailY);
+                terrainPos = currentLocationOnTerrainmap;
+                detailId = cellDetailX + cellResolution * cellDetailY;
+                this.terrain = terrain;
+                for (int i = 0; i < detailsHere3x3.Length; i++) detailsHere3x3[i] = default;
+                for (int d = 0; d < layers.Count; d++)
+                {
+                    detailsHere3x3[d] = new DetailInfo() { casted = true, name = manager.prototypeList[d].name, num = layers[d][detailId], detailX = cellDetailX, detailY = cellDetailY, detailBlocks = layers[d].Length, detailMapSize = cellResolution };
+                }
+                marker.transform.position = new Vector3(terrain.transform.position.x + cellPos.x * cellRelSize * terrain.terrainData.size.x, hitPos.y, terrain.transform.position.z + cellPos.y * cellRelSize * terrain.terrainData.size.z);
+            }
+
+            if (marker == null)
+            {
+                marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                marker.transform.localScale = Vector3.one * 0.5f;
+                marker.GetComponent<Collider>().enabled = false;
+            }
+
+        }
+
+        float SumDetailScore ()
+        {
+            float v = 0;
+            for (int i = 0; i < detailsHere3x3.Length; i++)
+            {
+                v += GetDetailCoverScoreByName(detailsHere3x3[i].name, detailsHere3x3[i].num);
+            }
+            return v;
+        }
+
+        void GetDetailCoverScoreByName (string name, int num, out float prone, out float crouch)
+        {
+            switch (name)
+            {
+                case "Detail_0_Grass_new_1_D_e2eb60": // normal grass, 8~12
+                case "Detail_1_Grass_02_512_df6e82":
+                case "Detail_2_Grass6_D_adb33a":
+                case "Detail_3_Field_grass_D_ead4fa":
+                case "Detail_4_Grass2_D_40d9d4":
+                case "Detail_5_Grass5_512_D_7c58e7":
+                case "Detail_6_Grass4_D_bf0a23":
+                // case "Detail_7_!vertexlit_rock_e9cd39":
+                case "Detail_8_Grass_new_3_D_27bbce":
+                case "Detail_9_grass11_4ad690":
+                case "Detail_10_T_WhitGrass_A_f83e15":
+                case "Detail_11_T_KrapivaLittle_A_b6cf18":
+                case "Detail_12_Grass3_D_994963":
+                case "Detail_13_Grass_new_1_D_e2eb60":
+                case "Detail_14_Grass_new_1_D_e2eb60":
+                    prone = 0.1f * num;
+                    crouch = 0.01f;
+                    break;
+                default:
+                    return 0;
+            }
         }
     }
 }
