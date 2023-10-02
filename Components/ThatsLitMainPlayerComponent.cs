@@ -60,10 +60,10 @@ namespace ThatsLit.Components
         public float fog, rain, cloud;
         public float MultiFrameLitScore { get; private set; }
         public float detailScoreProne, detailScoreCrouch;
-        public Vector3 lastTriggeredDetailCoverDirNearest;
-        public float lastTiltAngle, lastRotateAngle;
-        public float lastNearest;
-        public float lastFinalDetailScoreNearest;
+        // public Vector3 lastTriggeredDetailCoverDirNearest;
+        // public float lastTiltAngle, lastRotateAngle;
+        // public float lastNearest;
+        // public float lastFinalDetailScoreNearest;
         internal ScoreCalculator scoreCalculator;
         AsyncGPUReadbackRequest gquReq;
         // float benchMark1, benchMark2;
@@ -464,25 +464,25 @@ namespace ThatsLit.Components
             var poseFactor = MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
             if (MainPlayer.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
             poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
-            GUILayout.Label(string.Format("POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
+            // GUILayout.Label(string.Format("POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
             // GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
             if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight? "V" : scoreCalculator.irLight? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
             // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
-            GUILayout.Label(string.Format("LAST DETAIL ENEMY DIR: {0:+0.00;-0.00;+0.00} ({1:0.000}) ({2:+0.00;-0.00;+0.00} -> ({3:0.00}m)) {4} {5}", lastTriggeredDetailCoverDirNearest, lastFinalDetailScoreNearest, DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
-            for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
-                if (detailsHere5x5[i].casted)
-                    GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
-            GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
-            GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");
-            GUILayout.Label($" NE  DETAIL_LOW: { scoreCache[2] } DETAIL_MID: {scoreCache[3]}");
-            GUILayout.Label($"  E  DETAIL_LOW: { scoreCache[4] } DETAIL_MID: {scoreCache[5]}");
-            GUILayout.Label($" SE  DETAIL_LOW: { scoreCache[6] } DETAIL_MID: {scoreCache[7]}");
-            GUILayout.Label($"  S  DETAIL_LOW: { scoreCache[8] } DETAIL_MID: {scoreCache[9]}");
-            GUILayout.Label($" SW  DETAIL_LOW: { scoreCache[10] } DETAIL_MID: {scoreCache[11]}");
-            GUILayout.Label($"  W  DETAIL_LOW: { scoreCache[12] } DETAIL_MID: {scoreCache[13]}");
-            GUILayout.Label($" NW  DETAIL_LOW: { scoreCache[14] } DETAIL_MID: {scoreCache[15]}");
+            // GUILayout.Label(string.Format("LAST DETAIL ENEMY DIR: {0:+0.00;-0.00;+0.00} ({1:0.000}) ({2:+0.00;-0.00;+0.00} -> ({3:0.00}m)) {4} {5}", lastTriggeredDetailCoverDirNearest, lastFinalDetailScoreNearest, DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
+            // for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
+            //     if (detailsHere5x5[i].casted)
+            //         GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
+            // GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
+            // GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");
+            // GUILayout.Label($" NE  DETAIL_LOW: { scoreCache[2] } DETAIL_MID: {scoreCache[3]}");
+            // GUILayout.Label($"  E  DETAIL_LOW: { scoreCache[4] } DETAIL_MID: {scoreCache[5]}");
+            // GUILayout.Label($" SE  DETAIL_LOW: { scoreCache[6] } DETAIL_MID: {scoreCache[7]}");
+            // GUILayout.Label($"  S  DETAIL_LOW: { scoreCache[8] } DETAIL_MID: {scoreCache[9]}");
+            // GUILayout.Label($" SW  DETAIL_LOW: { scoreCache[10] } DETAIL_MID: {scoreCache[11]}");
+            // GUILayout.Label($"  W  DETAIL_LOW: { scoreCache[12] } DETAIL_MID: {scoreCache[13]}");
+            // GUILayout.Label($" NW  DETAIL_LOW: { scoreCache[14] } DETAIL_MID: {scoreCache[15]}");
         }
 
 
@@ -511,9 +511,6 @@ namespace ThatsLit.Components
             cloud = WeatherController.Instance.WeatherCurve.Cloudiness;
         }
 
-        float mappedHeight;
-        int detailId;
-        Vector3 hitPos;
         public DetailInfo[] detailsHere5x5 = new DetailInfo[MAX_DETAIL_TYPES * 25]; // MAX_DETAIL_TYPES(24) x 25;
         public struct DetailInfo
         {
@@ -524,15 +521,14 @@ namespace ThatsLit.Components
 
         Dictionary<Terrain, GClass1079<GClass1064>> terrainSpatialPartitions = new Dictionary<Terrain, GClass1079<GClass1064>>();
         Dictionary<Terrain, List<int[,]>> terrainDetailMaps = new Dictionary<Terrain, List<int[,]>>();
-        GameObject marker;
-        float[] scoreCache = new float[18];
+        // GameObject marker;
+        // float[] scoreCache = new float[18];
         void CheckTerrainDetails ()
         {
             Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
             var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
             if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return;
             var terrain = hit.transform.GetComponent<Terrain>();
-            hitPos = hit.point;
             GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
 
             if (!terrain || !manager || !manager.isInitialized ) return;
@@ -551,7 +547,7 @@ namespace ThatsLit.Components
             {
                 var resolution = (manager.prototypeList[d] as GPUInstancerDetailPrototype).detailResolution;
                 Vector2Int resolutionPos = new Vector2Int((int) (currentLocationOnTerrainmap.x * resolution), (int) (currentLocationOnTerrainmap.y * resolution));
-                EFT.UI.ConsoleScreen.Log($"JOB: Calculating score for detail#{d} at detail pos ({resolutionPos.x},{resolutionPos.y})" );
+                // EFT.UI.ConsoleScreen.Log($"JOB: Calculating score for detail#{d} at detail pos ({resolutionPos.x},{resolutionPos.y})" );
                 for (int x = 0; x < 5; x++)
                 for (int y = 0; y < 5; y++)
                 {
@@ -645,33 +641,33 @@ namespace ThatsLit.Components
                 }
             }
 
-            scoreCache[16] = 0;
-            scoreCache[17] = 0;
-            foreach (var pos in IterateDetailIndex3x3)
-            {
-                for (int i = 0; i < MAX_DETAIL_TYPES; i++)
-                {
-                    var info = detailsHere5x5[pos*MAX_DETAIL_TYPES + i];
-                    GetDetailCoverScoreByName(info.name, info.count, out var s1, out var s2);
-                    scoreCache[16] += s1;
-                    scoreCache[17] += s2;
-                }
-            }
-            CalculateDetailScore(Vector3.forward, 31, 0, out scoreCache[0], out scoreCache[1]);
-            CalculateDetailScore(Vector3.forward + Vector3.right, 31, 0, out scoreCache[2], out scoreCache[3]);
-            CalculateDetailScore(Vector3.right, 31, 0, out scoreCache[4], out scoreCache[5]);
-            CalculateDetailScore(Vector3.right + Vector3.back, 31, 0, out scoreCache[6], out scoreCache[7]);
-            CalculateDetailScore(Vector3.back, 31, 0, out scoreCache[8], out scoreCache[9]);
-            CalculateDetailScore(Vector3.back + Vector3.left, 31, 0, out scoreCache[10], out scoreCache[11]);
-            CalculateDetailScore(Vector3.left, 31, 0, out scoreCache[12], out scoreCache[13]);
-            CalculateDetailScore(Vector3.left + Vector3.forward, 31, 0, out scoreCache[14], out scoreCache[15]);
+            // scoreCache[16] = 0;
+            // scoreCache[17] = 0;
+            // foreach (var pos in IterateDetailIndex3x3)
+            // {
+            //     for (int i = 0; i < MAX_DETAIL_TYPES; i++)
+            //     {
+            //         var info = detailsHere5x5[pos*MAX_DETAIL_TYPES + i];
+            //         GetDetailCoverScoreByName(info.name, info.count, out var s1, out var s2);
+            //         scoreCache[16] += s1;
+            //         scoreCache[17] += s2;
+            //     }
+            // }
+            // CalculateDetailScore(Vector3.forward, 31, 0, out scoreCache[0], out scoreCache[1]);
+            // CalculateDetailScore(Vector3.forward + Vector3.right, 31, 0, out scoreCache[2], out scoreCache[3]);
+            // CalculateDetailScore(Vector3.right, 31, 0, out scoreCache[4], out scoreCache[5]);
+            // CalculateDetailScore(Vector3.right + Vector3.back, 31, 0, out scoreCache[6], out scoreCache[7]);
+            // CalculateDetailScore(Vector3.back, 31, 0, out scoreCache[8], out scoreCache[9]);
+            // CalculateDetailScore(Vector3.back + Vector3.left, 31, 0, out scoreCache[10], out scoreCache[11]);
+            // CalculateDetailScore(Vector3.left, 31, 0, out scoreCache[12], out scoreCache[13]);
+            // CalculateDetailScore(Vector3.left + Vector3.forward, 31, 0, out scoreCache[14], out scoreCache[15]);
 
         }
         
         Coroutine gatheringDetailMap;
         IEnumerator AsyncAllTerrainDetailMapGathering (Terrain priority = null)
         {
-            EFT.UI.ConsoleScreen.Log($"JOB: Staring gathering terrain details..." );
+            // EFT.UI.ConsoleScreen.Log($"JOB: Staring gathering terrain details..." );
             
             if (priority && !terrainDetailMaps.ContainsKey(priority))
             {

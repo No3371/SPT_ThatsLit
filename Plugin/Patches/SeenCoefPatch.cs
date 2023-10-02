@@ -153,7 +153,7 @@ namespace ThatsLit.Patches.Vision
                 {
                     nearestRecent = dis;
                     nearestAI = true;
-                    mainPlayer.lastNearest = nearestRecent;
+                    // mainPlayer.lastNearest = nearestRecent;
                     if (Time.frameCount % 47 == 46)
                     {
                         mainPlayer.lastCalcFrom = original;
@@ -194,17 +194,17 @@ namespace ThatsLit.Patches.Vision
                     var facingAngleDelta = Vector2.Angle(playerLegToHeadFlattened, playerLegToBotEyeFlatted); // Close to 90 when the player is facing right or left in the vision
                     if (facingAngleDelta >= 90) xyFacingFactor = (180f - facingAngleDelta) / 90f;
                     else if (facingAngleDelta <= 90) xyFacingFactor = (facingAngleDelta) / 90f;
-                    if (nearestAI) mainPlayer.lastRotateAngle = facingAngleDelta;
+                    // if (nearestAI) mainPlayer.lastRotateAngle = facingAngleDelta;
                     xyFacingFactor = 1f - xyFacingFactor; // 0 ~ 1
 
                     // Calculate how flat it is in the vision
                     var normal = Vector3.Cross(BotTransform.up, -playerLegToBotEye);
                     var playerLegToHeadAlongVision = Vector3.ProjectOnPlane(playerLegToHead, normal);
                     layingVerticaltInVisionFactor = Vector3.SignedAngle(playerLegToBotEye, playerLegToHeadAlongVision, normal); // When the angle is 90, it means the player looks straight up in the vision, vice versa for -90.
-                    if (nearestAI)
-                        if (layingVerticaltInVisionFactor >= 90f) mainPlayer.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
-                        else if (layingVerticaltInVisionFactor <= 0)  mainPlayer.lastTiltAngle = layingVerticaltInVisionFactor;
-                    ;
+                    // if (nearestAI)
+                    //     if (layingVerticaltInVisionFactor >= 90f) mainPlayer.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
+                    //     else if (layingVerticaltInVisionFactor <= 0)  mainPlayer.lastTiltAngle = layingVerticaltInVisionFactor;
+
                     if (layingVerticaltInVisionFactor >= 90f) layingVerticaltInVisionFactor = (180f - layingVerticaltInVisionFactor) / 15f; // the player is laying head up feet down in the vision...   "-> /"
                     else if (layingVerticaltInVisionFactor <= 0 && layingVerticaltInVisionFactor >= -90f) layingVerticaltInVisionFactor = layingVerticaltInVisionFactor / -15f; // "-> /"
                     else layingVerticaltInVisionFactor = 0; // other cases grasses should take effect
@@ -242,15 +242,15 @@ namespace ThatsLit.Patches.Vision
                 {
                     __result *= 1 + 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f)));
                     if (__result < dis) __result = dis;
-                    if (nearestAI)
-                    {
-                        mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
-                    }
+                    // if (nearestAI)
+                    // {
+                    //     mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
+                    // }
                 }
-                if (nearestAI)
-                {
-                    mainPlayer.lastFinalDetailScoreNearest = detailScore;
-                }
+                // if (nearestAI)
+                // {
+                //     mainPlayer.lastFinalDetailScoreNearest = detailScore;
+                // }
 
                 // BUSH RAT ----------------------------------------------------------------------------------------------------------------
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
