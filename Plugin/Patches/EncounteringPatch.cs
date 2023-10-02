@@ -57,15 +57,23 @@ namespace ThatsLit.Patches.Vision
             public bool triggered;
             public bool unexpected;
             public bool sprinting;
+            public float angle;
         }
 
         [PatchPrefix]
         public static bool PatchPrefix(GClass478 __instance, bool value, ref State __state)
         {
+            Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
+            Vector3 to = __instance.Person.Transform.position - __instance.Owner.Transform.position;
+            var angle = Vector3.Angle(from, to);
+            if (__instance.Person.IsYourPlayer && !__instance.IsVisible && value  && !__instance.Owner.Boss.IamBoss)
+            {
+                if (angle > 75 && UnityEngine.Random.Range(0f, 1f) < Mathf.Clamp01((angle - 75f) / 25f) * 0.75f) return false; // Cancel visible when facing away (SetVisible not only get called for the witness... ex: for group members )
+            }
             if (__instance.Person.IsYourPlayer && value && Time.time - __instance.PersonalSeenTime > 10f && (!__instance.HaveSeen || (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 49f))
             {
                 Singleton<ThatsLitMainPlayerComponent>.Instance.encounter++;
-                __state = new State () { triggered = true, unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f * UnityEngine.Random.Range(1, 2f), sprinting = __instance.Owner.Mover.Sprinting };
+                __state = new State () { triggered = true, unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f * UnityEngine.Random.Range(1, 2f), sprinting = __instance.Owner.Mover.Sprinting, angle = angle };
             }
             return true;
         }
@@ -76,9 +84,6 @@ namespace ThatsLit.Patches.Vision
             if (aim == null) return;
             if (__state.triggered && __instance.Owner.Memory.GoalEnemy == __instance)
             {
-                Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
-                Vector3 to = __instance.Person.Transform.position - __instance.Owner.Transform.position;
-                var angle = Vector3.Angle(from, to);
                 if (__state.sprinting)
                 {
                     __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 1f) * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(angle/15f));
@@ -86,11 +91,11 @@ namespace ThatsLit.Patches.Vision
                 }
                 else if (__state.unexpected)
                 {
-                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.25f) * Mathf.Clamp01(angle/15f));
+                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.25f) * Mathf.Clamp01(__state.angle/15f));
                 }
                 if (__instance.Owner.AimingData is GClass463 g463 && !__instance.Owner.WeaponManager.ShootController.IsAiming)
                 {
-                    g463.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.35f) * Mathf.Clamp01((angle - 15f)/45f);
+                    g463.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.35f) * Mathf.Clamp01((__state.angle - 15f)/45f);
                 }
             }
         }
