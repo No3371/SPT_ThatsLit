@@ -414,7 +414,7 @@ namespace ThatsLit.Patches.Vision
 
                 if (factor < 0)
                 {
-                    __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(sinceSeen / 0.1f)); // just seen (0s) => original, 0.1s => modified
+                    __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(sinceSeen / UnityEngine.Random.Range(0.075f, 0.15f))); // just seen (0s) => original, 0.1s => modified
                 }
                 // This probably will let bots stay unaffected until losing the visual
 
