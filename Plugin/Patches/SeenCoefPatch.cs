@@ -113,7 +113,7 @@ namespace ThatsLit.Patches.Vision
                 if (canSeeLight) globalOverlookChance /= 2f;
                 if (isGoalEnemy)
                 {
-                    if (sinceSeen < 5f) globalOverlookChance = 0;
+                    if (sinceSeen < 10f) globalOverlookChance = 0;
                     else globalOverlookChance *= UnityEngine.Random.Range(0.1f, 0.5f);
                 }
                 if (UnityEngine.Random.Range(0f, 1f) < globalOverlookChance)
