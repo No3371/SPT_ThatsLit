@@ -74,9 +74,9 @@ namespace ThatsLit.Patches.Vision
                 // var visionAngleToEnemyHead = Vector3.Angle(botVisionDir, EyeToEnemyHead);
 
                 var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
-                if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
+                if (!canSeeLight && __instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
                 var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
-                if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
+                if (!canSeeLaser && __instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
 
                 float sinceSeen = Time.time - __instance.TimeLastSeen;
                 if (sinceSeen > 30f && !canSeeLight)
