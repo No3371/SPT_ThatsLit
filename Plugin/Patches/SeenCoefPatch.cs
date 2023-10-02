@@ -25,8 +25,7 @@ namespace ThatsLit.Patches.Vision
             return AccessTools.Method(lookType, "method_7");
         }
 
-        private static int lastFrame;
-        private static float closetThisFrame;
+        private static float nearestRecent;
 
         [PatchPostfix]
         public static void PatchPostfix(GClass478 __instance, BifacialTransform BotTransform, BifacialTransform enemy, ref float __result)
@@ -41,10 +40,8 @@ namespace ThatsLit.Patches.Vision
 
             var original = __result;
 
-            if (Time.frameCount != lastFrame)
+            if (Time.frameCount % 47 == 0)
             {
-                lastFrame = Time.frameCount;
-                closetThisFrame = float.MaxValue;
                 if (mainPlayer) mainPlayer.calcedLastFrame = 0;
                 if (mainPlayer) mainPlayer.foliageCloaking = false;
             }
@@ -54,22 +51,28 @@ namespace ThatsLit.Patches.Vision
             {
                 if (!mainPlayer) return;
                 if (mainPlayer.disableVisionPatch) return;
+                nearestRecent += 0.1f;
 
-                Vector3 to = enemy.position - BotTransform.position;
-                var dis = to.magnitude;
+                Vector3 eyeToEnemyBody = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
+                var dis = eyeToEnemyBody.magnitude;
                 var disFactor = Mathf.Clamp01((dis  - 10) / 100f);
                 // To scale down various sneaking bonus
                 // The bigger the distance the bigger it is, capped to 110m
                 disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0
 
                 var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
-                if (__instance.Person.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
+                bool isInPronePose = __instance.Person.AIData.Player.IsInPronePose;
+                if (isInPronePose) poseFactor -= 0.4f; // prone: 0
                 poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
                 poseFactor = Mathf.Clamp01(poseFactor);
 
-                Vector3 from = BotTransform.rotation * Vector3.forward;
-                var visionAngleDelta = Vector3.Angle(from, to);
-                var angleVertical = Vector3.Angle(new Vector3(to.x, 0, to.z), to) * (to.y >= 0? 1f : -1f);
+                Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
+                var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToEnemyBody);
+                var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToEnemyBody.x, 0, eyeToEnemyBody.z), eyeToEnemyBody) * (eyeToEnemyBody.y >= 0? 1f : -1f); // negative if looking down (higher), 0 when looking straight... 
+
+                // Vector3 EyeToEnemyHead = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.head].Position;
+                // Vector3 EyeToEnemyLeg = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.leftLeg].Position;
+                // var visionAngleToEnemyHead = Vector3.Angle(botVisionDir, EyeToEnemyHead);
 
                 var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
                 if (__instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
@@ -79,7 +82,7 @@ namespace ThatsLit.Patches.Vision
                 float sinceSeen = Time.time - __instance.TimeLastSeen;
                 if (sinceSeen > 30f && !canSeeLight)
                 {
-                    var angleFactor = Mathf.Clamp01(1f * (angleVertical - 15f) / 30f) + Mathf.Clamp01(2f * (angleVertical - 45f) / 45f);
+                    var angleFactor = Mathf.Clamp01(1f * (visionAngleDeltaVertical - 15f) / 30f) + Mathf.Clamp01(2f * (visionAngleDeltaVertical - 45f) / 45f);
                     // Overlook close enemies at higher attitude and in low pose
                     var overheadFactor = angleFactor * (Mathf.Clamp01(visionAngleDelta - 15f) / 75f) * (1 - poseFactor * 1.5f); // 2.5+ (0%) ~ 10+ (100%) ... prone: 92.5%, crouch: 32.5%
                     overheadFactor *= Mathf.Clamp01((sinceSeen - 30) / 30f);
@@ -144,12 +147,13 @@ namespace ThatsLit.Patches.Vision
                     factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
                 }
 
-                bool closetAI = false;
-                if (dis < closetThisFrame)
+                bool nearestAI = false;
+                if (dis < nearestRecent)
                 {
-                    closetThisFrame = dis;
-                    closetAI = true;
-                    if (Time.frameCount % 47 == 0)
+                    nearestRecent = dis;
+                    nearestAI = true;
+                    mainPlayer.lastNearest = nearestRecent;
+                    if (Time.frameCount % 47 == 46)
                     {
                         mainPlayer.lastCalcFrom = original;
                         mainPlayer.lastScore = score;
@@ -158,7 +162,7 @@ namespace ThatsLit.Patches.Vision
                 }
 
                 var foliageImpact = mainPlayer.foliageScore * (1f - factor);
-                if (mainPlayer.foliageDir != Vector2.zero) foliageImpact *= 1 - Mathf.Clamp01(Vector2.Angle(new Vector2(-to.x, -to.z), mainPlayer.foliageDir) / 90f); // 0deg -> 1, 90+deg -> 0
+                if (mainPlayer.foliageDir != Vector2.zero) foliageImpact *= 1 - Mathf.Clamp01(Vector2.Angle(new Vector2(-eyeToEnemyBody.x, -eyeToEnemyBody.z), mainPlayer.foliageDir) / 90f); // 0deg -> 1, 90+deg -> 0
                 // Maybe randomly lose vision for foliages
                 // Pose higher than half will reduce the change
                 if (UnityEngine.Random.Range(0f, 1f) < disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(0.75f - poseFactor) / 0.75f) // Among bushes, from afar
@@ -172,19 +176,92 @@ namespace ThatsLit.Patches.Vision
                     __result += ThatsLitPlugin.FinalOffset.Value;
                 }
 
+                float lastPosDis = (__instance.EnemyLastPosition - __instance.Person.Position).magnitude;
 
                 var cqb = 1f - Mathf.Clamp01((dis - 1f) / 5f); // 6+ -> 0, 1f -> 1
+                var cqb15m = 1f - Mathf.Clamp01((dis - 1f) / 15f); // 6+ -> 0, 1f -> 1
                 // Fix for blind bots who are already touching us
 
                 var cqbSmooth = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
                 cqbSmooth *= cqbSmooth; // 6m -> 25%, 1m -> 100%
 
+                var xyFacingFactor = 0f;
+                var layingVerticaltInVisionFactor = 0f;
+                var detailScore = 0f;
+                mainPlayer.CalculateDetailScore(-eyeToEnemyBody, dis, visionAngleDeltaVertical, out float scoreLow, out float scoreMid);
+                if (isInPronePose) // Deal with player laying on slope and being very visible even with grasses
+                {
+                    Vector3 playerLegPos = (mainPlayer.MainPlayer.MainParts[BodyPartType.leftLeg].Position + mainPlayer.MainPlayer.MainParts[BodyPartType.rightLeg].Position) / 2f;
+                    var playerLegToHead = mainPlayer.MainPlayer.MainParts[BodyPartType.head].Position - playerLegPos;
+                    var playerLegToHeadFlattened = new Vector2(playerLegToHead.x, playerLegToHead.z);
+                    var playerLegToBotEye = __instance.Owner.MainParts[BodyPartType.head].Position - playerLegPos;
+                    var playerLegToBotEyeFlatted = new Vector2(playerLegToBotEye.x, playerLegToBotEye.z);
+                    var facingAngleDelta = Vector2.Angle(playerLegToHeadFlattened, playerLegToBotEyeFlatted); // Close to 90 when the player is facing right or left in the vision
+                    if (facingAngleDelta >= 90) xyFacingFactor = (180f - facingAngleDelta) / 90f;
+                    else if (facingAngleDelta <= 90) xyFacingFactor = (facingAngleDelta) / 90f;
+                    if (nearestAI) mainPlayer.lastRotateAngle = facingAngleDelta;
+                    xyFacingFactor = 1f - xyFacingFactor; // 0 ~ 1
+
+                    // Calculate how flat it is in the vision
+                    var normal = Vector3.Cross(BotTransform.up, -playerLegToBotEye);
+                    var playerLegToHeadAlongVision = Vector3.ProjectOnPlane(playerLegToHead, normal);
+                    layingVerticaltInVisionFactor = Vector3.SignedAngle(playerLegToBotEye, playerLegToHeadAlongVision, normal); // When the angle is 90, it means the player looks straight up in the vision, vice versa for -90.
+                    if (nearestAI)
+                        if (layingVerticaltInVisionFactor >= 90f) mainPlayer.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
+                        else if (layingVerticaltInVisionFactor <= 0)  mainPlayer.lastTiltAngle = layingVerticaltInVisionFactor;
+                    ;
+                    if (layingVerticaltInVisionFactor >= 90f) layingVerticaltInVisionFactor = (180f - layingVerticaltInVisionFactor) / 15f; // the player is laying head up feet down in the vision...   "-> /"
+                    else if (layingVerticaltInVisionFactor <= 0 && layingVerticaltInVisionFactor >= -90f) layingVerticaltInVisionFactor = layingVerticaltInVisionFactor / -15f; // "-> /"
+                    else layingVerticaltInVisionFactor = 0; // other cases grasses should take effect
+
+                    detailScore = scoreLow * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
+                }
+                else
+                {
+                    detailScore = scoreMid / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
+                }
+                
+                var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
+                switch (caution)
+                {
+                    case 0:
+                        detailScore /= 2f;
+                        detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                        break;
+                    case 1:
+                    case 3:
+                    case 2:
+                        detailScore *= 1.5f;
+                        detailScore *= 1f - cqb * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                        break;
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                        detailScore *= 1f - cqbSmooth * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                        break;
+                }
+
+                if (UnityEngine.Random.Range(0f, 1.001f) < Mathf.Clamp01(detailScore))
+                {
+                    __result *= 1 + 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f)));
+                    if (__result < dis) __result = dis;
+                    if (nearestAI)
+                    {
+                        mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
+                    }
+                }
+                if (nearestAI)
+                {
+                    mainPlayer.lastFinalDetailScoreNearest = detailScore;
+                }
+
                 // BUSH RAT ----------------------------------------------------------------------------------------------------------------
-                float lastPosDisSqr = (__instance.EnemyLastPosition - __instance.Person.Position).sqrMagnitude;
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
                 if (!canSeeLight && !(canSeeLaser && UnityEngine.Random.Range(0, 100) < 30)
                  && mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
-                 && (!__instance.HaveSeen || lastPosDisSqr > 3000f || sinceSeen > 300f && lastPosDisSqr > 100f))
+                 && (!__instance.HaveSeen || lastPosDis > 50f || sinceSeen > 300f && lastPosDis > 10f))
                 {
                     float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
                     bool foliageCloaking = true;
@@ -196,7 +273,7 @@ namespace ThatsLit.Patches.Vision
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.8f) / 0.7f); 
                             enemyDisFactor = Mathf.Clamp01(dis / 2.5f); // 100% at 2.5m+
                             poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.55f); // 100% at crouch
-                            yDeltaFactor = 1f - Mathf.Clamp01(-angleVertical / 60f); // +60deg => 1, 0deg => 1, -30deg => 0.5f, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
+                            yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVertical / 60f); // +60deg => 1, 0deg => 1, -30deg => 0.5f, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                             break;
                         case "filbert_big02":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 20f);
@@ -239,7 +316,7 @@ namespace ThatsLit.Patches.Vision
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 1f) / 0.4f); 
                             enemyDisFactor = Mathf.Clamp01(dis / 10f); // 100% at 2.5m+
                             poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.1f); 
-                            yDeltaFactor = 1f - Mathf.Clamp01(-angleVertical / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
+                            yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVertical / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                             break;
                         case "tree02":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 45f); // 0deg -> 0, 75 deg -> 1
@@ -264,10 +341,9 @@ namespace ThatsLit.Patches.Vision
                             break;
                     }
                     var overallFactor = angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor;
-                    if (closetAI && overallFactor > 0.05f) mainPlayer.foliageCloaking = foliageCloaking;
+                    if (nearestAI && overallFactor > 0.05f) mainPlayer.foliageCloaking = foliageCloaking;
                     if (foliageCloaking && overallFactor > 0)
                     {
-                        var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
                         __result = Mathf.Max(__result, dis);
                         switch (caution)
                         {
@@ -342,7 +418,7 @@ namespace ThatsLit.Patches.Vision
                 __result += ThatsLitPlugin.FinalOffset.Value;
                 if (__result < 0.001f) __result = 0.001f;
 
-                if (Time.frameCount % 47 == 0 && closetAI)
+                if (Time.frameCount % 47 == 46 && nearestAI)
                 {
                     mainPlayer.lastCalcTo = __result;
                     mainPlayer.lastFactor2 = factor;

@@ -50,7 +50,7 @@ namespace ThatsLit.Components
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass")| 1 << LayerMask.NameToLayer("PlayerSpiritAura");
         // PlayerSpiritAura is Visceral Bodies compat
 
-        float awakeAt, lastCheckedLights, lastCheckedFoliages;
+        float awakeAt, lastCheckedLights, lastCheckedFoliages, lastCheckedDetails;
         // Note: If vLight > 0, other counts may be skipped
 
         public Vector3 envCamOffset = new Vector3(0, 2, 0);
@@ -59,7 +59,11 @@ namespace ThatsLit.Components
         bool skipFoliageCheck;
         public float fog, rain, cloud;
         public float MultiFrameLitScore { get; private set; }
-
+        public float detailScoreProne, detailScoreCrouch;
+        public Vector3 lastTriggeredDetailCoverDirNearest;
+        public float lastTiltAngle, lastRotateAngle;
+        public float lastNearest;
+        public float lastFinalDetailScoreNearest;
         internal ScoreCalculator scoreCalculator;
         AsyncGPUReadbackRequest gquReq;
         // float benchMark1, benchMark2;
@@ -70,6 +74,7 @@ namespace ThatsLit.Components
                 this.enabled = false;
                 return;
             }
+
             awakeAt = Time.time;
             collidersCache = new Collider[16];
 
@@ -193,7 +198,6 @@ namespace ThatsLit.Components
 
         private void Update()
         {
-            GetDetail();
             if (!ThatsLitPlugin.EnabledMod.Value)
             {
                 if (cam?.enabled ?? false) GameObject.Destroy(cam.gameObject);
@@ -204,6 +208,11 @@ namespace ThatsLit.Components
             }
 
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
+            if (Time.time > lastCheckedDetails + 0.5f)
+            {
+                CheckTerrainDetails();
+                lastCheckedDetails = Time.time;
+            }
             if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.75f : 0.4f))
             {
                 UpdateFoliageScore(bodyPos);
@@ -353,9 +362,11 @@ namespace ThatsLit.Components
                     if (collidersCache[i].gameObject.transform.root.gameObject.layer == 8) continue; // Somehow sometimes player spines are tagged PlayerSpiritAura, VB or vanilla?
                     Vector3 dir = (collidersCache[i].transform.position - bodyPos);
                     float dis = dir.magnitude;
-                    if (dis < 0.4f) foliageScore += 3f;
-                    else if (dis < 0.55f) foliageScore += 1f;
-                    else if (dis < 0.7f) foliageScore += 0.6f;
+                    if (dis < 0.3f) foliageScore += 3f;
+                    else if (dis < 0.4f) foliageScore += 2f;
+                    else if (dis < 0.5f) foliageScore += 1f;
+                    else if (dis < 0.6f) foliageScore += 0.7f;
+                    else if (dis < 0.7f) foliageScore += 0.5f;
                     else if (dis < 1f) foliageScore += 0.3f;
                     else if (dis < 2f) foliageScore += 0.15f;
                     else foliageScore += 0.05f;
@@ -411,15 +422,31 @@ namespace ThatsLit.Components
             {
                 if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int) (MultiFrameLitScore / 0.0999f));
                 if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
-                if (foliageCloaking)
-                    GUILayout.Label("[FOLIAGE###]");
+                if (foliageScore > 0.6f)
+                    GUILayout.Label("[FOLIAGE++++++]");
+                else if (foliageScore > 0.55f)
+                    GUILayout.Label("[FOLIAGE+++++-]");
+                else if (foliageScore > 0.5f)
+                    GUILayout.Label("[FOLIAGE+++++]");
+                else if (foliageScore > 0.45f)
+                    GUILayout.Label("[FOLIAGE++++-]");
+                else if (foliageScore > 0.4f)
+                    GUILayout.Label("[FOLIAGE++++]");
+                else if (foliageScore > 0.35f)
+                    GUILayout.Label("[FOLIAGE+++-]");
                 else if (foliageScore > 0.3f)
                     GUILayout.Label("[FOLIAGE+++]");
+                else if (foliageScore > 0.25f)
+                    GUILayout.Label("[FOLIAGE++-]");
                 else if (foliageScore > 0.2f)
                     GUILayout.Label("[FOLIAGE++]");
+                else if (foliageScore > 0.15f)
+                    GUILayout.Label("[FOLIAGE+-]");
                 else if (foliageScore > 0.1f)
                     GUILayout.Label("[FOLIAGE+]");
-                else if (foliageScore > 0.05f)
+                else if (foliageScore > 0.5f)
+                    GUILayout.Label("[FOLIAGE-]");
+                else if (foliageScore > 0.025f)
                     GUILayout.Label("[FOLIAGE]");
 
                 if (Time.time < awakeAt + 10)
@@ -437,16 +464,25 @@ namespace ThatsLit.Components
             var poseFactor = MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
             if (MainPlayer.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
             poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
-            GUILayout.Label(string.Format("POSE: {0:0.000}", poseFactor));
+            GUILayout.Label(string.Format("POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
             // GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
             if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight? "V" : scoreCalculator.irLight? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
             // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
-            GUILayout.Label($"{this.terrain} {cellPos.x},{cellPos.y} - {detailPos.x},{detailPos.y} at {terrainPos.x:0.000},{terrainPos.y:0.000} H:{mappedHeight}");
-            for (int i = 0; i < detailsHere3x3.Length; i++)
-                if (detailsHere3x3[i].casted)
-                    GUILayout.Label($"{ detailsHere3x3[i].num } Detail#{i}({ detailsHere3x3[i].name }) ({detailId}/{detailsHere3x3[i].detailBlocks})");
+            GUILayout.Label(string.Format("LAST DETAIL ENEMY DIR: {0:+0.00;-0.00;+0.00} ({1:0.000}) ({2:+0.00;-0.00;+0.00} -> ({3:0.00}m)) {4} {5}", lastTriggeredDetailCoverDirNearest, lastFinalDetailScoreNearest, DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
+            for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
+                if (detailsHere5x5[i].casted)
+                    GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
+            GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
+            GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");
+            GUILayout.Label($" NE  DETAIL_LOW: { scoreCache[2] } DETAIL_MID: {scoreCache[3]}");
+            GUILayout.Label($"  E  DETAIL_LOW: { scoreCache[4] } DETAIL_MID: {scoreCache[5]}");
+            GUILayout.Label($" SE  DETAIL_LOW: { scoreCache[6] } DETAIL_MID: {scoreCache[7]}");
+            GUILayout.Label($"  S  DETAIL_LOW: { scoreCache[8] } DETAIL_MID: {scoreCache[9]}");
+            GUILayout.Label($" SW  DETAIL_LOW: { scoreCache[10] } DETAIL_MID: {scoreCache[11]}");
+            GUILayout.Label($"  W  DETAIL_LOW: { scoreCache[12] } DETAIL_MID: {scoreCache[13]}");
+            GUILayout.Label($" NW  DETAIL_LOW: { scoreCache[14] } DETAIL_MID: {scoreCache[15]}");
         }
 
 
@@ -475,104 +511,226 @@ namespace ThatsLit.Components
             cloud = WeatherController.Instance.WeatherCurve.Cloudiness;
         }
 
-        public Vector2 terrainPos;
-        public Vector2Int cellPos, detailPos;
         float mappedHeight;
         int detailId;
-        Terrain terrain;
         Vector3 hitPos;
-        public DetailInfo[] detailsHere3x3 = new DetailInfo[24];
-        public DetailInfo[] detailsHere6x6 = new DetailInfo[24];
+        public DetailInfo[] detailsHere5x5 = new DetailInfo[MAX_DETAIL_TYPES * 25]; // MAX_DETAIL_TYPES(24) x 25;
         public struct DetailInfo
         {
             public bool casted;
             public string name;
-            public int num;
-            public int detailX, detailY;
-            public float terrainX, terrainY;
-            public int detailMapSize, detailBlocks;
+            public int count;
         }
 
         Dictionary<Terrain, GClass1079<GClass1064>> terrainSpatialPartitions = new Dictionary<Terrain, GClass1079<GClass1064>>();
+        Dictionary<Terrain, List<int[,]>> terrainDetailMaps = new Dictionary<Terrain, List<int[,]>>();
         GameObject marker;
-        void GetDetail ()
+        float[] scoreCache = new float[18];
+        void CheckTerrainDetails ()
         {
-            if (Time.frameCount % 30 == 0)
+            Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
+            var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
+            if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return;
+            var terrain = hit.transform.GetComponent<Terrain>();
+            hitPos = hit.point;
+            GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
+
+            if (!terrain || !manager || !manager.isInitialized ) return;
+            if (!terrainDetailMaps.ContainsKey(terrain))
             {
-                var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
-                Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask);
-                var terrain = hit.transform.GetComponent<Terrain>();
-                hitPos = hit.point;
-                GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
+                if ( gatheringDetailMap == null) gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(terrain));
+                return;
+            }
+            if (!terrainDetailMaps.ContainsKey(terrain)) return;
+            var detailMap = terrainDetailMaps[terrain];
 
-                if (!terrain || !manager || !manager.isInitialized ) return;
-                if (!terrainSpatialPartitions.ContainsKey(terrain))
+            Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
+            var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
+            
+            for (int d = 0; d < manager.prototypeList.Count; d++)
+            {
+                var resolution = (manager.prototypeList[d] as GPUInstancerDetailPrototype).detailResolution;
+                Vector2Int resolutionPos = new Vector2Int((int) (currentLocationOnTerrainmap.x * resolution), (int) (currentLocationOnTerrainmap.y * resolution));
+                EFT.UI.ConsoleScreen.Log($"JOB: Calculating score for detail#{d} at detail pos ({resolutionPos.x},{resolutionPos.y})" );
+                for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
                 {
-                    // terrainDetailMap[terrain] = manager.GetDetailMapData();
-                    terrainSpatialPartitions[terrain] = AccessTools.Field(typeof(GPUInstancerDetailManager), "spData").GetValue(manager) as GClass1079<GClass1064>;
+                    var posX = resolutionPos.x - 2 + x;
+                    var posY = resolutionPos.y - 2 + y;
+                    int count = 0;
+
+                    if (posX < 0 && terrain.leftNeighbor && posY >= 0 && posY < resolution)
+                    {
+                        Terrain neighbor = terrain.leftNeighbor;
+                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                            if (gatheringDetailMap == null)
+                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
+                            count = terrainDetailMaps[neighbor][d][resolution + posX, posY];
+                    }
+                    else if (posX >= resolution && terrain.rightNeighbor && posY >= 0 && posY < resolution)
+                    {
+                        Terrain neighbor = terrain.rightNeighbor;
+                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                            if (gatheringDetailMap == null)
+                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
+                            count = terrainDetailMaps[neighbor][d][posX - resolution, posY];
+                    }
+                    else if (posY >= resolution && terrain.topNeighbor && posX >= 0 && posX < resolution)
+                    {
+                        Terrain neighbor = terrain.topNeighbor;
+                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                            if (gatheringDetailMap == null)
+                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
+                            count = terrainDetailMaps[neighbor][d][posX, posY - resolution];
+                    }
+                    else if (posY < 0 && terrain.bottomNeighbor && posX >= 0 && posX < resolution)
+                    {
+                        Terrain neighbor = terrain.bottomNeighbor;
+                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                            if (gatheringDetailMap == null)
+                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
+                            count = terrainDetailMaps[neighbor][d][posX, posY + resolution];
+                    }
+                    else if (posY >= resolution && terrain.topNeighbor.rightNeighbor && posX >= resolution)
+                    {
+                        Terrain neighbor = terrain.topNeighbor.rightNeighbor;
+                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                            if (gatheringDetailMap == null)
+                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
+                            count = terrainDetailMaps[neighbor][d][posX - resolution, posY - resolution];
+                    }
+                    else if (posY >= resolution && terrain.topNeighbor.leftNeighbor && posX < 0)
+                    {
+                        Terrain neighbor = terrain.topNeighbor.leftNeighbor;
+                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                            if (gatheringDetailMap == null)
+                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
+                            count = terrainDetailMaps[neighbor][d][posX + resolution, posY - resolution];
+                    }
+                    else if (posY < 0 && terrain.bottomNeighbor.rightNeighbor && posX >= resolution)
+                    {
+                        Terrain neighbor = terrain.bottomNeighbor.rightNeighbor;
+                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                            if (gatheringDetailMap == null)
+                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
+                            count = terrainDetailMaps[neighbor][d][posX - resolution, posY + resolution];
+                    }
+                    else if (posY < 0 && terrain.bottomNeighbor.leftNeighbor && posX < 0)
+                    {
+                        Terrain neighbor = terrain.bottomNeighbor.leftNeighbor;
+                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                            if (gatheringDetailMap == null)
+                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
+                            count = terrainDetailMaps[neighbor][d][posX + resolution, posY + resolution];
+                    }
+                    else if (detailMap.Count > d) // Async job
+                    {
+                        count = detailMap[d][posX, posY];
+                    }
+
+                    detailsHere5x5[GetDetailInfoIndex(x, y, d)] = new DetailInfo()
+                    {
+                        casted = true,
+                        name = manager.prototypeList[d].name,
+                        count = count,
+                    };
                 }
-                if (!terrainSpatialPartitions.ContainsKey(terrain)) return;
-                
-                Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
-                var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
-
-                GClass1079<GClass1064> spData = terrainSpatialPartitions[terrain];
-                var cellRelSize = 1f / (float) spData.cellRowAndCollumnCountPerTerrain;
-                var cellX = (int) (currentLocationOnTerrainmap.x / cellRelSize);
-                var cellY = (int) (currentLocationOnTerrainmap.y / cellRelSize);
-
-                if (!spData.GetCell(GClass1064.CalculateHash(cellX, 0, cellY), out var cell)) 
-                {
-                    EFT.UI.ConsoleScreen.Log($"No cell ({cellX},{cellY})");
-                    return;
-                }
-
-                GClass1065 gClass1065 = cell as GClass1065;
-                if (gClass1065 == null || gClass1065.detailMapData.Count < 1) return;
-                var cellResolution = (int) Mathf.Sqrt(gClass1065.detailMapData[0].Length);
-
-                var inCellOffsetXToTerrain = currentLocationOnTerrainmap.x - cellX * cellRelSize;
-                var inCellOffsetYToTerrain = currentLocationOnTerrainmap.y - cellY * cellRelSize;
-                var cellDetailX = (int) (inCellOffsetXToTerrain * cellResolution * spData.cellRowAndCollumnCountPerTerrain);
-                var cellDetailY = (int) (inCellOffsetYToTerrain * cellResolution * spData.cellRowAndCollumnCountPerTerrain);
-
-                var heightMapSize = (int) Mathf.Sqrt(gClass1065.heightMapData.Length);
-                var heightMapX = (int) (inCellOffsetXToTerrain * heightMapSize * spData.cellRowAndCollumnCountPerTerrain);
-                var heightMapY = (int) (inCellOffsetYToTerrain * heightMapSize * spData.cellRowAndCollumnCountPerTerrain);
-                List<int[]> layers = gClass1065?.detailMapData;
-                if (layers == null) return;
-
-                mappedHeight = gClass1065.heightMapData[heightMapY * heightMapSize + heightMapX];
-                cellPos = new Vector2Int(cellX, cellY);
-                detailPos = new Vector2Int(cellDetailX, cellDetailY);
-                terrainPos = currentLocationOnTerrainmap;
-                detailId = cellDetailX + cellResolution * cellDetailY;
-                this.terrain = terrain;
-                for (int i = 0; i < detailsHere3x3.Length; i++) detailsHere3x3[i] = default;
-                for (int d = 0; d < layers.Count; d++)
-                {
-                    detailsHere3x3[d] = new DetailInfo() { casted = true, name = manager.prototypeList[d].name, num = layers[d][detailId], detailX = cellDetailX, detailY = cellDetailY, detailBlocks = layers[d].Length, detailMapSize = cellResolution };
-                }
-                marker.transform.position = new Vector3(terrain.transform.position.x + cellPos.x * cellRelSize * terrain.terrainData.size.x, hitPos.y, terrain.transform.position.z + cellPos.y * cellRelSize * terrain.terrainData.size.z);
             }
 
-            if (marker == null)
+            scoreCache[16] = 0;
+            scoreCache[17] = 0;
+            foreach (var pos in IterateDetailIndex3x3)
             {
-                marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                marker.transform.localScale = Vector3.one * 0.5f;
-                marker.GetComponent<Collider>().enabled = false;
+                for (int i = 0; i < MAX_DETAIL_TYPES; i++)
+                {
+                    var info = detailsHere5x5[pos*MAX_DETAIL_TYPES + i];
+                    GetDetailCoverScoreByName(info.name, info.count, out var s1, out var s2);
+                    scoreCache[16] += s1;
+                    scoreCache[17] += s2;
+                }
             }
+            CalculateDetailScore(Vector3.forward, 31, 0, out scoreCache[0], out scoreCache[1]);
+            CalculateDetailScore(Vector3.forward + Vector3.right, 31, 0, out scoreCache[2], out scoreCache[3]);
+            CalculateDetailScore(Vector3.right, 31, 0, out scoreCache[4], out scoreCache[5]);
+            CalculateDetailScore(Vector3.right + Vector3.back, 31, 0, out scoreCache[6], out scoreCache[7]);
+            CalculateDetailScore(Vector3.back, 31, 0, out scoreCache[8], out scoreCache[9]);
+            CalculateDetailScore(Vector3.back + Vector3.left, 31, 0, out scoreCache[10], out scoreCache[11]);
+            CalculateDetailScore(Vector3.left, 31, 0, out scoreCache[12], out scoreCache[13]);
+            CalculateDetailScore(Vector3.left + Vector3.forward, 31, 0, out scoreCache[14], out scoreCache[15]);
 
         }
-
-        float SumDetailScore ()
+        
+        Coroutine gatheringDetailMap;
+        IEnumerator AsyncAllTerrainDetailMapGathering (Terrain priority = null)
         {
-            float v = 0;
-            for (int i = 0; i < detailsHere3x3.Length; i++)
+            EFT.UI.ConsoleScreen.Log($"JOB: Staring gathering terrain details..." );
+            
+            if (priority && !terrainDetailMaps.ContainsKey(priority))
             {
-                v += GetDetailCoverScoreByName(detailsHere3x3[i].name, detailsHere3x3[i].num);
+                var mgr = priority.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
+                terrainDetailMaps[priority] = new List<int[,]>(mgr.prototypeList.Count);
+                yield return AsyncTerrainDetailMapGathering(priority, terrainDetailMaps[priority]);
             }
-            return v;
+            foreach (Terrain terrain in Terrain.activeTerrains)
+            {
+                if (!terrainDetailMaps.ContainsKey(terrain))
+                {
+                    var mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
+                    terrainDetailMaps[terrain] = new List<int[,]>(mgr.prototypeList.Count);
+                    yield return AsyncTerrainDetailMapGathering(terrain, terrainDetailMaps[terrain]);
+                }
+            }
+        }
+        IEnumerator AsyncTerrainDetailMapGathering (Terrain terrain, List<int[,]> detailMapData)
+        {
+            var mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
+            if (mgr == null || !mgr.isInitialized) yield break;
+            if (!terrainSpatialPartitions.ContainsKey(terrain))
+            {
+                terrainSpatialPartitions[terrain] = AccessTools.Field(typeof(GPUInstancerDetailManager), "spData").GetValue(mgr) as GClass1079<GClass1064>;
+            }
+            if (!terrainSpatialPartitions.TryGetValue(terrain, out var spData)) yield break;
+            var waitNextFrame = new WaitForEndOfFrame();
+            
+            if (detailMapData == null) detailMapData = new List<int[,]>(mgr.prototypeList.Count);
+            else detailMapData.Clear();
+            for (int layer = 0; layer < mgr.prototypeList.Count; ++layer)
+            {
+                var prototype = mgr.prototypeList[layer] as GPUInstancerDetailPrototype;
+                if (prototype == null) detailMapData.Add(null);
+                int[,] detailLayer = new int[prototype.detailResolution, prototype.detailResolution];
+                detailMapData.Add(detailLayer);
+                var resolutionPerCell = prototype.detailResolution / spData.cellRowAndCollumnCountPerTerrain;
+                for (int terrainCellX = 0; terrainCellX < spData.cellRowAndCollumnCountPerTerrain; ++terrainCellX)
+                {
+                    for (int terrainCellY = 0; terrainCellY < spData.cellRowAndCollumnCountPerTerrain; ++terrainCellY)
+                    {
+                        GClass1064 cell;
+                        if (spData.GetCell(GClass1064.CalculateHash(terrainCellX, 0, terrainCellY), out cell))
+                        {
+                            GClass1065 gclass1065 = (GClass1065) cell;
+                            if (gclass1065.detailMapData != null)
+                            {
+                                for (int cellResX = 0; cellResX < resolutionPerCell; ++cellResX)
+                                {
+                                    for (int cellResY = 0; cellResY < resolutionPerCell; ++cellResY)
+                                        detailLayer[cellResX + terrainCellX * resolutionPerCell, cellResY + terrainCellY * resolutionPerCell] = gclass1065.detailMapData[layer][cellResX + cellResY * resolutionPerCell];
+                                }
+                            }
+                        }
+
+                        yield return waitNextFrame;
+                    }
+                }
+            }
         }
 
         void GetDetailCoverScoreByName (string name, int num, out float prone, out float crouch)
@@ -581,25 +739,163 @@ namespace ThatsLit.Components
             {
                 case "Detail_0_Grass_new_1_D_e2eb60": // normal grass, 8~12
                 case "Detail_1_Grass_02_512_df6e82":
-                case "Detail_2_Grass6_D_adb33a":
-                case "Detail_3_Field_grass_D_ead4fa":
-                case "Detail_4_Grass2_D_40d9d4":
                 case "Detail_5_Grass5_512_D_7c58e7":
-                case "Detail_6_Grass4_D_bf0a23":
                 // case "Detail_7_!vertexlit_rock_e9cd39":
                 case "Detail_8_Grass_new_3_D_27bbce":
-                case "Detail_9_grass11_4ad690":
-                case "Detail_10_T_WhitGrass_A_f83e15":
                 case "Detail_11_T_KrapivaLittle_A_b6cf18":
                 case "Detail_12_Grass3_D_994963":
                 case "Detail_13_Grass_new_1_D_e2eb60":
                 case "Detail_14_Grass_new_1_D_e2eb60":
-                    prone = 0.1f * num;
-                    crouch = 0.01f;
+                    prone = 0.075f * Mathf.Pow(Mathf.Clamp01(num / 10f), 2) * num; // Needs cluster
+                    crouch = 0.005f * num;
+                    break;
+                case "Detail_2_Grass6_D_adb33a": // wheat like, the top is fluffy
+                    prone = 0.02f * num;
+                    crouch = 0.09f * num;
+                    break;
+                case "Detail_10_T_WhitGrass_A_f83e15":
+                    prone = 0.05f * num;
+                    crouch = 0.08f * num;
+                    break;
+                case "Detail_3_Field_grass_D_ead4fa":
+                    prone = 0.075f * num;
+                    crouch = 0.075f * num;
+                    break;
+                case "Detail_4_Grass2_D_40d9d4": // thin, tall
+                case "Detail_9_grass11_4ad690":
+                case "Detail_6_Grass4_D_bf0a23":
+                    prone = 0.07f * num;
+                    crouch = 0.007f * num;
                     break;
                 default:
-                    return 0;
+                    prone = 0;
+                    crouch = 0;
+                    return;
             }
         }
+
+        int GetDetailInfoIndex (int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
+
+        string DetermineDir (Vector3 dir)
+        {
+            var dirFlat = (new Vector2 (dir.x, dir.z)).normalized;
+            var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
+            if (angle >= -22.5f && angle <= 22.5f)
+            {
+                return "N";
+            }
+            else if (angle >= 22.5f && angle <= 67.5f)
+            {
+                return "NE";
+            }
+            else if (angle >= 67.5f && angle <= 112.5f)
+            {
+                return "E";
+            }
+            else if (angle >= 112.5f && angle <= 157.5f)
+            {
+                return "SE";
+            }
+            else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
+            {
+                return "S";
+            }
+            else if (angle >= -157.5f && angle <= -112.5f)
+            {
+                return "SW";
+            }
+            else if (angle >= -112.5f && angle <= -67.5f)
+            {
+                return "W";
+            }
+            else if (angle >= -67.5f && angle <= -22.5f)
+            {
+                return "NW";
+            }
+            else return "?";
+        }
+
+        public void CalculateDetailScore (Vector3 enemyDirection, float dis, float verticalAxisAngle, out float scoreLow, out float scoreMid)
+        {
+            scoreLow = scoreMid = 0;
+            var dirFlat = (new Vector2 (enemyDirection.x, enemyDirection.z)).normalized;
+            var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
+            IEnumerable<int> it;
+            if (dis < 21f || verticalAxisAngle < -10f)
+                it = IterateDetailIndex3x3;
+            else if (angle >= -22.5f && angle <= 22.5f)
+            {
+                it = IterateDetailIndex3x3N;
+            }
+            else if (angle >= 22.5f && angle <= 67.5f)
+            {
+                it = IterateDetailIndex3x3NE;
+            }
+            else if (angle >= 67.5f && angle <= 112.5f)
+            {
+                it = IterateDetailIndex3x3E;
+            }
+            else if (angle >= 112.5f && angle <= 157.5f)
+            {
+                it = IterateDetailIndex3x3SE;
+            }
+            else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
+            {
+                it = IterateDetailIndex3x3S;
+            }
+            else if (angle >= -157.5f && angle <= -112.5f)
+            {
+                it = IterateDetailIndex3x3SW;
+            }
+            else if (angle >= -112.5f && angle <= -67.5f)
+            {
+                it = IterateDetailIndex3x3W;
+            }
+            else if (angle >= -67.5f && angle <= -22.5f)
+            {
+                it = IterateDetailIndex3x3NW;
+            }
+            else throw new Exception($"[That's Lit] Invalid angle to enemy: {angle}");
+
+            foreach (var pos in it)
+            {
+                for (int i = 0; i < MAX_DETAIL_TYPES; i++)
+                {
+                    var info = detailsHere5x5[pos*MAX_DETAIL_TYPES + i];
+                    GetDetailCoverScoreByName(info.name, info.count, out var s1, out var s2);
+                    scoreLow += s1;
+                    scoreMid += s2;
+                }
+            }
+        }
+
+        IEnumerable<int> IterateDetailIndex3x3N => IterateIndex3x3In5x5(0, 1);
+        IEnumerable<int> IterateDetailIndex3x3E => IterateIndex3x3In5x5(1, 0);
+        IEnumerable<int> IterateDetailIndex3x3W => IterateIndex3x3In5x5(-1, 0);
+        IEnumerable<int> IterateDetailIndex3x3S => IterateIndex3x3In5x5(0, -1);
+        IEnumerable<int> IterateDetailIndex3x3NE => IterateIndex3x3In5x5(1, 1);
+        IEnumerable<int> IterateDetailIndex3x3NW => IterateIndex3x3In5x5(-1, 1);
+        IEnumerable<int> IterateDetailIndex3x3SE => IterateIndex3x3In5x5(1, -1);
+        IEnumerable<int> IterateDetailIndex3x3SW => IterateIndex3x3In5x5(-1, -1);
+        IEnumerable<int> IterateDetailIndex3x3 => IterateIndex3x3In5x5(0, 0);
+        /// <param name="xOffset">WestSide(-x) => -1, EstSide(+x) => 1</param>
+        /// <param name="yOffset"></param>
+        /// <returns></returns>
+        IEnumerable<int> IterateIndex3x3In5x5 (int xOffset, int yOffset)
+        {
+            yield return 5*(1 + yOffset) + 1 + xOffset;
+            yield return 5*(1 + yOffset) + 2 + xOffset;
+            yield return 5*(1 + yOffset) + 3 + xOffset;
+            
+            yield return 5*(2 + yOffset) + 1 + xOffset;
+            yield return 5*(2 + yOffset) + 2 + xOffset;
+            yield return 5*(2 + yOffset) + 3 + xOffset;
+            
+            yield return 5*(3 + yOffset) + 1 + xOffset;
+            yield return 5*(3 + yOffset) + 2 + xOffset;
+            yield return 5*(3 + yOffset) + 3 + xOffset;
+        }
+
+        const int MAX_DETAIL_TYPES = 24;
     }
 }
