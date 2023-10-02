@@ -817,7 +817,7 @@ namespace ThatsLit.Components
             var dirFlat = (new Vector2 (enemyDirection.x, enemyDirection.z)).normalized;
             var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
             IEnumerable<int> it;
-            if (dis < 21f || verticalAxisAngle < -10f)
+            if (dis < 15f || verticalAxisAngle < -10f)
                 it = IterateDetailIndex3x3;
             else if (angle >= -22.5f && angle <= 22.5f)
             {
