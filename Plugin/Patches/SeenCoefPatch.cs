@@ -46,7 +46,6 @@ namespace ThatsLit.Patches.Vision
                 if (mainPlayer) mainPlayer.foliageCloaking = false;
             }
            
-
             if (__instance.Person.IsYourPlayer)
             {
                 if (!mainPlayer) return;
@@ -94,10 +93,11 @@ namespace ThatsLit.Patches.Vision
                 }
                 
                 bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
-                if (isGoalEnemy && __instance.Owner.WeaponManager.ShootController.IsAiming)
+                if (__instance.Owner.WeaponManager.ShootController.IsAiming)
                 {
                     float v = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 50;
-                    if (__instance.Owner.NightVision.UsingNow) Mathf.Min(v, 50); // AIs using NVGs does not get the scope buff
+                    if (visionAngleDelta > 1000f/v // Out of scope
+                     || __instance.Owner.NightVision.UsingNow) v = Mathf.Min(v, 50); // AIs using NVGs does not get the scope buff
                     disFactor *= 1 + 0.1f * (300 - v) / 100;
                     disFactor = Mathf.Clamp01(disFactor);
                     // 10m sight? => 1.29x... 10m -> 0, 110m -> 1.29x
@@ -107,6 +107,7 @@ namespace ThatsLit.Patches.Vision
                     // 600m sight => 0.8x... 110m -> 0.64
                     // 1000m sight => 0.3x... 110m -> 0.24
                 }
+                
 
 
                 float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
