@@ -439,44 +439,4 @@ namespace ThatsLit.Patches.Vision
             }
         }
     }
-
-    // Thanks to SAIN
-    internal class EFTInfo
-    {
-        public static bool IsEnemyMainPlayer(BotOwner bot) => EFTInfo.IsPlayerMainPlayer(EFTInfo.GetPlayer(bot?.Memory?.GoalEnemy?.Person));
-
-        public static bool IsPlayerMainPlayer(Player player) => (UnityEngine.Object)player != (UnityEngine.Object)null && EFTInfo.Compare(player, EFTInfo.MainPlayer);
-
-        public static bool IsPlayerMainPlayer(IAIDetails player) => player != null && EFTInfo.Compare(player, EFTInfo.MainPlayer);
-
-        public static Player GetPlayer(BotOwner bot) => EFTInfo.GetPlayer(bot?.ProfileId);
-
-        public static Player GetPlayer(IAIDetails person) => EFTInfo.GetPlayer(person?.ProfileId);
-
-        public static Player GetPlayer(string profileID) => EFTInfo.GameWorld?.GetAlivePlayerByProfileID(profileID);
-
-        public static bool Compare(IAIDetails A, IAIDetails B) => EFTInfo.Compare(A?.ProfileId, B?.ProfileId);
-
-        public static bool Compare(Player A, IAIDetails B) => EFTInfo.Compare(A?.ProfileId, B?.ProfileId);
-
-        public static bool Compare(IAIDetails A, Player B) => EFTInfo.Compare(A?.ProfileId, B?.ProfileId);
-
-        public static bool Compare(Player A, Player B) => EFTInfo.Compare(A?.ProfileId, B?.ProfileId);
-
-        public static bool Compare(Player A, string B) => EFTInfo.Compare(A?.ProfileId, B);
-
-        public static bool Compare(string A, Player B) => EFTInfo.Compare(A, B);
-
-        public static bool Compare(string A, string B) => A == B;
-
-        public static GameWorld GameWorld => Singleton<GameWorld>.Instance;
-
-        public static Player MainPlayer => EFTInfo.GameWorld?.MainPlayer;
-
-        public static List<IAIDetails> AllPlayers => EFTInfo.GameWorld?.RegisteredPlayers;
-
-        public static List<Player> AlivePlayers => EFTInfo.GameWorld?.AllAlivePlayersList;
-
-        public static Dictionary<string, Player> AlivePlayersDictionary => EFTInfo.GameWorld?.allAlivePlayersByID;
-    }
 }
