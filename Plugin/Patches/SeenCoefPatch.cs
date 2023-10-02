@@ -51,6 +51,7 @@ namespace ThatsLit.Patches.Vision
                 if (!mainPlayer) return;
                 if (mainPlayer.disableVisionPatch) return;
                 nearestRecent += 0.1f;
+                var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
 
                 Vector3 eyeToEnemyBody = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
                 var dis = eyeToEnemyBody.magnitude;
@@ -184,68 +185,73 @@ namespace ThatsLit.Patches.Vision
                 var layingVerticaltInVisionFactor = 0f;
                 var detailScore = 0f;
                 mainPlayer.CalculateDetailScore(-eyeToEnemyBody, dis, visionAngleDeltaVertical, out float scoreLow, out float scoreMid);
-                if (isInPronePose) // Deal with player laying on slope and being very visible even with grasses
+                if (scoreLow > 0.1f || scoreMid > 0.1f)
                 {
-                    Vector3 playerLegPos = (mainPlayer.MainPlayer.MainParts[BodyPartType.leftLeg].Position + mainPlayer.MainPlayer.MainParts[BodyPartType.rightLeg].Position) / 2f;
-                    var playerLegToHead = mainPlayer.MainPlayer.MainParts[BodyPartType.head].Position - playerLegPos;
-                    var playerLegToHeadFlattened = new Vector2(playerLegToHead.x, playerLegToHead.z);
-                    var playerLegToBotEye = __instance.Owner.MainParts[BodyPartType.head].Position - playerLegPos;
-                    var playerLegToBotEyeFlatted = new Vector2(playerLegToBotEye.x, playerLegToBotEye.z);
-                    var facingAngleDelta = Vector2.Angle(playerLegToHeadFlattened, playerLegToBotEyeFlatted); // Close to 90 when the player is facing right or left in the vision
-                    if (facingAngleDelta >= 90) xyFacingFactor = (180f - facingAngleDelta) / 90f;
-                    else if (facingAngleDelta <= 90) xyFacingFactor = (facingAngleDelta) / 90f;
-                    // if (nearestAI) mainPlayer.lastRotateAngle = facingAngleDelta;
-                    xyFacingFactor = 1f - xyFacingFactor; // 0 ~ 1
+                    if (isInPronePose) // Deal with player laying on slope and being very visible even with grasses
+                    {
+                        Vector3 playerLegPos = (mainPlayer.MainPlayer.MainParts[BodyPartType.leftLeg].Position + mainPlayer.MainPlayer.MainParts[BodyPartType.rightLeg].Position) / 2f;
+                        var playerLegToHead = mainPlayer.MainPlayer.MainParts[BodyPartType.head].Position - playerLegPos;
+                        var playerLegToHeadFlattened = new Vector2(playerLegToHead.x, playerLegToHead.z);
+                        var playerLegToBotEye = __instance.Owner.MainParts[BodyPartType.head].Position - playerLegPos;
+                        var playerLegToBotEyeFlatted = new Vector2(playerLegToBotEye.x, playerLegToBotEye.z);
+                        var facingAngleDelta = Vector2.Angle(playerLegToHeadFlattened, playerLegToBotEyeFlatted); // Close to 90 when the player is facing right or left in the vision
+                        if (facingAngleDelta >= 90) xyFacingFactor = (180f - facingAngleDelta) / 90f;
+                        else if (facingAngleDelta <= 90) xyFacingFactor = (facingAngleDelta) / 90f;
+                        // if (nearestAI) mainPlayer.lastRotateAngle = facingAngleDelta;
+                        xyFacingFactor = 1f - xyFacingFactor; // 0 ~ 1
 
-                    // Calculate how flat it is in the vision
-                    var normal = Vector3.Cross(BotTransform.up, -playerLegToBotEye);
-                    var playerLegToHeadAlongVision = Vector3.ProjectOnPlane(playerLegToHead, normal);
-                    layingVerticaltInVisionFactor = Vector3.SignedAngle(playerLegToBotEye, playerLegToHeadAlongVision, normal); // When the angle is 90, it means the player looks straight up in the vision, vice versa for -90.
-                    // if (nearestAI)
-                    //     if (layingVerticaltInVisionFactor >= 90f) mainPlayer.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
-                    //     else if (layingVerticaltInVisionFactor <= 0)  mainPlayer.lastTiltAngle = layingVerticaltInVisionFactor;
+                        // Calculate how flat it is in the vision
+                        var normal = Vector3.Cross(BotTransform.up, -playerLegToBotEye);
+                        var playerLegToHeadAlongVision = Vector3.ProjectOnPlane(playerLegToHead, normal);
+                        layingVerticaltInVisionFactor = Vector3.SignedAngle(playerLegToBotEye, playerLegToHeadAlongVision, normal); // When the angle is 90, it means the player looks straight up in the vision, vice versa for -90.
+                        // if (nearestAI)
+                        //     if (layingVerticaltInVisionFactor >= 90f) mainPlayer.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
+                        //     else if (layingVerticaltInVisionFactor <= 0)  mainPlayer.lastTiltAngle = layingVerticaltInVisionFactor;
 
-                    if (layingVerticaltInVisionFactor >= 90f) layingVerticaltInVisionFactor = (180f - layingVerticaltInVisionFactor) / 15f; // the player is laying head up feet down in the vision...   "-> /"
-                    else if (layingVerticaltInVisionFactor <= 0 && layingVerticaltInVisionFactor >= -90f) layingVerticaltInVisionFactor = layingVerticaltInVisionFactor / -15f; // "-> /"
-                    else layingVerticaltInVisionFactor = 0; // other cases grasses should take effect
+                        if (layingVerticaltInVisionFactor >= 90f) layingVerticaltInVisionFactor = (180f - layingVerticaltInVisionFactor) / 15f; // the player is laying head up feet down in the vision...   "-> /"
+                        else if (layingVerticaltInVisionFactor <= 0 && layingVerticaltInVisionFactor >= -90f) layingVerticaltInVisionFactor = layingVerticaltInVisionFactor / -15f; // "-> /"
+                        else layingVerticaltInVisionFactor = 0; // other cases grasses should take effect
 
-                    detailScore = scoreLow * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
-                }
-                else
-                {
-                    detailScore = scoreMid / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
-                }
-                
-                var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
-                switch (caution)
-                {
-                    case 0:
-                        detailScore /= 2f;
-                        detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
-                        break;
-                    case 1:
-                    case 3:
-                    case 2:
-                        detailScore *= 1.5f;
-                        detailScore *= 1f - cqb * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
-                        break;
-                    case 4:
-                    case 5:
-                    case 6:
-                    case 7:
-                    case 8:
-                        detailScore *= 1f - cqbSmooth * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
-                        break;
-                }
+                        detailScore = scoreLow * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
+                    }
+                    else
+                    {
+                        detailScore = scoreMid / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
+                    }
+                    
+                    switch (caution)
+                    {
+                        case 0:
+                            detailScore /= 2f;
+                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                            break;
+                        case 1:
+                        case 3:
+                        case 2:
+                            detailScore *= 1.5f;
+                            detailScore *= 1f - cqb * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                            break;
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+                        case 8:
+                            detailScore *= 1f - cqbSmooth * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                            break;
+                    }
 
-                if (UnityEngine.Random.Range(0f, 1.001f) < Mathf.Clamp01(detailScore))
-                {
-                    __result *= 1 + 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f)));
-                    if (__result < dis) __result = dis;
-                    // if (nearestAI)
-                    // {
-                    //     mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
-                    // }
+                    if (UnityEngine.Random.Range(0f, 1.001f) < Mathf.Clamp01(detailScore))
+                    {
+                        float detailImpact = 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen
+                        if (detailScore > 1 && isInPronePose) // But if the score is high and is proning (because the score is not capped to 1 even when crouching), make it "blink" so there's a chance to get hidden again
+                            detailImpact = UnityEngine.Random.Range(0, 4f) + UnityEngine.Random.Range(0, 5f) * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // Allow diving back into the grass field
+                        __result *= 1 + detailImpact;
+                        if (__result < dis) __result = dis;
+                        // if (nearestAI)
+                        // {
+                        //     mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
+                        // }
+                    }
                 }
                 // if (nearestAI)
                 // {
