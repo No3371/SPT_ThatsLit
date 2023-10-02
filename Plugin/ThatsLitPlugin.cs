@@ -161,6 +161,7 @@ namespace ThatsLit
         {
             new SeenCoefPatch().Enable();
             new EncounteringPatch().Enable();
+            // new SoundOverlapPatch().Enable();
         }
 
         private void Update()

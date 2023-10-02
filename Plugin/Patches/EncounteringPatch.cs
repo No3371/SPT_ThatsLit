@@ -4,9 +4,45 @@ using ThatsLit.Components;
 using System.Reflection;
 using UnityEngine;
 using Comfort.Common;
+using EFT;
 
 namespace ThatsLit.Patches.Vision
 {
+    // public class SoundOverlapPatch : ModulePatch
+    // {
+    //     protected override MethodBase GetTargetMethod()
+    //     {
+    //         //HearingSensor
+    //         return AccessTools.Method(typeof(GClass553), "method_6");
+    //     }
+
+    //     [PatchPostfix]
+    //     public static void PatchPostfix(GClass553 __instance, ref bool __result, BotOwner ___botOwner_0, Vector3 position, float power)
+    //     {
+    //         if (__result)
+    //         {
+    //             if (power > Singleton<ThatsLitGameworldComponent>.Instance.powerSample) Singleton<ThatsLitGameworldComponent>.Instance.powerSample = power;
+    //             if (Singleton<ThatsLitGameworldComponent>.Instance.BotLastHearingEvents.TryGetValue(___botOwner_0.Id, out var last))
+    //             {
+    //                 var rand = UnityEngine.Random.Range(0.05f, 0.25f);
+    //                 if (Time.time - last.Item1 < rand && (rand - 0.05f) * 5f > power / last.Item2)
+    //                 {
+    //                     __result = false;
+    //                     return;
+    //                 }
+    //                 if ((rand - 0.05f) * 2f > power)
+    //                 {
+    //                     __result = false;
+    //                     return;
+    //                 }
+    //             }
+    //             Vector3 vector3 = ___botOwner_0.Transform.position - position;
+    //             float num = ___botOwner_0.Settings.Current.CurrentHearingSense * power / vector3.magnitude;
+    //             Singleton<ThatsLitGameworldComponent>.Instance.BotLastHearingEvents[___botOwner_0.Id] = (Time.time, num);
+    //         }
+    //     }
+    // }
+
     public class EncounteringPatch : ModulePatch
     {
         private static PropertyInfo _GoalEnemyProp;
