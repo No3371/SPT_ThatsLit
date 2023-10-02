@@ -86,8 +86,8 @@ namespace ThatsLit.Patches.Vision
             {
                 if (__state.sprinting)
                 {
-                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 1f) * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(angle/15f));
-                    if (UnityEngine.Random.Range(0f, 1f) < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(angle/15f)) aim.NextShotMiss();
+                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.6f) * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(__state.angle/15f));
+                    if (UnityEngine.Random.Range(0f, 1f) < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(__state.angle/15f)) aim.NextShotMiss();
                 }
                 else if (__state.unexpected)
                 {
