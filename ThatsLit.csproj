@@ -187,6 +187,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.TerrainModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
