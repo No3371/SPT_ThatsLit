@@ -168,12 +168,6 @@ namespace ThatsLit.Patches.Vision
                 if (UnityEngine.Random.Range(0f, 1f) < disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(0.75f - poseFactor) / 0.75f) // Among bushes, from afar
                 {
                     __result *= 10f;
-                    if (Time.frameCount % 47 == 0 && closetAI)
-                    {
-                        mainPlayer.lastCalcTo = __result;
-                        mainPlayer.lastFactor2 = factor;
-                    }
-                    __result += ThatsLitPlugin.FinalOffset.Value;
                 }
 
                 float lastPosDis = (__instance.EnemyLastPosition - __instance.Person.Position).magnitude;
