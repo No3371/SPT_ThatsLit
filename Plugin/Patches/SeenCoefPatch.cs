@@ -407,7 +407,7 @@ namespace ThatsLit.Patches.Vision
                                                                                              // So even at 1m (cqb = 0), if the AI is facing 45+ deg away, there's a chance cqb check is bypassed
                         float rand = UnityEngine.Random.Range(0f, 1f);
                         var cqbCancel = rand < cqbCancelChance;
-                        if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1 - (cqbSmooth + cqb) * (cqbCancel ? 0.1f : 1f))
+                        if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1 - (cqbSmooth + cqb) * (cqbCancel ? 0.05f : 1f))
                          && rand > 0.0001f)
                          __result = 8888f;
                     }
