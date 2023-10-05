@@ -60,7 +60,10 @@ namespace ThatsLit.Patches.Vision
                 var disFactor = Mathf.Clamp01((dis  - 10) / 100f);
                 // To scale down various sneaking bonus
                 // The bigger the distance the bigger it is, capped to 110m
-                disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0
+                disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0, 50m => 0.16
+                // The disFactor is to scale up effectiveness of various mechanics by distance
+                // Once player is seen, it should be suppressed unless the player is out fo visual for sometime, to prevent interrupting long range fight
+                disFactor = Mathf.Lerp(0, disFactor, sinceSeen / (8f * (1.2f - disFactor)) / (isGoalEnemy? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
 
                 var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
                 bool isInPronePose = __instance.Person.AIData.Player.IsInPronePose;
