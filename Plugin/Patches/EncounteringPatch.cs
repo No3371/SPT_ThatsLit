@@ -33,7 +33,15 @@ namespace ThatsLit.Patches.Vision
             var angle = Vector3.Angle(from, to);
             if (__instance.Person.IsYourPlayer && !__instance.IsVisible && value  && !__instance.Owner.Boss.IamBoss)
             {
-                if (angle > 75 && UnityEngine.Random.Range(0f, 1f) < Mathf.Clamp01((angle - 75f) / 25f) * 0.75f) return false; // Cancel visible when facing away (SetVisible not only get called for the witness... ex: for group members )
+                float rand = UnityEngine.Random.Range(-1f, 1f);
+                float rand2 = UnityEngine.Random.Range(-1f, 1f);
+                if (angle > 75 && rand < Mathf.Clamp01((angle - 75f) / 25f) * 0.7f)
+                {
+                    var source = __instance.Owner.Position + (__instance.Person.Position - __instance.Owner.Position) * (0.75f + rand / 4f);
+                    source += (Vector3.up * rand  + Vector3.right * rand2 + Vector3.forward * (rand2 - rand) / 2f) * to.sqrMagnitude / (100f * (1.5f + rand));
+                    __instance.Owner.Memory.Spotted(false, source);
+                    return false; // Cancel visible when facing away (SetVisible not only get called for the witness... ex: for group members )
+                }
             }
             if (__instance.Person.IsYourPlayer && value && Time.time - __instance.PersonalSeenTime > 10f && (!__instance.HaveSeen || (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 49f))
             {
