@@ -410,11 +410,12 @@ namespace ThatsLit.Patches.Vision
                     // Absolute offset alone won't work for different vision angles
                     if (factor < 0)
                     {
-                        var cqbCancelChance = Mathf.Clamp01((visionAngleDelta - 45f) / 45f); // 0deg (in front) => 0%, 45deg() => 0%, 90deg => 100%
+                        var cqbCancelChance = Mathf.Clamp01((visionAngleDelta - 15f) / 85f); // 0~15deg (in front) => 0%, 45deg() => 40%, 90deg => 88%
                                                                                              // So even at 1m (cqb = 0), if the AI is facing 45+ deg away, there's a chance cqb check is bypassed
                         float rand = UnityEngine.Random.Range(0f, 1f);
+                        rand /= 1f + 0.5f * Mathf.Clamp01(-0.85f - factor) / 0.1f; // 45deg at f-0.95 => 40% -> 26%, 90deg at f-0.95 => 58%
                         var cqbCancel = rand < cqbCancelChance;
-                        if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1 - (cqbSmooth + cqb) * (cqbCancel ? 0.05f : 1f))
+                        if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1 - (cqbSmooth + cqb) * (cqbCancel ? 0.1f : 1f))
                          && rand > 0.0001f)
                          __result = 8888f;
                     }
