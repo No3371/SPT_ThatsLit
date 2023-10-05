@@ -52,6 +52,8 @@ namespace ThatsLit.Patches.Vision
                 if (mainPlayer.disableVisionPatch) return;
                 nearestRecent += 0.1f;
                 var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
+                float sinceSeen = Time.time - __instance.TimeLastSeen;
+                bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
 
                 Vector3 eyeToEnemyBody = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
                 var dis = eyeToEnemyBody.magnitude;
@@ -79,7 +81,6 @@ namespace ThatsLit.Patches.Vision
                 var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
                 if (!canSeeLaser && __instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
 
-                float sinceSeen = Time.time - __instance.TimeLastSeen;
                 if (sinceSeen > 30f && !canSeeLight)
                 {
                     var angleFactor = Mathf.Clamp01(1f * (visionAngleDeltaVertical - 15f) / 30f) + Mathf.Clamp01(2f * (visionAngleDeltaVertical - 45f) / 45f);
@@ -93,7 +94,6 @@ namespace ThatsLit.Patches.Vision
                     }
                 }
                 
-                bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
                 if (__instance.Owner.WeaponManager.ShootController.IsAiming)
                 {
                     float v = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 50;
