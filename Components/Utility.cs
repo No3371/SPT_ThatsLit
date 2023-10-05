@@ -28,6 +28,125 @@ namespace ThatsLit.Components
             }
         }
 
+
+        internal static void CalculateDetailScore (string name, int num, out float prone, out float crouch)
+        {
+            prone = 0;
+            crouch = 0;
+            if (name.Length < 6) return;
+
+            if (name.EndsWith("e2eb60")
+             || name.EndsWith("df6e82")
+             || name.EndsWith("7c58e7")
+             || name.EndsWith("994963")
+            )
+            {
+                prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 10f), 2) * num; // Needs cluster
+                crouch = 0.005f * num;
+            }
+            else if (name.EndsWith("27bbce"))
+            {
+                prone = 0.008f * num;
+                crouch = 0;
+            }
+            else if (name.EndsWith("fa097b"))
+            {
+                prone = 0.06f * num; 
+                crouch = 0.01f * num;
+            }
+            else if (name.EndsWith("eb7931"))
+            {
+                prone = 0.06f * num; 
+                crouch = 0.01f * num;
+            }
+            else if (name.EndsWith("adb33a"))
+            {
+                prone = 0.02f * num;
+                crouch = 0.09f * num;
+            }
+            else if (name.EndsWith("f83e15"))
+            {
+                prone = 0.05f * num;
+                crouch = 0.08f * num;
+            }
+            else if (name.EndsWith("ead4fa"))
+            {
+                prone = 0.075f * num;
+                crouch = 0.03f * num;
+            }
+            else if (name.EndsWith("40d9d4"))
+            {
+                prone = 0.007f * num;
+                crouch = 0.009f * num;
+            }
+            else if (name.EndsWith("4ad690")
+                || name.EndsWith("bf0a23")
+            )
+            {
+                prone = 0.007f * num;
+                crouch = 0.007f * num;
+            }
+            else if (name.EndsWith("b6cf18"))
+            {
+                prone = 0.01f * num;
+                crouch = 0.01f * num;
+            }
+
+                // I REALLY DONT WANT TO CALL SUBSTRING HERE
+                // switch (string.Intern(name.Substring(name.Length - 6, 6)))
+                // {
+                //     case "e2eb60": // Grass_new_1_D_e2eb60, normal grass, 8~12
+                //     case "df6e82": // Grass_02_512_df6e82
+                //     case "7c58e7": // Grass5_512_D_7c58e7
+                //     // case "!vertexlit_rock_e9cd39":
+                //     case "994963": // _Grass3_D_994963
+                //         prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 10f), 2) * num; // Needs cluster
+                //         crouch = 0.005f * num;
+                //         break;
+                //     case "27bbce": // Grass_new_3_D_27bbce, shorter and smaller, cross shape
+                //         prone = 0.008f * num;
+                //         crouch = 0;
+                //         break;
+                //     case "fa097b": // Grass_new_2_D_fa097b, denser and slightly bigger grass cluster
+                //         prone = 0.06f * num; 
+                //         crouch = 0.01f * num;
+                //         break;
+                //     case "eb7931": // Grass_2_roma_eb7931, brown, dense, somewhat tall
+                //         prone = 0.07f * num; 
+                //         crouch = 0.02f * num;
+                //         break;
+                //     case "adb33a": // Grass6_D_adb33a, wheat like
+                //         prone = 0.02f * num;
+                //         crouch = 0.09f * num;
+                //         break;
+                //     case "f83e15": // _T_WhitGrass_A_f83e15, tall white grass
+                //         prone = 0.05f * num;
+                //         crouch = 0.08f * num;
+                //         break;
+                //     case "ead4fa": // Field_grass_D_ead4fa, with little white flowers
+                //         prone = 0.075f * num;
+                //         crouch = 0.03f * num;
+                //         break;
+                //     case "40d9d4": // Grass2_D_40d9d4, thin, tall, wheat
+                //         prone = 0.007f * num;
+                //         crouch = 0.009f * num;
+                //         break;
+                //     case "4ad690": // grass11_4ad690
+                //     case "bf0a23": // Grass4_D_bf0a23, reed like, thin and tall
+                //         prone = 0.007f * num;
+                //         crouch = 0.007f * num;
+                //         break;
+                //     case "b6cf18": // _T_KrapivaLittle_A_b6cf18, tall, green
+                //         prone = 0.01f * num;
+                //         crouch = 0.01f * num;
+                //         break;
+                //     default:
+                //         return;
+                // }
+            // }
+            
+        }
+
         internal static void DetermineShiningEquipments(Player player, out bool vLight, out bool vLaser, out bool irLight, out bool irLaser, out bool vLightSub, out bool vLaserSub, out bool irLightSub, out bool irLaserSub)
         {
             vLight = vLaser = irLight = irLaser = vLightSub = vLaserSub = irLightSub = irLaserSub = false;

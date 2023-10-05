@@ -18,24 +18,19 @@ namespace ThatsLit.Components
 {
     public class ThatsLitMainPlayerComponent : MonoBehaviour
     {
-        static readonly List<string> EnabledMaps = new List<string>() { "Customs", "Shoreline", "Lighthouse", "Woods", "Reserve", "Factory" };
         public bool disabledLit;
         static readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value? 32 : 64;
         public const int POWER = 3;
         public RenderTexture rt, envRt;
         public Camera cam, envCam;
-        int currentCamPos = 0;
         public Texture2D envTex, envDebugTex;
         Unity.Collections.NativeArray<Color32> observed;
         public float lastCalcFrom, lastCalcTo, lastScore, lastFactor1, lastFactor2;
         public int calced = 0, calcedLastFrame = 0, encounter;
         public int lockPos = -1;
-        public int lastValidPixels = RESOLUTION * RESOLUTION;
         public RawImage display;
         public RawImage displayEnv;
         public bool disableVisionPatch;
-
-        public float cloudinessCompensationScale = 0.5f;
 
         public float foliageScore;
         int foliageCount;
@@ -221,65 +216,66 @@ namespace ThatsLit.Components
             {
                 return;
             }
-            if (lockPos != -1) currentCamPos = lockPos;
+            var camPos = 0;
+            if (lockPos != -1) camPos = lockPos;
+            else camPos = Time.frameCount % 6;
             var camHeight = MainPlayer.IsInPronePose ? 0.45f : 2.2f;
             var targetHeight = MainPlayer.IsInPronePose ? 0.2f : 0.7f;
             var horizontalScale = MainPlayer.IsInPronePose ? 1.2f : 1;
-            switch (currentCamPos++)
+            switch (Time.frameCount % 6)
             {
                 case 0:
+                {
+                    if (MainPlayer.IsInPronePose)
                     {
-                        if (MainPlayer.IsInPronePose)
-                        {
-                            cam.transform.localPosition = new Vector3(0, 2, 0);
-                            cam.transform.LookAt(MainPlayer.Transform.Original.position);
-                        }
-                        else
-                        {
-                            cam.transform.localPosition = new Vector3(0, camHeight, 0);
-                            cam.transform.LookAt(MainPlayer.Transform.Original.position);
-                        }
+                        cam.transform.localPosition = new Vector3(0, 2, 0);
+                        cam.transform.LookAt(MainPlayer.Transform.Original.position);
+                    }
+                    else
+                    {
+                        cam.transform.localPosition = new Vector3(0, camHeight, 0);
+                        cam.transform.LookAt(MainPlayer.Transform.Original.position);
+                    }
                     break;
                 }
                 case 1:
-                    {
-                        cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
-                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
-                        break;
-                    }
+                {
+                    cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
+                    cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
+                    break;
+                }
                 case 2:
-                    {
-                        cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
-                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
-                        break;
-                    }
+                {
+                    cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
+                    cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
+                    break;
+                }
                 case 3:
+                {
+                    if (MainPlayer.IsInPronePose)
                     {
-                        if (MainPlayer.IsInPronePose)
-                        {
-                            cam.transform.localPosition = new Vector3(0, 2f, 0);
-                            cam.transform.LookAt(MainPlayer.Transform.Original.position);
-                        }
-                        else
-                        {
-                            cam.transform.localPosition = new Vector3(0, -0.5f,  0.35f);
-                            cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * 1f);
-                        }
-                        break;
+                        cam.transform.localPosition = new Vector3(0, 2f, 0);
+                        cam.transform.LookAt(MainPlayer.Transform.Original.position);
                     }
+                    else
+                    {
+                        cam.transform.localPosition = new Vector3(0, -0.5f,  0.35f);
+                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * 1f);
+                    }
+                    break;
+                }
                 case 4:
-                    {
-                        cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
-                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
-                        break;
-                    }
+                {
+                    cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
+                    cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
+                    break;
+                }
                 case 5:
-                    {
-                        cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
-                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
-                        currentCamPos = 0;
-                        break;
-                    }
+                {
+                    cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
+                    cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
+                    break;
+                }
             }
 
             if (gquReq.done) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
@@ -290,39 +286,39 @@ namespace ThatsLit.Components
                 observed = req.GetData<Color32>();
             });
 
-            if (ThatsLitPlugin.DebugTexture.Value && envCam)
-            {
-                envCam.transform.localPosition = envCamOffset;
-                switch (currentCamPos)
-                {
-                    case 0:
-                        {
-                            envCam.transform.LookAt(bodyPos + Vector3.left * 25);
-                            break;
-                        }
-                    case 1:
-                        {
-                            envCam.transform.LookAt(bodyPos + Vector3.right * 25);
-                            break;
-                        }
-                    case 2:
-                        {
-                            envCam.transform.localPosition = envCamOffset;
-                            envCam.transform.LookAt(bodyPos + Vector3.down * 10);
-                            break;
-                        }
-                    case 3:
-                        {
-                            envCam.transform.LookAt(bodyPos + Vector3.back * 25);
-                            break;
-                        }
-                    case 4:
-                        {
-                            envCam.transform.LookAt(bodyPos + Vector3.right * 25);
-                            break;
-                        }
-                }
-            }
+            // if (ThatsLitPlugin.DebugTexture.Value && envCam)
+            // {
+            //     envCam.transform.localPosition = envCamOffset;
+            //     switch (camPos)
+            //     {
+            //         case 0:
+            //             {
+            //                 envCam.transform.LookAt(bodyPos + Vector3.left * 25);
+            //                 break;
+            //             }
+            //         case 1:
+            //             {
+            //                 envCam.transform.LookAt(bodyPos + Vector3.right * 25);
+            //                 break;
+            //             }
+            //         case 2:
+            //             {
+            //                 envCam.transform.localPosition = envCamOffset;
+            //                 envCam.transform.LookAt(bodyPos + Vector3.down * 10);
+            //                 break;
+            //             }
+            //         case 3:
+            //             {
+            //                 envCam.transform.LookAt(bodyPos + Vector3.back * 25);
+            //                 break;
+            //             }
+            //         case 4:
+            //             {
+            //                 envCam.transform.LookAt(bodyPos + Vector3.right * 25);
+            //                 break;
+            //             }
+            //     }
+            // }
 
             if (Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.6f : 0.33f))
             {
@@ -729,124 +725,6 @@ namespace ThatsLit.Components
             }
         }
 
-        void GetDetailCoverScoreByName (string name, int num, out float prone, out float crouch)
-        {
-            prone = 0;
-            crouch = 0;
-            if (name.Length < 6) return;
-
-            if (name.EndsWith("e2eb60")
-             || name.EndsWith("df6e82")
-             || name.EndsWith("7c58e7")
-             || name.EndsWith("994963")
-            )
-            {
-                prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 10f), 2) * num; // Needs cluster
-                crouch = 0.005f * num;
-            }
-            else if (name.EndsWith("27bbce"))
-            {
-                prone = 0.008f * num;
-                crouch = 0;
-            }
-            else if (name.EndsWith("fa097b"))
-            {
-                prone = 0.06f * num; 
-                crouch = 0.01f * num;
-            }
-            else if (name.EndsWith("eb7931"))
-            {
-                prone = 0.06f * num; 
-                crouch = 0.01f * num;
-            }
-            else if (name.EndsWith("adb33a"))
-            {
-                prone = 0.02f * num;
-                crouch = 0.09f * num;
-            }
-            else if (name.EndsWith("f83e15"))
-            {
-                prone = 0.05f * num;
-                crouch = 0.08f * num;
-            }
-            else if (name.EndsWith("ead4fa"))
-            {
-                prone = 0.075f * num;
-                crouch = 0.03f * num;
-            }
-            else if (name.EndsWith("40d9d4"))
-            {
-                prone = 0.007f * num;
-                crouch = 0.009f * num;
-            }
-            else if (name.EndsWith("4ad690")
-                || name.EndsWith("bf0a23")
-            )
-            {
-                prone = 0.007f * num;
-                crouch = 0.007f * num;
-            }
-            else if (name.EndsWith("b6cf18"))
-            {
-                prone = 0.01f * num;
-                crouch = 0.01f * num;
-            }
-
-                // I REALLY DONT WANT TO CALL SUBSTRING HERE
-                // switch (string.Intern(name.Substring(name.Length - 6, 6)))
-                // {
-                //     case "e2eb60": // Grass_new_1_D_e2eb60, normal grass, 8~12
-                //     case "df6e82": // Grass_02_512_df6e82
-                //     case "7c58e7": // Grass5_512_D_7c58e7
-                //     // case "!vertexlit_rock_e9cd39":
-                //     case "994963": // _Grass3_D_994963
-                //         prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 10f), 2) * num; // Needs cluster
-                //         crouch = 0.005f * num;
-                //         break;
-                //     case "27bbce": // Grass_new_3_D_27bbce, shorter and smaller, cross shape
-                //         prone = 0.008f * num;
-                //         crouch = 0;
-                //         break;
-                //     case "fa097b": // Grass_new_2_D_fa097b, denser and slightly bigger grass cluster
-                //         prone = 0.06f * num; 
-                //         crouch = 0.01f * num;
-                //         break;
-                //     case "eb7931": // Grass_2_roma_eb7931, brown, dense, somewhat tall
-                //         prone = 0.07f * num; 
-                //         crouch = 0.02f * num;
-                //         break;
-                //     case "adb33a": // Grass6_D_adb33a, wheat like
-                //         prone = 0.02f * num;
-                //         crouch = 0.09f * num;
-                //         break;
-                //     case "f83e15": // _T_WhitGrass_A_f83e15, tall white grass
-                //         prone = 0.05f * num;
-                //         crouch = 0.08f * num;
-                //         break;
-                //     case "ead4fa": // Field_grass_D_ead4fa, with little white flowers
-                //         prone = 0.075f * num;
-                //         crouch = 0.03f * num;
-                //         break;
-                //     case "40d9d4": // Grass2_D_40d9d4, thin, tall, wheat
-                //         prone = 0.007f * num;
-                //         crouch = 0.009f * num;
-                //         break;
-                //     case "4ad690": // grass11_4ad690
-                //     case "bf0a23": // Grass4_D_bf0a23, reed like, thin and tall
-                //         prone = 0.007f * num;
-                //         crouch = 0.007f * num;
-                //         break;
-                //     case "b6cf18": // _T_KrapivaLittle_A_b6cf18, tall, green
-                //         prone = 0.01f * num;
-                //         crouch = 0.01f * num;
-                //         break;
-                //     default:
-                //         return;
-                // }
-            // }
-            
-        }
-
         int GetDetailInfoIndex (int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
 
         string DetermineDir (Vector3 dir)
@@ -936,7 +814,7 @@ namespace ThatsLit.Components
                 {
                     var info = detailsHere5x5[pos*MAX_DETAIL_TYPES + i];
                     if (!info.casted) continue;
-                    GetDetailCoverScoreByName(info.name, info.count, out var s1, out var s2);
+                    Utility.CalculateDetailScore(info.name, info.count, out var s1, out var s2);
                     scoreLow += s1;
                     scoreMid += s2;
                 }
