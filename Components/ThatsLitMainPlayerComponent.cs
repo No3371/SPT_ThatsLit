@@ -56,7 +56,7 @@ namespace ThatsLit.Components
         public Vector3 envCamOffset = new Vector3(0, 2, 0);
 
         public RaidSettings activeRaidSettings;
-        bool skipFoliageCheck;
+        bool skipFoliageCheck, skipDetailCheck;
         public float fog, rain, cloud;
         public float MultiFrameLitScore { get; private set; }
         public float detailScoreProne, detailScoreCrouch;
@@ -97,10 +97,12 @@ namespace ThatsLit.Components
                     case "factory4_night":
                         if (ThatsLitPlugin.EnableFactoryNight.Value) scoreCalculator = GetInGameDayTime() > 12 ? null : new NightFactoryScoreCalculator();
                         skipFoliageCheck = true;
+                        skipDetailCheck = true;
                         break;
                     case "factory4_day":
                         scoreCalculator = null;
                         skipFoliageCheck = true;
+                        skipDetailCheck = true;
                         break;
                     case "bigmap": // Customs
                         if (ThatsLitPlugin.EnableCustoms.Value) scoreCalculator = new CustomsScoreCalculator();
@@ -124,6 +126,7 @@ namespace ThatsLit.Components
                     case null:
                         if (ThatsLitPlugin.EnableHideout.Value) scoreCalculator = new HideoutScoreCalculator();
                         skipFoliageCheck = true;
+                        skipDetailCheck = true;
                         break;
                     default:
                         break;
@@ -208,7 +211,7 @@ namespace ThatsLit.Components
             }
 
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
-            if (Time.time > lastCheckedDetails + 0.5f)
+            if (!skipDetailCheck && Time.time > lastCheckedDetails + 0.5f)
             {
                 CheckTerrainDetails();
                 lastCheckedDetails = Time.time;
