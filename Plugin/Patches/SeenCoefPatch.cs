@@ -54,6 +54,7 @@ namespace ThatsLit.Patches.Vision
                 var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
                 float sinceSeen = Time.time - __instance.TimeLastSeen;
                 bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
+                float immunityNegation = 0;
 
                 Vector3 eyeToEnemyBody = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
                 var dis = eyeToEnemyBody.magnitude;
@@ -247,7 +248,10 @@ namespace ThatsLit.Patches.Vision
                     {
                         float detailImpact = 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen
                         if (detailScore > 1 && isInPronePose) // But if the score is high and is proning (because the score is not capped to 1 even when crouching), make it "blink" so there's a chance to get hidden again
+                        {
                             detailImpact = UnityEngine.Random.Range(0, 4f) + UnityEngine.Random.Range(0, 5f) * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // Allow diving back into the grass field
+                            immunityNegation = 0.6f;
+                        }
                         __result *= 1 + detailImpact;
                         if (__result < dis) __result = dis;
                         // if (nearestAI)
@@ -424,7 +428,7 @@ namespace ThatsLit.Patches.Vision
 
                 if (factor < 0)
                 {
-                    __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(sinceSeen / UnityEngine.Random.Range(0.075f, 0.15f))); // just seen (0s) => original, 0.1s => modified
+                    __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(sinceSeen / UnityEngine.Random.Range(0.075f, 0.15f) + immunityNegation)); // just seen (0s) => original, 0.1s => modified
                 }
                 // This probably will let bots stay unaffected until losing the visual
 
