@@ -50,7 +50,7 @@ namespace ThatsLit.Patches.Vision
             {
                 if (!mainPlayer) return;
                 if (mainPlayer.disableVisionPatch) return;
-                nearestRecent += 0.1f;
+                nearestRecent += 0.5f;
                 var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
                 float sinceSeen = Time.time - __instance.TimeLastSeen;
                 bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
