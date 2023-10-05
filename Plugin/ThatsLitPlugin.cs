@@ -72,6 +72,8 @@ namespace ThatsLit
             GlobalRandomOverlookChance = Config.Bind(category, key: "Global Random Overlook Chance", 0.01f, "The chance for all AIs to simply overlook in 1 vision check.");
             FoliageImpactScale = Config.Bind(category, key: "Foliage Impact Scale", 1f, "Scale the strength of extra chance to be overlooked from sneaking around foliages.");
             FinalOffset = Config.Bind(category, key: "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa.");
+            VagueHintChance = Config.Bind(category, key: "Vague Hint Chance", 0.6f, "The chance to only tell an AI it's spotted when you are set to be visible to an AI but it's not facing your direction.");
+            IncludeBosses = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss.");
 
             category = "4. Info";
             ScoreInfo = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
@@ -119,8 +121,10 @@ namespace ThatsLit
         public static ConfigEntry<float> DarknessImpactScale { get; private set; }
         public static ConfigEntry<float> BrightnessImpactScale { get; private set; }
         public static ConfigEntry<float> FinalOffset { get; private set; }
+        public static ConfigEntry<float> VagueHintChance { get; private set; }
         public static ConfigEntry<float> GlobalRandomOverlookChance { get; private set; }
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
+        public static ConfigEntry<bool> IncludeBosses { get; private set; }
         public static ConfigEntry<bool> LessFoliageCheck { get; private set; }
         public static ConfigEntry<bool> LessEquipmentCheck { get; private set; }
         public static ConfigEntry<bool> EnableLighthouse { get; private set; }

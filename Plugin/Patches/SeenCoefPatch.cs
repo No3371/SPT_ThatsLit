@@ -36,6 +36,7 @@ namespace ThatsLit.Patches.Vision
             //     return;
             // }
             if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value) return;
+            if (!ThatsLitPlugin.IncludeBosses.Value && __instance.Owner.Boss.IamBoss) return;
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
 
             var original = __result;

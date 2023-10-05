@@ -35,7 +35,7 @@ namespace ThatsLit.Patches.Vision
             {
                 float rand = UnityEngine.Random.Range(-1f, 1f);
                 float rand2 = UnityEngine.Random.Range(-1f, 1f);
-                if (angle > 75 && rand < Mathf.Clamp01((angle - 75f) / 25f) * 0.7f)
+                if (angle > 75 && rand < Mathf.Clamp01(((angle - 75f) / 25f) * ThatsLitPlugin.VagueHintChance.Value))
                 {
                     var source = __instance.Owner.Position + (__instance.Person.Position - __instance.Owner.Position) * (0.75f + rand / 4f);
                     source += (Vector3.up * rand  + Vector3.right * rand2 + Vector3.forward * (rand2 - rand) / 2f) * to.sqrMagnitude / (100f * (1.5f + rand));
