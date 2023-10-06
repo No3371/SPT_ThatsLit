@@ -205,8 +205,15 @@ namespace ThatsLit.Components
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
             if (!skipDetailCheck && Time.time > lastCheckedDetails + 0.5f)
             {
-                CheckTerrainDetails();
-                lastCheckedDetails = Time.time;
+                if (GPUInstancerDetailManager.activeManagerList.Count == 0)
+                {
+                    skipDetailCheck = true;
+                }
+                else
+                {
+                    CheckTerrainDetails();
+                    lastCheckedDetails = Time.time;
+                }
             }
             if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.75f : 0.4f))
             {
