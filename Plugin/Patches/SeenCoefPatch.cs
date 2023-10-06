@@ -341,7 +341,7 @@ namespace ThatsLit.Patches.Vision
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.5f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
                             enemyDisFactor = Mathf.Clamp01(dis / 20f);
                             poseScale = poseFactor == 0.05f? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
-                            yDeltaFactor = 1f - Mathf.Clamp01(visionAngleDeltaVertical / 60f); // +60deg => 1, 0deg => 1, -30deg => 0.5f, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
+                            yDeltaFactor = 1f - Mathf.Clamp01(visionAngleDeltaVertical / 60f);
                             break;
                         case "pine01":
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 30f); // 0deg -> 0, 75 deg -> 1

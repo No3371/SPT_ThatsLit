@@ -671,7 +671,6 @@ namespace ThatsLit.Components
         IEnumerator AsyncAllTerrainDetailMapGathering (Terrain priority = null)
         {
             // EFT.UI.ConsoleScreen.Log($"JOB: Staring gathering terrain details..." );
-            
             if (priority && !terrainDetailMaps.ContainsKey(priority))
             {
                 var mgr = priority.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
