@@ -382,7 +382,7 @@ namespace ThatsLit.Components
         /// <returns>-1 ~ 1</returns>
         protected virtual float CalculateAmbienceScore (string locationId, float time, float cloudiness, float insideTime = 0)
         {
-            float insideCoef = Mathf.Clamp01((insideTime - 2) / 10f); // 0 ~ 2 sec => 0%, 12 sec => 100%
+            float insideCoef = Mathf.Clamp01((insideTime - 2) / 7f); // 0 ~ 2 sec => 0%, 12 sec => 100%
             float ambience = CalculateBaseAmbienceScore(locationId, time);
             ambience -= Mathf.Abs(ambience) * (1f - IndoorAmbienceScale) * insideCoef * (CalculateSunLightTimeFactor(locationId, time) + CalculateMoonLightTimeFactor(locationId, time) / 2f); // Consider the brighter ambience comes from the sun and the moon, scale the indoor impact down with sunlight time factor
             ambience += Mathf.Clamp01((cloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact;
@@ -520,7 +520,7 @@ namespace ThatsLit.Components
         protected virtual float MaxMoonlightScore { get => 0.3f; }
         protected virtual float MaxSunlightScore { get => 0.1f; }
         protected virtual float IndoorSunMoonScale { get => 0.5f; }
-        protected virtual float IndoorAmbienceScale { get => 0.75f; }
+        protected virtual float IndoorAmbienceScale { get => 0.5f; }
         protected virtual float MinAmbienceLum { get => 0.01f; }
         protected virtual float MaxAmbienceLum { get => 0.1f; }
         protected virtual float PixelLumScoreScale => 1f;
@@ -625,7 +625,7 @@ namespace ThatsLit.Components
         protected override float MaxAmbienceLum => 0.008f;
         protected override float NonCloudinessBaseAmbienceScoreImpact => 0.1f;
         protected override float PixelLumScoreScale { get => 2f; }
-        protected override float IndoorAmbienceScale => 0.9f;
+        protected override float IndoorAmbienceScale => 0.2f;
     }
     public class ShorelineScoreCalculator : ScoreCalculator
     {
