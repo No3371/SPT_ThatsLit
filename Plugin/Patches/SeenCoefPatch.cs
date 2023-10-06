@@ -252,15 +252,15 @@ namespace ThatsLit.Patches.Vision
                         float detailImpact = 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen
                         if (detailScore > 1 && isInPronePose) // But if the score is high and is proning (because the score is not capped to 1 even when crouching), make it "blink" so there's a chance to get hidden again
                         {
-                            detailImpact = UnityEngine.Random.Range(0, 4f) + UnityEngine.Random.Range(0, 5f) * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // Allow diving back into the grass field
+                            detailImpact = UnityEngine.Random.Range(2, 4f) + UnityEngine.Random.Range(0, 5f) * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // Allow diving back into the grass field
                             immunityNegation = 0.6f;
                         }
                         __result *= 1 + detailImpact;
-                        if (__result < dis) __result = dis;
                         // if (nearestAI)
                         // {
                         //     mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
                         // }
+                        if (__result < dis / 10f) __result = dis / 10f;
                     }
                 }
                 // if (nearestAI)
