@@ -223,6 +223,8 @@ namespace ThatsLit.Patches.Vision
                     {
                         detailScore = scoreMid / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
                     }
+
+                    if (canSeeLight) detailScore /= 2f;
                     
                     switch (caution)
                     {
@@ -270,10 +272,11 @@ namespace ThatsLit.Patches.Vision
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
                 if (!canSeeLight && !(canSeeLaser && UnityEngine.Random.Range(0, 100) < 30)
                  && mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
+                if (mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
                  && (!__instance.HaveSeen || lastPosDis > 50f || sinceSeen > 300f && lastPosDis > 10f))
                 {
                     float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
-                    bool foliageCloaking = true;
+                    bool bushRat = true;
 
                     switch (mainPlayer.foliage)
                     {
@@ -360,12 +363,13 @@ namespace ThatsLit.Patches.Vision
                             poseScale = poseFactor == 0.05f? 1f : (1f - poseFactor) / 5f; // very low
                             break;
                         default:
-                            foliageCloaking = false;
+                            bushRat = false;
                             break;
                     }
                     var overallFactor = angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor;
-                    if (nearestAI && overallFactor > 0.05f) mainPlayer.foliageCloaking = foliageCloaking;
-                    if (foliageCloaking && overallFactor > 0)
+                    if (canSeeLight || (canSeeLaser && UnityEngine.Random.Range(0, 100) < 20)) overallFactor /= 2f;
+                    if (nearestAI && overallFactor > 0.05f) mainPlayer.foliageCloaking = bushRat;
+                    if (bushRat && overallFactor > 0.01f)
                     {
                         __result = Mathf.Max(__result, dis);
                         switch (caution)
