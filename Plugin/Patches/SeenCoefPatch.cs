@@ -1,4 +1,5 @@
-﻿using Aki.Reflection.Patching;
+﻿// #define DEBUG_DETAILS
+using Aki.Reflection.Patching;
 using EFT;
 using HarmonyLib;
 using ThatsLit.Components;
@@ -159,7 +160,7 @@ namespace ThatsLit.Patches.Vision
                 {
                     nearestRecent = dis;
                     nearestAI = true;
-                    // mainPlayer.lastNearest = nearestRecent;
+                    mainPlayer.lastNearest = nearestRecent;
                     if (Time.frameCount % 47 == 46)
                     {
                         mainPlayer.lastCalcFrom = original;
@@ -202,16 +203,20 @@ namespace ThatsLit.Patches.Vision
                         var facingAngleDelta = Vector2.Angle(playerLegToHeadFlattened, playerLegToBotEyeFlatted); // Close to 90 when the player is facing right or left in the vision
                         if (facingAngleDelta >= 90) xyFacingFactor = (180f - facingAngleDelta) / 90f;
                         else if (facingAngleDelta <= 90) xyFacingFactor = (facingAngleDelta) / 90f;
-                        // if (nearestAI) mainPlayer.lastRotateAngle = facingAngleDelta;
+                        #if DEBUG_DETAILS
+                        if (nearestAI) mainPlayer.lastRotateAngle = facingAngleDelta;
+                        #endif
                         xyFacingFactor = 1f - xyFacingFactor; // 0 ~ 1
 
                         // Calculate how flat it is in the vision
                         var normal = Vector3.Cross(BotTransform.up, -playerLegToBotEye);
                         var playerLegToHeadAlongVision = Vector3.ProjectOnPlane(playerLegToHead, normal);
                         layingVerticaltInVisionFactor = Vector3.SignedAngle(playerLegToBotEye, playerLegToHeadAlongVision, normal); // When the angle is 90, it means the player looks straight up in the vision, vice versa for -90.
-                        // if (nearestAI)
-                        //     if (layingVerticaltInVisionFactor >= 90f) mainPlayer.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
-                        //     else if (layingVerticaltInVisionFactor <= 0)  mainPlayer.lastTiltAngle = layingVerticaltInVisionFactor;
+                        #if DEBUG_DETAILS
+                        if (nearestAI)
+                            if (layingVerticaltInVisionFactor >= 90f) mainPlayer.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
+                            else if (layingVerticaltInVisionFactor <= 0)  mainPlayer.lastTiltAngle = layingVerticaltInVisionFactor;
+                        #endif
 
                         if (layingVerticaltInVisionFactor >= 90f) layingVerticaltInVisionFactor = (180f - layingVerticaltInVisionFactor) / 15f; // the player is laying head up feet down in the vision...   "-> /"
                         else if (layingVerticaltInVisionFactor <= 0 && layingVerticaltInVisionFactor >= -90f) layingVerticaltInVisionFactor = layingVerticaltInVisionFactor / -15f; // "-> /"

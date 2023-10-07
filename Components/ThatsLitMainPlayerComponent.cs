@@ -1,4 +1,5 @@
-﻿using System;
+﻿// #define DEBUG_DETAILS
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,17 +46,17 @@ namespace ThatsLit.Components
         float awakeAt, lastCheckedLights, lastCheckedFoliages, lastCheckedDetails;
         // Note: If vLight > 0, other counts may be skipped
 
-        public Vector3 envCamOffset = new Vector3(0, 2, 0);
+        // public Vector3 envCamOffset = new Vector3(0, 2, 0);
 
         public RaidSettings activeRaidSettings;
         bool skipFoliageCheck, skipDetailCheck;
         public float fog, rain, cloud;
         public float MultiFrameLitScore { get; private set; }
         public float detailScoreProne, detailScoreCrouch;
-        // public Vector3 lastTriggeredDetailCoverDirNearest;
-        // public float lastTiltAngle, lastRotateAngle;
-        // public float lastNearest;
-        // public float lastFinalDetailScoreNearest;
+        public Vector3 lastTriggeredDetailCoverDirNearest;
+        public float lastTiltAngle, lastRotateAngle;
+        public float lastNearest;
+        public float lastFinalDetailScoreNearest;
         internal ScoreCalculator scoreCalculator;
         AsyncGPUReadbackRequest gquReq;
         // float benchMark1, benchMark2;
@@ -474,10 +475,12 @@ namespace ThatsLit.Components
             if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight? "V" : scoreCalculator.irLight? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
             // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
-            // GUILayout.Label(string.Format("LAST DETAIL ENEMY DIR: {0:+0.00;-0.00;+0.00} ({1:0.000}) ({2:+0.00;-0.00;+0.00} -> ({3:0.00}m)) {4} {5}", lastTriggeredDetailCoverDirNearest, lastFinalDetailScoreNearest, DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
-            // for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
-            //     if (detailsHere5x5[i].casted)
-            //         GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
+            #if DEBUG_DETAILS
+            GUILayout.Label(string.Format("LAST DETAIL ENEMY DIR: {0:+0.00;-0.00;+0.00} ({1:0.000}) ({2:+0.00;-0.00;+0.00} -> ({3:0.00}m)) {4} {5}", lastTriggeredDetailCoverDirNearest, lastFinalDetailScoreNearest, DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
+            for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
+                if (detailsHere5x5[i].casted)
+                    GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
+            #endif
             // GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
             // GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");
             // GUILayout.Label($" NE  DETAIL_LOW: { scoreCache[2] } DETAIL_MID: {scoreCache[3]}");
