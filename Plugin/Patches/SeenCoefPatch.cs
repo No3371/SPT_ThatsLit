@@ -338,16 +338,17 @@ namespace ThatsLit.Patches.Vision
                             poseScale = poseFactor == 0.05f? 0.6f : 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.55f); // 100% at crouch
                             break;
                         case "tree02":
+                            yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVertical - 10) / 40f); // bonus against bots up high
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 45f); // 0deg -> 0, 75 deg -> 1
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.5f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
-                            enemyDisFactor = Mathf.Clamp01(dis / 20f);
+                            enemyDisFactor = Mathf.Clamp01(dis * yDeltaFactor / 20f);
                             poseScale = poseFactor == 0.05f? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
-                            yDeltaFactor = 1f - Mathf.Clamp01(visionAngleDeltaVertical / 60f);
                             break;
                         case "pine01":
+                            yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVertical - 10) / 40f); // bonus against bots up high
                             angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 30f); // 0deg -> 0, 75 deg -> 1
                             foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.5f) / 0.35f); // 0.3 -> 100%, 0.55 -> 0%
-                            enemyDisFactor = Mathf.Clamp01(dis / 25f);
+                            enemyDisFactor = Mathf.Clamp01(dis * yDeltaFactor / 25f);
                             poseScale = poseFactor == 0.05f? 0 : 0.5f + (poseFactor - 0.45f) / 0.55f * 0.5f; // standing is better with this tall one
                             break;
                         case "pine05":
@@ -367,7 +368,7 @@ namespace ThatsLit.Patches.Vision
                             bushRat = false;
                             break;
                     }
-                    var overallFactor = angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor;
+                    var overallFactor = Mathf.Clamp01(angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor);
                     if (canSeeLight || (canSeeLaser && UnityEngine.Random.Range(0, 100) < 20)) overallFactor /= 2f;
                     if (nearestAI && overallFactor > 0.05f) mainPlayer.foliageCloaking = bushRat;
                     if (bushRat && overallFactor > 0.01f)
