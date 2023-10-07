@@ -44,7 +44,7 @@ namespace ThatsLit.Components
                 prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 10f), 2) * num; // Needs cluster
                 crouch = 0.005f * num;
             }
-            else if (name.EndsWith("27bbce"))
+            else if (name.EndsWith("27bbce")) // Grass_new_3_D_27bbce, shorter and smaller, cross shape
             {
                 prone = 0.008f * num;
                 crouch = 0;
@@ -91,6 +91,11 @@ namespace ThatsLit.Components
                 prone = 0.01f * num;
                 crouch = 0.01f * num;
             }
+            else if (name.EndsWith("a84c21"))
+            {
+                prone = 0.007f * num;
+                crouch = 0.006f * num;
+            }
 
                 // I REALLY DONT WANT TO CALL SUBSTRING HERE
                 // switch (string.Intern(name.Substring(name.Length - 6, 6)))
@@ -130,6 +135,10 @@ namespace ThatsLit.Components
                 //     case "40d9d4": // Grass2_D_40d9d4, thin, tall, wheat
                 //         prone = 0.007f * num;
                 //         crouch = 0.009f * num;
+                //         break;
+                //     case "a84c21": // Grass5_D_a84c21, shorter wheat like
+                //         prone = 0.007f * num;
+                //         crouch = 0.006f * num;
                 //         break;
                 //     case "4ad690": // grass11_4ad690
                 //     case "bf0a23": // Grass4_D_bf0a23, reed like, thin and tall
