@@ -629,11 +629,10 @@ namespace ThatsLit.Components
     }
     public class ShorelineScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.99f;
+        protected override float MinBaseAmbienceScore => -0.95f;
         protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.66f;
         protected override float MinAmbienceLum => 0.008f;
         protected override float MaxAmbienceLum => 0.008f;
-        protected override float IndoorAmbienceScale => 1f;
     }
 
     public class StreetsScoreCalculator : ScoreCalculator
