@@ -12,6 +12,7 @@ using System.Globalization;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 
+
 namespace ThatsLit.Patches.Vision
 {
     public class SeenCoefPatch : ModulePatch

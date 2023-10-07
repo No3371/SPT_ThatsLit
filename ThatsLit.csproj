@@ -50,44 +50,6 @@
   <PropertyGroup>
     <RootNamespace>ThatsLit</RootNamespace>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '3.5.5|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\3.5.5\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '3.5.7|x86'">
-    <DebugSymbols>false</DebugSymbols>
-    <OutputPath>bin\x86\3.5.7\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <DebugType>none</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '3.5.8|x86'">
-    <OutputPath>bin\x86\3.5.8\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '3.6.0|x86'">
-    <OutputPath>bin\x86\3.6.0\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
@@ -217,14 +179,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Properties\.vs\MyFirstPlugin\v16\.suo" />
-    <None Include="Properties\.vs\slnx.sqlite" />
-    <None Include="Properties\.vs\VSWorkspaceState.json" />
-    <None Include="Properties\NuGet.Config" />
-    <None Include="Plugin\VersionChecker\setbuild.ps1" />
-    <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="ComponentHelpers.cs" />
     <Compile Include="Components\FrameStats.cs" />
     <Compile Include="Components\ScoreCalculator.cs" />
@@ -256,3 +210,82 @@
     <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\..\BepInEx\plugins\$(TargetName)-$(ConfigurationName).dll"</PostBuildEvent>
   </PropertyGroup>
 </Project>
+
+
+<!-- <Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>ThatsLit</AssemblyName>
+    <Description></Description>
+    <Version>1.2.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <TarkovPath>..\..</TarkovPath>
+    <ManagedPath>$(TarkovPath)/EscapeFromTarkov_Data/Managed</ManagedPath>
+    <AssemblySearchPaths>$(TarkovPath);$(ManagedPath);</AssemblySearchPaths>
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+      <Reference>
+          <Private>False</Private>
+      </Reference>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Aki.Reflection" />
+    <Reference Include="Aki.Common" />
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>libs\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="ItemComponent.Types" />
+    <Reference Include="Comfort" />
+    <Reference Include="Assembly-CSharp" />
+    <Reference Include="UnityEngine" />
+    <Reference Include="UnityEngine.CoreModule" />
+    <Reference Include="UnityEngine.InputLegacyModule" />
+    <Reference Include="UnityEngine.JSONSerializeModule" />
+    <Reference Include="UnityEngine.UnityWebRequestModule" />
+    <Reference Include="UnityEngine.UnityWebRequestTextureModule" />
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule" />
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule" />
+    <Reference Include="UnityEngine.TerrainModule" />
+    <Reference Include="AnimationSystem.Types" />
+    <Reference Include="Newtonsoft.Json" />
+    <Reference Include="notGreg.UniformAim" />
+	  <Reference Include="UnityEngine.AudioModule" />
+    <Reference Include="Unity.Postprocessing.Runtime" />
+    <Reference Include="UnityEngine.PhysicsModule" />
+    <Reference Include="ItemTemplate.Types" />
+    <Reference Include="UnityEngine.UI" />
+    <Reference Include="Sirenix.Serialization" />
+    <Reference Include="UnityEngine.TerrainPhysicsModule" />
+    <Reference Include="BepInEx">
+      <HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\..\BepInEx\plugins\$(TargetName)-$(ConfigurationName).dll"</PostBuildEvent>
+  </PropertyGroup>
+
+</Project> -->
