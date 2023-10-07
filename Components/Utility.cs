@@ -66,13 +66,13 @@ namespace ThatsLit.Components
             }
             else if (name.EndsWith("f83e15"))
             {
-                prone = 0.05f * num;
-                crouch = 0.04f * num;
+                prone = 0.04f * num;
+                crouch = 0.03f * num;
             }
             else if (name.EndsWith("ead4fa"))
             {
-                prone = 0.075f * num;
-                crouch = 0.01f * num;
+                prone = 0.06f * num;
+                crouch = 0.008f * num;
             }
             else if (name.EndsWith("40d9d4"))
             {
@@ -125,12 +125,12 @@ namespace ThatsLit.Components
                 //         crouch = 0.02f * num;
                 //         break;
                 //     case "f83e15": // _T_WhitGrass_A_f83e15, tall white grass
-                //         prone = 0.05f * num;
-                //         crouch = 0.04f * num;
+                //         prone = 0.04f * num;
+                //         crouch = 0.03f * num;
                 //         break;
                 //     case "ead4fa": // Field_grass_D_ead4fa, with little white flowers
-                //         prone = 0.075f * num;
-                //         crouch = 0.01f * num;
+                //         prone = 0.06f * num;
+                //         crouch = 0.008f * num;
                 //         break;
                 //     case "40d9d4": // Grass2_D_40d9d4, thin, tall, wheat
                 //         prone = 0.007f * num;
