@@ -224,7 +224,9 @@ namespace ThatsLit.Patches.Vision
                         detailScore = scoreMid / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
                     }
 
-                    if (canSeeLight) detailScore /= 2f;
+
+                    detailScore *= 1f + disFactor / 2f; // At 110m+, 1.5x effective
+                    if (canSeeLight) detailScore /= 2 - disFactor; // At 110m+, lights does not impact
                     
                     switch (caution)
                     {
@@ -249,29 +251,28 @@ namespace ThatsLit.Patches.Vision
 
                     if (UnityEngine.Random.Range(0f, 1.001f) < Mathf.Clamp01(detailScore))
                     {
-                        float detailImpact = 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen
+                        float detailImpact;
                         if (detailScore > 1 && isInPronePose) // But if the score is high and is proning (because the score is not capped to 1 even when crouching), make it "blink" so there's a chance to get hidden again
                         {
                             detailImpact = UnityEngine.Random.Range(2, 4f) + UnityEngine.Random.Range(0, 5f) * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // Allow diving back into the grass field
                             immunityNegation = 0.6f;
                         }
+                        else detailImpact = 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen;
                         __result *= 1 + detailImpact;
-                        // if (nearestAI)
-                        // {
-                        //     mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
-                        // }
                         if (__result < dis / 10f) __result = dis / 10f;
+                        if (nearestAI)
+                        {
+                            mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
+                        }
                     }
                 }
-                // if (nearestAI)
-                // {
-                //     mainPlayer.lastFinalDetailScoreNearest = detailScore;
-                // }
+                if (nearestAI)
+                {
+                    mainPlayer.lastFinalDetailScoreNearest = detailScore;
+                }
 
                 // BUSH RAT ----------------------------------------------------------------------------------------------------------------
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-                if (!canSeeLight && !(canSeeLaser && UnityEngine.Random.Range(0, 100) < 30)
-                 && mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
                 if (mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
                  && (!__instance.HaveSeen || lastPosDis > 50f || sinceSeen > 300f && lastPosDis > 10f))
                 {
