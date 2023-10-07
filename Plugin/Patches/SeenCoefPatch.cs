@@ -172,7 +172,7 @@ namespace ThatsLit.Patches.Vision
                 if (mainPlayer.foliageDir != Vector2.zero) foliageImpact *= 1 - Mathf.Clamp01(Vector2.Angle(new Vector2(-eyeToEnemyBody.x, -eyeToEnemyBody.z), mainPlayer.foliageDir) / 90f); // 0deg -> 1, 90+deg -> 0
                 // Maybe randomly lose vision for foliages
                 // Pose higher than half will reduce the change
-                if (UnityEngine.Random.Range(0f, 1f) < disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(1.1f - poseFactor)) // Among bushes, from afar
+                if (UnityEngine.Random.Range(0f, 1.0005f) < Mathf.Clamp01(disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(1.1f - poseFactor))) // Among bushes, from afar
                 {
                     __result *= 10f;
                 }

@@ -356,7 +356,7 @@ namespace ThatsLit.Components
                 for (int i = 0; i < collidersCache.Length; i++)
                     collidersCache[i] = null;
 
-                int count = Physics.OverlapSphereNonAlloc(bodyPos, 3f, collidersCache, foliageLayerMask);
+                int count = Physics.OverlapSphereNonAlloc(bodyPos, 4f, collidersCache, foliageLayerMask);
                 float closet = 9999f;
                 foliage = null;
 
@@ -365,14 +365,14 @@ namespace ThatsLit.Components
                     if (collidersCache[i].gameObject.transform.root.gameObject.layer == 8) continue; // Somehow sometimes player spines are tagged PlayerSpiritAura, VB or vanilla?
                     Vector3 dir = (collidersCache[i].transform.position - bodyPos);
                     float dis = dir.magnitude;
-                    if (dis < 0.3f) foliageScore += 3f;
-                    else if (dis < 0.4f) foliageScore += 2f;
-                    else if (dis < 0.5f) foliageScore += 1f;
+                    if (dis < 0.3f) foliageScore += 1f;
+                    else if (dis < 0.4f) foliageScore += 0.9f;
+                    else if (dis < 0.5f) foliageScore += 0.8f;
                     else if (dis < 0.6f) foliageScore += 0.7f;
-                    else if (dis < 0.7f) foliageScore += 0.5f;
-                    else if (dis < 1f) foliageScore += 0.3f;
-                    else if (dis < 2f) foliageScore += 0.15f;
-                    else foliageScore += 0.05f;
+                    else if (dis < 0.7f) foliageScore += 0.6f;
+                    else if (dis < 1f) foliageScore += 0.5f;
+                    else if (dis < 2f) foliageScore += 0.3f;
+                    else foliageScore += 0.1f;
 
                     if (dis < closet)
                     {
@@ -386,12 +386,13 @@ namespace ThatsLit.Components
 
                 if (count > 0)
                 {
-                    foliageScore /= (float) count;
+                    // foliageScore /= (float) count;
                     foliageDisH = foliageDir.magnitude;
                     foliageDisV = Mathf.Abs(foliageDir.y);
                 }
-                if (count == 1) foliageScore /= 2f;
-                if (count == 2) foliageScore /= 1.5f;
+                if (count == 1) foliageScore /= 1.5f;
+                if (count == 2) foliageScore /= 1.3f;
+                if (count == 3) foliageScore /= 1.1f;
             }
         }
 
