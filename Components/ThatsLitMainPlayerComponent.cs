@@ -539,13 +539,11 @@ namespace ThatsLit.Components
             GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
 
             if (!terrain || !manager || !manager.isInitialized ) return;
-            if (!terrainDetailMaps.ContainsKey(terrain))
+            if (!terrainDetailMaps.TryGetValue(terrain, out var detailMap))
             {
                 if ( gatheringDetailMap == null) gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(terrain));
                 return;
             }
-            if (!terrainDetailMaps.ContainsKey(terrain)) return;
-            var detailMap = terrainDetailMaps[terrain];
 
             Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
             var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
@@ -565,74 +563,74 @@ namespace ThatsLit.Components
                     if (posX < 0 && terrain.leftNeighbor && posY >= 0 && posY < resolution)
                     {
                         Terrain neighbor = terrain.leftNeighbor;
-                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
                                 gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
-                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
-                            count = terrainDetailMaps[neighbor][d][resolution + posX, posY];
+                        else if (neighborDetailMap.Count > d) // Async job
+                            count = neighborDetailMap[d][resolution + posX, posY];
                     }
                     else if (posX >= resolution && terrain.rightNeighbor && posY >= 0 && posY < resolution)
                     {
                         Terrain neighbor = terrain.rightNeighbor;
-                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
                                 gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
-                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
-                            count = terrainDetailMaps[neighbor][d][posX - resolution, posY];
+                        else if (neighborDetailMap.Count > d) // Async job
+                            count = neighborDetailMap[d][posX - resolution, posY];
                     }
                     else if (posY >= resolution && terrain.topNeighbor && posX >= 0 && posX < resolution)
                     {
                         Terrain neighbor = terrain.topNeighbor;
-                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
                                 gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
-                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
-                            count = terrainDetailMaps[neighbor][d][posX, posY - resolution];
+                        else if (neighborDetailMap.Count > d) // Async job
+                            count = neighborDetailMap[d][posX, posY - resolution];
                     }
                     else if (posY < 0 && terrain.bottomNeighbor && posX >= 0 && posX < resolution)
                     {
                         Terrain neighbor = terrain.bottomNeighbor;
-                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
                                 gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
-                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
-                            count = terrainDetailMaps[neighbor][d][posX, posY + resolution];
+                        else if (neighborDetailMap.Count > d) // Async job
+                            count = neighborDetailMap[d][posX, posY + resolution];
                     }
                     else if (posY >= resolution && terrain.topNeighbor.rightNeighbor && posX >= resolution)
                     {
                         Terrain neighbor = terrain.topNeighbor.rightNeighbor;
-                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
                                 gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
-                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
-                            count = terrainDetailMaps[neighbor][d][posX - resolution, posY - resolution];
+                        else if (neighborDetailMap.Count > d) // Async job
+                            count = neighborDetailMap[d][posX - resolution, posY - resolution];
                     }
                     else if (posY >= resolution && terrain.topNeighbor.leftNeighbor && posX < 0)
                     {
                         Terrain neighbor = terrain.topNeighbor.leftNeighbor;
-                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
                                 gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
-                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
-                            count = terrainDetailMaps[neighbor][d][posX + resolution, posY - resolution];
+                        else if (neighborDetailMap.Count > d) // Async job
+                            count = neighborDetailMap[d][posX + resolution, posY - resolution];
                     }
                     else if (posY < 0 && terrain.bottomNeighbor.rightNeighbor && posX >= resolution)
                     {
                         Terrain neighbor = terrain.bottomNeighbor.rightNeighbor;
-                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
                                 gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
-                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
-                            count = terrainDetailMaps[neighbor][d][posX - resolution, posY + resolution];
+                        else if (neighborDetailMap.Count > d) // Async job
+                            count = neighborDetailMap[d][posX - resolution, posY + resolution];
                     }
                     else if (posY < 0 && terrain.bottomNeighbor.leftNeighbor && posX < 0)
                     {
                         Terrain neighbor = terrain.bottomNeighbor.leftNeighbor;
-                        if (!terrainDetailMaps.ContainsKey(neighbor))
+                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
                                 gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
-                        else if (terrainDetailMaps[neighbor].Count > d) // Async job
-                            count = terrainDetailMaps[neighbor][d][posX + resolution, posY + resolution];
+                        else if (neighborDetailMap.Count > d) // Async job
+                            count = neighborDetailMap[d][posX + resolution, posY + resolution];
                     }
                     else if (detailMap.Count > d) // Async job
                     {
