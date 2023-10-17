@@ -14,7 +14,7 @@ namespace ThatsLit.Patches.Vision
         protected override MethodBase GetTargetMethod()
         {
             _GoalEnemyProp = AccessTools.Property(typeof(BotMemoryClass), "GoalEnemy");
-            return AccessTools.Method(typeof(GClass478), nameof(GClass478.SetVisible));
+            return AccessTools.Method(typeof(EnemyInfo), nameof(EnemyInfo.SetVisible));
         }
 
         public struct State
@@ -26,7 +26,7 @@ namespace ThatsLit.Patches.Vision
         }
 
         [PatchPrefix]
-        public static bool PatchPrefix(GClass478 __instance, bool value, ref State __state)
+        public static bool PatchPrefix(EnemyInfo __instance, bool value, ref State __state)
         {
             Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
             Vector3 to = __instance.Person.Transform.position - __instance.Owner.Transform.position;
@@ -51,7 +51,7 @@ namespace ThatsLit.Patches.Vision
             return true;
         }
         [PatchPostfix]
-        public static void PatchPostfix(GClass478 __instance, State __state)
+        public static void PatchPostfix(EnemyInfo __instance, State __state)
         {
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;
@@ -66,9 +66,9 @@ namespace ThatsLit.Patches.Vision
                 {
                     __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.25f) * Mathf.Clamp01(__state.angle/15f));
                 }
-                if (__instance.Owner.AimingData is GClass463 g463 && !__instance.Owner.WeaponManager.ShootController.IsAiming)
+                if (__instance.Owner.AimingData is GClass388 g388 && !__instance.Owner.WeaponManager.ShootController.IsAiming)
                 {
-                    g463.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.35f) * Mathf.Clamp01((__state.angle - 15f)/45f);
+                    g388.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.35f) * Mathf.Clamp01((__state.angle - 15f)/45f);
                 }
             }
         }

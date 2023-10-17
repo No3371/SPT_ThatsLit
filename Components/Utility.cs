@@ -492,6 +492,45 @@ namespace ThatsLit.Components
                     break;
             }
         }
+
+        public static string DetermineDir (Vector3 dir)
+        {
+            var dirFlat = (new Vector2 (dir.x, dir.z)).normalized;
+            var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
+            if (angle >= -22.5f && angle <= 22.5f)
+            {
+                return "N";
+            }
+            else if (angle >= 22.5f && angle <= 67.5f)
+            {
+                return "NE";
+            }
+            else if (angle >= 67.5f && angle <= 112.5f)
+            {
+                return "E";
+            }
+            else if (angle >= 112.5f && angle <= 157.5f)
+            {
+                return "SE";
+            }
+            else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
+            {
+                return "S";
+            }
+            else if (angle >= -157.5f && angle <= -112.5f)
+            {
+                return "SW";
+            }
+            else if (angle >= -112.5f && angle <= -67.5f)
+            {
+                return "W";
+            }
+            else if (angle >= -67.5f && angle <= -22.5f)
+            {
+                return "NW";
+            }
+            else return "?";
+        }
     }
 }
 

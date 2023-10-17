@@ -13,7 +13,7 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 
 
-namespace ThatsLit.Patches.Vision
+namespace ThatsLit
 {
     public class SeenCoefPatch : ModulePatch
     {
@@ -22,15 +22,14 @@ namespace ThatsLit.Patches.Vision
         protected override MethodBase GetTargetMethod()
         {
             _enemyRel = AccessTools.Property(typeof(BotMemoryClass), "GoalEnemy");
-            Type lookType = _enemyRel.PropertyType;
-
-            return AccessTools.Method(lookType, "method_7");
+            Type enemyInfoType = _enemyRel.PropertyType;
+            return ReflectionHelper.FindMethodByArgTypes(enemyInfoType, new Type[] { typeof(BifacialTransform), typeof(BifacialTransform), typeof(BotDifficultySettingsClass), typeof(AIData), typeof(float), typeof(Vector3) });;
         }
 
         private static float nearestRecent;
 
         [PatchPostfix]
-        public static void PatchPostfix(GClass478 __instance, BifacialTransform BotTransform, BifacialTransform enemy, ref float __result)
+        public static void PatchPostfix(EnemyInfo __instance, BifacialTransform BotTransform, BifacialTransform enemy, ref float __result)
         {
             // if (ThatsLitPlugin.DevMode.Value && ThatsLitPlugin.DevModeInvisible.Value)
             // {

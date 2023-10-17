@@ -15,6 +15,10 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
+using BaseCellClass = GClass964;
+using CellClass = GClass965;
+using SpatialPartitionClass = GClass979<GClass964>;
+
 namespace ThatsLit.Components
 {
     public class ThatsLitMainPlayerComponent : MonoBehaviour
@@ -526,7 +530,7 @@ namespace ThatsLit.Components
             public int count;
         }
 
-        Dictionary<Terrain, GClass1079<GClass1064>> terrainSpatialPartitions = new Dictionary<Terrain, GClass1079<GClass1064>>();
+        Dictionary<Terrain, SpatialPartitionClass> terrainSpatialPartitions = new Dictionary<Terrain, SpatialPartitionClass>();
         Dictionary<Terrain, List<int[,]>> terrainDetailMaps = new Dictionary<Terrain, List<int[,]>>();
         // GameObject marker;
         // float[] scoreCache = new float[18];
@@ -541,7 +545,7 @@ namespace ThatsLit.Components
             if (!terrain || !manager || !manager.isInitialized ) return;
             if (!terrainDetailMaps.TryGetValue(terrain, out var detailMap))
             {
-                if ( gatheringDetailMap == null) gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(terrain));
+                if ( gatheringDetailMap == null) gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(terrain));
                 return;
             }
 
@@ -565,7 +569,7 @@ namespace ThatsLit.Components
                         Terrain neighbor = terrain.leftNeighbor;
                         if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
                         else if (neighborDetailMap.Count > d) // Async job
                             count = neighborDetailMap[d][resolution + posX, posY];
                     }
@@ -574,7 +578,7 @@ namespace ThatsLit.Components
                         Terrain neighbor = terrain.rightNeighbor;
                         if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
                         else if (neighborDetailMap.Count > d) // Async job
                             count = neighborDetailMap[d][posX - resolution, posY];
                     }
@@ -583,7 +587,7 @@ namespace ThatsLit.Components
                         Terrain neighbor = terrain.topNeighbor;
                         if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
                         else if (neighborDetailMap.Count > d) // Async job
                             count = neighborDetailMap[d][posX, posY - resolution];
                     }
@@ -592,7 +596,7 @@ namespace ThatsLit.Components
                         Terrain neighbor = terrain.bottomNeighbor;
                         if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
                         else if (neighborDetailMap.Count > d) // Async job
                             count = neighborDetailMap[d][posX, posY + resolution];
                     }
@@ -601,7 +605,7 @@ namespace ThatsLit.Components
                         Terrain neighbor = terrain.topNeighbor.rightNeighbor;
                         if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
                         else if (neighborDetailMap.Count > d) // Async job
                             count = neighborDetailMap[d][posX - resolution, posY - resolution];
                     }
@@ -610,7 +614,7 @@ namespace ThatsLit.Components
                         Terrain neighbor = terrain.topNeighbor.leftNeighbor;
                         if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
                         else if (neighborDetailMap.Count > d) // Async job
                             count = neighborDetailMap[d][posX + resolution, posY - resolution];
                     }
@@ -619,7 +623,7 @@ namespace ThatsLit.Components
                         Terrain neighbor = terrain.bottomNeighbor.rightNeighbor;
                         if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
                         else if (neighborDetailMap.Count > d) // Async job
                             count = neighborDetailMap[d][posX - resolution, posY + resolution];
                     }
@@ -628,7 +632,7 @@ namespace ThatsLit.Components
                         Terrain neighbor = terrain.bottomNeighbor.leftNeighbor;
                         if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
                             if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(AsyncAllTerrainDetailMapGathering(neighbor));
+                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
                         else if (neighborDetailMap.Count > d) // Async job
                             count = neighborDetailMap[d][posX + resolution, posY + resolution];
                     }
@@ -670,14 +674,14 @@ namespace ThatsLit.Components
         }
         
         Coroutine gatheringDetailMap;
-        IEnumerator AsyncAllTerrainDetailMapGathering (Terrain priority = null)
+        IEnumerator BuildAllTerrainDetailMapCoroutine (Terrain priority = null)
         {
             // EFT.UI.ConsoleScreen.Log($"JOB: Staring gathering terrain details..." );
             if (priority && !terrainDetailMaps.ContainsKey(priority))
             {
                 var mgr = priority.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
                 terrainDetailMaps[priority] = new List<int[,]>(mgr.prototypeList.Count);
-                yield return AsyncTerrainDetailMapGathering(priority, terrainDetailMaps[priority]);
+                yield return BuildTerrainDetailMapCoroutine(priority, terrainDetailMaps[priority]);
             }
             foreach (Terrain terrain in Terrain.activeTerrains)
             {
@@ -685,11 +689,11 @@ namespace ThatsLit.Components
                 {
                     var mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
                     terrainDetailMaps[terrain] = new List<int[,]>(mgr.prototypeList.Count);
-                    yield return AsyncTerrainDetailMapGathering(terrain, terrainDetailMaps[terrain]);
+                    yield return BuildTerrainDetailMapCoroutine(terrain, terrainDetailMaps[terrain]);
                 }
             }
         }
-        IEnumerator AsyncTerrainDetailMapGathering (Terrain terrain, List<int[,]> detailMapData)
+        IEnumerator BuildTerrainDetailMapCoroutine (Terrain terrain, List<int[,]> detailMapData)
         {
             var mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
             if (mgr == null || !mgr.isInitialized) yield break;
@@ -713,16 +717,16 @@ namespace ThatsLit.Components
                 {
                     for (int terrainCellY = 0; terrainCellY < spData.cellRowAndCollumnCountPerTerrain; ++terrainCellY)
                     {
-                        GClass1064 cell;
-                        if (spData.GetCell(GClass1064.CalculateHash(terrainCellX, 0, terrainCellY), out cell))
+                        BaseCellClass cell;
+                        if (spData.GetCell(BaseCellClass.CalculateHash(terrainCellX, 0, terrainCellY), out cell))
                         {
-                            GClass1065 gclass1065 = (GClass1065) cell;
-                            if (gclass1065.detailMapData != null)
+                            CellClass gclass965 = (CellClass) cell;
+                            if (gclass965.detailMapData != null)
                             {
                                 for (int cellResX = 0; cellResX < resolutionPerCell; ++cellResX)
                                 {
                                     for (int cellResY = 0; cellResY < resolutionPerCell; ++cellResY)
-                                        detailLayer[cellResX + terrainCellX * resolutionPerCell, cellResY + terrainCellY * resolutionPerCell] = gclass1065.detailMapData[layer][cellResX + cellResY * resolutionPerCell];
+                                        detailLayer[cellResX + terrainCellX * resolutionPerCell, cellResY + terrainCellY * resolutionPerCell] = gclass965.detailMapData[layer][cellResX + cellResY * resolutionPerCell];
                                 }
                             }
                         }
@@ -735,44 +739,6 @@ namespace ThatsLit.Components
 
         int GetDetailInfoIndex (int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
 
-        string DetermineDir (Vector3 dir)
-        {
-            var dirFlat = (new Vector2 (dir.x, dir.z)).normalized;
-            var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
-            if (angle >= -22.5f && angle <= 22.5f)
-            {
-                return "N";
-            }
-            else if (angle >= 22.5f && angle <= 67.5f)
-            {
-                return "NE";
-            }
-            else if (angle >= 67.5f && angle <= 112.5f)
-            {
-                return "E";
-            }
-            else if (angle >= 112.5f && angle <= 157.5f)
-            {
-                return "SE";
-            }
-            else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
-            {
-                return "S";
-            }
-            else if (angle >= -157.5f && angle <= -112.5f)
-            {
-                return "SW";
-            }
-            else if (angle >= -112.5f && angle <= -67.5f)
-            {
-                return "W";
-            }
-            else if (angle >= -67.5f && angle <= -22.5f)
-            {
-                return "NW";
-            }
-            else return "?";
-        }
 
         public void CalculateDetailScore (Vector3 enemyDirection, float dis, float verticalAxisAngle, out float scoreLow, out float scoreMid)
         {
