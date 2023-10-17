@@ -536,6 +536,7 @@ namespace ThatsLit.Components
         // float[] scoreCache = new float[18];
         void CheckTerrainDetails ()
         {
+            Array.Clear(detailScoreFrameCache, 0, detailScoreFrameCache.Length);
             Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
             var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
             if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return;
@@ -742,45 +743,70 @@ namespace ThatsLit.Components
 
         int GetDetailInfoIndex (int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
 
-
+        (bool, float, float)[] detailScoreFrameCache = new (bool, float, float)[10];
         public void CalculateDetailScore (Vector3 enemyDirection, float dis, float verticalAxisAngle, out float scoreLow, out float scoreMid)
         {
+            bool TryGetCache (int index, out float low, out float mid)
+            {
+                (bool, float, float) cache = detailScoreFrameCache[index];
+                if (cache.Item1)
+                {
+                    low = cache.Item2;
+                    mid = cache.Item3;
+                    return true;
+                }
+                low = 0;
+                mid = 0;
+                return false;
+            }
             scoreLow = scoreMid = 0;
             var dirFlat = (new Vector2 (enemyDirection.x, enemyDirection.z)).normalized;
             var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
             IEnumerable<int> it;
+            int dir = 0;
             if (dis < 15f || verticalAxisAngle < -10f)
+            {
+                if (TryGetCache(dir = 5, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3;
+            }
             else if (angle >= -22.5f && angle <= 22.5f)
             {
+                if (TryGetCache(dir = 8, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3N;
             }
             else if (angle >= 22.5f && angle <= 67.5f)
             {
+                if (TryGetCache(dir = 9, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3NE;
             }
             else if (angle >= 67.5f && angle <= 112.5f)
             {
+                if (TryGetCache(dir = 6, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3E;
             }
             else if (angle >= 112.5f && angle <= 157.5f)
             {
+                if (TryGetCache(dir = 3, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3SE;
             }
             else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
             {
+                if (TryGetCache(dir = 2, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3S;
             }
             else if (angle >= -157.5f && angle <= -112.5f)
             {
+                if (TryGetCache(dir = 1, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3SW;
             }
             else if (angle >= -112.5f && angle <= -67.5f)
             {
+                if (TryGetCache(dir = 4, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3W;
             }
             else if (angle >= -67.5f && angle <= -22.5f)
             {
+                if (TryGetCache(dir = 7, out scoreLow, out scoreMid)) return;
                 it = IterateDetailIndex3x3NW;
             }
             else throw new Exception($"[That's Lit] Invalid angle to enemy: {angle}");
@@ -796,6 +822,8 @@ namespace ThatsLit.Components
                     scoreMid += s2;
                 }
             }
+
+            detailScoreFrameCache[dir] = (true, scoreLow, scoreMid);
         }
 
         IEnumerable<int> IterateDetailIndex3x3N => IterateIndex3x3In5x5(0, 1);
