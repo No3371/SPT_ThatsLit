@@ -384,7 +384,7 @@ namespace ThatsLit.Components
         {
             float insideCoef = Mathf.Clamp01((insideTime - 2) / 7f); // 0 ~ 2 sec => 0%, 12 sec => 100%
             float ambience = CalculateBaseAmbienceScore(locationId, time);
-            ambience -= Mathf.Abs(ambience - MinBaseAmbienceScore) * (1f - IndoorAmbienceScale) * insideCoef; // Indoor offset
+            ambience -= Mathf.Abs(ambience - MinBaseAmbienceScore) * (1f - IndoorAmbienceScale) * insideCoef * (CalculateSunLightTimeFactor(locationId, time) + CalculateMoonLightTimeFactor(locationId, time) / 2f); // Indoor offset; Max sunlight is much brighter than max moonlight
             ambience += Mathf.Clamp01((cloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact;
             return ambience + CalculateMoonLight(locationId, time, cloudiness) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef) + CalculateSunLight(locationId, time, cloudiness) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef);
         }
