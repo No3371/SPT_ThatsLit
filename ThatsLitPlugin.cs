@@ -14,7 +14,7 @@ namespace ThatsLit
     public static class AssemblyInfo
     {
         public const string Title = ModName;
-        public const string Description = "Let lighting matters.";
+        public const string Description = "One step closer to fair gameplay, by giving AIs non-perfect vision and reactions. Because we too deserve grasses, bushes and nights.";
         public const string Configuration = SPTVersion;
         public const string Company = "";
         public const string Product = ModName;
@@ -22,14 +22,13 @@ namespace ThatsLit
         public const string Trademark = "";
         public const string Culture = "";
 
-        // spt 3.6.0 == 25206
-        public const int TarkovVersion = 25206;
+        public const int TarkovVersion = 26535;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.2.1";
+        public const string ModVersion = "1.2.3";
 
         public const string SPTGUID = "com.spt-aki.core";
-        public const string SPTVersion = "3.6.0";
+        public const string SPTVersion = "3.7.1";
     }
 
     [BepInPlugin("bastudio.thatslit", ModName, ModVersion)]
