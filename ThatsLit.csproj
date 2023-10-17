@@ -1,291 +1,158 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{08D5B0F0-2F19-46FB-9C26-D78C0722ECA5}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>ThatsLit</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <RootNamespace>ThatsLit</RootNamespace>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Aki.Build, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Aki.Build.dll</HintPath>
-    </Reference>
-    <Reference Include="Aki.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Aki.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Aki.Reflection, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Aki.Reflection.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
-    </Reference>
-    <Reference Include="bsg.console.core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\bsg.console.core.dll</HintPath>
-    </Reference>
-    <Reference Include="Comfort, Version=1.0.0.4, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
-    </Reference>
-    <Reference Include="DissonanceVoip, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\DissonanceVoip.dll</HintPath>
-    </Reference>
-    <Reference Include="DrakiaXYZ-BigBrain">
-      <HintPath>..\..\BepInEx\plugins\DrakiaXYZ-BigBrain.dll</HintPath>
-    </Reference>
-    <Reference Include="ItemComponent.Types, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
-    <Reference Include="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Mono.Data.Sqlite.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Posix, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Mono.Posix.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Mono.Security.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.WebBrowser, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Mono.WebBrowser.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.AIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TerrainModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestAudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestWWWModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="ComponentHelpers.cs" />
-    <Compile Include="Components\FrameStats.cs" />
-    <Compile Include="Components\ScoreCalculator.cs" />
-    <Compile Include="Components\ThatsLitMainPlayerComponent.cs" />
-    <Compile Include="Components\ThatsLitGameworldComponent.cs" />
-    <Compile Include="Components\Utility.cs" />
-    <Compile Include="Logger.cs" />
-    <Compile Include="Plugin\GameWorldHandler.cs" />
-    <Compile Include="Plugin\Patches\EncounteringPatch.cs" />
-    <Compile Include="Plugin\Patches\SeenCoefPatch.cs" />
-    <Compile Include="Properties\ConfigurationManagerAttributes.cs" />
-    <Compile Include="Plugin\ThatsLitPlugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Plugin\VersionChecker\VersionChecker.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
-  <ProjectExtensions>
-    <VisualStudio AllowExistingFolder="true" />
-  </ProjectExtensions>
-  <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\..\BepInEx\plugins\$(TargetName)-$(ConfigurationName).dll"</PostBuildEvent>
-  </PropertyGroup>
-</Project>
-
-
-<!-- <Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>ThatsLit</AssemblyName>
-    <Description></Description>
-    <Version>1.2.0</Version>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>latest</LangVersion>
-    <TarkovPath>..\..</TarkovPath>
+    <AssemblyName>ThatsLit-$(Configuration)</AssemblyName>
+    <LangVersion>8.0</LangVersion>
+    <Version>1.2.3</Version>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>   
+  </PropertyGroup>
+<!-- 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup> -->
+
+  <PropertyGroup>
+    <!-- folder switch -->
+    <EFTPath>..\..</EFTPath>
+    <ManagedAssembliesPath>$(EFTPath)\EscapeFromTarkov_Data\Managed</ManagedAssembliesPath>
+    <BepInExPath>$(EFTPath)\BepInEx\core</BepInExPath>
     <ManagedPath>$(TarkovPath)/EscapeFromTarkov_Data/Managed</ManagedPath>
-    <AssemblySearchPaths>$(TarkovPath);$(ManagedPath);</AssemblySearchPaths>
-    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
-    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
-    <OutputType>Library</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblySearchPaths>$(BepInExPath);$(ManagedAssembliesPath);</AssemblySearchPaths>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-
-  <ItemDefinitionGroup>
-      <Reference>
-          <Private>False</Private>
-      </Reference>
-  </ItemDefinitionGroup>
 
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="Aki.Reflection" />
-    <Reference Include="Aki.Common" />
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>libs\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="ItemComponent.Types" />
-    <Reference Include="Comfort" />
-    <Reference Include="Assembly-CSharp" />
-    <Reference Include="UnityEngine" />
-    <Reference Include="UnityEngine.CoreModule" />
-    <Reference Include="UnityEngine.InputLegacyModule" />
-    <Reference Include="UnityEngine.JSONSerializeModule" />
-    <Reference Include="UnityEngine.UnityWebRequestModule" />
-    <Reference Include="UnityEngine.UnityWebRequestTextureModule" />
-    <Reference Include="UnityEngine.UnityWebRequestWWWModule" />
-    <Reference Include="UnityEngine.UnityWebRequestAudioModule" />
-    <Reference Include="UnityEngine.TerrainModule" />
-    <Reference Include="AnimationSystem.Types" />
-    <Reference Include="Newtonsoft.Json" />
-    <Reference Include="notGreg.UniformAim" />
-	  <Reference Include="UnityEngine.AudioModule" />
-    <Reference Include="Unity.Postprocessing.Runtime" />
-    <Reference Include="UnityEngine.PhysicsModule" />
-    <Reference Include="ItemTemplate.Types" />
-    <Reference Include="UnityEngine.UI" />
-    <Reference Include="Sirenix.Serialization" />
-    <Reference Include="UnityEngine.TerrainPhysicsModule" />
     <Reference Include="BepInEx">
-      <HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>$(BepInExPath)\BepInEx.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>$(BepInExPath)\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Aki.Common">
+      <HintPath>$(ManagedAssembliesPath)\Aki.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Aki.Reflection">
+      <HintPath>$(ManagedAssembliesPath)\Aki.Reflection.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(ManagedAssembliesPath)\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Comfort">
+      <Private>False</Private>
+      <HintPath>$(ManagedAssembliesPath)\Comfort.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(ManagedAssembliesPath)\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.AudioModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(ManagedAssembliesPath)\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(ManagedAssembliesPath)\Sirenix.Serialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule.dll">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ItemComponent.Types" />
+    <Reference Include="UnityEngine.UI" />
+    <Reference Include="UnityEngine.IMGUIModule" />
+    <Reference Include="UnityEngine.PhysicsModule.dll">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule.dll">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.TerrainModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System">
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
 
-  <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\..\BepInEx\plugins\$(TargetName)-$(ConfigurationName).dll"</PostBuildEvent>
-  </PropertyGroup>
+  <ItemGroup>
+    <Reference Update="System.Core">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
 
-</Project> -->
+  <ItemGroup>
+    <Reference Update="System.Data">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Drawing">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.IO.Compression.FileSystem">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Numerics">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Runtime.Serialization">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Xml">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Xml.Linq">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CopyOutput" AfterTargets="Build">
+    <Message Text="Copying new build to dist" Importance="High" />
+
+    <Copy
+      SourceFiles="$(TargetDir)$(AssemblyName).dll"
+      DestinationFolder="$(ProjectDir)\..\..\BepInEx\plugins" />
+
+    <Message Text="Copied build files" Importance="High" />
+  </Target>
+</Project>
