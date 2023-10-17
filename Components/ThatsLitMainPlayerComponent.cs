@@ -697,11 +697,14 @@ namespace ThatsLit.Components
         {
             var mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
             if (mgr == null || !mgr.isInitialized) yield break;
-            if (!terrainSpatialPartitions.ContainsKey(terrain))
+            if (!terrainSpatialPartitions.TryGetValue(terrain, out var spData))
             {
-                terrainSpatialPartitions[terrain] = AccessTools.Field(typeof(GPUInstancerDetailManager), "spData").GetValue(mgr) as GClass1079<GClass1064>;
+                spData = terrainSpatialPartitions[terrain] = AccessTools.Field(typeof(GPUInstancerDetailManager), "spData").GetValue(mgr) as SpatialPartitionClass;
             }
-            if (!terrainSpatialPartitions.TryGetValue(terrain, out var spData)) yield break;
+            if (spData == null)
+            {
+                terrainSpatialPartitions.Remove(terrain);
+            }
             var waitNextFrame = new WaitForEndOfFrame();
             
             if (detailMapData == null) detailMapData = new List<int[,]>(mgr.prototypeList.Count);
