@@ -55,7 +55,7 @@ namespace ThatsLit
             //ScoreOffset = Config.Bind(category, key: "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
-            EnabledLighting = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are only affected by randomness and foliages.", null, new ConfigurationManagerAttributes() { Order = 100 }));
+            EnabledLighting = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order = 100 }));
             DarknessImpactScale = Config.Bind(category, key: "Darkness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players slower due to darkness.", null, new ConfigurationManagerAttributes() { Order = 95 }));
             BrightnessImpactScale = Config.Bind(category, key: "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", null, new ConfigurationManagerAttributes() { Order = 94 }));
             EnableFactoryNight = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
