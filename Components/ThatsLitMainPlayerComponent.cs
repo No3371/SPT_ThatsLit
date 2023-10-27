@@ -53,7 +53,7 @@ namespace ThatsLit.Components
         // public Vector3 envCamOffset = new Vector3(0, 2, 0);
 
         public RaidSettings activeRaidSettings;
-        bool skipFoliageCheck, skipDetailCheck;
+        internal bool skipFoliageCheck, skipDetailCheck;
         public float fog, rain, cloud;
         public float MultiFrameLitScore { get; private set; }
         public float detailScoreProne, detailScoreCrouch;
