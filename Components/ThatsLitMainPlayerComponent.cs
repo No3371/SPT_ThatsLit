@@ -24,7 +24,7 @@ namespace ThatsLit.Components
     public class ThatsLitMainPlayerComponent : MonoBehaviour
     {
         public bool disabledLit;
-        static readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value? 32 : 64;
+        static readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value ? 32 : 64;
         public const int POWER = 3;
         public RenderTexture rt, envRt;
         public Camera cam, envCam;
@@ -44,7 +44,7 @@ namespace ThatsLit.Components
         internal string foliage;
         internal bool foliageCloaking;
         Collider[] collidersCache;
-        public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass")| 1 << LayerMask.NameToLayer("PlayerSpiritAura");
+        public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
         // PlayerSpiritAura is Visceral Bodies compat
 
         float awakeAt, lastCheckedLights, lastCheckedFoliages, lastCheckedDetails;
@@ -237,64 +237,64 @@ namespace ThatsLit.Components
             switch (Time.frameCount % 6)
             {
                 case 0:
-                {
-                    if (MainPlayer.IsInPronePose)
                     {
-                        cam.transform.localPosition = new Vector3(0, 2, 0);
-                        cam.transform.LookAt(MainPlayer.Transform.Original.position);
+                        if (MainPlayer.IsInPronePose)
+                        {
+                            cam.transform.localPosition = new Vector3(0, 2, 0);
+                            cam.transform.LookAt(MainPlayer.Transform.Original.position);
+                        }
+                        else
+                        {
+                            cam.transform.localPosition = new Vector3(0, camHeight, 0);
+                            cam.transform.LookAt(MainPlayer.Transform.Original.position);
+                        }
+                        break;
                     }
-                    else
-                    {
-                        cam.transform.localPosition = new Vector3(0, camHeight, 0);
-                        cam.transform.LookAt(MainPlayer.Transform.Original.position);
-                    }
-                    break;
-                }
                 case 1:
-                {
-                    cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
-                    cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
-                    break;
-                }
+                    {
+                        cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
+                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
+                        break;
+                    }
                 case 2:
-                {
-                    cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
-                    cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
-                    break;
-                }
+                    {
+                        cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
+                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
+                        break;
+                    }
                 case 3:
-                {
-                    if (MainPlayer.IsInPronePose)
                     {
-                        cam.transform.localPosition = new Vector3(0, 2f, 0);
-                        cam.transform.LookAt(MainPlayer.Transform.Original.position);
+                        if (MainPlayer.IsInPronePose)
+                        {
+                            cam.transform.localPosition = new Vector3(0, 2f, 0);
+                            cam.transform.LookAt(MainPlayer.Transform.Original.position);
+                        }
+                        else
+                        {
+                            cam.transform.localPosition = new Vector3(0, -0.5f, 0.35f);
+                            cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * 1f);
+                        }
+                        break;
                     }
-                    else
-                    {
-                        cam.transform.localPosition = new Vector3(0, -0.5f,  0.35f);
-                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * 1f);
-                    }
-                    break;
-                }
                 case 4:
-                {
-                    cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
-                    cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
-                    break;
-                }
+                    {
+                        cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
+                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
+                        break;
+                    }
                 case 5:
-                {
-                    cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
-                    cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
-                    break;
-                }
+                    {
+                        cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
+                        cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
+                        break;
+                    }
             }
 
             if (gquReq.done) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
             {
                 if (req.hasError)
                     return;
-                
+
                 observed = req.GetData<Color32>();
             });
 
@@ -401,7 +401,7 @@ namespace ThatsLit.Components
             }
         }
 
-        void LateUpdate ()
+        void LateUpdate()
         {
             if (disabledLit) return;
             GetWeatherStats(out fog, out rain, out cloud);
@@ -429,7 +429,7 @@ namespace ThatsLit.Components
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
-                if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int) (MultiFrameLitScore / 0.0999f));
+                if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(MultiFrameLitScore / 0.0999f));
                 if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
                 if (foliageScore > 0.6f)
                     GUILayout.Label("[FOLIAGE++++++]");
@@ -469,22 +469,22 @@ namespace ThatsLit.Components
             GUILayout.Label(string.Format("AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));
 
             GUILayout.Label(string.Format("FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
-            
+
             var poseFactor = MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
             if (MainPlayer.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
             poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
             // GUILayout.Label(string.Format("POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
             // GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
             GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
-            if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight? "V" : scoreCalculator.irLight? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
+            if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
             // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
-            #if DEBUG_DETAILS
+#if DEBUG_DETAILS
             GUILayout.Label(string.Format("LAST DETAIL ENEMY DIR: {0:+0.00;-0.00;+0.00} ({1:0.000}) ({2:+0.00;-0.00;+0.00} -> ({3:0.00}m)) {4} {5}", lastTriggeredDetailCoverDirNearest, lastFinalDetailScoreNearest, Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
             for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
                 if (detailsHere5x5[i].casted)
                     GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
-            #endif
+#endif
             // GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
             // GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");
             // GUILayout.Label($" NE  DETAIL_LOW: { scoreCache[2] } DETAIL_MID: {scoreCache[3]}");
@@ -499,7 +499,7 @@ namespace ThatsLit.Components
 
         public Player MainPlayer { get; private set; }
 
-        float GetInGameDayTime ()
+        float GetInGameDayTime()
         {
             if (Singleton<GameWorld>.Instance?.GameDateTime == null) return 19f;
 
@@ -509,12 +509,12 @@ namespace ThatsLit.Components
             return GameDateTime.Hour + minutes;
         }
 
-        void GetWeatherStats (out float fog, out float rain, out float cloud)
+        void GetWeatherStats(out float fog, out float rain, out float cloud)
         {
             if (WeatherController.Instance?.WeatherCurve == null)
             {
                 fog = rain = cloud = 0;
-               return;
+                return;
             }
 
             fog = WeatherController.Instance.WeatherCurve.Fog;
@@ -534,7 +534,7 @@ namespace ThatsLit.Components
         Dictionary<Terrain, List<int[,]>> terrainDetailMaps = new Dictionary<Terrain, List<int[,]>>();
         // GameObject marker;
         // float[] scoreCache = new float[18];
-        void CheckTerrainDetails ()
+        void CheckTerrainDetails()
         {
             Array.Clear(detailScoreFrameCache, 0, detailScoreFrameCache.Length);
             Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
@@ -543,112 +543,112 @@ namespace ThatsLit.Components
             var terrain = hit.transform.GetComponent<Terrain>();
             GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
 
-            if (!terrain || !manager || !manager.isInitialized ) return;
+            if (!terrain || !manager || !manager.isInitialized) return;
             if (!terrainDetailMaps.TryGetValue(terrain, out var detailMap))
             {
-                if ( gatheringDetailMap == null) gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(terrain));
+                if (gatheringDetailMap == null) gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(terrain));
                 return;
             }
 
             Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
             var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
-            
+
             for (int d = 0; d < manager.prototypeList.Count; d++)
             {
                 var resolution = (manager.prototypeList[d] as GPUInstancerDetailPrototype).detailResolution;
-                Vector2Int resolutionPos = new Vector2Int((int) (currentLocationOnTerrainmap.x * resolution), (int) (currentLocationOnTerrainmap.y * resolution));
+                Vector2Int resolutionPos = new Vector2Int((int)(currentLocationOnTerrainmap.x * resolution), (int)(currentLocationOnTerrainmap.y * resolution));
                 // EFT.UI.ConsoleScreen.Log($"JOB: Calculating score for detail#{d} at detail pos ({resolutionPos.x},{resolutionPos.y})" );
                 for (int x = 0; x < 5; x++)
-                for (int y = 0; y < 5; y++)
-                {
-                    var posX = resolutionPos.x - 2 + x;
-                    var posY = resolutionPos.y - 2 + y;
-                    int count = 0;
+                    for (int y = 0; y < 5; y++)
+                    {
+                        var posX = resolutionPos.x - 2 + x;
+                        var posY = resolutionPos.y - 2 + y;
+                        int count = 0;
 
-                    if (posX < 0 && terrain.leftNeighbor && posY >= 0 && posY < resolution)
-                    {
-                        Terrain neighbor = terrain.leftNeighbor;
-                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
-                            if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
-                        else if (neighborDetailMap.Count > d) // Async job
-                            count = neighborDetailMap[d][resolution + posX, posY];
-                    }
-                    else if (posX >= resolution && terrain.rightNeighbor && posY >= 0 && posY < resolution)
-                    {
-                        Terrain neighbor = terrain.rightNeighbor;
-                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
-                            if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
-                        else if (neighborDetailMap.Count > d) // Async job
-                            count = neighborDetailMap[d][posX - resolution, posY];
-                    }
-                    else if (posY >= resolution && terrain.topNeighbor && posX >= 0 && posX < resolution)
-                    {
-                        Terrain neighbor = terrain.topNeighbor;
-                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
-                            if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
-                        else if (neighborDetailMap.Count > d) // Async job
-                            count = neighborDetailMap[d][posX, posY - resolution];
-                    }
-                    else if (posY < 0 && terrain.bottomNeighbor && posX >= 0 && posX < resolution)
-                    {
-                        Terrain neighbor = terrain.bottomNeighbor;
-                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
-                            if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
-                        else if (neighborDetailMap.Count > d) // Async job
-                            count = neighborDetailMap[d][posX, posY + resolution];
-                    }
-                    else if (posY >= resolution && terrain.topNeighbor.rightNeighbor && posX >= resolution)
-                    {
-                        Terrain neighbor = terrain.topNeighbor.rightNeighbor;
-                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
-                            if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
-                        else if (neighborDetailMap.Count > d) // Async job
-                            count = neighborDetailMap[d][posX - resolution, posY - resolution];
-                    }
-                    else if (posY >= resolution && terrain.topNeighbor.leftNeighbor && posX < 0)
-                    {
-                        Terrain neighbor = terrain.topNeighbor.leftNeighbor;
-                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
-                            if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
-                        else if (neighborDetailMap.Count > d) // Async job
-                            count = neighborDetailMap[d][posX + resolution, posY - resolution];
-                    }
-                    else if (posY < 0 && terrain.bottomNeighbor.rightNeighbor && posX >= resolution)
-                    {
-                        Terrain neighbor = terrain.bottomNeighbor.rightNeighbor;
-                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
-                            if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
-                        else if (neighborDetailMap.Count > d) // Async job
-                            count = neighborDetailMap[d][posX - resolution, posY + resolution];
-                    }
-                    else if (posY < 0 && terrain.bottomNeighbor.leftNeighbor && posX < 0)
-                    {
-                        Terrain neighbor = terrain.bottomNeighbor.leftNeighbor;
-                        if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
-                            if (gatheringDetailMap == null)
-                                gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
-                        else if (neighborDetailMap.Count > d) // Async job
-                            count = neighborDetailMap[d][posX + resolution, posY + resolution];
-                    }
-                    else if (detailMap.Count > d) // Async job
-                    {
-                        count = detailMap[d][posX, posY];
-                    }
+                        if (posX < 0 && terrain.leftNeighbor && posY >= 0 && posY < resolution)
+                        {
+                            Terrain neighbor = terrain.leftNeighbor;
+                            if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
+                                if (gatheringDetailMap == null)
+                                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
+                                else if (neighborDetailMap.Count > d) // Async job
+                                    count = neighborDetailMap[d][resolution + posX, posY];
+                        }
+                        else if (posX >= resolution && terrain.rightNeighbor && posY >= 0 && posY < resolution)
+                        {
+                            Terrain neighbor = terrain.rightNeighbor;
+                            if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
+                                if (gatheringDetailMap == null)
+                                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
+                                else if (neighborDetailMap.Count > d) // Async job
+                                    count = neighborDetailMap[d][posX - resolution, posY];
+                        }
+                        else if (posY >= resolution && terrain.topNeighbor && posX >= 0 && posX < resolution)
+                        {
+                            Terrain neighbor = terrain.topNeighbor;
+                            if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
+                                if (gatheringDetailMap == null)
+                                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
+                                else if (neighborDetailMap.Count > d) // Async job
+                                    count = neighborDetailMap[d][posX, posY - resolution];
+                        }
+                        else if (posY < 0 && terrain.bottomNeighbor && posX >= 0 && posX < resolution)
+                        {
+                            Terrain neighbor = terrain.bottomNeighbor;
+                            if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
+                                if (gatheringDetailMap == null)
+                                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
+                                else if (neighborDetailMap.Count > d) // Async job
+                                    count = neighborDetailMap[d][posX, posY + resolution];
+                        }
+                        else if (posY >= resolution && terrain.topNeighbor.rightNeighbor && posX >= resolution)
+                        {
+                            Terrain neighbor = terrain.topNeighbor.rightNeighbor;
+                            if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
+                                if (gatheringDetailMap == null)
+                                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
+                                else if (neighborDetailMap.Count > d) // Async job
+                                    count = neighborDetailMap[d][posX - resolution, posY - resolution];
+                        }
+                        else if (posY >= resolution && terrain.topNeighbor.leftNeighbor && posX < 0)
+                        {
+                            Terrain neighbor = terrain.topNeighbor.leftNeighbor;
+                            if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
+                                if (gatheringDetailMap == null)
+                                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
+                                else if (neighborDetailMap.Count > d) // Async job
+                                    count = neighborDetailMap[d][posX + resolution, posY - resolution];
+                        }
+                        else if (posY < 0 && terrain.bottomNeighbor.rightNeighbor && posX >= resolution)
+                        {
+                            Terrain neighbor = terrain.bottomNeighbor.rightNeighbor;
+                            if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
+                                if (gatheringDetailMap == null)
+                                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
+                                else if (neighborDetailMap.Count > d) // Async job
+                                    count = neighborDetailMap[d][posX - resolution, posY + resolution];
+                        }
+                        else if (posY < 0 && terrain.bottomNeighbor.leftNeighbor && posX < 0)
+                        {
+                            Terrain neighbor = terrain.bottomNeighbor.leftNeighbor;
+                            if (!terrainDetailMaps.TryGetValue(neighbor, out var neighborDetailMap))
+                                if (gatheringDetailMap == null)
+                                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(neighbor));
+                                else if (neighborDetailMap.Count > d) // Async job
+                                    count = neighborDetailMap[d][posX + resolution, posY + resolution];
+                        }
+                        else if (detailMap.Count > d) // Async job
+                        {
+                            count = detailMap[d][posX, posY];
+                        }
 
-                    detailsHere5x5[GetDetailInfoIndex(x, y, d)] = new DetailInfo()
-                    {
-                        casted = true,
-                        name = manager.prototypeList[d].name,
-                        count = count,
-                    };
-                }
+                        detailsHere5x5[GetDetailInfoIndex(x, y, d)] = new DetailInfo()
+                        {
+                            casted = true,
+                            name = manager.prototypeList[d].name,
+                            count = count,
+                        };
+                    }
             }
 
             // scoreCache[16] = 0;
@@ -673,28 +673,43 @@ namespace ThatsLit.Components
             // CalculateDetailScore(Vector3.left + Vector3.forward, 31, 0, out scoreCache[14], out scoreCache[15]);
 
         }
-        
+
         Coroutine gatheringDetailMap;
-        IEnumerator BuildAllTerrainDetailMapCoroutine (Terrain priority = null)
+        IEnumerator BuildAllTerrainDetailMapCoroutine(Terrain priority = null)
         {
+            yield return new WaitForSeconds(1); // Grass Cutter
             // EFT.UI.ConsoleScreen.Log($"JOB: Staring gathering terrain details..." );
-            if (priority && !terrainDetailMaps.ContainsKey(priority))
+            bool allDisabled = true;
+            var mgr = priority.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
+            if (mgr != null && mgr.enabled)
             {
-                var mgr = priority.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
-                terrainDetailMaps[priority] = new List<int[,]>(mgr.prototypeList.Count);
-                yield return BuildTerrainDetailMapCoroutine(priority, terrainDetailMaps[priority]);
-            }
-            foreach (Terrain terrain in Terrain.activeTerrains)
-            {
-                if (!terrainDetailMaps.ContainsKey(terrain))
+                allDisabled = false;
+                if (!terrainDetailMaps.ContainsKey(priority))
                 {
-                    var mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
-                    terrainDetailMaps[terrain] = new List<int[,]>(mgr.prototypeList.Count);
-                    yield return BuildTerrainDetailMapCoroutine(terrain, terrainDetailMaps[terrain]);
+                    terrainDetailMaps[priority] = new List<int[,]>(mgr.prototypeList.Count);
+                    yield return BuildTerrainDetailMapCoroutine(priority, terrainDetailMaps[priority]);
+
                 }
             }
+            else terrainDetailMaps[priority] = null;
+            foreach (Terrain terrain in Terrain.activeTerrains)
+            {
+                mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
+                if (mgr != null && mgr.enabled)
+                {
+                    allDisabled = false;
+                    if (!terrainDetailMaps.ContainsKey(terrain))
+                    {
+                        terrainDetailMaps[terrain] = new List<int[,]>(mgr.prototypeList.Count);
+                        yield return BuildTerrainDetailMapCoroutine(terrain, terrainDetailMaps[terrain]);
+
+                    }
+                }
+                else terrainDetailMaps[terrain] = null;
+            }
+            if (allDisabled) skipDetailCheck = true;
         }
-        IEnumerator BuildTerrainDetailMapCoroutine (Terrain terrain, List<int[,]> detailMapData)
+        IEnumerator BuildTerrainDetailMapCoroutine(Terrain terrain, List<int[,]> detailMapData)
         {
             var mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
             if (mgr == null || !mgr.isInitialized) yield break;
@@ -707,7 +722,7 @@ namespace ThatsLit.Components
                 terrainSpatialPartitions.Remove(terrain);
             }
             var waitNextFrame = new WaitForEndOfFrame();
-            
+
             if (detailMapData == null) detailMapData = new List<int[,]>(mgr.prototypeList.Count);
             else detailMapData.Clear();
             for (int layer = 0; layer < mgr.prototypeList.Count; ++layer)
@@ -724,7 +739,7 @@ namespace ThatsLit.Components
                         BaseCellClass cell;
                         if (spData.GetCell(BaseCellClass.CalculateHash(terrainCellX, 0, terrainCellY), out cell))
                         {
-                            CellClass gclass965 = (CellClass) cell;
+                            CellClass gclass965 = (CellClass)cell;
                             if (gclass965.detailMapData != null)
                             {
                                 for (int cellResX = 0; cellResX < resolutionPerCell; ++cellResX)
@@ -741,12 +756,12 @@ namespace ThatsLit.Components
             }
         }
 
-        int GetDetailInfoIndex (int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
+        int GetDetailInfoIndex(int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
 
         (bool, float, float)[] detailScoreFrameCache = new (bool, float, float)[10];
-        public void CalculateDetailScore (Vector3 enemyDirection, float dis, float verticalAxisAngle, out float scoreLow, out float scoreMid)
+        public void CalculateDetailScore(Vector3 enemyDirection, float dis, float verticalAxisAngle, out float scoreLow, out float scoreMid)
         {
-            bool TryGetCache (int index, out float low, out float mid)
+            bool TryGetCache(int index, out float low, out float mid)
             {
                 (bool, float, float) cache = detailScoreFrameCache[index];
                 if (cache.Item1)
@@ -760,7 +775,7 @@ namespace ThatsLit.Components
                 return false;
             }
             scoreLow = scoreMid = 0;
-            var dirFlat = (new Vector2 (enemyDirection.x, enemyDirection.z)).normalized;
+            var dirFlat = (new Vector2(enemyDirection.x, enemyDirection.z)).normalized;
             var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
             IEnumerable<int> it;
             int dir = 0;
@@ -815,7 +830,7 @@ namespace ThatsLit.Components
             {
                 for (int i = 0; i < MAX_DETAIL_TYPES; i++)
                 {
-                    var info = detailsHere5x5[pos*MAX_DETAIL_TYPES + i];
+                    var info = detailsHere5x5[pos * MAX_DETAIL_TYPES + i];
                     if (!info.casted) continue;
                     Utility.CalculateDetailScore(info.name, info.count, out var s1, out var s2);
                     scoreLow += s1;
@@ -838,19 +853,19 @@ namespace ThatsLit.Components
         /// <param name="xOffset">WestSide(-x) => -1, EstSide(+x) => 1</param>
         /// <param name="yOffset"></param>
         /// <returns></returns>
-        IEnumerable<int> IterateIndex3x3In5x5 (int xOffset, int yOffset)
+        IEnumerable<int> IterateIndex3x3In5x5(int xOffset, int yOffset)
         {
-            yield return 5*(1 + yOffset) + 1 + xOffset;
-            yield return 5*(1 + yOffset) + 2 + xOffset;
-            yield return 5*(1 + yOffset) + 3 + xOffset;
-            
-            yield return 5*(2 + yOffset) + 1 + xOffset;
-            yield return 5*(2 + yOffset) + 2 + xOffset;
-            yield return 5*(2 + yOffset) + 3 + xOffset;
-            
-            yield return 5*(3 + yOffset) + 1 + xOffset;
-            yield return 5*(3 + yOffset) + 2 + xOffset;
-            yield return 5*(3 + yOffset) + 3 + xOffset;
+            yield return 5 * (1 + yOffset) + 1 + xOffset;
+            yield return 5 * (1 + yOffset) + 2 + xOffset;
+            yield return 5 * (1 + yOffset) + 3 + xOffset;
+
+            yield return 5 * (2 + yOffset) + 1 + xOffset;
+            yield return 5 * (2 + yOffset) + 2 + xOffset;
+            yield return 5 * (2 + yOffset) + 3 + xOffset;
+
+            yield return 5 * (3 + yOffset) + 1 + xOffset;
+            yield return 5 * (3 + yOffset) + 2 + xOffset;
+            yield return 5 * (3 + yOffset) + 3 + xOffset;
         }
 
         const int MAX_DETAIL_TYPES = 24;
