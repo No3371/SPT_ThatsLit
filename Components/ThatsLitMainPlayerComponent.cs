@@ -119,6 +119,7 @@ namespace ThatsLit.Components
                     case "laboratory":
                         // scoreCalculator = new LabScoreCalculator();
                         skipFoliageCheck = true;
+                        skipDetailCheck = true;
                         break;
                     case null:
                         if (ThatsLitPlugin.EnableHideout.Value) scoreCalculator = new HideoutScoreCalculator();
