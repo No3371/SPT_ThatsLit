@@ -37,7 +37,7 @@ namespace ThatsLit
             //     return;
             // }
             if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value) return;
-            if (!ThatsLitPlugin.IncludeBosses.Value && __instance.Owner.Boss.IamBoss) return;
+            if (!ThatsLitPlugin.IncludeBosses.Value && Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role)) return;
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
 
             var original = __result;
@@ -278,7 +278,7 @@ namespace ThatsLit
 
                 // BUSH RAT ----------------------------------------------------------------------------------------------------------------
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-                if (mainPlayer.foliage != null && !__instance.Owner.Boss.IamBoss
+                if (mainPlayer.foliage != null && !Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role)
                  && (!__instance.HaveSeen || lastPosDis > 50f || sinceSeen > 300f && lastPosDis > 10f))
                 {
                     float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;

@@ -10,6 +10,29 @@ namespace ThatsLit.Components
 {
     public static class Utility
     {
+        public static bool IsBoss (WildSpawnType type) => type switch {
+            WildSpawnType.bossBoar => true,
+            WildSpawnType.bossBoarSniper => true,
+            WildSpawnType.bossBully => true,
+            WildSpawnType.bossGluhar => true,
+            WildSpawnType.bossKilla => true,
+            WildSpawnType.bossKnight => true,
+            WildSpawnType.bossKojaniy => true,
+            WildSpawnType.bossSanitar => true,
+            WildSpawnType.bossTagilla => true,
+            WildSpawnType.bossZryachiy => true,
+            WildSpawnType.followerBigPipe => true,
+            WildSpawnType.followerBirdEye => true,
+            WildSpawnType.followerBoar => true,
+            WildSpawnType.followerBully => true,
+            WildSpawnType.followerKojaniy => true,
+            WildSpawnType.followerSanitar => true,
+            WildSpawnType.followerTagilla => true,
+            WildSpawnType.followerZryachiy => true,
+            WildSpawnType.sectantPriest => true,
+            _ => false
+        };
+
         internal static float GetInGameDayTime()
         {
             if (Singleton<GameWorld>.Instance?.GameDateTime == null) return 19f;

@@ -31,7 +31,7 @@ namespace ThatsLit.Patches.Vision
             Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
             Vector3 to = __instance.Person.Transform.position - __instance.Owner.Transform.position;
             var angle = Vector3.Angle(from, to);
-            if (__instance.Person.IsYourPlayer && !__instance.IsVisible && value  && !__instance.Owner.Boss.IamBoss)
+            if (__instance.Person.IsYourPlayer && !__instance.IsVisible && value  && !Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role))
             {
                 float rand = UnityEngine.Random.Range(-1f, 1f);
                 float rand2 = UnityEngine.Random.Range(-1f, 1f);
