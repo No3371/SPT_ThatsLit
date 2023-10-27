@@ -99,22 +99,21 @@ namespace ThatsLit
                         __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                     }
                 }
-                
-                if (__instance.Owner.WeaponManager.ShootController.IsAiming)
+
+                float sightRange = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 100;
+                if (UnityEngine.Random.Range(-3f, 1f) > Mathf.Clamp01(visionAngleDelta / 10f))
                 {
-                    float v = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 50;
-                    if (visionAngleDelta > 1000f/v // Out of scope
-                     || __instance.Owner.NightVision.UsingNow) v = Mathf.Min(v, 50); // AIs using NVGs does not get the scope buff
-                    disFactor *= 1 + 0.1f * (300 - v) / 100;
+                    if (visionAngleDelta > 1000f / sightRange // Out of scope
+                     || __instance.Owner.NightVision.UsingNow) sightRange = Mathf.Min(sightRange, 50); // AIs using NVGs does not get the scope buff (Realism style)
+                    disFactor *= 1 + 0.1f * (100 - sightRange) / 100;
                     disFactor = Mathf.Clamp01(disFactor);
-                    // 10m sight? => 1.29x... 10m -> 0, 110m -> 1.29x
-                    // 50m sight => 1.25x... 10m -> 0, 110m -> 1.25x
-                    // 100m sight => 1.2x... 10m -> 0, 110m -> 1.2x
-                    // 300m sight => 1x... 110m -> 0.8
-                    // 600m sight => 0.8x... 110m -> 0.64
-                    // 1000m sight => 0.3x... 110m -> 0.24
+                    // 100m sight => 1.0x
+                    // 200m sight => 0.9x
+                    // 300m sight => 0.8
+                    // 600m sight => 0.5x
+                    // 1000m sight => 0.1x
                 }
-                
+
 
 
                 float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
