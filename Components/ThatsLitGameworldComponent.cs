@@ -18,7 +18,7 @@ namespace ThatsLit.Components
 
         private void Update()
         {
-            SAINMainPlayer = ComponentHelpers.AddOrDestroyComponent(SAINMainPlayer, GameWorld?.MainPlayer);
+            if (Singleton<GameWorld>.Instantiated && SAINMainPlayer == null) SAINMainPlayer = ComponentHelpers.AddOrDestroyComponent(SAINMainPlayer, GameWorld?.MainPlayer);
         }
 
         private void OnDestroy()

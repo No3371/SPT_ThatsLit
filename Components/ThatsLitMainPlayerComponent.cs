@@ -79,8 +79,9 @@ namespace ThatsLit.Components
             MainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
 
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-            activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
-
+            if (session == null) throw new Exception("No session!");
+            activeRaidSettings = (RaidSettings) (typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
+            
             if (ThatsLitPlugin.EnabledLighting.Value)
             {
                 switch (activeRaidSettings?.LocationId)
