@@ -64,8 +64,8 @@ namespace ThatsLit.Components
              || name.EndsWith("994963")
             )
             {
-                prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 10f), 2) * num; // Needs cluster
-                crouch = 0.005f * num;
+                prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 20f), 2) * Mathf.Min(num, 50); // Needs cluster
+                crouch = 0.005f * Mathf.Min(num, 20);
             }
             else if (name.EndsWith("27bbce")) // Grass_new_3_D_27bbce, shorter and smaller, cross shape
             {
