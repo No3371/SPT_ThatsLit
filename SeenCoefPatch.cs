@@ -74,6 +74,9 @@ namespace ThatsLit
                 poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
                 poseFactor = Mathf.Clamp01(poseFactor);
 
+                float rand1 = UnityEngine.Random.Range(0f, 1f);
+                if (rand1 + 0.1f < disFactor * Mathf.Clamp01(mainPlayer.fog / 0.1f)) __result *= 10;
+
                 Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
                 var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToEnemyBody);
                 var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToEnemyBody.x, 0, eyeToEnemyBody.z), eyeToEnemyBody) * (eyeToEnemyBody.y >= 0 ? 1f : -1f); // negative if looking down (higher), 0 when looking straight... 
@@ -94,7 +97,7 @@ namespace ThatsLit
                     var overheadFactor = angleFactor * (Mathf.Clamp01(visionAngleDelta - 15f) / 75f) * (1 - poseFactor * 1.5f); // 2.5+ (0%) ~ 10+ (100%) ... prone: 92.5%, crouch: 32.5%
                     overheadFactor *= Mathf.Clamp01((sinceSeen - 30) / 30f);
                     overheadFactor *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 12f);
-                    if (UnityEngine.Random.Range(0f, 1f) < Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * 20f * overheadFactor * (1f - disFactor)) // mainly for "close but high" scenarios
+                    if (rand1 < Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * 20f * overheadFactor * (1f - disFactor)) // mainly for "close but high" scenarios
                     {
                         __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                     }
