@@ -370,6 +370,7 @@ namespace ThatsLit.Components
                 for (int i = 0; i < count; i++)
                 {
                     if (collidersCache[i].gameObject.transform.root.gameObject.layer == 8) continue; // Somehow sometimes player spines are tagged PlayerSpiritAura, VB or vanilla?
+                    if (collidersCache[i].gameObject.GetComponent<Terrain>()) continue; // Somehow sometimes terrains can be casted
                     Vector3 dir = (collidersCache[i].transform.position - bodyPos);
                     float dis = dir.magnitude;
                     if (dis < 0.3f) foliageScore += 1f;
