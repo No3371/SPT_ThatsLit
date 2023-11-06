@@ -243,7 +243,7 @@ namespace ThatsLit
                             case 1:
                             case 3:
                             case 2:
-                                detailScore *= 1.5f;
+                                detailScore *= 1.25f;
                                 detailScore *= 1f - cqb * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
                                 break;
                             case 4:
