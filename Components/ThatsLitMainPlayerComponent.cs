@@ -58,7 +58,7 @@ namespace ThatsLit.Components
         public float MultiFrameLitScore { get; private set; }
         public float detailScoreProne, detailScoreCrouch;
         public Vector3 lastTriggeredDetailCoverDirNearest;
-        public float lastTiltAngle, lastRotateAngle;
+        public float lastTiltAngle, lastRotateAngle, lastDisFactorNearest;
         public float lastNearest;
         public float lastFinalDetailScoreNearest;
         internal ScoreCalculator scoreCalculator;
@@ -482,10 +482,12 @@ namespace ThatsLit.Components
             // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
             // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
 #if DEBUG_DETAILS
-            GUILayout.Label(string.Format("LAST DETAIL ENEMY DIR: {0:+0.00;-0.00;+0.00} ({1:0.000}) ({2:+0.00;-0.00;+0.00} -> ({3:0.00}m)) {4} {5}", lastTriggeredDetailCoverDirNearest, lastFinalDetailScoreNearest, Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
+            GUILayout.Label(string.Format("DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df)", lastFinalDetailScoreNearest, lastDisFactorNearest));
+            GUILayout.Label(string.Format("{0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
             for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
                 if (detailsHere5x5[i].casted)
                     GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
+            Utility.GUILayoutDrawAsymetricMeter((int)(lastFinalDetailScoreNearest / 0.0999f));
 #endif
             // GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
             // GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");

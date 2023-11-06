@@ -180,10 +180,9 @@ namespace ThatsLit.Components
 
         internal virtual void CalledOnGUI ()
         {
-            Utility.GUILayoutDrawAsymetricMeter((int)(baseAmbienceScore / 0.0999f));
-            Utility.GUILayoutDrawAsymetricMeter((int)(ambienceScore / 0.0999f));
-            Utility.GUILayoutDrawAsymetricMeter((int)(frame0.score / 0.0999f));
-            Utility.GUILayoutDrawAsymetricMeter((int)(frame0.multiFrameLitScore / 0.0999f));
+            // Utility.GUILayoutDrawAsymetricMeter((int)(baseAmbienceScore / 0.0999f));
+            // Utility.GUILayoutDrawAsymetricMeter((int)(ambienceScore / 0.0999f));
+            // Utility.GUILayoutDrawAsymetricMeter((int)(frame0.multiFrameLitScore / 0.0999f));
             if (Time.frameCount % 41 == 0)
             {
                 shinePixelsRatioSample = (frame0.RatioShinePixels + frame1.RatioShinePixels + frame2.RatioShinePixels + frame3.RatioShinePixels + frame4.RatioShinePixels + frame5.RatioShinePixels) / 6f;
@@ -198,6 +197,8 @@ namespace ThatsLit.Components
             GUILayout.Label(string.Format("AvgLumMF: {0:0.000} / {1:0.000} ~ {2:0.000} ({3:0.000})", frame0.avgLumMultiFrames, GetMinAmbianceLum(), GetMaxAmbianceLum(), GetAmbianceLumRange()));
             GUILayout.Label(string.Format("Sun: {0:0.000}/{1:0.000}, Moon: {2:0.000}/{3:0.000}, INDOOR: {4:0.00}", sunLightScore, GetMaxSunlightScore(), moonLightScore, GetMaxMoonlightScore(), Time.time - lastOutside));
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} (SAMPLE)", scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4));
+            
+            Utility.GUILayoutDrawAsymetricMeter((int)(frame0.score / 0.0999f));
         }
 
         protected virtual float FinalTransformScore (float score)

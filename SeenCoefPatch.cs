@@ -275,6 +275,7 @@ namespace ThatsLit
                     if (nearestAI)
                     {
                         mainPlayer.lastFinalDetailScoreNearest = detailScore;
+                        mainPlayer.lastDisFactorNearest = disFactor;
                     }
                 }
 
