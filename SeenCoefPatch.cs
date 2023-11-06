@@ -390,21 +390,21 @@ namespace ThatsLit
                     }
                     var overallFactor = Mathf.Clamp01(angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor);
                     if (canSeeLight || (canSeeLaser && UnityEngine.Random.Range(0, 100) < 20)) overallFactor /= 2f;
-                    if (nearestAI && overallFactor > 0.05f) mainPlayer.foliageCloaking = bushRat;
                     if (bushRat && overallFactor > 0.01f)
                     {
+                        if (nearestAI) mainPlayer.foliageCloaking = bushRat;
                         __result = Mathf.Max(__result, dis);
                         switch (caution)
                         {
                             case 0:
-                                if (UnityEngine.Random.Range(0f, 1f) > 0.01f) __result *= 1 + 5 * overallFactor * UnityEngine.Random.Range(0.2f, 0.4f);
+                                if (UnityEngine.Random.Range(0f, 1f) > 0.01f) __result *= 1 + 4 * overallFactor * UnityEngine.Random.Range(0.2f, 0.4f);
                                 cqb *= 1 - overallFactor * 0.5f;
                                 cqbSmooth *= 1 - overallFactor * 0.5f;
                                 break;
                             case 1:
                             case 3:
                             case 2:
-                                if (UnityEngine.Random.Range(0f, 1f) > 0.005f) __result *= 1 + 6 * overallFactor * UnityEngine.Random.Range(0.3f, 0.65f);
+                                if (UnityEngine.Random.Range(0f, 1f) > 0.005f) __result *= 1 + 8 * overallFactor * UnityEngine.Random.Range(0.3f, 0.65f);
                                 cqb *= 1 - overallFactor * 0.8f;
                                 cqbSmooth *= 1 - overallFactor * 0.8f;
                                 break;
@@ -413,7 +413,7 @@ namespace ThatsLit
                             case 6:
                             case 7:
                             case 8:
-                                if (UnityEngine.Random.Range(0f, 1f) > 0.001f) __result *= 1 + 7 * overallFactor * UnityEngine.Random.Range(0.5f, 1.0f);
+                                if (UnityEngine.Random.Range(0f, 1f) > 0.001f) __result *= 1 + 6 * overallFactor * UnityEngine.Random.Range(0.5f, 1.0f);
                                 cqb *= 1 - overallFactor;
                                 cqbSmooth *= 1 - overallFactor;
                                 break;
