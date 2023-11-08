@@ -1,4 +1,5 @@
-﻿using System;
+﻿// #define DEBUG_DETAILS
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
@@ -51,7 +52,9 @@ namespace ThatsLit.Components
             }
         }
 
-
+#if DEBUG_DETAILS
+        static string lastLogged;
+#endif
         internal static void CalculateDetailScore (string name, int num, out float prone, out float crouch)
         {
             prone = 0;
@@ -119,6 +122,17 @@ namespace ThatsLit.Components
                 prone = 0.007f * num;
                 crouch = 0.006f * num;
             }
+            #if DEBUG_DETAILS
+            else if (name.EndsWith("e9cd39")) {} // rock
+            else
+            {
+                if (Time.frameCount % 47 == 0 && name != lastLogged)
+                {
+                    EFT.UI.ConsoleScreen.LogWarning(name);
+                    lastLogged = name;
+                }
+            }
+            #endif
 
                 // I REALLY DONT WANT TO CALL SUBSTRING HERE
                 // switch (string.Intern(name.Substring(name.Length - 6, 6)))
