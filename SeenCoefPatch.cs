@@ -456,8 +456,6 @@ namespace ThatsLit
 
                 if (!mainPlayer.disabledLit && Mathf.Abs(score) >= 0.15f) // Skip works
                 {
-                    if (factor < 0) factor *= 1 + disFactor * (mainPlayer.fog / 0.1f);
-
                     if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight ? 0.3f : 1f); // Darkness will be far more effective from afar
                     else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
 
