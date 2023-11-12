@@ -479,8 +479,9 @@ namespace ThatsLit
                     // f-1, 1m => 
                     var reducingSeconds = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqbSmooth, 1f - 0.5f * cqbSmooth);
                     reducingSeconds *= factor < 0 ? 1 : 0.2f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
-                    reducingSeconds *= reducingSeconds > 0 ? ThatsLitPlugin.DarknessImpactScale.Value : ThatsLitPlugin.BrightnessImpactScale.Value;
+                    reducingSeconds *= factor > 0 ? ThatsLitPlugin.DarknessImpactScale.Value : ThatsLitPlugin.BrightnessImpactScale.Value;
                     __result -= reducingSeconds;
+                    if (__result < 0) __result = 0;
 
                     // The scaling here allows the player to stay in the dark without being seen
                     // The reason why scaling is needed is because SeenCoef will change dramatically depends on vision angles
@@ -501,7 +502,7 @@ namespace ThatsLit
                     else if (factor < -0.5f) __result *= 1 - (factor * (1.5f - 0.75f * cqb - 0.75f * cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
                     else if (factor < -0.2f) __result *= 1 - factor * cqb * ThatsLitPlugin.DarknessImpactScale.Value;
                     else if (factor < 0f) __result *= 1 - factor / 1.5f * ThatsLitPlugin.DarknessImpactScale.Value;
-                    else if (factor > 0f) __result /= (1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value); // 0.66x at 100% score
+                    else if (factor > 0f) __result /= 1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value;
                 }
 
                 if (factor < 0)
