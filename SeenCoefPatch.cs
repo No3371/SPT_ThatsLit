@@ -469,8 +469,7 @@ namespace ThatsLit
                             factor *= 0.1f; // It's not really that dark, scale down massively
                     }
 
-
-                    factor = Mathf.Clamp(factor, -0.95f, 0.95f);
+                    factor = Mathf.Clamp(factor, -0.975f, 0.975f);
 
                     // Absoulute offset
                     // factor: -0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (6m)
