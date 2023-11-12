@@ -122,7 +122,7 @@ namespace ThatsLit.Components
                 prone = 0.007f * num;
                 crouch = 0.006f * num;
             }
-            #if DEBUG_DETAILS
+#if DEBUG_DETAILS
             else if (name.EndsWith("e9cd39")) {} // rock
             else
             {
@@ -132,7 +132,7 @@ namespace ThatsLit.Components
                     lastLogged = name;
                 }
             }
-            #endif
+#endif
 
                 // I REALLY DONT WANT TO CALL SUBSTRING HERE
                 // switch (string.Intern(name.Substring(name.Length - 6, 6)))
