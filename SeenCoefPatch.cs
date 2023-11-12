@@ -146,8 +146,9 @@ namespace ThatsLit
                     {
                         __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                     }
-                }
 
+                    if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside && rand2 < 0.2f && dis > 15 && visionAngleDelta > 20)
+                        __result *= 1 + rand1;
                 }
 
 
