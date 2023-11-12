@@ -162,12 +162,6 @@ namespace ThatsLit
                 if (UnityEngine.Random.Range(0f, 1f) < globalOverlookChance)
                 {
                     __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
-                    // prone, 110m, about 8% 
-                    // prone, 50m, about 1.08%
-                    // prone, 10m, 0
-                    // stand, 110m, about 0.8% 
-                    // stand, 50m, about 0.108%
-                    // prone, 10m, 0
                 }
 
                 float score, factor;
