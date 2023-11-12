@@ -139,15 +139,15 @@ namespace ThatsLit
                     var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
                     // (unscaled) 30deg -> 8%, 45deg->20%, 60deg -> 41%, 75deg->69%, 90deg->105%
                     // Overlook close enemies at higher attitude and in low pose
-                    var overheadChance = Mathf.Clamp01(weight) * (1 - poseFactor * 1.5f); // prone: 0.925x, crouch: 0.325x (x = squared angle weight), 30deg -> prone10%
-                    overheadChance *= Mathf.Clamp01((sinceSeen - 30) / 15f); // Seen recently (~45s)
-                    overheadChance *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 12f); // Seen nearby
-                    if (rand1 < overheadChance / 2f) // scaled down
+                    var overheadChance = Mathf.Clamp01(weight) * (1.15f - poseFactor); // prone: 1.1x, crouch: 0.7x, stand: 0.1x 
+                    overheadChance *= Mathf.Clamp01((sinceSeen - 30) / 30f); // Seen recently (~60s)
+                    overheadChance *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 15f); // Seen nearby
+                    if (rand1 < overheadChance) // scaled down
                     {
                         __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                     }
 
-                    if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside && rand2 < 0.2f && dis > 15 && visionAngleDelta > 20)
+                    if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside && rand2 < 0.2f && dis > 15 && visionAngleDelta > 25)
                         __result *= 1 + rand1;
                 }
 
