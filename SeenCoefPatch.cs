@@ -502,7 +502,13 @@ namespace ThatsLit
                     else if (factor > 0f) __result /= 1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value;
                 }
 
-                if (factor < 0)
+                if (__instance.Owner.Mover.Sprinting) __result *= 1 + (rand2 / 5f) * Mathf.Clamp01((visionAngleDelta - 25f) / 65f); // When facing away (25~90deg), sprinting bots takes up to 20% longer to spot the player
+                else if (!__instance.Owner.Mover.IsMoving) __result *= 1 - (rand2 / 5f); // When static, bots takes up to 20% shorter to spot the player
+                
+                if (!mainPlayer.MainPlayer.MovementContext.IsInPronePose && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.05f)
+                    __result *= 1 - (rand2 / 5f) * Mathf.Clamp01(mainPlayer.MainPlayer.MovementContext.ClampedSpeed / 2f); // Depends on the player's speed, bots takes up to 20% shorter to spot the player
+                
+                if (__result > original)
                 {
                     __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(sinceSeen / UnityEngine.Random.Range(0.075f, 0.15f) + immunityNegation)); // just seen (0s) => original, 0.1s => modified
                 }
