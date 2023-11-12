@@ -136,12 +136,13 @@ namespace ThatsLit
 
                 if (sinceSeen > 30f && !canSeeLight)
                 {
-                    var angleFactor = Mathf.Clamp01(1f * (visionAngleDeltaVertical - 15f) / 30f) + Mathf.Clamp01(2f * (visionAngleDeltaVertical - 45f) / 45f);
+                    var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
+                    // (unscaled) 30deg -> 8%, 45deg->20%, 60deg -> 41%, 75deg->69%, 90deg->105%
                     // Overlook close enemies at higher attitude and in low pose
-                    var overheadFactor = angleFactor * (Mathf.Clamp01(visionAngleDelta - 15f) / 75f) * (1 - poseFactor * 1.5f); // 2.5+ (0%) ~ 10+ (100%) ... prone: 92.5%, crouch: 32.5%
-                    overheadFactor *= Mathf.Clamp01((sinceSeen - 30) / 30f);
-                    overheadFactor *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 12f);
-                    if (rand1 < Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * 20f * overheadFactor * (1f - disFactor)) // mainly for "close but high" scenarios
+                    var overheadChance = Mathf.Clamp01(weight) * (1 - poseFactor * 1.5f); // prone: 0.925x, crouch: 0.325x (x = squared angle weight), 30deg -> prone10%
+                    overheadChance *= Mathf.Clamp01((sinceSeen - 30) / 15f); // Seen recently (~45s)
+                    overheadChance *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 12f); // Seen nearby
+                    if (rand1 < overheadChance / 2f) // scaled down
                     {
                         __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                     }
