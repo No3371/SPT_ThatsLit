@@ -11,6 +11,7 @@ using EFT.Utilities;
 using System.Globalization;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using EFT.InventoryLogic;
 
 
 namespace ThatsLit
@@ -52,6 +53,7 @@ namespace ThatsLit
             {
                 if (!mainPlayer) return;
                 if (mainPlayer.disableVisionPatch) return;
+                
                 nearestRecent += 0.5f;
                 var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
                 float sinceSeen = Time.time - __instance.TimeLastSeen;
@@ -59,14 +61,6 @@ namespace ThatsLit
                 float immunityNegation = 0;
 
                 Vector3 eyeToEnemyBody = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
-                var dis = eyeToEnemyBody.magnitude;
-                var disFactor = Mathf.Clamp01((dis - 10) / 100f);
-                // To scale down various sneaking bonus
-                // The bigger the distance the bigger it is, capped to 110m
-                disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0, 50m => 0.16
-                // The disFactor is to scale up effectiveness of various mechanics by distance
-                // Once player is seen, it should be suppressed unless the player is out fo visual for sometime, to prevent interrupting long range fight
-                disFactor = Mathf.Lerp(0, disFactor, sinceSeen / (8f * (1.2f - disFactor)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
 
                 var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
                 bool isInPronePose = __instance.Person.AIData.Player.IsInPronePose;
@@ -75,12 +69,62 @@ namespace ThatsLit
                 poseFactor = Mathf.Clamp01(poseFactor);
 
                 float rand1 = UnityEngine.Random.Range(0f, 1f);
-                if (rand1 + 0.1f < disFactor * Mathf.Clamp01(mainPlayer.fog / 0.1f)) __result *= 10;
+                float rand2 = UnityEngine.Random.Range(0f, 1f);
 
                 Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
                 var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToEnemyBody);
                 var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToEnemyBody.x, 0, eyeToEnemyBody.z), eyeToEnemyBody) * (eyeToEnemyBody.y >= 0 ? 1f : -1f); // negative if looking down (higher), 0 when looking straight... 
 
+                var dis = eyeToEnemyBody.magnitude;
+                float disFactor = 0;
+                bool seenWithThermal = false;
+
+
+                if (__instance.Owner.NightVision.UsingNow
+                    && __instance.Owner.NightVision.NightVisionItem.Template.Mask == NightVisionComponent.EMask.Thermal)
+                {
+                    seenWithThermal = true;
+                }
+                else if (UnityEngine.Random.Range(__instance.Owner.Mover.IsMoving? -4f : -1f, 1f) > Mathf.Clamp01(visionAngleDelta / 15f))
+                {
+                    EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentScope?.Mod;
+                    if (rand1 < 0.1f) sightMod?.SetScopeMode(UnityEngine.Random.Range(0, sightMod.ScopesCount), UnityEngine.Random.Range(0, 2));
+                    float currentZoom = sightMod?.GetCurrentOpticZoom() ?? 1;
+
+
+                    if (sightMod?.Item?.GetItemComponent<ThermalVisionComponent>() != null
+                     && visionAngleDelta <= 60f / currentZoom
+                     && !__instance.Owner.NightVision.UsingNow)
+                    {
+                        disFactor = 0;
+                        seenWithThermal = true;
+                    }
+                    else if (dis > 20)
+                    {
+                        if (currentZoom == 0) currentZoom = 1;
+
+                        if (visionAngleDelta > 60f / currentZoom || __instance.Owner.NightVision.UsingNow)
+                            currentZoom = 1; // AIs using NVGs does not get the scope buff (Realism style)
+        
+                        // Recalculate
+                        disFactor = Mathf.Clamp01((dis / currentZoom - 10) / 100f);
+                    }
+                }
+                else if (dis > 20)
+                {
+                    disFactor = Mathf.Clamp01((dis - 10) / 100f);
+                }
+                // var disFactorLong = Mathf.Clamp01((dis - 10) / 300f);
+                // To scale down various sneaking bonus
+                // The bigger the distance the bigger it is, capped to 110m
+                disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0, 50m => 0.16
+                // The disFactor is to scale up effectiveness of various mechanics by distance
+                // Once player is seen, it should be suppressed unless the player is out fo visual for sometime, to prevent interrupting long range fight
+                disFactor = Mathf.Lerp(0, disFactor, sinceSeen / (8f * (1.2f - disFactor)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
+                // disFactorLong = Mathf.Lerp(0, disFactorLong, sinceSeen / (8f * (1.2f - disFactorLong)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
+
+
+                if (rand1 + 0.1f < disFactor * Mathf.Clamp01(mainPlayer.fog / 0.1f)) __result *= 10;
                 // Vector3 EyeToEnemyHead = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.head].Position;
                 // Vector3 EyeToEnemyLeg = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.leftLeg].Position;
                 // var visionAngleToEnemyHead = Vector3.Angle(botVisionDir, EyeToEnemyHead);
@@ -103,20 +147,7 @@ namespace ThatsLit
                     }
                 }
 
-                float sightRange = __instance.Owner?.WeaponManager?.CurrentWeapon?.GetSightingRange() ?? 100;
-                if (UnityEngine.Random.Range(-3f, 1f) > Mathf.Clamp01(visionAngleDelta / 10f))
-                {
-                    if (visionAngleDelta > 1000f / sightRange // Out of scope
-                     || __instance.Owner.NightVision.UsingNow) sightRange = Mathf.Min(sightRange, 50); // AIs using NVGs does not get the scope buff (Realism style)
-                    disFactor *= 1 + 0.1f * (100 - sightRange) / 100;
-                    disFactor = Mathf.Clamp01(disFactor);
-                    // 100m sight => 1.0x
-                    // 200m sight => 0.9x
-                    // 300m sight => 0.8
-                    // 600m sight => 0.5x
-                    // 1000m sight => 0.1x
                 }
-
 
 
                 float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
@@ -143,6 +174,8 @@ namespace ThatsLit
                 {
                     score = factor = 0;
                 }
+                else if (seenWithThermal)
+                    score = factor = 1;
                 else
                 {
                     score = mainPlayer.MultiFrameLitScore; // -1 ~ 1
@@ -192,7 +225,7 @@ namespace ThatsLit
                 var xyFacingFactor = 0f;
                 var layingVerticaltInVisionFactor = 0f;
                 var detailScore = 0f;
-                if (!mainPlayer.skipDetailCheck)
+                if (!seenWithThermal && !mainPlayer.skipDetailCheck)
                 {
                     mainPlayer.CalculateDetailScore(-eyeToEnemyBody, dis, visionAngleDeltaVertical, out float scoreLow, out float scoreMid);
                     if (scoreLow > 0.1f || scoreMid > 0.1f)
@@ -284,7 +317,7 @@ namespace ThatsLit
 
                 // BUSH RAT ----------------------------------------------------------------------------------------------------------------
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-                if (mainPlayer.foliage != null && !Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role)
+                if (!seenWithThermal && mainPlayer.foliage != null && !Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role)
                  && (!__instance.HaveSeen || lastPosDis > 50f || sinceSeen > 300f && lastPosDis > 10f))
                 {
                     float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
