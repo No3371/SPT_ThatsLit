@@ -35,10 +35,10 @@ namespace ThatsLit.Patches.Vision
             {
                 float rand = UnityEngine.Random.Range(-1f, 1f);
                 float rand2 = UnityEngine.Random.Range(-1f, 1f);
-                if (angle > 75 && rand < Mathf.Clamp01(((angle - 75f) / 25f) * ThatsLitPlugin.VagueHintChance.Value))
+                if (angle > 75 && rand < Mathf.Clamp01(((angle - 75f) / 45f) * ThatsLitPlugin.VagueHintChance.Value))
                 {
                     var source = __instance.Owner.Position + (__instance.Person.Position - __instance.Owner.Position) * (0.75f + rand / 4f);
-                    source += (Vector3.up * rand  + Vector3.right * rand2 + Vector3.forward * (rand2 - rand) / 2f) * to.sqrMagnitude / (100f * (1.5f + rand));
+                    source += (Vector3.up * Mathf.Abs(rand + rand2) / 2f  + Vector3.right * rand2 + Vector3.forward * (rand2 - rand) / 2f) * to.sqrMagnitude / (100f * (1.5f + rand));
                     __instance.Owner.Memory.Spotted(false, source);
                     return false; // Cancel visible when facing away (SetVisible not only get called for the witness... ex: for group members )
                 }
@@ -66,9 +66,10 @@ namespace ThatsLit.Patches.Vision
                 {
                     __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.2f) * Mathf.Clamp01(__state.angle/15f));
                 }
+    
                 if (__instance.Owner.AimingData is GClass388 g388 && !__instance.Owner.WeaponManager.ShootController.IsAiming)
                 {
-                    g388.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.35f) * Mathf.Clamp01((__state.angle - 15f)/45f);
+                    g388.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.2f) * Mathf.Clamp01((__state.angle - 30f)/45f);
                 }
             }
         }
