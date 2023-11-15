@@ -136,8 +136,8 @@ namespace ThatsLit
 
                 if (sinceSeen > 30f && !canSeeLight)
                 {
-                    var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
-                    // (unscaled) 30deg -> 8%, 45deg->20%, 60deg -> 41%, 75deg->69%, 90deg->105%
+                    var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 60f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
+                    // (unscaled) 30deg -> 8%, 45deg->22%, 60deg -> 50%, 75deg->83%, 80deg->104%
                     // Overlook close enemies at higher attitude and in low pose
                     var overheadChance = Mathf.Clamp01(weight) * (1.15f - poseFactor); // prone: 1.1x, crouch: 0.7x, stand: 0.1x 
                     overheadChance *= Mathf.Clamp01((sinceSeen - 30) / 30f); // Seen recently (~60s)
@@ -505,7 +505,7 @@ namespace ThatsLit
                 if (__instance.Owner.Mover.Sprinting) __result *= 1 + (rand2 / 5f) * Mathf.Clamp01((visionAngleDelta - 25f) / 65f); // When facing away (25~90deg), sprinting bots takes up to 20% longer to spot the player
                 else if (!__instance.Owner.Mover.IsMoving) __result *= 1 - (rand2 / 5f); // When static, bots takes up to 20% shorter to spot the player
                 
-                if (!mainPlayer.MainPlayer.MovementContext.IsInPronePose && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.05f)
+                if (poseFactor > 0.45f && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.01f)
                     __result *= 1 - (rand2 / 5f) * Mathf.Clamp01(mainPlayer.MainPlayer.MovementContext.ClampedSpeed / 2f); // Depends on the player's speed, bots takes up to 20% shorter to spot the player
                 
                 if (__result > original)
