@@ -28,6 +28,7 @@ namespace ThatsLit.Patches.Vision
         [PatchPrefix]
         public static bool PatchPrefix(EnemyInfo __instance, bool value, ref State __state)
         {
+            if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
             Vector3 from = __instance.Owner.Transform.rotation * Vector3.forward;
             Vector3 to = __instance.Person.Transform.position - __instance.Owner.Transform.position;
             var angle = Vector3.Angle(from, to);
@@ -53,6 +54,7 @@ namespace ThatsLit.Patches.Vision
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, State __state)
         {
+            if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return;
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;
             if (__state.triggered && __instance.Owner.Memory.GoalEnemy == __instance)
