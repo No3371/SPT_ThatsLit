@@ -162,11 +162,11 @@ namespace ThatsLit
                 if (isGoalEnemy)
                 {
                     if (sinceSeen < 10f) globalOverlookChance = 0;
-                    else globalOverlookChance *= UnityEngine.Random.Range(0.1f, 0.5f);
+                    else globalOverlookChance *= UnityEngine.Random.Range(0.15f, 0.5f);
                 }
-                if (UnityEngine.Random.Range(0f, 1f) < globalOverlookChance)
+                if (rand4 < globalOverlookChance)
                 {
-                    __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
+                    __result *= 10 + rand1 * 100; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                 }
 
                 float score, factor;
@@ -211,7 +211,7 @@ namespace ThatsLit
                 // Pose higher than half will reduce the change
                 if (UnityEngine.Random.Range(0f, 1.05f) < Mathf.Clamp01(disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(1.2f - poseFactor))) // Among bushes, from afar
                 {
-                    __result *= 10f;
+                    __result *= 10f + rand2 * 10;
                 }
 
                 float lastPosDis = (__instance.EnemyLastPosition - __instance.Person.Position).magnitude;
@@ -426,7 +426,7 @@ namespace ThatsLit
                             break;
                     }
                     var overallFactor = Mathf.Clamp01(angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor);
-                    if (canSeeLight || (canSeeLaser && UnityEngine.Random.Range(0, 100) < 20)) overallFactor /= 2f;
+                    if (canSeeLight || (canSeeLaser && rand3 < 0.2f)) overallFactor /= 2f;
                     if (bushRat && overallFactor > 0.01f)
                     {
                         if (nearestAI) mainPlayer.foliageCloaking = bushRat;
@@ -434,14 +434,14 @@ namespace ThatsLit
                         switch (caution)
                         {
                             case 0:
-                                if (UnityEngine.Random.Range(0f, 1f) > 0.01f) __result *= 1 + 4 * overallFactor * UnityEngine.Random.Range(0.2f, 0.4f);
+                                if (rand2 > 0.01f) __result *= 1 + 4 * overallFactor * UnityEngine.Random.Range(0.2f, 0.4f);
                                 cqb *= 1 - overallFactor * 0.5f;
                                 cqbSmooth *= 1 - overallFactor * 0.5f;
                                 break;
                             case 1:
                             case 3:
                             case 2:
-                                if (UnityEngine.Random.Range(0f, 1f) > 0.005f) __result *= 1 + 8 * overallFactor * UnityEngine.Random.Range(0.3f, 0.65f);
+                                if (rand3 > 0.005f) __result *= 1 + 8 * overallFactor * UnityEngine.Random.Range(0.3f, 0.65f);
                                 cqb *= 1 - overallFactor * 0.8f;
                                 cqbSmooth *= 1 - overallFactor * 0.8f;
                                 break;
@@ -450,7 +450,7 @@ namespace ThatsLit
                             case 6:
                             case 7:
                             case 8:
-                                if (UnityEngine.Random.Range(0f, 1f) > 0.001f) __result *= 1 + 6 * overallFactor * UnityEngine.Random.Range(0.5f, 1.0f);
+                                if (rand1 > 0.001f) __result *= 1 + 6 * overallFactor * UnityEngine.Random.Range(0.5f, 1.0f);
                                 cqb *= 1 - overallFactor;
                                 cqbSmooth *= 1 - overallFactor;
                                 break;
@@ -511,8 +511,10 @@ namespace ThatsLit
                 else if (!__instance.Owner.Mover.IsMoving) __result *= 1 - (rand2 / 5f); // When static, bots takes up to 20% shorter to spot the player
                 
                 if (poseFactor > 0.45f && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.01f)
-                    __result *= 1 - (rand2 / 5f) * Mathf.Clamp01(mainPlayer.MainPlayer.MovementContext.ClampedSpeed / 2f); // Depends on the player's speed, bots takes up to 20% shorter to spot the player
-                
+                {
+                    __result *= 1 - (rand2 / 5f) * pSpeedFactor; // Depends on the player's speed, bots takes up to 20% shorter to spot the player
+                }
+
                 if (__result > original)
                 {
                     __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(sinceSeen / UnityEngine.Random.Range(0.075f, 0.15f) + immunityNegation)); // just seen (0s) => original, 0.1s => modified
