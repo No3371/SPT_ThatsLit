@@ -75,7 +75,8 @@ namespace ThatsLit.Components
                 prone = 0.008f * num;
                 crouch = 0;
             }
-            else if (name.EndsWith("fa097b"))
+            else if (name.EndsWith("fa097b")
+                  || name.EndsWith("2adee9")) // low res, bigger yellower grass cross
             {
                 prone = 0.06f * num; 
                 crouch = 0.01f * num;
