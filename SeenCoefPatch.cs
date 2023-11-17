@@ -138,21 +138,22 @@ namespace ThatsLit
                 var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
                 if (!canSeeLaser && __instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
 
-                if (sinceSeen > 30f && !canSeeLight)
+                if (sinceSeen > 15f && !canSeeLight)
                 {
-                    var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 60f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
-                    // (unscaled) 30deg -> 8%, 45deg->22%, 60deg -> 50%, 75deg->83%, 80deg->104%
+                    var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
+                    // (unscaled) 30deg -> 8%, 45deg->20%, 60deg -> 41%, 75deg->69%, 80deg->80%, 85deg->92%
                     // Overlook close enemies at higher attitude and in low pose
-                    var overheadChance = Mathf.Clamp01(weight) * (1.15f - poseFactor); // prone: 1.1x, crouch: 0.7x, stand: 0.1x 
-                    overheadChance *= Mathf.Clamp01((sinceSeen - 30) / 30f); // Seen recently (~60s)
+                    var overheadChance = Mathf.Clamp01(weight) * (1.025f - poseFactor / 2f); // prone: 1.0x, crouch: 0.8x, stand: 0.5x
                     overheadChance *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 15f); // Seen nearby
+                    overheadChance *= 1 - pSpeedFactor * 0.1f;
+                    overheadChance = Mathf.Clamp01(overheadChance + (rand3 - 0.5f) * 2f * 0.1f);
                     if (rand1 < overheadChance) // scaled down
                     {
-                        __result *= 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
+                        __result *= 10 + rand2 * 100; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
                     }
 
-                    if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside && rand2 < 0.2f && dis > 15 && visionAngleDelta > 25)
-                        __result *= 1 + rand1;
+                    if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside)
+                        __result *= 10 + rand3 * 50 * Mathf.Clamp01((dis - 15f) / 55f) * Mathf.Clamp01((visionAngleDelta - 20f) / 55f);
                 }
 
 
