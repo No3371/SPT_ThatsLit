@@ -54,6 +54,8 @@ namespace ThatsLit
                 if (!mainPlayer) return;
                 if (mainPlayer.disableVisionPatch) return;
                 
+                float pSpeedFactor = Mathf.Clamp01(mainPlayer.MainPlayer.MovementContext.ClampedSpeed / 2f);
+
                 nearestRecent += 0.5f;
                 var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
                 float sinceSeen = Time.time - __instance.TimeLastSeen;
@@ -70,6 +72,8 @@ namespace ThatsLit
 
                 float rand1 = UnityEngine.Random.Range(0f, 1f);
                 float rand2 = UnityEngine.Random.Range(0f, 1f);
+                float rand3 = UnityEngine.Random.Range(0f, 1f);
+                float rand4 = UnityEngine.Random.Range(0f, 1f);
 
                 Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
                 var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToEnemyBody);
