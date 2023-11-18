@@ -153,7 +153,7 @@ namespace ThatsLit
                     }
 
                     if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside)
-                        __result *= 10 + rand3 * 50 * Mathf.Clamp01((dis - 15f) / 55f) * Mathf.Clamp01((visionAngleDelta - 20f) / 55f);
+                        __result *= 1 + rand3 * 50 * Mathf.Clamp01((dis - 15f) / 55f) * Mathf.Clamp01((visionAngleDelta - 20f) / 55f);
                 }
 
 
