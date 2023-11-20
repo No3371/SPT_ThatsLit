@@ -512,7 +512,7 @@ namespace ThatsLit
                 
                 if (poseFactor > 0.45f && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.01f)
                 {
-                    __result *= 1 - (rand2 / 5f) * pSpeedFactor; // Depends on the player's speed, bots takes up to 20% shorter to spot the player
+                    __result *= 1 - (rand2 / 5f) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.25f); // Depends on the player's speed, bots takes up to 20% shorter to spot the player
                 }
 
                 if (__result > original)
