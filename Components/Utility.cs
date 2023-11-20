@@ -443,6 +443,29 @@ namespace ThatsLit.Components
                             break;
                     }
                     break;
+                case "644a3df63b0b6f03e101e065": // MAWL-C1+
+                    switch (selectedMode)
+                    {
+                        case 0:
+                            light = true;
+                            break;
+                        case 1:
+                            light = true;
+                            break;
+                        case 2:
+                            lightIsIR = true;
+                            break;
+                        case 3:
+                            lightIsIR = true;
+                            break;
+                        case 4:
+                            laserIsIR = true;
+                            break;
+                        case 5:
+                            laserIsIR = true;
+                            break;
+                    }
+                    break;
             }
         }
         internal static void GUILayoutDrawAsymetricMeter(int level)
