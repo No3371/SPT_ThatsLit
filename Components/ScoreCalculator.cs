@@ -484,8 +484,10 @@ namespace ThatsLit.Components
 
         protected virtual float CalculateSunLightTimeFactor(string locationId, float time)
         {
-            if (time >= 5 && time < 8) // 0 ~ 0.3
-                return GetTimeProgress(time, 5, 8) * 0.3f;
+            if (time >= 5 && time < 6) // 0 ~ 0.1
+                return GetTimeProgress(time, 5, 6) * 0.1f;
+            else if (time >= 6 && time < 8) // 0.1 ~ 0.3
+                return 0.1f + GetTimeProgress(time, 6, 8) * 0.2f;
             else if (time >= 8 && time < 12) // 0.3 ~ 1
                 return 0.3f + GetTimeProgress(time, 8, 12) * 0.7f;
             else if (time >= 12 && time < 15) // 1 ~ 1
@@ -670,6 +672,22 @@ namespace ThatsLit.Components
         protected override float ThresholdMid { get => 0.1f; }
         protected override float ThresholdMidLow { get => 0.025f; }
         protected override float NonCloudinessBaseAmbienceScoreImpact => 0.2f;
+        protected override float CalculateSunLightTimeFactor(string locationId, float time)
+        {
+            if (time >= 5.5 && time < 6.5) // 0 ~ 0.1
+                return GetTimeProgress(time, 5, 6) * 0.1f;
+            else if (time >= 6.5 && time < 7.5) // 0.1 ~ 0.3
+                return 0.1f + GetTimeProgress(time, 6, 8) * 0.2f;
+            else if (time >= 7.5 && time < 12) // 0.3 ~ 1
+                return 0.3f + GetTimeProgress(time, 8, 12) * 0.7f;
+            else if (time >= 12 && time < 15) // 1 ~ 1
+                return 1;
+            else if (time >= 15 && time < 19) // 1 ~ 0.5f
+                return 1f - GetTimeProgress(time, 15, 19) * 0.5f;
+            else if (time >= 19 && time < 21.5f) // 0.5 ~ 0f
+                return 0.5f - GetTimeProgress(time, 19, 21.5f) * 0.5f;
+            else return 0;
+        }
     }
 
     public class StreetsScoreCalculator : ScoreCalculator
