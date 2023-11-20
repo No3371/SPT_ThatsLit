@@ -56,8 +56,9 @@ namespace ThatsLit
 
             category = "2. Darkness / Brightness";
             EnabledLighting = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order = 100 }));
-            DarknessImpactScale = Config.Bind(category, "Darkness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players slower due to darkness.", null, new ConfigurationManagerAttributes() { Order = 95 }));
-            BrightnessImpactScale = Config.Bind(category, "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", null, new ConfigurationManagerAttributes() { Order = 94 }));
+            DarknessImpactScale = Config.Bind(category, "Darkness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players slower due to darkness.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 95 }));
+            BrightnessImpactScale = Config.Bind(category, "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 94 }));
+            LitVisionDistanceScale = Config.Bind(category, "Lit Vision Distance Scale", 1f, new ConfigDescription("Scale how AI noticing players from further due to getting lit (from non-ambience lighting).", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 93 }));
             EnableFactoryNight = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
             EnableLighthouse = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
             EnableShoreline = Config.Bind(category, "Shoreline", true, "Enable darkness/brightness on the map.");
@@ -71,21 +72,30 @@ namespace ThatsLit
             EnabledEncountering = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This randomly nerf AIs a bit at the moment they encounter you, especially when they are sprinting.", null, new ConfigurationManagerAttributes() { Order = 100 }));
             VagueHintChance = Config.Bind(category, key: "Vague Hint Chance", 0.6f, "The chance to only tell an AI it's spotted when you are set to be visible to an AI but it's not facing your direction.");
 
-            category = "4. Tweaks";
-            GlobalRandomOverlookChance = Config.Bind(category, "Global Random Overlook Chance", 0.01f, "The chance for all AIs to simply overlook in 1 vision check.");
-            FoliageImpactScale = Config.Bind(category, "Foliage Impact Scale", 1f, "Scale the strength of extra chance to be overlooked from sneaking around foliages.");
+            category = "3. Grasses";
+            EnabledGrasses = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order = 100 }));
+
+            category = "5. Tweaks";
+            GlobalRandomOverlookChance = Config.Bind(category,
+                                                     "Global Random Overlook Chance",
+                                                     0.01f,
+                                                     new ConfigDescription("The chance for all AIs to simply overlook in 1 vision check.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 100 }));
+            FoliageImpactScale = Config.Bind(category,
+                                             "Foliage Impact Scale",
+                                             1f,
+                                             new ConfigDescription("Scale the strength of extra chance to be overlooked from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 100 }));
             FinalOffset = Config.Bind(category, "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa.");
             IncludeBosses = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss.");
 
-            category = "5. Info";
+            category = "6. Info";
             ScoreInfo = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
 
-            category = "6. Performance";
+            category = "7. Performance";
             LessFoliageCheck = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
             LessEquipmentCheck = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
             LowResMode = Config.Bind(category, "Low Res Mode", false, "Can reduce CPU time of calculation, may reduce lighting detection accuracy.");
 
-            category = "7. Debug";
+            category = "8. Debug";
             DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             EnableHideout = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
@@ -120,9 +130,11 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnabledMod { get; private set; }
         public static ConfigEntry<bool> EnabledLighting { get; private set; }
         public static ConfigEntry<bool> EnabledEncountering { get; private set; }
+        public static ConfigEntry<bool> EnabledGrasses { get; private set; }
         public static ConfigEntry<float> ScoreOffset { get; private set; }
         public static ConfigEntry<float> DarknessImpactScale { get; private set; }
         public static ConfigEntry<float> BrightnessImpactScale { get; private set; }
+        public static ConfigEntry<float> LitVisionDistanceScale { get; private set; }
         public static ConfigEntry<float> FinalOffset { get; private set; }
         public static ConfigEntry<float> VagueHintChance { get; private set; }
         public static ConfigEntry<float> GlobalRandomOverlookChance { get; private set; }
@@ -168,6 +180,7 @@ namespace ThatsLit
         {
             new SeenCoefPatch().Enable();
             new EncounteringPatch().Enable();
+            new ExtraVisibleDistancePatch().Enable();
             // new SoundOverlapPatch().Enable();
         }
 

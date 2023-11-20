@@ -132,6 +132,9 @@ namespace ThatsLit.Components
                 }
             }
 
+            if (!ThatsLitPlugin.EnabledGrasses.Value)
+                skipDetailCheck = true;
+
             if (scoreCalculator == null)
             {
                 disabledLit = true;
