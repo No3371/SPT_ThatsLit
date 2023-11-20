@@ -10,7 +10,6 @@ using Comfort.Common;
 using EFT.Utilities;
 using System.Globalization;
 using UnityEngine.UIElements;
-using System.Collections.Generic;
 using EFT.InventoryLogic;
 
 
@@ -52,7 +51,6 @@ namespace ThatsLit
             if (__instance.Person.IsYourPlayer)
             {
                 if (!mainPlayer) return;
-                if (mainPlayer.disableVisionPatch) return;
                 
                 float pSpeedFactor = Mathf.Clamp01(mainPlayer.MainPlayer.MovementContext.ClampedSpeed / 2f);
 
@@ -205,7 +203,7 @@ namespace ThatsLit
                 }
 
                 bool nearestAI = false;
-                if (dis < nearestRecent)
+                if (dis <= nearestRecent)
                 {
                     nearestRecent = dis;
                     nearestAI = true;
