@@ -35,10 +35,9 @@ namespace ThatsLit.Components
         public int lockPos = -1;
         public RawImage display;
         public RawImage displayEnv;
-        public bool disableVisionPatch;
 
         public float foliageScore;
-        int foliageCount;
+        internal int foliageCount;
         internal Vector2 foliageDir;
         internal float foliageDisH, foliageDisV;
         internal string foliage;
@@ -60,6 +59,7 @@ namespace ThatsLit.Components
         public float lastTiltAngle, lastRotateAngle, lastDisFactorNearest;
         public float lastNearest;
         public float lastFinalDetailScoreNearest;
+        internal int recentDetailCount3x3;
         internal ScoreCalculator scoreCalculator;
         AsyncGPUReadbackRequest gquReq;
         // float benchMark1, benchMark2;
@@ -375,13 +375,13 @@ namespace ThatsLit.Components
                     if (collidersCache[i].gameObject.GetComponent<Terrain>()) continue; // Somehow sometimes terrains can be casted
                     Vector3 dir = (collidersCache[i].transform.position - bodyPos);
                     float dis = dir.magnitude;
-                    if (dis < 0.3f) foliageScore += 1f;
-                    else if (dis < 0.4f) foliageScore += 0.9f;
+                    if (dis < 0.25f) foliageScore += 1f;
+                    else if (dis < 0.35f) foliageScore += 0.9f;
                     else if (dis < 0.5f) foliageScore += 0.8f;
                     else if (dis < 0.6f) foliageScore += 0.7f;
-                    else if (dis < 0.7f) foliageScore += 0.6f;
-                    else if (dis < 1f) foliageScore += 0.5f;
-                    else if (dis < 2f) foliageScore += 0.3f;
+                    else if (dis < 0.7f) foliageScore += 0.5f;
+                    else if (dis < 1f) foliageScore += 0.3f;
+                    else if (dis < 2f) foliageScore += 0.2f;
                     else foliageScore += 0.1f;
 
                     if (dis < closet)
@@ -400,9 +400,24 @@ namespace ThatsLit.Components
                     foliageDisH = foliageDir.magnitude;
                     foliageDisV = Mathf.Abs(foliageDir.y);
                 }
-                if (count == 1) foliageScore /= 1.5f;
-                if (count == 2) foliageScore /= 1.3f;
-                if (count == 3) foliageScore /= 1.1f;
+                switch (count)
+                {
+                    case 1:
+                    foliageScore /= 3f;
+                    break;
+                    case 2:
+                    foliageScore /= 2.7f;
+                    break;
+                    case 3:
+                    foliageScore /= 2.3f;
+                    break;
+                    case 4:
+                    foliageScore /= 1.8f;
+                    break;
+                    case 5:
+                    foliageScore /= 1.2f;
+                    break;
+                }
             }
         }
 
@@ -520,6 +535,7 @@ namespace ThatsLit.Components
         {
             Array.Clear(detailScoreFrameCache, 0, detailScoreFrameCache.Length);
             Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
+            recentDetailCount3x3 = 0;
             var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
             if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return;
             var terrain = hit.transform.GetComponent<Terrain>();
@@ -630,6 +646,8 @@ namespace ThatsLit.Components
                             name = manager.prototypeList[d].name,
                             count = count,
                         };
+
+                        if (x >= 1 && x <= 3 && y >= 1 && y <= 3) recentDetailCount3x3 += count;
                     }
             }
 

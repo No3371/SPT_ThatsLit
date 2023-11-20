@@ -78,6 +78,32 @@ namespace ThatsLit.Components
             sunLightScore = CalculateSunLight(locationId, time, cloud);
             moonLightScore = CalculateMoonLight(locationId, time, cloud);
 
+            float foliageBonus = 0;
+            if (player.foliageCount > 9)
+            {
+                foliageBonus += moonLightScore * 0.05f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
+                foliageBonus += sunLightScore * 0.03f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
+            }
+            else if (player.foliageCount > 6)
+            {
+                foliageBonus += moonLightScore * 0.06f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
+                foliageBonus += sunLightScore * 0.025f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
+            }
+            else if (player.foliageCount > 4)
+            {
+                foliageBonus += moonLightScore * 0.025f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
+            }
+            if (foliageBonus > foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, Time.fixedDeltaTime);
+            else if (foliageBonus < foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, 0.25f);
+
+            if (player.recentDetailCount3x3 >= 50 && detailBonusSmooth < 1f) detailBonusSmooth += Time.fixedDeltaTime; 
+            else detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, 0, 0.3f);
+
+            ambienceScore -= foliageBonusSmooth;
+            ambienceScore -= detailBonusSmooth * 0.1f;
+            ambienceScore = Mathf.Max(ambienceScore, -1f);
+
+
             //float score = CalculateTotalPixelScore(time, thisFrame.pxS, thisFrame.pxH, thisFrame.pxHM, thisFrame.pxM, thisFrame.pxML, thisFrame.pxL, thisFrame.pxD);
             //score /= (float)thisFrame.pixels;
             float lowAmbienceScoreFactor = (1f - ambienceScore) / 2f;
