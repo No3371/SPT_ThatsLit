@@ -467,6 +467,7 @@ namespace ThatsLit.Components
         protected virtual float CalculateMoonLight(string locationId, float time, float cloudiness)
         {
             cloudiness = 1 - cloudiness; // difference from 1
+            if (cloudiness > 1) cloudiness = Mathf.Lerp(cloudiness, 1, 0.25f);
             float maxMoonlightScore = GetMaxMoonlightScore();
             return cloudiness * maxMoonlightScore * CalculateMoonLightTimeFactor(locationId, time);
         }
@@ -476,6 +477,7 @@ namespace ThatsLit.Components
         protected virtual float CalculateSunLight(string locationId, float time, float cloudiness)
         {
             cloudiness = 1 - cloudiness; // difference from 1
+            if (cloudiness > 2f) cloudiness = Mathf.Lerp(cloudiness, 2, 0.5f); // Balancing days of -1.5 cloudiness, which seems more common in 3.7+
             float maxSunlightScore = GetMaxSunlightScore();
             return cloudiness * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
         }
