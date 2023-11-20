@@ -11,6 +11,7 @@ namespace ThatsLit.Components
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
         float scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
         float lastOutside;
+        float foliageBonusSmooth, detailBonusSmooth;
         public ScoreCalculator()
         {
             // ThatsLitPlugin.DevMode.Value = false;
@@ -153,6 +154,8 @@ namespace ThatsLit.Components
             }
             if (Time.frameCount % 47 == 0) scoreRaw4 = lumScore + ambienceScore;
 
+            litScoreFactor = Mathf.Pow(Mathf.Clamp(lumScore, 0, 2f) / 2f, 2); // positive
+            lumScore -= lumScore * 0.25f * Mathf.Clamp01(ambienceScore); // When ambience is already above 0, reduce lumScore contribution
             lumScore += ambienceScore;
             lumScore = Mathf.Clamp(lumScore, -1, 1);
             thisFrame.score = lumScore;
@@ -174,7 +177,7 @@ namespace ThatsLit.Components
 
         }
 
-        float baseAmbienceScore, ambienceScore;
+        internal float baseAmbienceScore, ambienceScore, litScoreFactor;
         float shinePixelsRatioSample, highLightPixelsRatioSample, highMidLightPixelsRatioSample, midLightPixelsRatioSample, midLowLightPixelsRatioSample, lowLightPixelsRatioSample, darkPixelsRatioSample;
         float sunLightScore, moonLightScore;
 
