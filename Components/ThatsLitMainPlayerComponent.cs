@@ -56,7 +56,6 @@ namespace ThatsLit.Components
         internal bool skipFoliageCheck, skipDetailCheck;
         public float fog, rain, cloud;
         public float MultiFrameLitScore { get; private set; }
-        public float detailScoreProne, detailScoreCrouch;
         public Vector3 lastTriggeredDetailCoverDirNearest;
         public float lastTiltAngle, lastRotateAngle, lastDisFactorNearest;
         public float lastNearest;
@@ -430,64 +429,39 @@ namespace ThatsLit.Components
         {
             if (disabledLit && Time.time - awakeAt < 30f)
             {
-                GUILayout.Label("[That's Lit] Lit detection on this map is not supported or disabled in configs.");
+                GUILayout.Label(" [That's Lit] Lit detection on this map is not supported or disabled in configs.");
                 if (!ThatsLitPlugin.DebugInfo.Value) return;
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
             {
                 if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(MultiFrameLitScore / 0.0999f));
                 if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
-                if (foliageScore > 0.6f)
-                    GUILayout.Label("[FOLIAGE++++++]");
-                else if (foliageScore > 0.55f)
-                    GUILayout.Label("[FOLIAGE+++++-]");
-                else if (foliageScore > 0.5f)
-                    GUILayout.Label("[FOLIAGE+++++]");
-                else if (foliageScore > 0.45f)
-                    GUILayout.Label("[FOLIAGE++++-]");
-                else if (foliageScore > 0.4f)
-                    GUILayout.Label("[FOLIAGE++++]");
-                else if (foliageScore > 0.35f)
-                    GUILayout.Label("[FOLIAGE+++-]");
-                else if (foliageScore > 0.3f)
-                    GUILayout.Label("[FOLIAGE+++]");
-                else if (foliageScore > 0.25f)
-                    GUILayout.Label("[FOLIAGE++-]");
-                else if (foliageScore > 0.2f)
-                    GUILayout.Label("[FOLIAGE++]");
-                else if (foliageScore > 0.15f)
-                    GUILayout.Label("[FOLIAGE+-]");
-                else if (foliageScore > 0.1f)
-                    GUILayout.Label("[FOLIAGE+]");
-                else if (foliageScore > 0.5f)
-                    GUILayout.Label("[FOLIAGE-]");
-                else if (foliageScore > 0.025f)
-                    GUILayout.Label("[FOLIAGE]");
-
+                if (foliageScore > 0)
+                    Utility.GUILayoutFoliageMeter((int)(foliageScore / 0.0999f));
                 if (Time.time < awakeAt + 10)
-                    GUILayout.Label("[That's Lit HUD] Can be disabled in plugin settings.");
+                    GUILayout.Label(" [That's Lit HUD] Can be disabled in plugin settings.");
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
             scoreCalculator?.CalledOnGUI();
-            GUILayout.Label(string.Format("IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore));
+            GUILayout.Label(string.Format(" IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore));
             //GUILayout.Label(text: "PIXELS:");
             //GUILayout.Label(lastValidPixels.ToString());
-            GUILayout.Label(string.Format("AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));
+            GUILayout.Label(string.Format(" AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));
 
-            GUILayout.Label(string.Format("FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
+            GUILayout.Label(string.Format(" FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
 
             var poseFactor = MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
             if (MainPlayer.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
             poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
-            // GUILayout.Label(string.Format("POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
-            // GUILayout.Label(string.Format("{0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
-            GUILayout.Label(string.Format("FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
-            if (scoreCalculator != null) GUILayout.Label(string.Format("LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
-            // GUILayout.Label(string.Format("{0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
-            // GUILayout.Label(string.Format("{0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
+            // GUILayout.Label(string.Format(" POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
+            // GUILayout.Label(string.Format(" {0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
+            GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
+            if (scoreCalculator != null) GUILayout.Label(string.Format(" LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
+            // GUILayout.Label(string.Format(" {0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
+            // GUILayout.Label(string.Format(" {0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
 #if DEBUG_DETAILS
-            GUILayout.Label(string.Format("DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df)", lastFinalDetailScoreNearest, lastDisFactorNearest));
-            GUILayout.Label(string.Format("{0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
+            GUILayout.Label(string.Format(" DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df) 3x3: {2}", lastFinalDetailScoreNearest, lastDisFactorNearest, recentDetailCount3x3));
+            GUILayout.Label(string.Format(" {0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
             for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
                 if (detailsHere5x5[i].casted)
                     GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");

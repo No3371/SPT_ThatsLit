@@ -472,84 +472,128 @@ namespace ThatsLit.Components
         {
             if (level < -10)
             {
-                GUILayout.Label(" ▰▰▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
                 return;
             }
             if (level > 10)
             {
-                GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▰▰▰▰▰▰");
+                GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰");
                 return;
             }
             switch (level)
             {
                 case -11:
-                    GUILayout.Label(" ▰▰▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -10:
-                    GUILayout.Label(" ▰▰▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -9:
-                    GUILayout.Label(" ▱▰▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -8:
-                    GUILayout.Label(" ▱▱▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -7:
-                    GUILayout.Label(" ▱▱▱▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -6:
-                    GUILayout.Label(" ▱▱▱▱▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -5:
-                    GUILayout.Label(" ▱▱▱▱▱▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -4:
-                    GUILayout.Label(" ▱▱▱▱▱▱▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -3:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -2:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▰▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case -1:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▰ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▰  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case 0:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▱▱▱▱▱▱▱▱▱▱");
                     break;
                 case 1:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▱▱▱▱▱▱▱▱▱");
                     break;
                 case 2:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▱▱▱▱▱▱▱▱");
                     break;
                 case 3:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▱▱▱▱▱▱▱");
                     break;
                 case 4:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▱▱▱▱▱▱");
                     break;
                 case 5:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▰▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▱▱▱▱▱");
                     break;
                 case 6:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▰▰▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▱▱▱▱");
                     break;
                 case 7:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▰▰▰▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▱▱▱");
                     break;
                 case 8:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▰▰▰▰▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▱▱");
                     break;
                 case 9:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▰▰▰▰▰▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▱");
                     break;
                 case 10:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▰▰▰▰▰▰");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰");
                     break;
                 case 11:
-                    GUILayout.Label(" ▱▱▱▱▱▱▱▱▱▱ ▰▰▰▰▰▰▰▰▰▰");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰");
+                    break;
+            }
+        }
+
+        internal static void GUILayoutFoliageMeter(int level)
+        {
+            if (level <= 0)
+            {
+                GUILayout.Label("  FOLIAGE ▱▱▱▱▱▱▱▱▱▱");
+                return;
+            }
+            if (level >= 10)
+            {
+                GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▰▰▰▰");
+                return;
+            }
+            switch (level)
+            {
+                case 1:
+                    GUILayout.Label("  FOLIAGE ▰▱▱▱▱▱▱▱▱▱");
+                    break;
+                case 2:
+                    GUILayout.Label("  FOLIAGE ▰▰▱▱▱▱▱▱▱▱");
+                    break;
+                case 3:
+                    GUILayout.Label("  FOLIAGE ▰▰▰▱▱▱▱▱▱▱");
+                    break;
+                case 4:
+                    GUILayout.Label("  FOLIAGE ▰▰▰▰▱▱▱▱▱▱");
+                    break;
+                case 5:
+                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▱▱▱▱▱");
+                    break;
+                case 6:
+                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▱▱▱▱");
+                    break;
+                case 7:
+                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▰▱▱▱");
+                    break;
+                case 8:
+                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▰▰▱▱");
+                    break;
+                case 9:
+                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▰▰▰▱");
                     break;
             }
         }
