@@ -147,13 +147,26 @@ namespace ThatsLit
                     overheadChance *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 15f); // Seen nearby
                     overheadChance *= 1 - pSpeedFactor * 0.1f;
                     overheadChance = Mathf.Clamp01(overheadChance + (rand3 - 0.5f) * 2f * 0.1f);
-                    if (rand1 < overheadChance) // scaled down
+
+                    switch (caution)
                     {
-                        __result *= 10 + rand2 * 100; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
+                        case 0:
+                            overheadChance /= 2f;
+                            break;
+                        case 3:
+                        case 4:
+                        case 5:
+                            overheadChance *= 1.2f;
+                            break;
+                    }
+
+                    if (rand1 < overheadChance)
+                    {
+                        __result *= 10 + rand2 * 100;
                     }
 
                     if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside)
-                        __result *= 1 + rand3 * 50 * Mathf.Clamp01((dis - 15f) / 55f) * Mathf.Clamp01((visionAngleDelta - 20f) / 55f);
+                        __result *= 1 + rand3 * 50 * Mathf.Clamp01((dis - 10f) / 65f) * Mathf.Clamp01((visionAngleDelta - 20f) / 55f);
                 }
 
 
@@ -209,7 +222,7 @@ namespace ThatsLit
                 if (mainPlayer.foliageDir != Vector2.zero) foliageImpact *= 1 - Mathf.Clamp01(Vector2.Angle(new Vector2(-eyeToEnemyBody.x, -eyeToEnemyBody.z), mainPlayer.foliageDir) / 90f); // 0deg -> 1, 90+deg -> 0
                 // Maybe randomly lose vision for foliages
                 // Pose higher than half will reduce the change
-                if (UnityEngine.Random.Range(0f, 1.05f) < Mathf.Clamp01(disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(1.2f - poseFactor))) // Among bushes, from afar
+                if (UnityEngine.Random.Range(0f, 1.05f) < Mathf.Clamp01(disFactor * foliageImpact * ThatsLitPlugin.FoliageImpactScale.Value * Mathf.Clamp01(1.35f - poseFactor))) // Among bushes, from afar
                 {
                     __result *= 10f + rand2 * 10;
                 }
@@ -467,7 +480,7 @@ namespace ThatsLit
                     if (factor < 0 && __instance.Owner.NightVision.UsingNow)
                     {
                         if (factor < -0.85f)
-                            factor *= UnityEngine.Random.Range(0.5f, 0.8f); // It's really dark, slightly scale down
+                            factor *= UnityEngine.Random.Range(0.4f, 0.75f); // It's really dark, slightly scale down
                         else if (factor < -0.7f)
                             factor *= UnityEngine.Random.Range(0.25f, 0.45f); // It's quite dark, scale down
                         else if (factor < 0)
