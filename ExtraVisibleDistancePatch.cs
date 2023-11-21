@@ -25,8 +25,15 @@ namespace ThatsLit
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
             if (mainPlayer.scoreCalculator == null) return true;
 
-            float delta = __instance.Owner.LookSensor.VisibleDist * mainPlayer.scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value;
-            delta = Mathf.Min(50, delta);
+            float fromLights = 1;
+            if (__instance.Owner.NightVision.UsingNow && __instance.Owner.NightVision.NightVisionItem.Template.Mask != EFT.InventoryLogic.NightVisionComponent.EMask.Thermal)
+            {
+                if (mainPlayer?.scoreCalculator?.irLight?? false) fromLights = 2f;
+                else if (mainPlayer?.scoreCalculator?.irLaser?? false) fromLights = 1.7f;
+            }
+
+            float delta = __instance.Owner.LookSensor.VisibleDist * mainPlayer.scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * fromLights;
+            delta = Mathf.Min(75, delta);
 
             addVisibility += UnityEngine.Random.Range(delta * 0.2f, delta);
             return true;
