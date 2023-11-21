@@ -52,9 +52,7 @@ namespace ThatsLit.Components
             }
         }
 
-#if DEBUG_DETAILS
         static string lastLogged;
-#endif
         internal static void CalculateDetailScore (string name, int num, out float prone, out float crouch)
         {
             prone = 0;
@@ -128,17 +126,17 @@ namespace ThatsLit.Components
                 prone = 0.007f * num;
                 crouch = 0.006f * num;
             }
-#if DEBUG_DETAILS
+
             else if (name.EndsWith("e9cd39")) {} // rock
-            else
+            else if (ThatsLitPlugin.DebugInfo.Value)
             {
                 if (Time.frameCount % 47 == 0 && name != lastLogged)
                 {
-                    NotificationManagerClass.DisplayWarningNotification(name);
+                    NotificationManagerClass.DisplayWarningNotification(string.Format("That's Lit Debug: Missing terrain detail: {0}", name));
                     lastLogged = name;
                 }
             }
-#endif
+
 
                 // I REALLY DONT WANT TO CALL SUBSTRING HERE
                 // switch (string.Intern(name.Substring(name.Length - 6, 6)))

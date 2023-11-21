@@ -295,7 +295,7 @@ namespace ThatsLit
 
 
                         detailScore *= 1f + disFactor / 2f; // At 110m+, 1.5x effective
-                        if (canSeeLight) detailScore /= 2 - disFactor; // At 110m+, lights does not impact
+                        if (canSeeLight) detailScore /= 2f - disFactor; // Lights impact less from afar
 
                         switch (caution)
                         {
