@@ -79,43 +79,48 @@ namespace ThatsLit
 
                 var dis = eyeToEnemyBody.magnitude;
                 float disFactor = 0;
-                bool seenWithThermal = false;
+                bool inThermalView = false;
+                bool inNVGView = false;
 
 
-                if (__instance.Owner.NightVision.UsingNow
-                    && __instance.Owner.NightVision.NightVisionItem.Template.Mask == NightVisionComponent.EMask.Thermal)
+                if (__instance.Owner.NightVision.UsingNow) // Goggles
                 {
-                    seenWithThermal = true;
+                    if (__instance.Owner.NightVision.NightVisionItem.Template.Mask == NightVisionComponent.EMask.Thermal) inThermalView = true;
+                    else inNVGView = true;
                 }
-                else if (UnityEngine.Random.Range(__instance.Owner.Mover.IsMoving? -4f : -1f, 1f) > Mathf.Clamp01(visionAngleDelta / 15f))
+                else if (UnityEngine.Random.Range(__instance.Owner.Mover.IsMoving? -4f : -1f, 1f) > Mathf.Clamp01(visionAngleDelta / 15f)) // Scopes
                 {
                     EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentScope?.Mod;
-                    if (rand1 < 0.1f) sightMod?.SetScopeMode(UnityEngine.Random.Range(0, sightMod.ScopesCount), UnityEngine.Random.Range(0, 2));
-                    float currentZoom = sightMod?.GetCurrentOpticZoom() ?? 1;
-
-
-                    if (sightMod?.Item?.GetItemComponent<ThermalVisionComponent>() != null
-                     && visionAngleDelta <= 60f / currentZoom
-                     && !__instance.Owner.NightVision.UsingNow)
+                    if (sightMod != null)
                     {
-                        disFactor = 0;
-                        seenWithThermal = true;
-                    }
-                    else if (dis > 20)
-                    {
+                        if (rand1 < 0.1f) sightMod?.SetScopeMode(UnityEngine.Random.Range(0, sightMod.ScopesCount), UnityEngine.Random.Range(0, 2));
+                        float currentZoom = sightMod?.GetCurrentOpticZoom() ?? 1;
                         if (currentZoom == 0) currentZoom = 1;
 
-                        if (visionAngleDelta > 60f / currentZoom || __instance.Owner.NightVision.UsingNow)
-                            currentZoom = 1; // AIs using NVGs does not get the scope buff (Realism style)
-        
-                        // Recalculate
-                        disFactor = Mathf.Clamp01((dis / currentZoom - 10) / 100f);
+                        if (!__instance.Owner.NightVision.UsingNow // AIs using NVGs does not get the scope buff (Realism style)
+                        && visionAngleDelta <= 60f / currentZoom) // Scoped?
+                        {
+                            disFactor = Mathf.Clamp01((dis / currentZoom - 10) / 100f);
+                            if (Utility.IsThermalScope(sightMod.Item.TemplateId))
+                                inThermalView = true;
+                            else if (Utility.IsNightVisionScope(sightMod.Item.TemplateId))
+                                inNVGView = true;
+                        }
+                        else if (dis > 20) // Regular
+                        {
+                            disFactor = Mathf.Clamp01((dis - 10) / 100f);
+                        }
+                    }
+                    else if (dis > 20) // Regular
+                    {
+                        disFactor = Mathf.Clamp01((dis - 10) / 100f);
                     }
                 }
-                else if (dis > 20)
+                else if (dis > 20) // Regular
                 {
                     disFactor = Mathf.Clamp01((dis - 10) / 100f);
                 }
+                
                 // var disFactorLong = Mathf.Clamp01((dis - 10) / 300f);
                 // To scale down various sneaking bonus
                 // The bigger the distance the bigger it is, capped to 110m
@@ -126,14 +131,15 @@ namespace ThatsLit
                 // disFactorLong = Mathf.Lerp(0, disFactorLong, sinceSeen / (8f * (1.2f - disFactorLong)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
 
 
-                if (mainPlayer.fog > 0) __result *= 1 + ((dis - 10f) / 10f + rand1) * Mathf.Clamp01(mainPlayer.fog / 0.1f);
+                if (mainPlayer.fog > 0) __result *= 1 + 5 * (dis - 10f) / 10f * Mathf.Clamp01(mainPlayer.fog / 0.1f);
                 // Considering 0.1 fogginess blocks 10m+ view in 3.7+
-                // 10m  @0.087f -> 1 ~ 1.87x
-                // 15m  @0.087f -> 1.435 ~ 2.305x
-                // 100m @0.087f -> 8.83 ~ 9.7x
-                // 10m  @0.012f -> 1 ~ 1.12x
-                // 15m  @0.012f -> 1.006 ~ 1.018x
-                // 100m @0.012f -> 1.108 ~ 1.12x
+                // 0m  @0.087f -> 1x
+                // 10m  @0.087f -> 1x
+                // 15m  @0.087f -> 1.435x
+                // 100m @0.087f -> 8.83x
+                // 10m  @0.012f -> 1x
+                // 15m  @0.012f -> 1.006x
+                // 100m @0.012f -> 1.108x
 
 
                 // Vector3 EyeToEnemyHead = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.head].Position;
@@ -141,9 +147,9 @@ namespace ThatsLit
                 // var visionAngleToEnemyHead = Vector3.Angle(botVisionDir, EyeToEnemyHead);
 
                 var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
-                if (!canSeeLight && __instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
+                if (!canSeeLight && inNVGView && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
                 var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
-                if (!canSeeLaser && __instance.Owner.NightVision.UsingNow && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
+                if (!canSeeLaser && inNVGView && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
 
                 if (sinceSeen > 15f && !canSeeLight)
                 {
@@ -195,12 +201,12 @@ namespace ThatsLit
                 {
                     score = factor = 0;
                 }
-                else if (seenWithThermal)
-                    score = factor = 1;
+                else if (inThermalView)
+                    score = factor = 1f;
                 else
                 {
                     score = mainPlayer.MultiFrameLitScore; // -1 ~ 1
-                    if (score < 0 && __instance.Owner.NightVision.UsingNow) // The score was not reduced (toward 0) for IR lights, process the score here
+                    if (score < 0 && inNVGView) // The score was not reduced (toward 0) for IR lights, process the score here
                     {
                         if (mainPlayer.scoreCalculator.irLight) score /= 2;
                         else if (mainPlayer.scoreCalculator.irLaser) score /= 1.75f;
@@ -246,7 +252,7 @@ namespace ThatsLit
                 var xyFacingFactor = 0f;
                 var layingVerticaltInVisionFactor = 0f;
                 var detailScore = 0f;
-                if (!seenWithThermal && !mainPlayer.skipDetailCheck)
+                if (!inThermalView && !mainPlayer.skipDetailCheck)
                 {
                     mainPlayer.CalculateDetailScore(-eyeToEnemyBody, dis, visionAngleDeltaVertical, out float scoreLow, out float scoreMid);
                     if (scoreLow > 0.1f || scoreMid > 0.1f)
@@ -338,7 +344,7 @@ namespace ThatsLit
 
                 // BUSH RAT ----------------------------------------------------------------------------------------------------------------
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-                if (!seenWithThermal && mainPlayer.foliage != null && !Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role)
+                if (!inThermalView && mainPlayer.foliage != null && !Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role)
                  && (!__instance.HaveSeen || lastPosDis > 50f || sinceSeen > 300f && lastPosDis > 10f))
                 {
                     float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
@@ -484,7 +490,7 @@ namespace ThatsLit
                     if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight ? 0.3f : 1f); // Darkness will be far more effective from afar
                     else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
                     
-                    if (factor < 0 && __instance.Owner.NightVision.UsingNow)
+                    if (factor < 0 && inNVGView)
                     {
                         if (factor < -0.85f)
                             factor *= UnityEngine.Random.Range(0.4f, 0.75f); // It's really dark, slightly scale down
