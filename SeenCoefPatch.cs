@@ -126,7 +126,16 @@ namespace ThatsLit
                 // disFactorLong = Mathf.Lerp(0, disFactorLong, sinceSeen / (8f * (1.2f - disFactorLong)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
 
 
-                if (rand1 + 0.1f < disFactor * Mathf.Clamp01(mainPlayer.fog / 0.1f)) __result *= 10;
+                if (mainPlayer.fog > 0) __result *= 1 + ((dis - 10f) / 10f + rand1) * Mathf.Clamp01(mainPlayer.fog / 0.1f);
+                // Considering 0.1 fogginess blocks 10m+ view in 3.7+
+                // 10m  @0.087f -> 1 ~ 1.87x
+                // 15m  @0.087f -> 1.435 ~ 2.305x
+                // 100m @0.087f -> 8.83 ~ 9.7x
+                // 10m  @0.012f -> 1 ~ 1.12x
+                // 15m  @0.012f -> 1.006 ~ 1.018x
+                // 100m @0.012f -> 1.108 ~ 1.12x
+
+
                 // Vector3 EyeToEnemyHead = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.head].Position;
                 // Vector3 EyeToEnemyLeg = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.leftLeg].Position;
                 // var visionAngleToEnemyHead = Vector3.Angle(botVisionDir, EyeToEnemyHead);
