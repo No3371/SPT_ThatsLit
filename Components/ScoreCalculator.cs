@@ -664,7 +664,7 @@ namespace ThatsLit.Components
     public class ShorelineScoreCalculator : ScoreCalculator
     {
         protected override float MinBaseAmbienceScore => -0.9f;
-        protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.7f;
+        protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.5f;
         protected override float MinAmbienceLum => 0.008f;
         protected override float MaxAmbienceLum => 0.008f;
         protected override float ThresholdShine { get => 0.5f; }
@@ -672,7 +672,7 @@ namespace ThatsLit.Components
         protected override float ThresholdHighMid { get => 0.2f; }
         protected override float ThresholdMid { get => 0.1f; }
         protected override float ThresholdMidLow { get => 0.025f; }
-        protected override float NonCloudinessBaseAmbienceScoreImpact => 0.2f;
+        protected override float NonCloudinessBaseAmbienceScoreImpact => 0.1f;
         protected override float CalculateSunLightTimeFactor(string locationId, float time)
         {
             if (time >= 5.5 && time < 6.5) // 0 ~ 0.1
