@@ -47,7 +47,7 @@ namespace ThatsLit.Patches.Vision
             if (__instance.Person.IsYourPlayer && value && Time.time - __instance.PersonalSeenTime > 10f && (!__instance.HaveSeen || (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 49f))
             {
                 if (Singleton<ThatsLitMainPlayerComponent>.Instance) Singleton<ThatsLitMainPlayerComponent>.Instance.encounter++;
-                __state = new State () { triggered = true, unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f * UnityEngine.Random.Range(1, 2f), sprinting = __instance.Owner.Mover.Sprinting, angle = angle };
+                __state = new State () { triggered = true, unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 45f * UnityEngine.Random.Range(1, 2f), sprinting = __instance.Owner.Mover.Sprinting, angle = angle };
             }
             return true;
         }
@@ -66,12 +66,12 @@ namespace ThatsLit.Patches.Vision
                 }
                 else if (__state.unexpected)
                 {
-                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.2f) * Mathf.Clamp01(__state.angle/15f));
+                    __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.15f) * Mathf.Clamp01(__state.angle/15f));
                 }
     
                 if (__instance.Owner.AimingData is GClass388 g388 && !__instance.Owner.WeaponManager.ShootController.IsAiming)
                 {
-                    g388.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.2f) * Mathf.Clamp01((__state.angle - 30f)/45f);
+                    g388.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.15f) * Mathf.Clamp01((__state.angle - 30f)/45f);
                 }
             }
         }
