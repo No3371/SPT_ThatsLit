@@ -173,7 +173,7 @@ namespace ThatsLit
                     }
 
                     if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside)
-                        __result *= 1 + rand3 * 50 * Mathf.Clamp01((dis - 10f) / 65f) * Mathf.Clamp01((visionAngleDelta - 20f) / 55f);
+                        __result *= 1 + (rand3 * 25 + (isGoalEnemy? 0f : 1f)) * disFactor * Mathf.Clamp01((visionAngleDelta - (isGoalEnemy? 25f : 10f)) / 45f);
                 }
 
 
