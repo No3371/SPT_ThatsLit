@@ -25,7 +25,7 @@ namespace ThatsLit
         public const int TarkovVersion = 26535;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.3.0";
+        public const string ModVersion = "1.373.1";
 
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.7.1";
@@ -55,50 +55,50 @@ namespace ThatsLit
             //ScoreOffset = Config.Bind(category, "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
-            EnabledLighting = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order = 100 }));
-            DarknessImpactScale = Config.Bind(category, "Darkness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players slower due to darkness.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 95 }));
-            BrightnessImpactScale = Config.Bind(category, "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 94 }));
-            LitVisionDistanceScale = Config.Bind(category, "Lit Vision Distance Scale", 1f, new ConfigDescription("Scale how AI noticing players from further due to getting lit (from non-ambience lighting).", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 93 }));
-            EnableFactoryNight = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
-            EnableLighthouse = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
-            EnableShoreline = Config.Bind(category, "Shoreline", true, "Enable darkness/brightness on the map.");
-            EnableReserve = Config.Bind(category, "Reserve", true, "Enable darkness/brightness on the map.");
-            EnableWoods = Config.Bind(category, "Woods", true, "Enable darkness/brightness on the map.");
-            EnableInterchange = Config.Bind(category, "Interchange", true, "Enable darkness/brightness on the map.");
-            EnableCustoms = Config.Bind(category, "Customs", true, "Enable darkness/brightness on the map.");
-            EnableStreets = Config.Bind(category, "Streets", true, "Enable darkness/brightness on the map.");
+            EnabledLighting            = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order                                                              = 100 }));
+            DarknessImpactScale        = Config.Bind(category, "Darkness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players slower due to darkness.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
+            BrightnessImpactScale      = Config.Bind(category, "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
+            LitVisionDistanceScale     = Config.Bind(category, "Lit Vision Distance Scale", 1f, new ConfigDescription("Scale how AI noticing players from further due to getting lit (from non-ambience lighting).", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 93 }));
+            EnableFactoryNight         = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
+            EnableLighthouse           = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
+            EnableShoreline            = Config.Bind(category, "Shoreline", true, "Enable darkness/brightness on the map.");
+            EnableReserve              = Config.Bind(category, "Reserve", true, "Enable darkness/brightness on the map.");
+            EnableWoods                = Config.Bind(category, "Woods", true, "Enable darkness/brightness on the map.");
+            EnableInterchange          = Config.Bind(category, "Interchange", true, "Enable darkness/brightness on the map.");
+            EnableCustoms              = Config.Bind(category, "Customs", true, "Enable darkness/brightness on the map.");
+            EnableStreets              = Config.Bind(category, "Streets", true, "Enable darkness/brightness on the map.");
 
-            category = "3. Encountering Patch";
-            EnabledEncountering = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This randomly nerf AIs a bit at the moment they encounter you, especially when they are sprinting.", null, new ConfigurationManagerAttributes() { Order = 100 }));
-            VagueHintChance = Config.Bind(category, key: "Vague Hint Chance", 0.6f, "The chance to only tell an AI it's spotted when you are set to be visible to an AI but it's not facing your direction.");
+            category                   = "3. Encountering Patch";
+            EnabledEncountering        = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This randomly nerf AIs a bit at the moment they encounter you, especially when they are sprinting.", null, new ConfigurationManagerAttributes() { Order                          = 100 }));
+            VagueHintChance            = Config.Bind(category, key: "Vague Hint Chance", 0.6f, "The chance to only tell an AI it's spotted when you are set to be visible to an AI but it's not facing your direction.");
 
-            category = "3. Grasses";
-            EnabledGrasses = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order = 100 }));
+            category                   = "3. Grasses";
+            EnabledGrasses             = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
 
-            category = "5. Tweaks";
+            category                   = "5. Tweaks";
             GlobalRandomOverlookChance = Config.Bind(category,
                                                      "Global Random Overlook Chance",
                                                      0.01f,
                                                      new ConfigDescription("The chance for all AIs to simply overlook in 1 vision check.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 100 }));
-            FoliageImpactScale = Config.Bind(category,
+            FoliageImpactScale         = Config.Bind(category,
                                              "Foliage Impact Scale",
                                              1f,
                                              new ConfigDescription("Scale the strength of extra chance to be overlooked from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 100 }));
-            FinalOffset = Config.Bind(category, "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa.");
-            IncludeBosses = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss.");
+            FinalOffset                = Config.Bind(category, "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa.");
+            IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss.");
 
-            category = "6. Info";
-            ScoreInfo = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
+            category                   = "6. Info";
+            ScoreInfo                  = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
 
-            category = "7. Performance";
-            LessFoliageCheck = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
-            LessEquipmentCheck = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
-            LowResMode = Config.Bind(category, "Low Res Mode", false, "Can reduce CPU time of calculation, may reduce lighting detection accuracy.");
+            category                   = "7. Performance";
+            LessFoliageCheck           = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
+            LessEquipmentCheck         = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
+            LowResMode                 = Config.Bind(category, "Low Res Mode", false, "Can reduce CPU time of calculation, may reduce lighting detection accuracy.");
 
-            category = "8. Debug";
-            DebugInfo = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
-            DebugTexture = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            EnableHideout = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
+            category                   = "8. Debug";
+            DebugInfo                  = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
+            DebugTexture               = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
+            EnableHideout              = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
             // DevMode = Config.Bind(category, "Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             // DevModeInvisible = Config.Bind(category, "Dev Mode Invisible", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             // NoGPUReq = Config.Bind(category, "NoGPUReq", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
