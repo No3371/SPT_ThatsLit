@@ -59,7 +59,12 @@ namespace ThatsLit.Components
         {
             prone = 0;
             crouch = 0;
-            if (name.Length < 6) return;
+            if (num == 0)
+            {
+                prone = 0;
+                crouch = 0;
+                return;
+            }
 
             if (name.EndsWith("e2eb60")
              || name.EndsWith("df6e82")
@@ -129,7 +134,7 @@ namespace ThatsLit.Components
             {
                 if (Time.frameCount % 47 == 0 && name != lastLogged)
                 {
-                    EFT.UI.ConsoleScreen.LogWarning(name);
+                    NotificationManagerClass.DisplayWarningNotification(name);
                     lastLogged = name;
                 }
             }

@@ -94,7 +94,7 @@ namespace ThatsLit.Components
             if (foliageBonus > foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, Time.fixedDeltaTime);
             else if (foliageBonus < foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, 0.25f);
 
-            if (player.recentDetailCount3x3 >= 50 && detailBonusSmooth < 1f) detailBonusSmooth += Time.fixedDeltaTime; 
+            if (player.recentDetailCount3x3 >= 50 && detailBonusSmooth < 1f) detailBonusSmooth = Mathf.Clamp01(detailBonusSmooth + Time.fixedDeltaTime);
             else detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, 0, 0.3f);
 
             ambienceScore -= foliageBonusSmooth;
