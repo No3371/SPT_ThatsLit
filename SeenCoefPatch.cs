@@ -131,7 +131,8 @@ namespace ThatsLit
                 // disFactorLong = Mathf.Lerp(0, disFactorLong, sinceSeen / (8f * (1.2f - disFactorLong)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
 
 
-                if (mainPlayer.fog > 0) __result *= 1 + 10 * (dis - 10f) / 10f * Mathf.Clamp01(mainPlayer.fog / 0.1f);
+                if (mainPlayer.fog > 0 && dis > 15) __result *= 1 + (dis - 15f) * Mathf.Clamp01(mainPlayer.fog / 0.1f);
+                // 10 -> 15 as not tested
                 // Considering 0.1 fogginess blocks 10m+ view in 3.7+
                 // 0m  @0.087f -> 1x
                 // 10m  @0.087f -> 1x
