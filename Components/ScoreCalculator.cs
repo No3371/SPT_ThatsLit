@@ -453,9 +453,9 @@ namespace ThatsLit.Components
                 return 0.8f - 0.8f * GetTimeProgress(time, 18, 20);
             else if (time >= 20 && time < 21.5f) // 0.3 ~ 0
                 return 0.3f - 0.3f * GetTimeProgress(time, 20, 21.5f);
-            else if (time >= 0 && time < 2) // 0 ~ 0.1
-                return 0.1f * GetTimeProgress(time, 0, 2);
-            else if (time >= 2 && time < 3) // 0.1
+            else if (time >= 22 && time < 24) // 0 ~ 0.1
+                return 0.1f * GetTimeProgress(time, 22, 24);
+            else if (time >= 0 && time < 3) // 0 ~ 0.1
                 return 0.1f;
             else if (time >= 3 && time < 5) // 0.1 ~ 0
                 return 0.1f - 0.1f * GetTimeProgress(time, 3, 5);
@@ -622,9 +622,9 @@ namespace ThatsLit.Components
                 return 0.8f - 0.45f * GetTimeProgress(time, 18, 20f);
             else if (time >= 20 && time < 21.5f)
                 return 0.35f - 0.35f * GetTimeProgress(time, 20, 21.5f);
-            else if (time >= 0 && time < 2) // 0 ~ 0.1
-                return 0.1f * GetTimeProgress(time, 0, 2);
-            else if (time >= 2 && time < 3) // 0.1
+            else if (time >= 22 && time < 24) // 0 ~ 0.1
+                return 0.1f * GetTimeProgress(time, 22, 24);
+            else if (time >= 0 && time < 3) // 0 ~ 0.1
                 return 0.1f;
             else if (time >= 3 && time < 5) // 0.1 ~ 0
                 return 0.1f - 0.1f * GetTimeProgress(time, 3, 5);
@@ -722,43 +722,15 @@ namespace ThatsLit.Components
                 result = 0.8f - 0.4f * GetTimeProgress(time, 18, 20);
             else if (time >= 20 && time < 21.5f) // 0.3 ~ 0
                 result = 0.3f - 0.3f * GetTimeProgress(time, 20, 21.5f);
-            else if (time >= 0 && time < 2) // 0 ~ 0.1
-                result = 0.1f * GetTimeProgress(time, 0, 2);
-            else if (time >= 2 && time < 3) // 0.1
-                result = 0.1f;
+            else if (time >= 22 && time < 24) // 0 ~ 0.1
+                return 0.1f * GetTimeProgress(time, 22, 24);
+            else if (time >= 0 && time < 3) // 0 ~ 0.1
+                return 0.1f;
             else if (time >= 3 && time < 5) // 0.1 ~ 0
                 result = 0.1f * GetTimeProgress(time, 3, 5);
             else result = 0;
             return result;
         }
-    }
-
-    public class DayFactoryScoreCalculator : ScoreCalculator
-    {
-        protected override float MinBaseAmbienceScore => 0;
-        protected override float MaxMoonlightScore { get => 0; }
-        protected override float MaxSunlightScore { get => 0; }
-        protected override float MinAmbienceLum { get => 0.1f; }
-        protected override float MaxAmbienceLum { get => 0.1f; }
-        protected override float ThresholdShine { get => 0.8f; }
-        protected override float ThresholdHigh { get => 0.5f; }
-        protected override float ThresholdHighMid { get => 0.25f; }
-        protected override float ThresholdMid { get => 0.13f; }
-        protected override float ThresholdMidLow { get => 0.06f; }
-        protected override float ThresholdLow { get => 0.02f; }
-
-        protected override void GetPixelScores(float tlf, out float scoreShine, out float scoreHigh, out float scoreHighMid, out float scoreMid, out float scoreMidLow, out float scoreLow, out float scoreDark)
-        {
-            scoreShine = 5f;
-            scoreHigh = 1.5f;
-            scoreHighMid = 0.8f;
-            scoreMid = 0.5f;
-            scoreMidLow = 0.2f;
-            scoreLow = 0.1f;
-            scoreDark = 0;
-        }
-        protected override float GetMapAmbienceCoef(string locationId, float time) => 0;
-        protected override float CalculateMoonLight(string locationId, float time, float cloudiness) => 0;
     }
 
     public class NightFactoryScoreCalculator : ScoreCalculator
