@@ -181,6 +181,7 @@ namespace ThatsLit.Components
             if (Time.frameCount % 47 == 0) scoreRaw4 = lumScore + ambienceScore;
 
             litScoreFactor = Mathf.Pow(Mathf.Clamp(lumScore, 0, 2f) / 2f, 2); // positive
+            litScoreFactor /= 1 + Mathf.Max(ambienceScore, 0);
             lumScore -= lumScore * 0.25f * Mathf.Clamp01(ambienceScore); // When ambience is already above 0, reduce lumScore contribution
             lumScore += ambienceScore;
             lumScore = Mathf.Clamp(lumScore, -1, 1);
