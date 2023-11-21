@@ -26,10 +26,14 @@ namespace ThatsLit
             if (mainPlayer.scoreCalculator == null) return true;
 
             float fromLights = 1;
-            if (__instance.Owner.NightVision.UsingNow && __instance.Owner.NightVision.NightVisionItem.Template.Mask != EFT.InventoryLogic.NightVisionComponent.EMask.Thermal)
+            if (mainPlayer.scoreCalculator.frame0.multiFrameLitScore < 0)
             {
-                if (mainPlayer?.scoreCalculator?.irLight?? false) fromLights = 2f;
-                else if (mainPlayer?.scoreCalculator?.irLaser?? false) fromLights = 1.7f;
+                if (__instance.Owner.NightVision.UsingNow && __instance.Owner.NightVision.NightVisionItem?.Template?.Mask != EFT.InventoryLogic.NightVisionComponent.EMask.Thermal)
+                {
+                    if (mainPlayer?.scoreCalculator?.irLight?? false) fromLights = 2f;
+                    else if (mainPlayer?.scoreCalculator?.irLaser?? false) fromLights = 1.7f;
+                }
+                fromLights = Mathf.Lerp(1, fromLights, Mathf.Clamp01(mainPlayer.scoreCalculator.frame0.multiFrameLitScore / -1f));
             }
 
             float delta = __instance.Owner.LookSensor.VisibleDist * mainPlayer.scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * fromLights;
