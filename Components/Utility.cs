@@ -647,6 +647,15 @@ namespace ThatsLit
             }
         }
 
+        internal static void RightAlignedGUILabel (string str)
+        {
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                GUILayout.Label(str);
+            }
+        }
+
         internal static void GUILayoutFoliageMeter(int level)
         {
             if (level <= 0)
