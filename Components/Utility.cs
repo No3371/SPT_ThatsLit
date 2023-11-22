@@ -7,7 +7,7 @@ using EFT;
 using EFT.InventoryLogic;
 using UnityEngine;
 
-namespace ThatsLit.Components
+namespace ThatsLit
 {
     public static class Utility
     {
@@ -469,8 +469,50 @@ namespace ThatsLit.Components
                             break;
                     }
                     break;
+                default:
+                    if (CustomLightAndLaser == null) return;
+                    if (CustomLightAndLaser.TryGetValue((templateId, selectedMode), out var setup))
+                    {
+                        light = setup.light;
+                        lightIsIR = setup.lightIsIR;
+                        laser = setup.laser;
+                        laserIsIR = setup.laserIsIR;
+                    }
+                    break;
             }
         }
+
+        static Dictionary<(string, int), (bool light, bool lightIsIR, bool laser, bool laserIsIR)> CustomLightAndLaser { get; set; }
+        public static void RegisterCustomLightAndLaser (string templateId, int mode, bool light, bool lightIsIR, bool laser, bool laserIsIR)
+        {
+            if (CustomLightAndLaser == null) CustomLightAndLaser = new Dictionary<(string, int), (bool light, bool lightIsIR, bool laser, bool laserIsIR)>();
+            CustomLightAndLaser.Add((templateId, mode), (light, lightIsIR, laser, laserIsIR));
+        }
+        static HashSet<string> CustomNightVisionScopes { get; set; }
+        static HashSet<string> CustomThermalScopes { get; set; }
+        public static void RegisterCustomNightVisionScopes (string templateId)
+        {
+            if (CustomNightVisionScopes == null) CustomNightVisionScopes = new HashSet<string>();
+            CustomNightVisionScopes.Add(templateId);
+        }
+        public static void RegisterCustomThermalScopes (string templateId)
+        {
+            if (CustomThermalScopes == null) CustomThermalScopes = new HashSet<string>();
+            CustomThermalScopes.Add(templateId);
+        }
+// void RegisterExample ()
+// {
+//     Type type = Type.GetType("ThatsLit.Utility, ThatsLit");
+//     if (type == null)
+//         return;
+//     var m = type.GetMethod("RegisterCustomLightAndLaser"); // or RegisterCustomNightVisionScopes, RegisterCustomThermalScopes
+//     if (m == null)
+//     {
+//         LogWarning("ThatsLit endpoint not found.");
+//         return;
+//     }
+//     m.Invoke(null, new object[] { templateId, mode, light, lightIsIR, laser, laserIsIR });
+// }
 
         internal static bool IsNightVisionScope (string templateId)
         {
@@ -478,7 +520,7 @@ namespace ThatsLit.Components
             {
                 "5b3b6e495acfc4330140bd88" => true,
                 "5a7c74b3e899ef0014332c29" => true,
-                _ => false
+                _ => CustomNightVisionScopes?.Contains(templateId)?? false
             };
     // "_id": "5b3b6e495acfc4330140bd88",
     // "_name": "scope_base_armasight_vulcan_gen3_bravo_mg_3,5x",
@@ -496,7 +538,7 @@ namespace ThatsLit.Components
                 "5d1b5e94d7ad1a2b865a96b0" => true,
                 "606f2696f2cb2e02a42aceb1" => true,
                 "609bab8b455afd752b2e6138" => true,
-                _ => false
+                _ => CustomThermalScopes?.Contains(templateId)?? false
             };
             // THERMAL
 
