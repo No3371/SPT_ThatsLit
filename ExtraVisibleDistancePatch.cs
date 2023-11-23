@@ -25,18 +25,19 @@ namespace ThatsLit
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
             if (mainPlayer.scoreCalculator == null) return true;
 
-            float fromLights = 1;
+            float fromNVG = 1;
             if (mainPlayer.scoreCalculator.frame0.multiFrameLitScore < 0)
             {
                 if (__instance.Owner.NightVision.UsingNow && __instance.Owner.NightVision.NightVisionItem?.Template?.Mask != EFT.InventoryLogic.NightVisionComponent.EMask.Thermal)
                 {
-                    if (mainPlayer?.scoreCalculator?.irLight?? false) fromLights = 2f;
-                    else if (mainPlayer?.scoreCalculator?.irLaser?? false) fromLights = 1.7f;
+                    if (mainPlayer?.scoreCalculator?.irLight?? false) fromNVG = 3f;
+                    else if (mainPlayer?.scoreCalculator?.irLaser?? false) fromNVG = 2.5f;
+                    else fromNVG = 2;
                 }
-                fromLights = Mathf.Lerp(1, fromLights, Mathf.Clamp01(mainPlayer.scoreCalculator.frame0.multiFrameLitScore / -1f));
+                fromNVG = Mathf.Lerp(1, fromNVG, Mathf.Clamp01(mainPlayer.scoreCalculator.frame0.multiFrameLitScore / -1f));
             }
 
-            float delta = __instance.Owner.LookSensor.VisibleDist * mainPlayer.scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * fromLights;
+            float delta = __instance.Owner.LookSensor.VisibleDist * mainPlayer.scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * fromNVG;
             delta = Mathf.Min(75, delta);
 
             addVisibility += UnityEngine.Random.Range(delta * 0.2f, delta);
