@@ -23,6 +23,7 @@ namespace ThatsLit.Components
 {
     public class ThatsLitMainPlayerComponent : MonoBehaviour
     {
+        public static bool IsDebugSampleFrame { get; set; }
         public bool disabledLit;
         static readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value ? 32 : 64;
         public const int POWER = 3;
@@ -210,6 +211,8 @@ namespace ThatsLit.Components
                 this.enabled = false;
                 return;
             }
+
+            IsDebugSampleFrame = ThatsLitPlugin.DebugInfo.Value && Time.frameCount % 47 == 0;
 
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
             if (!skipDetailCheck && Time.time > lastCheckedDetails + 0.5f)
@@ -439,7 +442,7 @@ namespace ThatsLit.Components
             if (rt) rt.Release();
 
         }
-
+        float litFactorSample, ambScoreSample;
         private void OnGUI()
         {
             if (disabledLit && Time.time - awakeAt < 30f)
@@ -458,7 +461,12 @@ namespace ThatsLit.Components
             }
             if (!ThatsLitPlugin.DebugInfo.Value) return;
             scoreCalculator?.CalledOnGUI();
-            GUILayout.Label(string.Format(" IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore));
+            if (IsDebugSampleFrame)
+            {
+                litFactorSample = scoreCalculator?.litScoreFactor ?? 0;
+                ambScoreSample = scoreCalculator?.frame0.ambienceScore ?? 0;
+            }
+            GUILayout.Label(string.Format(" IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) AMB: {5:0.00} LIT: {6:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore, ambScoreSample, litFactorSample));
             //GUILayout.Label(text: "PIXELS:");
             //GUILayout.Label(lastValidPixels.ToString());
             GUILayout.Label(string.Format(" AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));
