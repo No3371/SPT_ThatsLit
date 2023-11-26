@@ -88,7 +88,8 @@ namespace ThatsLit
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss.");
 
             category                   = "6. Info";
-            ScoreInfo                  = Config.Bind(category, "Info", true, "The info shown at the upper left corner.");
+            ScoreInfo                  = Config.Bind(category, "Lighting Info", true, "Shown at the upper left corner.");
+            TerrainInfo                  = Config.Bind(category, "Terrain Info", true, "Gives a hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.");
 
             category                   = "7. Performance";
             LessFoliageCheck           = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
@@ -125,6 +126,7 @@ namespace ThatsLit
         }
 
         public static ConfigEntry<bool> ScoreInfo { get; private set; }
+        public static ConfigEntry<bool> TerrainInfo { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> EnabledMod { get; private set; }

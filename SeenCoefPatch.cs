@@ -255,8 +255,8 @@ namespace ThatsLit
                 var detailScore = 0f;
                 if (!inThermalView && !mainPlayer.skipDetailCheck)
                 {
-                    mainPlayer.CalculateDetailScore(-eyeToEnemyBody, dis, visionAngleDeltaVertical, out float scoreLow, out float scoreMid);
-                    if (scoreLow > 0.1f || scoreMid > 0.1f)
+                    mainPlayer.CalculateDetailScore(-eyeToEnemyBody, dis, visionAngleDeltaVertical, out float scoreProne, out float scoreRegular);
+                    if (scoreProne > 0.1f || scoreRegular > 0.1f)
                     {
                         if (isInPronePose) // Deal with player laying on slope and being very visible even with grasses
                         {
@@ -287,11 +287,11 @@ namespace ThatsLit
                             else if (layingVerticaltInVisionFactor <= 0 && layingVerticaltInVisionFactor >= -90f) layingVerticaltInVisionFactor = layingVerticaltInVisionFactor / -15f; // "-> /"
                             else layingVerticaltInVisionFactor = 0; // other cases grasses should take effect
 
-                            detailScore = scoreLow * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
+                            detailScore = scoreProne * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
                         }
                         else
                         {
-                            detailScore = scoreMid / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
+                            detailScore = scoreRegular / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
                         }
 
 

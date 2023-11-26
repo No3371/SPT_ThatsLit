@@ -700,6 +700,50 @@ namespace ThatsLit
             }
         }
 
+        internal static void GUILayoutTerrainMeter(int level)
+        {
+            if (level <= 0)
+            {
+                GUILayout.Label("  TERRAIN ▱▱▱▱▱▱▱▱▱▱");
+                return;
+            }
+            if (level >= 10)
+            {
+                GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▰▰▰▰");
+                return;
+            }
+            switch (level)
+            {
+                case 1:
+                    GUILayout.Label("  TERRAIN ▰▱▱▱▱▱▱▱▱▱");
+                    break;
+                case 2:
+                    GUILayout.Label("  TERRAIN ▰▰▱▱▱▱▱▱▱▱");
+                    break;
+                case 3:
+                    GUILayout.Label("  TERRAIN ▰▰▰▱▱▱▱▱▱▱");
+                    break;
+                case 4:
+                    GUILayout.Label("  TERRAIN ▰▰▰▰▱▱▱▱▱▱");
+                    break;
+                case 5:
+                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▱▱▱▱▱");
+                    break;
+                case 6:
+                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▱▱▱▱");
+                    break;
+                case 7:
+                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▰▱▱▱");
+                    break;
+                case 8:
+                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▰▰▱▱");
+                    break;
+                case 9:
+                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▰▰▰▱");
+                    break;
+            }
+        }
+
         public static string DetermineDir (Vector3 dir)
         {
             var dirFlat = (new Vector2 (dir.x, dir.z)).normalized;
