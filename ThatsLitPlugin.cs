@@ -69,8 +69,14 @@ namespace ThatsLit
             EnableStreets              = Config.Bind(category, "Streets", true, "Enable darkness/brightness on the map.");
 
             category                   = "3. Encountering Patch";
-            EnabledEncountering        = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This randomly nerf AIs a bit at the moment they encounter you, especially when they are sprinting.", null, new ConfigurationManagerAttributes() { Order                          = 100 }));
-            VagueHintChance            = Config.Bind(category, key: "Vague Hint Chance", 0.6f, "The chance to only tell an AI it's spotted when you are set to be visible to an AI but it's not facing your direction.");
+            EnabledEncountering        = Config.Bind(category,
+                                                     "Enable",
+                                                     true,
+                                                     new ConfigDescription("Enable the module. This randomly nerf AIs a bit at the moment they encounter you, especially when they are sprinting.", null, new ConfigurationManagerAttributes() { Order = 100 }));
+            VagueHintChance            = Config.Bind(category,
+                                                     "Vague Hint Chance",
+                                                     0.6f,
+                                                     new ConfigDescription("The chance to only tell an AI it's spotted when you are set to be visible to an AI but it's not facing your direction.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
 
             category                   = "4. Grasses";
             EnabledGrasses             = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
