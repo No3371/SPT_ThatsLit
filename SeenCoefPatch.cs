@@ -553,7 +553,8 @@ namespace ThatsLit
 
                 if (__result > original)
                 {
-                    __result = Mathf.Lerp(__result, original, 1f - Mathf.Clamp01(sinceSeen / UnityEngine.Random.Range(0.075f, 0.15f) + stealthNegation)); // just seen (0s) => original, 0.1s => modified
+                    float lerp = 1f - Mathf.Clamp01(sinceSeen - 0.1f / UnityEngine.Random.Range(0.01f, 0.1f)) - stealthNegation;
+                    __result = Mathf.Lerp(__result, original, Mathf.Clamp01(lerp)); // just seen (0s) => original, 0.1s => modified
                 }
                 // This probably will let bots stay unaffected until losing the visual
 
