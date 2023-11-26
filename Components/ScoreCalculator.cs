@@ -10,7 +10,6 @@ namespace ThatsLit.Components
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
         float scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
-        float lastOutside;
         float foliageBonusSmooth, detailBonusSmooth;
         public ScoreCalculator()
         {
@@ -71,10 +70,8 @@ namespace ThatsLit.Components
             thisFrame.avgLumMultiFrames = (thisFrame.avgLum + frame1.avgLum + frame2.avgLum + frame3.avgLum + frame4.avgLum + frame5.avgLum) / 6f;
             UpdateLumTrackers(thisFrame.avgLumMultiFrames);
 
-            if (!player.MainPlayer.AIData.IsInside) lastOutside = Time.time;
-
             baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
-            ambienceScore = CalculateAmbienceScore(locationId, time, cloud, out sunLightScore, out moonLightScore, Time.time - lastOutside); // The base brightness with sun/moon/cloud
+            ambienceScore = CalculateAmbienceScore(locationId, time, cloud, out sunLightScore, out moonLightScore, Time.time - player.lastOutside); // The base brightness with sun/moon/cloud
 
             float foliageBonus = 0;
             if (player.foliageCount > 9)
@@ -224,7 +221,7 @@ namespace ThatsLit.Components
             }
             GUILayout.Label(string.Format("PIXELS: {0:000}% - {1:000}% - {2:000}% - {3:000}% - {4:000}% - {5:000}% | {6:000}% (AVG Sample)", shinePixelsRatioSample * 100, highLightPixelsRatioSample * 100, highMidLightPixelsRatioSample * 100, midLightPixelsRatioSample * 100, midLowLightPixelsRatioSample * 100, lowLightPixelsRatioSample * 100, darkPixelsRatioSample * 100));
             GUILayout.Label(string.Format("AvgLumMF: {0:0.000} / {1:0.000} ~ {2:0.000} ({3:0.000})", frame0.avgLumMultiFrames, GetMinAmbianceLum(), GetMaxAmbianceLum(), GetAmbianceLumRange()));
-            GUILayout.Label(string.Format("Sun: {0:0.000}/{1:0.000}, Moon: {2:0.000}/{3:0.000}, INDOOR: {4:0.00}", sunLightScore, GetMaxSunlightScore(), moonLightScore, GetMaxMoonlightScore(), Time.time - lastOutside));
+            GUILayout.Label(string.Format("Sun: {0:0.000}/{1:0.000}, Moon: {2:0.000}/{3:0.000}", sunLightScore, GetMaxSunlightScore(), moonLightScore, GetMaxMoonlightScore()));
             GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} (SAMPLE)", scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4));
             
             Utility.GUILayoutDrawAsymetricMeter((int)(frame0.score / 0.0999f));

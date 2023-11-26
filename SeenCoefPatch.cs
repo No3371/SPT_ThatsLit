@@ -181,10 +181,9 @@ namespace ThatsLit
                         __result *= 10 + rand2 * 100;
                     }
 
-                    if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside)
-                        __result *= 1 + (rand3 * 25 + (isGoalEnemy? 0f : rand2 * 5f)) * Mathf.Clamp01(dis / (isGoalEnemy? 100f : 50f)) * Mathf.Clamp01((visionAngleDelta - (isGoalEnemy? 25f : 10f)) / 45f);
+                    if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside && Time.time - mainPlayer.lastOutside > 1f)
+                        __result *= 1 + (rand3 * 25 + (isGoalEnemy? 0f : rand2 * 5f) + Mathf.Clamp01(0.05f * visionAngleDeltaVertical)) * (0.5f * Mathf.Clamp01(dis / (isGoalEnemy? 100f : 50f)) + 0.5f * Mathf.Clamp01((visionAngleDelta - (isGoalEnemy? 25f : 10f)) / 45f));
                 }
-
 
                 float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
                 if (canSeeLight) globalOverlookChance /= 2f;
@@ -568,6 +567,7 @@ namespace ThatsLit
                 }
                 mainPlayer.calced++;
                 mainPlayer.calcedLastFrame++;
+
 
             }
         }

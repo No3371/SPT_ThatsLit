@@ -63,6 +63,7 @@ namespace ThatsLit.Components
         internal int recentDetailCount3x3;
         internal ScoreCalculator scoreCalculator;
         AsyncGPUReadbackRequest gquReq;
+        internal float lastOutside;
         // float benchMark1, benchMark2;
         public void Awake()
         {
@@ -212,6 +213,7 @@ namespace ThatsLit.Components
                 return;
             }
 
+            if (!MainPlayer.AIData.IsInside) lastOutside = Time.time;
             IsDebugSampleFrame = ThatsLitPlugin.DebugInfo.Value && Time.frameCount % 47 == 0;
 
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
