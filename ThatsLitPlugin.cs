@@ -95,6 +95,7 @@ namespace ThatsLit
 
             category                   = "6. Info";
             ScoreInfo                  = Config.Bind(category, "Lighting Info", true, "Shown at the upper left corner.");
+            FoliageInfo                  = Config.Bind(category, "Foliage Info", true, "Gives a hint about surrounding foliage.");
             TerrainInfo                  = Config.Bind(category, "Terrain Info", true, "Gives a hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.");
 
             category                   = "7. Performance";
@@ -133,6 +134,7 @@ namespace ThatsLit
 
         public static ConfigEntry<bool> ScoreInfo { get; private set; }
         public static ConfigEntry<bool> TerrainInfo { get; private set; }
+        public static ConfigEntry<bool> FoliageInfo { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> EnabledMod { get; private set; }
