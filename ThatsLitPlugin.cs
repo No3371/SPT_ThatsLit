@@ -25,7 +25,7 @@ namespace ThatsLit
         public const int TarkovVersion = 26535;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.373.2";
+        public const string ModVersion = "1.373.3";
 
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.7.1";
@@ -51,7 +51,7 @@ namespace ThatsLit
         private void BindConfigs()
         {
             string category = "1. Main";
-            EnabledMod = Config.Bind(category, "Enable", true, "Enable the mod. Can not be turned back on in-raid.");
+            EnabledMod = Config.Bind(category, "Enable", true, "Enable the mod. Most features can't be re-enabled in raids.");
             //ScoreOffset = Config.Bind(category, "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";

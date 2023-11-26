@@ -4,7 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>ThatsLit-$(Configuration)</AssemblyName>
     <LangVersion>8.0</LangVersion>
-    <Version>1.373.1</Version>
+    <Version>1.373.3</Version>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>   
   </PropertyGroup>
 <!-- 
