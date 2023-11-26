@@ -33,6 +33,11 @@ namespace ThatsLit
             WildSpawnType.sectantPriest => true,
             _ => false
         };
+        public static bool IsBossNerfExcluded (WildSpawnType type) => type switch {
+            WildSpawnType.bossTagilla => true,
+            WildSpawnType.followerTagilla => true,
+            _ => false
+        };
 
         internal static float GetInGameDayTime()
         {

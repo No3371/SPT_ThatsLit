@@ -37,7 +37,9 @@ namespace ThatsLit
             //     return;
             // }
             if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value) return;
-            if (!ThatsLitPlugin.IncludeBosses.Value && Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role)) return;
+            WildSpawnType spawnType = __instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault;
+            if ((!ThatsLitPlugin.IncludeBosses.Value && Utility.IsBoss(spawnType))
+             || Utility.IsBossNerfExcluded(spawnType)) return;
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
 
             var original = __result;
