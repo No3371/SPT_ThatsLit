@@ -30,7 +30,6 @@ namespace ThatsLit.Patches.Vision
         {
             __state = default;
             if (!__instance.Person.IsYourPlayer || !value || !__instance.IsVisible || !ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
-            if (Utility.IsBoss(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault)) return true;
             Vector3 look = __instance.Owner.GetPlayer.LookDirection;
             Vector3 to = __instance.Person.Position - __instance.Owner.Position;
             var angle = Vector3.Angle(look, to);
