@@ -20,15 +20,15 @@ namespace ThatsLit
         [PatchPrefix]
         public static bool PatchPrefix(EnemyInfo __instance, KeyValuePair<EnemyPart, EnemyPartData> part, ref float addVisibility)
         {
-            if (!part.Key.Owner.IsYourPlayer || ThatsLitPlugin.LitVisionDistanceScale.Value == 0 || !ThatsLitPlugin.EnabledLighting.Value) return true;
+            if (!ThatsLitPlugin.EnabledMod.Value || !part.Key.Owner.IsYourPlayer || ThatsLitPlugin.LitVisionDistanceScale.Value == 0 || !ThatsLitPlugin.EnabledLighting.Value) return true;
 
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
-            if (mainPlayer.scoreCalculator == null) return true;
+            if (mainPlayer.scoreCalculator == null || __instance.Owner.LookSensor == null) return true;
 
             float fromNVG = 1;
             if (mainPlayer.scoreCalculator.frame0.ambienceScore < 0)
             {
-                if (__instance.Owner.NightVision.UsingNow && __instance.Owner.NightVision.NightVisionItem?.Template?.Mask != EFT.InventoryLogic.NightVisionComponent.EMask.Thermal)
+                if (__instance.Owner.NightVision != null && __instance.Owner.NightVision.UsingNow && __instance.Owner.NightVision.NightVisionItem?.Template?.Mask != EFT.InventoryLogic.NightVisionComponent.EMask.Thermal)
                 {
                     if (mainPlayer?.scoreCalculator?.irLight?? false) fromNVG = 3f;
                     else if (mainPlayer?.scoreCalculator?.irLaser?? false) fromNVG = 2.5f;
