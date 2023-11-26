@@ -665,42 +665,42 @@ namespace ThatsLit
         {
             if (level <= 0)
             {
-                GUILayout.Label("  FOLIAGE ▱▱▱▱▱▱▱▱▱▱");
+                GUILayout.Label("  FOLIAGE  ▱▱▱▱▱▱▱▱▱▱");
                 return;
             }
             if (level >= 10)
             {
-                GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▰▰▰▰");
+                GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▰▰");
                 return;
             }
             switch (level)
             {
                 case 1:
-                    GUILayout.Label("  FOLIAGE ▰▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▱▱▱▱▱▱▱▱▱");
                     break;
                 case 2:
-                    GUILayout.Label("  FOLIAGE ▰▰▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▱▱▱▱▱▱▱▱");
                     break;
                 case 3:
-                    GUILayout.Label("  FOLIAGE ▰▰▰▱▱▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▱▱▱▱▱▱▱");
                     break;
                 case 4:
-                    GUILayout.Label("  FOLIAGE ▰▰▰▰▱▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▱▱▱▱▱▱");
                     break;
                 case 5:
-                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▱▱▱▱▱");
                     break;
                 case 6:
-                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▱▱▱▱");
                     break;
                 case 7:
-                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▰▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▱▱▱");
                     break;
                 case 8:
-                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▰▰▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▱▱");
                     break;
                 case 9:
-                    GUILayout.Label("  FOLIAGE ▰▰▰▰▰▰▰▰▰▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▰▱");
                     break;
             }
         }
@@ -709,42 +709,42 @@ namespace ThatsLit
         {
             if (level <= 0)
             {
-                GUILayout.Label("  TERRAIN ▱▱▱▱▱▱▱▱▱▱");
+                GUILayout.Label("  TERRAIN  ▱▱▱▱▱▱▱▱▱▱");
                 return;
             }
             if (level >= 10)
             {
-                GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▰▰▰▰");
+                GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▰▰");
                 return;
             }
             switch (level)
             {
                 case 1:
-                    GUILayout.Label("  TERRAIN ▰▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▱▱▱▱▱▱▱▱▱");
                     break;
                 case 2:
-                    GUILayout.Label("  TERRAIN ▰▰▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▱▱▱▱▱▱▱▱");
                     break;
                 case 3:
-                    GUILayout.Label("  TERRAIN ▰▰▰▱▱▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▱▱▱▱▱▱▱");
                     break;
                 case 4:
-                    GUILayout.Label("  TERRAIN ▰▰▰▰▱▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▱▱▱▱▱▱");
                     break;
                 case 5:
-                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▱▱▱▱▱");
                     break;
                 case 6:
-                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▱▱▱▱");
                     break;
                 case 7:
-                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▰▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▱▱▱");
                     break;
                 case 8:
-                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▰▰▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▱▱");
                     break;
                 case 9:
-                    GUILayout.Label("  TERRAIN ▰▰▰▰▰▰▰▰▰▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▰▱");
                     break;
             }
         }

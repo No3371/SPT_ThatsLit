@@ -463,7 +463,7 @@ namespace ThatsLit.Components
                 if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
                 if (foliageScore > 0)
                     Utility.GUILayoutFoliageMeter((int)(foliageScore / 0.0999f));
-                if (!skipDetailCheck && terrainScoreHintProne > 0.998f && ThatsLitPlugin.TerrainInfo.Value)
+                if (!skipDetailCheck && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
                     if (MainPlayer.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
                     else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
                 if (Time.time < awakeAt + 10)
