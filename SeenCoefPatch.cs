@@ -347,7 +347,7 @@ namespace ThatsLit
 
                 // BUSH RAT ----------------------------------------------------------------------------------------------------------------
                 /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-                if (!inThermalView && mainPlayer.foliage != null && !Utility.IsBoss(__instance.Owner.Profile.Info.Settings.Role)
+                if (!inThermalView && mainPlayer.foliage != null && !Utility.IsBoss(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault)
                  && (!__instance.HaveSeen || lastPosDis > 50f || sinceSeen > 300f && lastPosDis > 10f))
                 {
                     float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
