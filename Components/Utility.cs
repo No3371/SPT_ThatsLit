@@ -34,8 +34,8 @@ namespace ThatsLit
             _ => false
         };
         public static bool IsBossNerfExcluded (WildSpawnType type) => type switch {
-            WildSpawnType.bossTagilla => true,
-            WildSpawnType.followerTagilla => true,
+            // WildSpawnType.bossTagilla => true,
+            // WildSpawnType.followerTagilla => true,
             _ => false
         };
 
