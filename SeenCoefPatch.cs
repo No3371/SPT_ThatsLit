@@ -62,7 +62,8 @@ namespace ThatsLit
                 bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
                 float stealthNegation = 0;
 
-                Vector3 eyeToEnemyBody = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
+                System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = mainPlayer.MainPlayer.MainParts;
+                Vector3 eyeToEnemyBody = playerParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
 
                 var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
                 bool isInPronePose = __instance.Person.AIData.Player.IsInPronePose;
@@ -85,27 +86,28 @@ namespace ThatsLit
                 bool inNVGView = false;
 
 
-                if (__instance.Owner.NightVision.UsingNow) // Goggles
+                BotNightVisionData nightVision = __instance.Owner.NightVision;
+                bool usingNVG = nightVision?.UsingNow?? false;
+                if (usingNVG) // Goggles
                 {
-                    if (__instance.Owner.NightVision.NightVisionItem.Template.Mask == NightVisionComponent.EMask.Thermal) inThermalView = true;
-                    else inNVGView = true;
+                    if (nightVision.NightVisionItem?.Template?.Mask == NightVisionComponent.EMask.Thermal) inThermalView = true;
+                    else if (nightVision.NightVisionItem?.Template?.Mask != null) inNVGView = true;
                 }
-                else if (UnityEngine.Random.Range(__instance.Owner.Mover.IsMoving? -4f : -1f, 1f) > Mathf.Clamp01(visionAngleDelta / 15f)) // Scopes
+                else if (UnityEngine.Random.Range((__instance.Owner.Mover?.IsMoving?? false)? -4f : -1f, 1f) > Mathf.Clamp01(visionAngleDelta / 15f)) // Scopes
                 {
-                    EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentScope?.Mod;
+                    EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
                     if (sightMod != null)
                     {
-                        if (rand1 < 0.1f) sightMod?.SetScopeMode(UnityEngine.Random.Range(0, sightMod.ScopesCount), UnityEngine.Random.Range(0, 2));
-                        float currentZoom = sightMod?.GetCurrentOpticZoom() ?? 1;
+                        if (rand1 < 0.1f) sightMod.SetScopeMode(UnityEngine.Random.Range(0, sightMod.ScopesCount), UnityEngine.Random.Range(0, 2));
+                        float currentZoom = sightMod.GetCurrentOpticZoom();
                         if (currentZoom == 0) currentZoom = 1;
 
-                        if (!__instance.Owner.NightVision.UsingNow // AIs using NVGs does not get the scope buff (Realism style)
-                        && visionAngleDelta <= 60f / currentZoom) // Scoped?
+                        if (visionAngleDelta <= 60f / currentZoom) // Scoped?  (btw AIs using NVGs does not get the scope buff (Realism style)
                         {
                             disFactor = Mathf.Clamp01((dis / currentZoom - 10) / 100f);
-                            if (Utility.IsThermalScope(sightMod.Item.TemplateId))
+                            if (Utility.IsThermalScope(sightMod.Item?.TemplateId, out float effDis) && dis <= effDis)
                                 inThermalView = true;
-                            else if (Utility.IsNightVisionScope(sightMod.Item.TemplateId))
+                            else if (Utility.IsNightVisionScope(sightMod.Item?.TemplateId))
                                 inNVGView = true;
                         }
                         else if (dis > 20) // Regular
@@ -123,14 +125,17 @@ namespace ThatsLit
                     disFactor = Mathf.Clamp01((dis - 10) / 100f);
                 }
                 
+                if (disFactor > 0)
+                {
                 // var disFactorLong = Mathf.Clamp01((dis - 10) / 300f);
-                // To scale down various sneaking bonus
-                // The bigger the distance the bigger it is, capped to 110m
-                disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0, 50m => 0.16
-                // The disFactor is to scale up effectiveness of various mechanics by distance
-                // Once player is seen, it should be suppressed unless the player is out fo visual for sometime, to prevent interrupting long range fight
-                disFactor = Mathf.Lerp(0, disFactor, sinceSeen / (8f * (1.2f - disFactor)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
+                    // To scale down various sneaking bonus
+                    // The bigger the distance the bigger it is, capped to 110m
+                    disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0, 50m => 0.16
+                    // The disFactor is to scale up effectiveness of various mechanics by distance
+                    // Once player is seen, it should be suppressed unless the player is out fo visual for sometime, to prevent interrupting long range fight
+                    disFactor = Mathf.Lerp(0, disFactor, sinceSeen / (8f * (1.2f - disFactor)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
                 // disFactorLong = Mathf.Lerp(0, disFactorLong, sinceSeen / (8f * (1.2f - disFactorLong)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
+                }
 
 
                 // if (mainPlayer.fog > 0 && dis > 15) __result *= 1 + (dis - 15f) * Mathf.Clamp01(mainPlayer.fog / 0.1f);
@@ -181,7 +186,9 @@ namespace ThatsLit
                         __result *= 10 + rand2 * 100;
                     }
 
-                    if (!__instance.Owner.AIData.IsInside && mainPlayer.MainPlayer.AIData.IsInside && Time.time - mainPlayer.lastOutside > 1f)
+                    bool botIsInside = __instance.Owner.AIData.IsInside;
+                    bool playerIsInside = mainPlayer.MainPlayer.AIData.IsInside;
+                    if (!botIsInside && playerIsInside && Time.time - mainPlayer.lastOutside > 1f)
                         __result *= 1 + (rand3 * 25 + (isGoalEnemy? 0f : rand2 * 5f) + Mathf.Clamp01(0.05f * visionAngleDeltaVertical)) * (0.5f * Mathf.Clamp01(dis / (isGoalEnemy? 100f : 50f)) + 0.5f * Mathf.Clamp01((visionAngleDelta - (isGoalEnemy? 25f : 10f)) / 45f));
                 }
 
@@ -261,8 +268,8 @@ namespace ThatsLit
                     {
                         if (isInPronePose) // Deal with player laying on slope and being very visible even with grasses
                         {
-                            Vector3 playerLegPos = (mainPlayer.MainPlayer.MainParts[BodyPartType.leftLeg].Position + mainPlayer.MainPlayer.MainParts[BodyPartType.rightLeg].Position) / 2f;
-                            var playerLegToHead = mainPlayer.MainPlayer.MainParts[BodyPartType.head].Position - playerLegPos;
+                            Vector3 playerLegPos = (playerParts[BodyPartType.leftLeg].Position + playerParts[BodyPartType.rightLeg].Position) / 2f;
+                            var playerLegToHead = playerParts[BodyPartType.head].Position - playerLegPos;
                             var playerLegToHeadFlattened = new Vector2(playerLegToHead.x, playerLegToHead.z);
                             var playerLegToBotEye = __instance.Owner.MainParts[BodyPartType.head].Position - playerLegPos;
                             var playerLegToBotEyeFlatted = new Vector2(playerLegToBotEye.x, playerLegToBotEye.z);
@@ -528,30 +535,30 @@ namespace ThatsLit
                             __result *= 100;
                     }
                     else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor) __result *= (1f - factor * 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value); // Half the reaction time regardles angle half of the time at 100% score
-                    else if (factor < -0.9f) __result *= 1 - (factor * (2f - cqb - cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
-                    else if (factor < -0.5f) __result *= 1 - (factor * (1.5f - 0.75f * cqb - 0.75f * cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
-                    else if (factor < -0.2f) __result *= 1 - factor * cqb * ThatsLitPlugin.DarknessImpactScale.Value;
-                    else if (factor < 0f) __result *= 1 - factor / 1.5f * ThatsLitPlugin.DarknessImpactScale.Value;
-                    else if (factor > 0f) __result /= 1 + factor / 2f * ThatsLitPlugin.BrightnessImpactScale.Value;
+                    else if (factor < -0.9f) __result *= 1f - (factor * (2f - cqb - cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
+                    else if (factor < -0.5f) __result *= 1f - (factor * (1.5f - 0.75f * cqb - 0.75f * cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
+                    else if (factor < -0.2f) __result *= 1f - factor * cqb * ThatsLitPlugin.DarknessImpactScale.Value;
+                    else if (factor < 0f) __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value;
+                    else if (factor > 0f) __result /= 1f + (factor / 2f) * ThatsLitPlugin.BrightnessImpactScale.Value;
                 }
 
-                if (__instance.Owner.Mover.Sprinting) __result *= 1 + (rand2 / 5f) * Mathf.Clamp01((visionAngleDelta - 25f) / 65f); // When facing away (25~90deg), sprinting bots takes up to 20% longer to spot the player
+                if (__instance.Owner.Mover.Sprinting)
+                    __result *= 1 + (rand2 / 5f) * Mathf.Clamp01((visionAngleDelta - 25f) / 65f); // When facing away (25~90deg), sprinting bots takes up to 20% longer to spot the player
                 else if (!__instance.Owner.Mover.IsMoving)
                 {
                     float delta = __result * (rand4/5f); // When not moving, bots takes up to 20% shorter to spot the player
-                    if (__result > original && __result - delta < original) __result = original;
-                    else __result -= delta;
+                    __result = Mathf.Max(original, __result - delta);
                 }
                 
                 if (poseFactor > 0.45f && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.01f)
                 {
                     float delta = __result * (rand2 / 5f) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.25f); // Depends on the player's speed, bots takes up to 20% shorter to spot the player;
-                    if (__result > original && __result - delta < original) __result = original;
-                    else __result -= delta;
+                    __result = Mathf.Max(original, __result - delta);
                 }
 
-                if (__result > original)
+                if (__result > original) // That's Lit delaying the bot
                 {
+                    // In ~0.2s after being seen, stealth is nullfied (fading between 0.1~0.2)
                     float lerp = 1f - Mathf.Clamp01(sinceSeen - 0.1f / UnityEngine.Random.Range(0.01f, 0.1f)) - stealthNegation;
                     __result = Mathf.Lerp(__result, original, Mathf.Clamp01(lerp)); // just seen (0s) => original, 0.1s => modified
                 }
