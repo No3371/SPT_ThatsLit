@@ -454,7 +454,7 @@ namespace ThatsLit.Components
         {
             if (disabledLit && Time.time - awakeAt < 30f)
             {
-                GUILayout.Label(" [That's Lit] Lit detection on this map is not supported or disabled in configs.");
+                if (!ThatsLitPlugin.HideMapTip.Value) GUILayout.Label(" [That's Lit] Lit detection on this map is not supported or disabled in configs.");
                 if (!ThatsLitPlugin.DebugInfo.Value) return;
             }
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)

@@ -50,14 +50,34 @@ namespace ThatsLit
 
         private void BindConfigs()
         {
-            string category = "1. Main";
+            string category = "0. Readme";
+            Config.Bind(category,
+                        "Performance",
+                        true,
+                        new ConfigDescription("The mod takes away at least several fps. Actual overhead varies from machines to machines, some lose 5, some lose 20. You can try giving up the brightness module if the fps is not acceptable.",
+                                                         null,
+                                                         new ConfigurationManagerAttributes() { ReadOnly = true }));
+            Config.Bind(category,
+                        "Balance",
+                        true,
+                        new ConfigDescription("The mod aims to make AIs reasonable without making it easy. However, SAIN or other mods can change bots, and everyone has different configurations, so you may have different experience than mine with default That's Lit configs. (Quite some people has bots too blind with That's Lit installed) If you have balance issue, consider raising SAIN difficulty (first) or tweaking scales below.",
+                                                         null,
+                                                         new ConfigurationManagerAttributes() { ReadOnly = true }));
+            Config.Bind(category,
+                        "Mechanics",
+                        true,
+                        new ConfigDescription("The mod tries to make everything as intuitive as possible so you can enjoy human-like AIs by just applying common sense. However, EFT's AIs are never designed to be human-like, the mod basically \"imagine up\" some new systems out of data here and there in the game, there are things can't be done, or can't be very accurate. It's best to read the mod description page if you want to make the most out of That's Lit.",
+                                                         null,
+                                                         new ConfigurationManagerAttributes() { ReadOnly = true }));
+
+            category = "1. Main";
             EnabledMod = Config.Bind(category, "Enable", true, "Enable the mod. Most features can't be re-enabled in raids.");
             //ScoreOffset = Config.Bind(category, "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
             EnabledLighting            = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order                                                              = 100 }));
             DarknessImpactScale        = Config.Bind(category, "Darkness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players slower due to darkness.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
-            BrightnessImpactScale      = Config.Bind(category, "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
+            BrightnessImpactScale      = Config.Bind(category, "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", new AcceptableValueRange<float>(0.001f, 1f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
             LitVisionDistanceScale     = Config.Bind(category, "Lit Vision Distance Scale", 1f, new ConfigDescription("Scale how AI noticing players from further under some circumstances. This is designed to compensate low night vision distance from SAIN, you may want to set this to 0 if you don't run SAIN.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 93 }));
             EnableFactoryNight         = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
             EnableLighthouse           = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
@@ -97,6 +117,7 @@ namespace ThatsLit
             ScoreInfo                  = Config.Bind(category, "Lighting Info", true, "Shown at the upper left corner.");
             FoliageInfo                  = Config.Bind(category, "Foliage Info", true, "Gives a hint about surrounding foliage.");
             TerrainInfo                  = Config.Bind(category, "Terrain Info", true, "Gives a hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.");
+            HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, "Hide the reminder about disabled lit detection.");
 
             category                   = "7. Performance";
             LessFoliageCheck           = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
@@ -136,6 +157,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> TerrainInfo { get; private set; }
         public static ConfigEntry<bool> FoliageInfo { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
+        public static ConfigEntry<bool> HideMapTip { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> EnabledMod { get; private set; }
         public static ConfigEntry<bool> EnabledLighting { get; private set; }
