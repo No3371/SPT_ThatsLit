@@ -494,16 +494,16 @@ namespace ThatsLit
             CustomLightAndLaser.Add((templateId, mode), (light, lightIsIR, laser, laserIsIR));
         }
         static HashSet<string> CustomNightVisionScopes { get; set; }
-        static HashSet<string> CustomThermalScopes { get; set; }
+        static Dictionary<string, float> CustomThermalScopes { get; set; }
         public static void RegisterCustomNightVisionScopes (string templateId)
         {
             if (CustomNightVisionScopes == null) CustomNightVisionScopes = new HashSet<string>();
             CustomNightVisionScopes.Add(templateId);
         }
-        public static void RegisterCustomThermalScopes (string templateId)
+        public static void RegisterCustomThermalScopes (string templateId, float effDis)
         {
-            if (CustomThermalScopes == null) CustomThermalScopes = new HashSet<string>();
-            CustomThermalScopes.Add(templateId);
+            if (CustomThermalScopes == null) CustomThermalScopes = new Dictionary<string, float>();
+            CustomThermalScopes.Add(templateId, effDis);
         }
 // void RegisterExample ()
 // {
@@ -533,18 +533,28 @@ namespace ThatsLit
     // "_id": "5a7c74b3e899ef0014332c29",
     // "_name": "scope_dovetail_npz_nspum_3,5x",
         }
-        internal static bool IsThermalScope (string templateId)
+        internal static bool IsThermalScope (string templateId, out float effDis)
         {
-            return templateId switch
+            effDis = 200;
+            switch (templateId)
             {
-                "6478641c19d732620e045e17" => true,
-                "63fc44e2429a8a166c7f61e6" => true,
-                "5a1eaa87fcdbcb001865f75e" => true,
-                "5d1b5e94d7ad1a2b865a96b0" => true,
-                "606f2696f2cb2e02a42aceb1" => true,
-                "609bab8b455afd752b2e6138" => true,
-                _ => CustomThermalScopes?.Contains(templateId)?? false
-            };
+                case "6478641c19d732620e045e17":
+                    return true;
+                case "63fc44e2429a8a166c7f61e6":
+                    return true;
+                case "5a1eaa87fcdbcb001865f75e":
+                    return true;
+                case "5d1b5e94d7ad1a2b865a96b0":
+                    return true;
+                case "606f2696f2cb2e02a42aceb1":
+                    effDis = 5;
+                    return true;
+                case "609bab8b455afd752b2e6138":
+                    return true;
+                default:
+                    return CustomThermalScopes == null? false : CustomThermalScopes.TryGetValue(templateId, out effDis);
+
+            }
             // THERMAL
 
             // "_id": "6478641c19d732620e045e17",
