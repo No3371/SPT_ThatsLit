@@ -6,6 +6,7 @@ using System.Reflection;
 using UnityEngine;
 using Comfort.Common;
 using System.Collections.Generic;
+using EFT.InventoryLogic;
 
 
 namespace ThatsLit
@@ -20,27 +21,57 @@ namespace ThatsLit
         [PatchPrefix]
         public static bool PatchPrefix(EnemyInfo __instance, KeyValuePair<EnemyPart, EnemyPartData> part, ref float addVisibility)
         {
-            if (!ThatsLitPlugin.EnabledMod.Value || !part.Key.Owner.IsYourPlayer || ThatsLitPlugin.LitVisionDistanceScale.Value == 0 || !ThatsLitPlugin.EnabledLighting.Value) return true;
+            if (__instance?.Owner == null
+             || !ThatsLitPlugin.EnabledMod.Value
+             || ThatsLitPlugin.LitVisionDistanceScale.Value == 0
+             || !ThatsLitPlugin.EnabledLighting.Value
+             || Time.frameCount % (__instance.Owner.Id & 7 + 1) != 0) // Transform bot id to 1~7 and reduce and spread the workload to 1/7
+                return true;
+            if (!(part.Key.Owner?.IsYourPlayer ?? false)) return true;
 
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
-            if (mainPlayer.scoreCalculator == null || __instance.Owner.LookSensor == null) return true;
+            if (mainPlayer?.scoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
 
-            float fromNVG = 1;
-            if (mainPlayer.scoreCalculator.frame0.ambienceScore < 0)
+            bool thermalActive = false, nvgActive = false, scope = false;
+            float scopeDis = 0;
+
+            var botNVG = __instance.Owner?.NightVision;
+            if (botNVG?.UsingNow == true)
             {
-                if (__instance.Owner.NightVision != null && __instance.Owner.NightVision.UsingNow && __instance.Owner.NightVision.NightVisionItem?.Template?.Mask != EFT.InventoryLogic.NightVisionComponent.EMask.Thermal)
+                NightVisionComponent.EMask? mask = botNVG.NightVisionItem?.Template?.Mask;
+                thermalActive = mask == EFT.InventoryLogic.NightVisionComponent.EMask.Thermal;
+                nvgActive = mask != null && mask != EFT.InventoryLogic.NightVisionComponent.EMask.Thermal;
+            }
+            else
+            {
+                EFT.InventoryLogic.SightComponent sightMod = __instance.Owner.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
+                if (sightMod != null)
                 {
-                    if (mainPlayer?.scoreCalculator?.irLight?? false) fromNVG = 3f;
-                    else if (mainPlayer?.scoreCalculator?.irLaser?? false) fromNVG = 2.5f;
-                    else fromNVG = 2;
+                    scope = true;
+                    if (Utility.IsThermalScope(sightMod.Item.TemplateId, out scopeDis))
+                        thermalActive = true;
+                    else if (Utility.IsNightVisionScope(sightMod.Item.TemplateId))
+                        nvgActive = true;
                 }
-                fromNVG = Mathf.Lerp(1, fromNVG, Mathf.Clamp01(mainPlayer.scoreCalculator.frame0.ambienceScore / -1f));
             }
 
-            float delta = __instance.Owner.LookSensor.VisibleDist * mainPlayer.scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * fromNVG;
-            delta = Mathf.Min(75, delta);
+            ScoreCalculator scoreCalculator = mainPlayer.scoreCalculator;
+            if (thermalActive)
+            {
+                float compensation = (scope? scopeDis : 200) - __instance.Owner.LookSensor.VisibleDist;
+                addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation;
+            }
+            else if (nvgActive && scoreCalculator.frame0.ambienceScore < 0)
+            {
+                float scale;
+                if (scoreCalculator.irLight) scale = 4f;
+                else if (scoreCalculator.irLaser) scale = 3.5f;
+                else scale = 3;
+                scale = Mathf.Lerp(1, scale, Mathf.Clamp01(scoreCalculator.frame0.ambienceScore / -1f));
 
-            addVisibility += UnityEngine.Random.Range(delta * 0.2f, delta);
+                addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(100, __instance.Owner.LookSensor.VisibleDist * scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale);
+            }
+
             return true;
         }
     }
