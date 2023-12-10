@@ -110,17 +110,17 @@ namespace ThatsLit
                             else if (Utility.IsNightVisionScope(sightMod.Item?.TemplateId))
                                 inNVGView = true;
                         }
-                        else if (dis > 20) // Regular
+                        else if (dis > 10) // Regular
                         {
                             disFactor = Mathf.Clamp01((dis - 10) / 100f);
                         }
                     }
-                    else if (dis > 20) // Regular
+                    else if (dis > 10) // Regular
                     {
                         disFactor = Mathf.Clamp01((dis - 10) / 100f);
                     }
                 }
-                else if (dis > 20) // Regular
+                else if (dis > 10) // Regular
                 {
                     disFactor = Mathf.Clamp01((dis - 10) / 100f);
                 }
