@@ -226,7 +226,7 @@ namespace ThatsLit
             var inv = player?.ActiveSlot?.ContainedItem?.Owner as InventoryControllerClass;
             if (inv == null) return;
 
-            var helmet = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear)?.ContainedItem as GClass2537;
+            var helmet = inv?.Inventory?.Equipment?.GetSlot(EquipmentSlot.Headwear)?.ContainedItem;
 
             if (helmet != null)
             {
