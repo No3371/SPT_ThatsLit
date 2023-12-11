@@ -36,7 +36,7 @@ namespace ThatsLit
             float scopeDis = 0;
 
             var botNVG = __instance.Owner?.NightVision;
-            if (botNVG?.UsingNow == true)
+            if (botNVG?.UsingNow == true) // goggles
             {
                 NightVisionComponent.EMask? mask = botNVG.NightVisionItem?.Template?.Mask;
                 thermalActive = mask == EFT.InventoryLogic.NightVisionComponent.EMask.Thermal;
@@ -59,17 +59,18 @@ namespace ThatsLit
             if (thermalActive)
             {
                 float compensation = (scope? scopeDis : 200) - __instance.Owner.LookSensor.VisibleDist;
-                addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation;
+                if (compensation > 0) addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation * ThatsLitPlugin.LitVisionDistanceScale.Value;
             }
             else if (nvgActive && scoreCalculator.frame0.ambienceScore < 0)
             {
                 float scale;
                 if (scoreCalculator.irLight) scale = 4f;
                 else if (scoreCalculator.irLaser) scale = 3.5f;
-                else scale = 3;
+                else scale = 3f;
                 scale = Mathf.Lerp(1, scale, Mathf.Clamp01(scoreCalculator.frame0.ambienceScore / -1f));
 
-                addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(100, __instance.Owner.LookSensor.VisibleDist * scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale);
+                float extra = __instance.Owner.LookSensor.VisibleDist * scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
+                addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(100, extra);
             }
 
             return true;
