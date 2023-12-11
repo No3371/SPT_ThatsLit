@@ -22,12 +22,12 @@ namespace ThatsLit
         public static bool PatchPrefix(EnemyInfo __instance, KeyValuePair<EnemyPart, EnemyPartData> part, ref float addVisibility)
         {
             if (__instance?.Owner == null
+             || (part.Key?.Owner?.IsYourPlayer ?? false) == false
              || !ThatsLitPlugin.EnabledMod.Value
              || ThatsLitPlugin.LitVisionDistanceScale.Value == 0
              || !ThatsLitPlugin.EnabledLighting.Value
-             || Time.frameCount % (__instance.Owner.Id & 7 + 1) != 0) // Transform bot id to 1~7 and reduce and spread the workload to 1/7
+             || Time.frameCount % ((__instance.Owner.Id & 7) + 1) != 0) // Transform bot id to 1~7 and reduce and spread the workload to 1/7
                 return true;
-            if (!(part.Key.Owner?.IsYourPlayer ?? false)) return true;
 
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
             if (mainPlayer?.scoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
