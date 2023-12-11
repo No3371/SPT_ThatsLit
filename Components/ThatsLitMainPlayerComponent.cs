@@ -120,6 +120,7 @@ namespace ThatsLit.Components
                         break;
                     case "laboratory":
                         // scoreCalculator = new LabScoreCalculator();
+                        scoreCalculator = null;
                         skipFoliageCheck = true;
                         skipDetailCheck = true;
                         break;

@@ -54,7 +54,7 @@ namespace ThatsLit
             Config.Bind(category,
                         "Performance",
                         true,
-                        new ConfigDescription("The mod takes away at least several fps. Actual overhead varies from machines to machines, some lose 5, some lose 20. You can try giving up the brightness module if the fps is not acceptable.",
+                        new ConfigDescription("The mod takes away at least several fps. Actual overhead varies from machine to machine, some lose 5, some lose 20. You can try giving up the brightness module   if the performance is not acceptable.",
                                                          null,
                                                          new ConfigurationManagerAttributes() { ReadOnly = true }));
             Config.Bind(category,

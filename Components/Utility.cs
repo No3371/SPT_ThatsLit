@@ -525,7 +525,7 @@ namespace ThatsLit
             {
                 "5b3b6e495acfc4330140bd88" => true,
                 "5a7c74b3e899ef0014332c29" => true,
-                _ => CustomNightVisionScopes?.Contains(templateId)?? false
+                _ => CustomNightVisionScopes == null? false : CustomNightVisionScopes.Contains(templateId)
             };
     // "_id": "5b3b6e495acfc4330140bd88",
     // "_name": "scope_base_armasight_vulcan_gen3_bravo_mg_3,5x",
