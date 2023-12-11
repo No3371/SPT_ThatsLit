@@ -5,7 +5,7 @@ namespace ThatsLit.Components
 {
     public class ScoreCalculator
     {
-        static readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value? 32 : 64;
+        readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value? 32 : 64;
         internal float lum3s, lum1s, lum10s;
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;

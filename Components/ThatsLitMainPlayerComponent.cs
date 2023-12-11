@@ -25,7 +25,7 @@ namespace ThatsLit.Components
     {
         public static bool IsDebugSampleFrame { get; set; }
         public bool disabledLit;
-        static readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value ? 32 : 64;
+        readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value ? 32 : 64;
         public const int POWER = 3;
         public RenderTexture rt, envRt;
         public Camera cam, envCam;
