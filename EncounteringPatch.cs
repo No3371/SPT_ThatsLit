@@ -41,10 +41,10 @@ namespace ThatsLit.Patches.Vision
                 float rand2 = UnityEngine.Random.Range(-1f, 1f);
                 if (angle > 75 && rand < Mathf.Clamp01(((angle - 75f) / 45f) * ThatsLitPlugin.VagueHintChance.Value))
                 {
-                    var vagueSource = __instance.Owner.Position + to * (0.75f + rand / 4f);
-                    vagueSource += (Vector3.up * Mathf.Abs(rand + rand2) / 2f  + Vector3.right * rand2 + Vector3.forward * (rand2 - rand) / 2f) * to.sqrMagnitude / (100f * (1.5f + rand));
+                    var vagueSource = __instance.Owner.Position + to * (0.75f + 0.25f * rand);
+                    vagueSource += (Vector3.right * rand2 + Vector3.forward * (rand2 - rand) / 2f) * to.sqrMagnitude / (100f * (1.5f + rand));
                     __instance.Owner.Memory.Spotted(false, vagueSource);
-                    return false; // Cancel visible when facing away (SetVisible not only get called for the witness... ex: for group members )
+                    return false; // Cancel visibllity (SetVisible does not only get called for the witness... ex: for group members )
                 }
             }
 
@@ -60,7 +60,7 @@ namespace ThatsLit.Patches.Vision
         public static void PatchPostfix(EnemyInfo __instance, State __state)
         {
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return;
-            if (!__state.triggered || __instance.Owner.Memory.GoalEnemy != __instance) return;
+            if (!__state.triggered || __instance.Owner.Memory.GoalEnemy != __instance) return; // __instance.Owner.Memory.GoalEnemy may has been changed in the method body
 
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;

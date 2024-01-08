@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -11,7 +10,6 @@ using EFT.Weather;
 using GPUInstancer;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
@@ -29,7 +27,7 @@ namespace ThatsLit.Components
         public const int POWER = 3;
         public RenderTexture rt, envRt;
         public Camera cam, envCam;
-        public Texture2D envTex, envDebugTex;
+        // public Texture2D envTex, envDebugTex;
         Unity.Collections.NativeArray<Color32> observed;
         public float lastCalcFrom, lastCalcTo, lastScore, lastFactor1, lastFactor2;
         public int calced = 0, calcedLastFrame = 0, encounter;
@@ -81,8 +79,8 @@ namespace ThatsLit.Components
 
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
             if (session == null) throw new Exception("No session!");
-            activeRaidSettings = (RaidSettings) (typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
-            
+            activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
+
             if (ThatsLitPlugin.EnabledLighting.Value)
             {
                 switch (activeRaidSettings?.LocationId)
@@ -414,20 +412,20 @@ namespace ThatsLit.Components
                 switch (count)
                 {
                     case 1:
-                    foliageScore /= 3f;
-                    break;
+                        foliageScore /= 3f;
+                        break;
                     case 2:
-                    foliageScore /= 2.7f;
-                    break;
+                        foliageScore /= 2.7f;
+                        break;
                     case 3:
-                    foliageScore /= 2.3f;
-                    break;
+                        foliageScore /= 2.3f;
+                        break;
                     case 4:
-                    foliageScore /= 1.8f;
-                    break;
+                        foliageScore /= 1.8f;
+                        break;
                     case 5:
-                    foliageScore /= 1.2f;
-                    break;
+                        foliageScore /= 1.2f;
+                        break;
                 }
             }
         }
@@ -438,7 +436,7 @@ namespace ThatsLit.Components
             GetWeatherStats(out fog, out rain, out cloud);
 
             //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
-            if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
+            // if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
             MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
         }

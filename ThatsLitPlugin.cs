@@ -96,7 +96,7 @@ namespace ThatsLit
             VagueHintChance            = Config.Bind(category,
                                                      "Vague Hint Chance",
                                                      0.6f,
-                                                     new ConfigDescription("The chance to only tell an AI it's spotted when you are set to be visible to an AI but it's not facing your direction.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+                                                     new ConfigDescription("The chance to cancel a bot's visual confirmation on you and instead only tell it it's spotted from roughly your direction, when it's not facing your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
 
             category                   = "4. Grasses";
             EnabledGrasses             = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
@@ -109,8 +109,12 @@ namespace ThatsLit
             FoliageImpactScale         = Config.Bind(category,
                                                      "Foliage Impact Scale",
                                                      1f,
-                                                     new ConfigDescription("Scale the strength of extra chance to be overlooked from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 100 }));
-            FinalOffset                = Config.Bind(category, "Final Offset", 0f, "Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa.");
+                                                     new ConfigDescription("Scale the strength of extra chance to be overlooked from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+            FinalImpactScale         = Config.Bind(category,
+                                                     "Final Impact Scale",
+                                                     1f,
+                                                     new ConfigDescription("Scale the buff/nerf to bots from the mod. 0% = use the original value. Adjust this to balance your game to your liking. This is mainly provided for people whose game somehow becomes too easy with the mod.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 98}));
+            FinalOffset                = Config.Bind(category, "Final Offset", 0f, "(Not recommanded because it's easy to mess up the balance, try Final Impact Scale first) Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa. Applied after Final Impact Scale.");
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss.");
 
             category                   = "6. Info";
@@ -122,7 +126,8 @@ namespace ThatsLit
             category                   = "7. Performance";
             LessFoliageCheck           = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
             LessEquipmentCheck         = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
-            LowResMode                 = Config.Bind(category, "Low Res Mode", false, "Can reduce CPU time of calculation, may reduce lighting detection accuracy.");
+            ResLevel                 = Config.Bind(category, "Resolustion Level", 2,
+                                                   new ConfigDescription("Resolution of the observed image by the observer camera, higher level means somewhat higher accuracy. Has an impact on CPU time. Level1 -> 32x32, Level2 -> 64x64... This config is used on raid start.", new AcceptableValueRange<int>(1, 4)));
 
             category                   = "8. Debug";
             DebugInfo                  = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
@@ -168,6 +173,7 @@ namespace ThatsLit
         public static ConfigEntry<float> BrightnessImpactScale { get; private set; }
         public static ConfigEntry<float> LitVisionDistanceScale { get; private set; }
         public static ConfigEntry<float> FinalOffset { get; private set; }
+        public static ConfigEntry<float> FinalImpactScale { get; private set; }
         public static ConfigEntry<float> VagueHintChance { get; private set; }
         public static ConfigEntry<float> GlobalRandomOverlookChance { get; private set; }
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
@@ -183,7 +189,8 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableStreets { get; private set; }
         public static ConfigEntry<bool> EnableWoods { get; private set; }
         public static ConfigEntry<bool> EnableHideout { get; private set; }
-        public static ConfigEntry<bool> LowResMode { get; private set; }
+        public static ConfigEntry<bool> EnableBenchmark { get; private set; }
+        public static ConfigEntry<int> ResLevel { get; private set; }
         // public static ConfigEntry<bool> DevMode { get; private set; }
         // public static ConfigEntry<bool> DevModeInvisible { get; private set; }
         // public static ConfigEntry<bool> NoGPUReq { get; private set; }

@@ -5,7 +5,7 @@ namespace ThatsLit.Components
 {
     public class ScoreCalculator
     {
-        readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value? 32 : 64;
+        readonly int RESOLUTION = 32 * ThatsLitPlugin.ResLevel.Value;
         internal float lum3s, lum1s, lum10s;
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
@@ -53,7 +53,6 @@ namespace ThatsLit.Components
             float lumScoreScale = PixelLumScoreScale;
             // if (ThatsLitPlugin.DevMode.Value)
             //     lumScoreScale = ThatsLitPlugin.OverridePixelLumScoreScale.Value;
-
 
             frame5 = frame4;
             frame4 = frame3;
