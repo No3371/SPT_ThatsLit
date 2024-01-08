@@ -7,12 +7,15 @@ using UnityEngine;
 using Comfort.Common;
 using System.Collections.Generic;
 using EFT.InventoryLogic;
+using System;
 
 
 namespace ThatsLit
 {
     public class ExtraVisibleDistancePatch : ModulePatch
     {
+        internal static System.Diagnostics.Stopwatch _benchmarkSW;
+
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(EnemyInfo), "CheckVisibility");
@@ -31,6 +34,17 @@ namespace ThatsLit
 
             ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
             if (mainPlayer?.scoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
+
+#region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value)
+            {
+                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
+                _benchmarkSW.Start();
+            }
+            else if (_benchmarkSW != null)
+                _benchmarkSW = null;
+#endregion
 
             bool thermalActive = false, nvgActive = false, scope = false;
             float scopeDis = 0;
@@ -72,6 +86,10 @@ namespace ThatsLit
                 float extra = __instance.Owner.LookSensor.VisibleDist * scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
                 addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(100, extra);
             }
+
+#region BENCHMARK
+            _benchmarkSW?.Stop();
+#endregion
 
             return true;
         }

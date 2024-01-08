@@ -9,6 +9,7 @@ using EFT.UI;
 using EFT.Weather;
 using GPUInstancer;
 using HarmonyLib;
+using ThatsLit.Patches.Vision;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -23,7 +24,7 @@ namespace ThatsLit.Components
     {
         public static bool IsDebugSampleFrame { get; set; }
         public bool disabledLit;
-        readonly int RESOLUTION = ThatsLitPlugin.LowResMode.Value ? 32 : 64;
+        readonly int RESOLUTION = 32 * ThatsLitPlugin.ResLevel.Value;
         public const int POWER = 3;
         public RenderTexture rt, envRt;
         public Camera cam, envCam;
@@ -200,6 +201,7 @@ namespace ThatsLit.Components
             }
         }
 
+        internal static System.Diagnostics.Stopwatch _benchmarkSW, _benchmarkSWGUI;
 
         private void Update()
         {
@@ -211,6 +213,17 @@ namespace ThatsLit.Components
                 this.enabled = false;
                 return;
             }
+
+            #region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value)
+            {
+                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
+                _benchmarkSW.Start();
+            }
+            else if (_benchmarkSW != null)
+                _benchmarkSW = null;
+            #endregion
 
             if (!MainPlayer.AIData.IsInside) lastOutside = Time.time;
             IsDebugSampleFrame = ThatsLitPlugin.DebugInfo.Value && Time.frameCount % 47 == 0;
@@ -361,6 +374,10 @@ namespace ThatsLit.Components
                     scoreCalculator.irLaserSub = irLaserSub;
                 }
             }
+
+            #region BENCHMARK
+            _benchmarkSW?.Stop();
+            #endregion
         }
 
         private void UpdateFoliageScore(Vector3 bodyPos)
@@ -449,48 +466,87 @@ namespace ThatsLit.Components
 
         }
         float litFactorSample, ambScoreSample;
+        float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleGUI;
+        int guiFrame;
         private void OnGUI()
         {
+            #region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value)
+            {
+                if (_benchmarkSWGUI == null) _benchmarkSWGUI = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSWGUI.IsRunning) throw new Exception("Wrong assumption");
+                _benchmarkSWGUI.Start();
+            }
+            else if (_benchmarkSWGUI != null)
+                _benchmarkSWGUI = null;
+            #endregion
+            bool skip = false;
             if (disabledLit && Time.time - awakeAt < 30f)
             {
                 if (!ThatsLitPlugin.HideMapTip.Value) GUILayout.Label(" [That's Lit] Lit detection on this map is not supported or disabled in configs.");
-                if (!ThatsLitPlugin.DebugInfo.Value) return;
+                if (!ThatsLitPlugin.DebugInfo.Value) skip = true;
             }
-            if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
+            if (!skip)
             {
-                if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(MultiFrameLitScore / 0.0999f));
-                if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
-                if (foliageScore > 0 && ThatsLitPlugin.FoliageInfo.Value)
-                    Utility.GUILayoutFoliageMeter((int)(foliageScore / 0.0999f));
-                if (!skipDetailCheck && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
-                    if (MainPlayer.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
-                    else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
-                if (Time.time < awakeAt + 10)
-                    GUILayout.Label(" [That's Lit HUD] Can be disabled in plugin settings.");
+                if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
+                {
+                    if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(MultiFrameLitScore / 0.0999f));
+                    if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
+                    if (foliageScore > 0 && ThatsLitPlugin.FoliageInfo.Value)
+                        Utility.GUILayoutFoliageMeter((int)(foliageScore / 0.0999f));
+                    if (!skipDetailCheck && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
+                        if (MainPlayer.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
+                        else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
+                    if (Time.time < awakeAt + 10)
+                        GUILayout.Label(" [That's Lit HUD] Can be disabled in plugin settings.");
+                }
             }
-            if (!ThatsLitPlugin.DebugInfo.Value) return;
-            scoreCalculator?.CalledOnGUI();
-            if (IsDebugSampleFrame)
+            if (!ThatsLitPlugin.DebugInfo.Value) skip = true;
+            if (!skip)
             {
-                litFactorSample = scoreCalculator?.litScoreFactor ?? 0;
-                ambScoreSample = scoreCalculator?.frame0.ambienceScore ?? 0;
-            }
-            GUILayout.Label(string.Format(" IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) AMB: {5:0.00} LIT: {6:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore, ambScoreSample, litFactorSample));
-            //GUILayout.Label(text: "PIXELS:");
-            //GUILayout.Label(lastValidPixels.ToString());
-            GUILayout.Label(string.Format(" AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));
+                scoreCalculator?.CalledOnGUI();
+                if (IsDebugSampleFrame)
+                {
+                    litFactorSample = scoreCalculator?.litScoreFactor ?? 0;
+                    ambScoreSample = scoreCalculator?.frame0.ambienceScore ?? 0;
+                    if (ThatsLitPlugin.EnableBenchmark.Value && guiFrame < Time.frameCount) // The trap here is OnGUI is called multiple times per frame, make sure to reset the stopwatches only once
+                    {
+                        if (SeenCoefPatch._benchmarkSW != null) benchmarkSampleSeenCoef = (SeenCoefPatch._benchmarkSW.ElapsedMilliseconds / 47f);
+                        if (EncounteringPatch._benchmarkSW != null) benchmarkSampleEncountering = (EncounteringPatch._benchmarkSW.ElapsedMilliseconds / 47f);
+                        if (ExtraVisibleDistancePatch._benchmarkSW != null) benchmarkSampleExtraVisDis = (ExtraVisibleDistancePatch._benchmarkSW.ElapsedMilliseconds / 47f);
+                        if (ScoreCalculator._benchmarkSW != null) benchmarkSampleScoreCalculator = (ScoreCalculator._benchmarkSW.ElapsedMilliseconds / 47f);
+                        if (_benchmarkSW != null) benchmarkSampleUpdate = (_benchmarkSW.ElapsedMilliseconds / 47f);
+                        if (_benchmarkSWGUI != null) benchmarkSampleGUI = (_benchmarkSWGUI.ElapsedMilliseconds / 47f);
+                        SeenCoefPatch._benchmarkSW?.Reset();
+                        EncounteringPatch._benchmarkSW?.Reset();
+                        ExtraVisibleDistancePatch._benchmarkSW?.Reset();
+                        ScoreCalculator._benchmarkSW?.Reset();
+                        _benchmarkSW?.Reset();
+                        _benchmarkSWGUI?.Reset();
+                    }
+                }
+                GUILayout.Label(string.Format(" IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) AMB: {5:0.00} LIT: {6:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore, ambScoreSample, litFactorSample));
+                //GUILayout.Label(text: "PIXELS:");
+                //GUILayout.Label(lastValidPixels.ToString());
+                GUILayout.Label(string.Format(" AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));
 
-            GUILayout.Label(string.Format(" FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
+                GUILayout.Label(string.Format(" FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
 
-            var poseFactor = MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
-            if (MainPlayer.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
-            poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
-            // GUILayout.Label(string.Format(" POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
-            // GUILayout.Label(string.Format(" {0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
-            GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
-            if (scoreCalculator != null) GUILayout.Label(string.Format(" LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
-            // GUILayout.Label(string.Format(" {0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
-            // GUILayout.Label(string.Format(" {0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
+                var poseFactor = MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
+                if (MainPlayer.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
+                poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
+                                     // GUILayout.Label(string.Format(" POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
+                                     // GUILayout.Label(string.Format(" {0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
+                GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
+                if (scoreCalculator != null) GUILayout.Label(string.Format(" LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
+                // GUILayout.Label(string.Format(" {0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
+                // GUILayout.Label(string.Format(" {0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
+                if (ThatsLitPlugin.EnableBenchmark.Value)
+                {
+                    GUILayout.Label(string.Format(" Update: {0,8:0.000}\n SeenCoef: {1,8:0.000}\n Encountering: {2,8:0.000}\n ExtraVisDis: {3,8:0.000}\n ScoreCalculator: {4,8:0.000}\n GUI(+Debug): {5,8:0.000} ms", benchmarkSampleUpdate, benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleGUI));
+                    if (Time.frameCount % 6000 == 0)
+                        EFT.UI.ConsoleScreen.Log($"[That's Lit Benchmark Sample] Update: {benchmarkSampleUpdate,8:0.000} / SeenCoef: {benchmarkSampleSeenCoef,8:0.000} / Encountering: {benchmarkSampleEncountering,8:0.000} / ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000} / ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000} / GUI: {benchmarkSampleGUI,8:0.000} ms");
+                }
 #if DEBUG_DETAILS
             GUILayout.Label(string.Format(" DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df) 3x3: {2}", lastFinalDetailScoreNearest, lastDisFactorNearest, recentDetailCount3x3));
             GUILayout.Label(string.Format(" {0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
@@ -499,15 +555,21 @@ namespace ThatsLit.Components
                     GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
             Utility.GUILayoutDrawAsymetricMeter((int)(lastFinalDetailScoreNearest / 0.0999f));
 #endif
-            // GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
-            // GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");
-            // GUILayout.Label($" NE  DETAIL_LOW: { scoreCache[2] } DETAIL_MID: {scoreCache[3]}");
-            // GUILayout.Label($"  E  DETAIL_LOW: { scoreCache[4] } DETAIL_MID: {scoreCache[5]}");
-            // GUILayout.Label($" SE  DETAIL_LOW: { scoreCache[6] } DETAIL_MID: {scoreCache[7]}");
-            // GUILayout.Label($"  S  DETAIL_LOW: { scoreCache[8] } DETAIL_MID: {scoreCache[9]}");
-            // GUILayout.Label($" SW  DETAIL_LOW: { scoreCache[10] } DETAIL_MID: {scoreCache[11]}");
-            // GUILayout.Label($"  W  DETAIL_LOW: { scoreCache[12] } DETAIL_MID: {scoreCache[13]}");
-            // GUILayout.Label($" NW  DETAIL_LOW: { scoreCache[14] } DETAIL_MID: {scoreCache[15]}");
+                // GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
+                // GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");
+                // GUILayout.Label($" NE  DETAIL_LOW: { scoreCache[2] } DETAIL_MID: {scoreCache[3]}");
+                // GUILayout.Label($"  E  DETAIL_LOW: { scoreCache[4] } DETAIL_MID: {scoreCache[5]}");
+                // GUILayout.Label($" SE  DETAIL_LOW: { scoreCache[6] } DETAIL_MID: {scoreCache[7]}");
+                // GUILayout.Label($"  S  DETAIL_LOW: { scoreCache[8] } DETAIL_MID: {scoreCache[9]}");
+                // GUILayout.Label($" SW  DETAIL_LOW: { scoreCache[10] } DETAIL_MID: {scoreCache[11]}");
+                // GUILayout.Label($"  W  DETAIL_LOW: { scoreCache[12] } DETAIL_MID: {scoreCache[13]}");
+                // GUILayout.Label($" NW  DETAIL_LOW: { scoreCache[14] } DETAIL_MID: {scoreCache[15]}");
+
+            }
+            #region BENCHMARK
+            _benchmarkSWGUI?.Stop();
+            #endregion
+            guiFrame = Time.frameCount;
         }
 
 

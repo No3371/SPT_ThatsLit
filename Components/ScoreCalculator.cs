@@ -11,6 +11,7 @@ namespace ThatsLit.Components
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
         float scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
         float foliageBonusSmooth, detailBonusSmooth;
+        internal static System.Diagnostics.Stopwatch _benchmarkSW;
         public ScoreCalculator()
         {
             // ThatsLitPlugin.DevMode.Value = false;
@@ -44,6 +45,17 @@ namespace ThatsLit.Components
         
         public float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
         {
+#region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value)
+            {
+                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
+                _benchmarkSW.Start();
+            }
+            else if (_benchmarkSW != null)
+                _benchmarkSW = null;
+#endregion
+
             float minAmbienceLum = MinAmbienceLum;
             // if (ThatsLitPlugin.DevMode.Value)
             //     minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
@@ -196,6 +208,9 @@ namespace ThatsLit.Components
 
             frame0 = thisFrame;
 
+#region BENCHMARK
+            _benchmarkSW?.Stop();
+#endregion
             return thisFrame.multiFrameLitScore;
 
         }

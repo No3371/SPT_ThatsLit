@@ -5,12 +5,14 @@ using System.Reflection;
 using UnityEngine;
 using Comfort.Common;
 using EFT;
+using System;
 
 namespace ThatsLit.Patches.Vision
 {
     public class EncounteringPatch : ModulePatch
     {
         private static PropertyInfo _GoalEnemyProp;
+        internal static System.Diagnostics.Stopwatch _benchmarkSW;
         protected override MethodBase GetTargetMethod()
         {
             _GoalEnemyProp = AccessTools.Property(typeof(BotMemoryClass), "GoalEnemy");
@@ -30,6 +32,17 @@ namespace ThatsLit.Patches.Vision
         {
             __state = default;
             if (!__instance.Person.IsYourPlayer || !value || !__instance.IsVisible || !ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
+#region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value)
+            {
+                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
+                _benchmarkSW.Start();
+            }
+            else if (_benchmarkSW != null)
+                _benchmarkSW = null;
+#endregion
+
             Vector3 look = __instance.Owner.GetPlayer.LookDirection;
             Vector3 to = __instance.Person.Position - __instance.Owner.Position;
             var angle = Vector3.Angle(look, to);
@@ -54,6 +67,11 @@ namespace ThatsLit.Patches.Vision
                 if (Singleton<ThatsLitMainPlayerComponent>.Instance) Singleton<ThatsLitMainPlayerComponent>.Instance.encounter++;
                 __state = new State () { triggered = true, unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 45f * UnityEngine.Random.Range(1, 2f), sprinting = __instance.Owner?.Mover?.Sprinting ?? false, angle = angle };
             }
+
+#region BENCHMARK
+            _benchmarkSW?.Stop();
+#endregion
+
             return true;
         }
         [PatchPostfix]
@@ -64,6 +82,15 @@ namespace ThatsLit.Patches.Vision
 
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;
+#region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value)
+            {
+                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
+                _benchmarkSW.Start();
+            }
+            else if (_benchmarkSW != null)
+                _benchmarkSW = null;
+#endregion
 
             if (__state.sprinting)
             {
@@ -79,6 +106,10 @@ namespace ThatsLit.Patches.Vision
             {
                 g388.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.15f) * Mathf.Clamp01((__state.angle - 30f)/45f);
             }
+
+#region BENCHMARK
+            _benchmarkSW?.Stop();
+#endregion
         }
     }
 }

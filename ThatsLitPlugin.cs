@@ -133,6 +133,7 @@ namespace ThatsLit
             DebugInfo                  = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
             DebugTexture               = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
             EnableHideout              = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
+            EnableBenchmark              = Config.Bind(category, "Benchmark", false, "");
             // DevMode = Config.Bind(category, "Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             // DevModeInvisible = Config.Bind(category, "Dev Mode Invisible", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
             // NoGPUReq = Config.Bind(category, "NoGPUReq", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
@@ -190,7 +191,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableWoods { get; private set; }
         public static ConfigEntry<bool> EnableHideout { get; private set; }
         public static ConfigEntry<bool> EnableBenchmark { get; private set; }
-        public static ConfigEntry<int> ResLevel { get; private set; }
+        public static ConfigEntry<bool> LowResMode { get; private set; }
         // public static ConfigEntry<bool> DevMode { get; private set; }
         // public static ConfigEntry<bool> DevModeInvisible { get; private set; }
         // public static ConfigEntry<bool> NoGPUReq { get; private set; }
