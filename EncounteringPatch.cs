@@ -31,7 +31,11 @@ namespace ThatsLit.Patches.Vision
         public static bool PatchPrefix(EnemyInfo __instance, bool value, ref State __state)
         {
             __state = default;
-            if (!__instance.Person.IsYourPlayer || !value || !__instance.IsVisible || !ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
+            if (!__instance.Person.IsYourPlayer) return true; // SKIP non-player.
+            if (!value) return true; // SKIP. Only works when the player is set to be visible to the bot.
+            if (__instance.IsVisible) return true; // SKIP. Only works when the bot hasn't see the player. IsVisible means the player is already seen.
+            if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
+
 #region BENCHMARK
             if (ThatsLitPlugin.EnableBenchmark.Value)
             {
