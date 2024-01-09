@@ -191,7 +191,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableWoods { get; private set; }
         public static ConfigEntry<bool> EnableHideout { get; private set; }
         public static ConfigEntry<bool> EnableBenchmark { get; private set; }
-        public static ConfigEntry<bool> LowResMode { get; private set; }
+        public static ConfigEntry<int> ResLevel { get; private set; }
         // public static ConfigEntry<bool> DevMode { get; private set; }
         // public static ConfigEntry<bool> DevModeInvisible { get; private set; }
         // public static ConfigEntry<bool> NoGPUReq { get; private set; }
