@@ -1,4 +1,9 @@
-﻿using EFT;
+﻿using System;
+using BepInEx.Logging;
+using EFT;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace ThatsLit.Components
@@ -42,6 +47,11 @@ namespace ThatsLit.Components
             //     }
             // };
         }
+        public void PreCalculate (Unity.Collections.NativeArray<Color32> tex, float time)
+        {
+            GetThresholds(time, out float thS, out float thH, out float thHM, out float thM, out float thML, out float thL);
+            StartCountPixels(tex, thS, thH, thHM, thM, thML, thL);
+        }
         
         public float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
         {
@@ -72,9 +82,7 @@ namespace ThatsLit.Components
             frame2 = frame1;
             frame1 = frame0;
             FrameStats thisFrame = default;
-
-            GetThresholds(time, out float thS, out float thH, out float thHM, out float thM, out float thML, out float thL);
-            CountPixels(tex, thS, thH, thHM, thM, thML, thL, out thisFrame.pxS, out thisFrame.pxH, out thisFrame.pxHM, out thisFrame.pxM, out thisFrame.pxML, out thisFrame.pxL, out thisFrame.pxD, out float lum, out float lumNonDark, out thisFrame.pixels);
+            CompleteCountPixels(out thisFrame.pxS, out thisFrame.pxH, out thisFrame.pxHM, out thisFrame.pxM, out thisFrame.pxML, out thisFrame.pxL, out thisFrame.pxD, out float lum, out float lumNonDark, out thisFrame.pixels);
             if (thisFrame.pixels == 0) thisFrame.pixels = RESOLUTION * RESOLUTION;
             thisFrame.avgLum = lum / (float)thisFrame.pixels;
             thisFrame.avgLumNonDark = lum / (float) (thisFrame.pixels - thisFrame.pxD);
@@ -390,35 +398,107 @@ namespace ThatsLit.Components
                  + pxL * sL
                  + pxD * sD);
         }
-        protected virtual void CountPixels(Unity.Collections.NativeArray<Color32> tex, float thresholdShine, float thresholdHigh, float thresholdHighMid, float thresholdMid, float thresholdMidLow, float thresholdLow, out int shine, out int high, out int highMid, out int mid, out int midLow, out int low, out int dark, out float lum, out float lumNonDark, out int valid)
+
+        struct CountPixelsJob : IJobParallelFor
+        {
+            [Unity.Collections.LowLevel.Unsafe.NativeSetThreadIndex]
+            public int threadIndex;
+            [ReadOnly]
+            public NativeArray<Color32> tex;
+            [WriteOnly]
+            [Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestriction]
+            public NativeArray<int> counted; // pxS, pxH, pxHM, pxM, pxML, pxL, pxD, valid
+            [WriteOnly]
+            [Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestriction]
+            public NativeArray<float> lum; // lum, lumNonDark
+            [ReadOnly]
+            public NativeArray<float> thresholds; // thresholdShine, thresholdHigh, thresholdHighMid, thresholdMid, thresholdMidLow, thresholdLow
+
+            public void Execute(int index)
+            {
+                Color32 c = tex[index];
+                if (c == Color.white)
+                    return;
+
+                var pxLum = (c.r + c.g + c.b) / 765f;
+
+                int threadIndexOffset = threadIndex * 8;
+                lum[threadIndexOffset + 0] += pxLum;
+                if (pxLum < thresholds[5])
+                {
+                    counted[threadIndexOffset + 6] += 1;
+                    lum[threadIndexOffset + 1] += pxLum;
+                }
+                else if (pxLum >= thresholds[0]) counted[threadIndexOffset + 0] += 1;
+                else if (pxLum >= thresholds[1]) counted[threadIndexOffset + 1] += 1;
+                else if (pxLum >= thresholds[2]) counted[threadIndexOffset + 2] += 1;
+                else if (pxLum >= thresholds[3]) counted[threadIndexOffset + 3] += 1;
+                else if (pxLum >= thresholds[4]) counted[threadIndexOffset + 4] += 1;
+                else if (pxLum >= thresholds[5]) counted[threadIndexOffset + 5] += 1;
+
+                counted[threadIndexOffset + 7] += 1;
+            }
+        }
+        CountPixelsJob countingJob;
+        JobHandle countingJobHandle;
+
+        protected void StartCountPixels(Unity.Collections.NativeArray<Color32> tex, float thresholdShine, float thresholdHigh, float thresholdHighMid, float thresholdMid, float thresholdMidLow, float thresholdLow)
+        {
+            if (!tex.IsCreated) return;
+
+            NativeArray<float> thresholds = new NativeArray<float>(6, Allocator.TempJob);
+            thresholds[0] = thresholdShine;
+            thresholds[1] = thresholdHigh;
+            thresholds[2] = thresholdHighMid;
+            thresholds[3] = thresholdMid;
+            thresholds[4] = thresholdMidLow;
+            thresholds[5] = thresholdLow;
+
+            countingJob = new CountPixelsJob()
+            {
+                thresholds = thresholds,
+                tex = tex,
+                counted = new NativeArray<int>(8 * JobsUtility.MaxJobThreadCount , Allocator.TempJob, NativeArrayOptions.ClearMemory),
+                lum = new NativeArray<float>(2 * JobsUtility.MaxJobThreadCount , Allocator.TempJob, NativeArrayOptions.ClearMemory)
+            };
+            countingJobHandle = countingJob.Schedule(tex.Length, tex.Length / 64);
+            // Logger.LogInfo(string.Format("F{0} Counting {1} px in batches of {2}", Time.frameCount, tex.Length, tex.Length / 64));
+        }
+        protected void CompleteCountPixels(out int shine, out int high, out int highMid, out int mid, out int midLow, out int low, out int dark, out float lum, out float lumNonDark, out int valid)
         {
             shine = high = highMid = mid = midLow = low = dark = valid = 0;
             lum = 0;
             lumNonDark = 0;
-            if (!tex.IsCreated) return;
-            for (int i = 0; i < tex.Length; i++)
-            {
-                var c = tex[i];
-                if (c == Color.white)
-                {
-                    continue;
-                }
-                var pLum = (c.r + c.g + c.b) / 765f;
-                lum += pLum;
-                if (pLum < thresholdLow)
-                {
-                    dark += 1;
-                    lumNonDark += pLum;
-                }
-                if (pLum >= thresholdShine) shine += 1;
-                else if (pLum >= thresholdHigh) high += 1;
-                else if (pLum >= thresholdHighMid) highMid += 1;
-                else if (pLum >= thresholdMid) mid += 1;
-                else if (pLum >= thresholdMidLow) midLow += 1;
-                else if (pLum >= thresholdLow) low += 1;
 
-                valid++;
+            countingJobHandle.Complete();
+
+            countingJob.thresholds.Dispose();
+            
+            if (countingJob.lum.IsCreated) for (int i = 0; i < countingJob.lum.Length; i += 2)
+            {
+                lum += countingJob.lum[i];
+                lumNonDark += countingJob.lum[i + 1];
             }
+            countingJob.lum.Dispose();
+            if (countingJob.counted.IsCreated)
+            for (int i = 0; i < countingJob.counted.Length; i += 8)
+            {
+                if (countingJob.counted[i+7] == 0) continue;
+                shine += countingJob.counted[i];
+                high += countingJob.counted[i+1];
+                highMid += countingJob.counted[i+2];
+                mid += countingJob.counted[i+3];
+                midLow += countingJob.counted[i+4];
+                low += countingJob.counted[i+5];
+                dark += countingJob.counted[i+6];
+                valid += countingJob.counted[i+7];
+                // Logger.LogInfo(string.Format("F{0} #{9}---{1} {2} {3} {4} {5} {6} {7} {8}",
+                                // Time.frameCount, countingJob.counted[i], countingJob.counted[i+1], countingJob.counted[i+2], countingJob.counted[i+3],
+                                // countingJob.counted[i+4], countingJob.counted[i+5], countingJob.counted[i+6], countingJob.counted[i+7], i/8));
+            }
+            countingJob.counted.Dispose();
+            // Logger.LogInfo(string.Format("F{0} Counted {1} px", Time.frameCount, valid));
+
         }
 
         /// <returns>-1 ~ 1</returns>

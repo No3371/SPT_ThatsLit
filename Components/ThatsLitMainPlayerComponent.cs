@@ -321,7 +321,9 @@ namespace ThatsLit.Components
                 if (req.hasError)
                     return;
 
+                observed.Dispose();
                 observed = req.GetData<Color32>();
+                scoreCalculator?.PreCalculate(observed, GetInGameDayTime());
             });
 
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
@@ -455,7 +457,9 @@ namespace ThatsLit.Components
             //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
             // if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
+            if (!observed.IsCreated) return;
             MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
+            observed.Dispose();
         }
 
         private void OnDestroy()
