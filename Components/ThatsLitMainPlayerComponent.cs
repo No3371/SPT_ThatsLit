@@ -547,7 +547,7 @@ namespace ThatsLit.Components
                 // GUILayout.Label(string.Format(" {0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
                 if (ThatsLitPlugin.EnableBenchmark.Value)
                 {
-                    GUILayout.Label(string.Format(" Update: {0,8:0.000}\n SeenCoef: {1,8:0.000}\n Encountering: {2,8:0.000}\n ExtraVisDis: {3,8:0.000}\n ScoreCalculator: {4,8:0.000}\n GUI(+Debug): {5,8:0.000} ms", benchmarkSampleUpdate, benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleGUI));
+                    GUILayout.Label(string.Format(" Update: {0,8:0.000}\n SeenCoef: {1,8:0.000}\n Encountering: {2,8:0.000}\n ExtraVisDis: {3,8:0.000}\n ScoreCalculator: {4,8:0.000}\n Info(+Debug): {5,8:0.000} ms", benchmarkSampleUpdate, benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleGUI));
                     if (Time.frameCount % 6000 == 0)
                         EFT.UI.ConsoleScreen.Log($"[That's Lit Benchmark Sample] Update: {benchmarkSampleUpdate,8:0.000} / SeenCoef: {benchmarkSampleSeenCoef,8:0.000} / Encountering: {benchmarkSampleEncountering,8:0.000} / ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000} / ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000} / GUI: {benchmarkSampleGUI,8:0.000} ms");
                 }
