@@ -63,6 +63,7 @@ namespace ThatsLit.Components
         internal ScoreCalculator scoreCalculator;
         AsyncGPUReadbackRequest gquReq;
         internal float lastOutside;
+        internal bool isWinterCache;
         // float benchMark1, benchMark2;
         public void Awake()
         {
@@ -80,6 +81,7 @@ namespace ThatsLit.Components
 
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
             if (session == null) throw new Exception("No session!");
+            isWinterCache = session.Session.IsWinter;
             activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
 
             if (ThatsLitPlugin.EnabledLighting.Value)

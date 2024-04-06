@@ -91,7 +91,13 @@ namespace ThatsLit.Components
 
             baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
             ambienceScore = CalculateAmbienceScore(locationId, time, cloud, out sunLightScore, out moonLightScore, Time.time - player.lastOutside); // The base brightness with sun/moon/cloud
+            
+            if (player.isWinterCache && Time.time - player.lastOutside < 2f) // Debuff from winter environment when outside
+            {
+                ambienceScore *= 1 + Mathf.Clamp01((sunLightScore + moonLightScore - 0.1f) / 0.2f) * 0.1f;
+            }
 
+            // Simulate the extra darkness in grassy field/forest
             float foliageBonus = 0;
             if (player.foliageCount > 9)
             {
@@ -107,15 +113,17 @@ namespace ThatsLit.Components
             {
                 foliageBonus += moonLightScore * 0.025f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
             }
+
             if (foliageBonus > foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, Time.fixedDeltaTime);
             else if (foliageBonus < foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, 0.25f);
 
             if (player.recentDetailCount3x3 >= 50 && detailBonusSmooth < 1f) detailBonusSmooth = Mathf.Clamp01(detailBonusSmooth + Time.fixedDeltaTime);
             else detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, 0, 0.3f);
 
+            foliageBonusSmooth *= player.isWinterCache? 0.2f : 1f; // Debuff from winter environment
             ambienceScore -= foliageBonusSmooth;
             ambienceScore -= detailBonusSmooth * 0.1f;
-            ambienceScore = Mathf.Max(ambienceScore, -1f);
+            ambienceScore = Mathf.Clamp(ambienceScore, -1f, 1f);
 
 
             //float score = CalculateTotalPixelScore(time, thisFrame.pxS, thisFrame.pxH, thisFrame.pxHM, thisFrame.pxM, thisFrame.pxML, thisFrame.pxL, thisFrame.pxD);
