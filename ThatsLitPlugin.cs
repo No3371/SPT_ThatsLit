@@ -18,17 +18,17 @@ namespace ThatsLit
         public const string Configuration = SPTVersion;
         public const string Company = "";
         public const string Product = ModName;
-        public const string Copyright = "Copyright © 2023 BA";
+        public const string Copyright = "Copyright © 2024 BA";
         public const string Trademark = "";
         public const string Culture = "";
 
-        public const int TarkovVersion = 26535;
+        public const int TarkovVersion = 29197;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.373.5";
+        public const string ModVersion = "1.380.3";
 
         public const string SPTGUID = "com.spt-aki.core";
-        public const string SPTVersion = "3.7.1";
+        public const string SPTVersion = "3.8.0";
     }
 
     [BepInPlugin("bastudio.thatslit", ModName, ModVersion)]
