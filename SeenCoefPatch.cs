@@ -167,9 +167,12 @@ namespace ThatsLit
 
             var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
             if (!canSeeLight && inNVGView && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
+            if (visionAngleDelta > 105) canSeeLight = false;
             var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
             if (!canSeeLaser && inNVGView && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
+            if (visionAngleDelta > 105) canSeeLaser = false;
 
+            // Overhead overlooking
             if (sinceSeen > 15f && !canSeeLight)
             {
                 var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
@@ -268,6 +271,11 @@ namespace ThatsLit
 
             var cqbSmooth = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
             cqbSmooth *= cqbSmooth; // 6m -> 25%, 1m -> 100%
+
+            // Scale down cqb factors for AIs facing away
+            cqb *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
+            cqb15m *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
+            cqbSmooth *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
 
             var xyFacingFactor = 0f;
             var layingVerticaltInVisionFactor = 0f;
@@ -579,7 +587,7 @@ namespace ThatsLit
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
             __result += ThatsLitPlugin.FinalOffset.Value;
-            if (__result < 0.001f) __result = 0.001f;
+            if (__result < 0.005f) __result = 0.005f;
 
             if (Time.frameCount % 47 == 46 && nearestAI)
             {
