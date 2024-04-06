@@ -429,6 +429,18 @@ namespace ThatsLit
                         enemyDisFactor = Mathf.Clamp01(dis / 30f);
                         poseScale = poseFactor == 0.05f ? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f;
                         break;
+                    case "fibert_hedge01":
+                        angleFactor = Mathf.Clamp01(visionAngleDelta / 40f);
+                        foliageDisFactor = (1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.1f) / 0.1f)) * (1f - Mathf.Clamp01(mainPlayer.foliageDisH / 0.2f));
+                        enemyDisFactor = Mathf.Clamp01(dis / 30f);
+                        poseScale = poseFactor == 0.45f ? 1f : 0; // Too narrow for proning
+                        break;
+                    case "fibert_hedge02":
+                        angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 40f);
+                        foliageDisFactor = (1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.1f) / 0.2f)) * (1f - Mathf.Clamp01(mainPlayer.foliageDisH / 0.3f));
+                        enemyDisFactor = Mathf.Clamp01(dis / 20f);
+                        poseScale = poseFactor == 0.45f ? 1f : 0; // Too narrow for proning
+                        break;
                     case "bush_dry01":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 35f);
                         foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.15f) / 0.15f);
