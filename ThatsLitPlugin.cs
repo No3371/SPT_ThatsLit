@@ -87,6 +87,7 @@ namespace ThatsLit
             EnableInterchange          = Config.Bind(category, "Interchange", true, "Enable darkness/brightness on the map.");
             EnableCustoms              = Config.Bind(category, "Customs", true, "Enable darkness/brightness on the map.");
             EnableStreets              = Config.Bind(category, "Streets", true, "Enable darkness/brightness on the map.");
+            EnableGroundZero              = Config.Bind(category, "Ground Zero", true, "Enable darkness/brightness on the map.");
 
             category                   = "3. Encountering Patch";
             EnabledEncountering        = Config.Bind(category,
@@ -188,6 +189,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableShoreline { get; private set; }
         public static ConfigEntry<bool> EnableInterchange { get; private set; }
         public static ConfigEntry<bool> EnableStreets { get; private set; }
+        public static ConfigEntry<bool> EnableGroundZero { get; private set; }
         public static ConfigEntry<bool> EnableWoods { get; private set; }
         public static ConfigEntry<bool> EnableHideout { get; private set; }
         public static ConfigEntry<bool> EnableBenchmark { get; private set; }
