@@ -5,6 +5,7 @@ using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using ThatsLit.Components;
 using UnityEngine;
 
 namespace ThatsLit
@@ -424,14 +425,15 @@ namespace ThatsLit
                     }
                     break;
                 default:
-                    if (CustomLightAndLaser == null) return;
-                    if (CustomLightAndLaser.TryGetValue((templateId, selectedMode), out var setup))
+                    if (CustomLightAndLaser != null
+                    &&  CustomLightAndLaser.TryGetValue((templateId, selectedMode), out var setup))
                     {
                         light = setup.light;
                         lightIsIR = setup.lightIsIR;
                         laser = setup.laser;
                         laserIsIR = setup.laserIsIR;
                     }
+                    else if (ThatsLitMainPlayerComponent.IsDebugSampleFrame) Logger.LogError($"Unknown device: {templateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(templateId)?.Name}");
                     break;
             }
         }
