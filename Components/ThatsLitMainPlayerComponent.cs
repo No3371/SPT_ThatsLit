@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -444,6 +445,7 @@ namespace ThatsLit.Components
                         foliage = collidersCache[i]?.gameObject.transform.parent.gameObject.name;
                     }
                 }
+                if (foliage != null) foliage = Regex.Replace(foliage, @"(.+?)\s?(\(\d+\))?", "$1");
 
                 foliageCount = count;
 
