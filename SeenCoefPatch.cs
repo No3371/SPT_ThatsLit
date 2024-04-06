@@ -531,12 +531,13 @@ namespace ThatsLit
                 factor = Mathf.Clamp(factor, -0.975f, 0.975f);
 
                 // Absoulute offset
-                // factor: -0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (6m)
+                // f-0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (6m)
                 // f-1, 1m => 
-                var reducingSeconds = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqbSmooth, 1f - 0.5f * cqbSmooth);
-                reducingSeconds *= factor < 0 ? 1 : 0.1f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
-                reducingSeconds *= factor > 0 ? ThatsLitPlugin.DarknessImpactScale.Value : ThatsLitPlugin.BrightnessImpactScale.Value;
-                __result -= reducingSeconds;
+                var secondsOffset = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqbSmooth, 1f - 0.5f * cqbSmooth);
+                secondsOffset *= -1; // Inversed (negative value now delay the visual)
+                secondsOffset *= factor < 0 ? 1 : 0.1f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
+                secondsOffset *= factor > 0 ? ThatsLitPlugin.BrightnessImpactScale.Value : ThatsLitPlugin.DarknessImpactScale.Value;
+                __result += secondsOffset;
                 if (__result < 0) __result = 0;
 
                 // The scaling here allows the player to stay in the dark without being seen
