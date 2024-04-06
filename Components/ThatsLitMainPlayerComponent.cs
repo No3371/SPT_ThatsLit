@@ -215,9 +215,12 @@ namespace ThatsLit.Components
             }
 
             #region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value)
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
-                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSW == null)
+                {
+                    _benchmarkSW = new System.Diagnostics.Stopwatch();
+                }
                 if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
                 _benchmarkSW.Start();
             }
@@ -250,10 +253,37 @@ namespace ThatsLit.Components
             {
                 UpdateFoliageScore(bodyPos);
             }
+
             if (disabledLit)
             {
+                #region BENCHMARK
+                _benchmarkSW?.Stop();
+                #endregion
                 return;
             }
+
+            if (!ThatsLitPlugin.EnabledLighting.Value)
+            {
+                if (cam?.enabled ?? false) GameObject.Destroy(cam.gameObject);
+                if (rt != null) rt.Release();
+                if (display?.enabled ?? false) GameObject.Destroy(display);
+                disabledLit = true;
+                #region BENCHMARK
+                _benchmarkSW?.Stop();
+                #endregion
+                return;
+            }
+
+            if (gquReq.done) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
+            {
+                if (!req.hasError)
+                {
+                    observed.Dispose();
+                    observed = req.GetData<Color32>();
+                    scoreCalculator?.PreCalculate(observed, GetInGameDayTime());
+                }
+            });
+
             var camPos = 0;
             if (lockPos != -1) camPos = lockPos;
             else camPos = Time.frameCount % 6;
@@ -475,7 +505,7 @@ namespace ThatsLit.Components
         private void OnGUI()
         {
             #region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value)
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSWGUI == null) _benchmarkSWGUI = new System.Diagnostics.Stopwatch();
                 if (_benchmarkSWGUI.IsRunning) throw new Exception("Wrong assumption");

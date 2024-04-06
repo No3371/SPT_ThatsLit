@@ -130,7 +130,7 @@ namespace ThatsLit
                                                    new ConfigDescription("Resolution of the observed image by the observer camera, higher level means somewhat higher accuracy. Has an impact on CPU time. Level1 -> 32x32, Level2 -> 64x64... This config is used on raid start.", new AcceptableValueRange<int>(1, 4)));
 
             category                   = "8. Debug";
-            DebugInfo                  = Config.Bind(category, "Debug Info", false, "A lot of gibberish.");
+            DebugInfo                  = Config.Bind(category, "Debug Info (Expensive)", false, "A lot of gibberish.");
             DebugTexture               = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
             EnableHideout              = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
             EnableBenchmark              = Config.Bind(category, "Benchmark", false, "");

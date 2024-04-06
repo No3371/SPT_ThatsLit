@@ -37,7 +37,7 @@ namespace ThatsLit.Patches.Vision
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
 
 #region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value)
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
                 if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
@@ -87,7 +87,7 @@ namespace ThatsLit.Patches.Vision
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;
 #region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value)
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
                 _benchmarkSW.Start();

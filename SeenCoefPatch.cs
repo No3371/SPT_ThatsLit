@@ -58,7 +58,7 @@ namespace ThatsLit
             if (!__instance.Person.IsYourPlayer) return;
 
 #region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value)
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSW == null) _benchmarkSW = new Stopwatch();
                 if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");

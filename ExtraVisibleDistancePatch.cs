@@ -36,7 +36,7 @@ namespace ThatsLit
             if (mainPlayer?.scoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
 
 #region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value)
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
                 if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");

@@ -56,7 +56,7 @@ namespace ThatsLit.Components
         public float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
         {
 #region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value)
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
                 if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
