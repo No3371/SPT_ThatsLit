@@ -351,16 +351,6 @@ namespace ThatsLit.Components
                     }
             }
 
-            if (gquReq.done) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
-            {
-                if (req.hasError)
-                    return;
-
-                observed.Dispose();
-                observed = req.GetData<Color32>();
-                scoreCalculator?.PreCalculate(observed, GetInGameDayTime());
-            });
-
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
             //     envCam.transform.localPosition = envCamOffset;
