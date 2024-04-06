@@ -96,7 +96,7 @@ namespace ThatsLit
             VagueHintChance            = Config.Bind(category,
                                                      "Vague Hint Chance",
                                                      0.6f,
-                                                     new ConfigDescription("The chance to cancel a bot's visual confirmation on you and instead only tell it it's spotted from roughly your direction, when it's not facing your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+                                                     new ConfigDescription("The chance to cancel a bot's visual confirmation on you and instead only tell it it's spotted from roughly your direction, when it's not even facing your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
 
             category                   = "4. Grasses";
             EnabledGrasses             = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));

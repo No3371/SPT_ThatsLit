@@ -15,7 +15,7 @@ namespace ThatsLit.Patches.Vision
         internal static System.Diagnostics.Stopwatch _benchmarkSW;
         protected override MethodBase GetTargetMethod()
         {
-            _GoalEnemyProp = AccessTools.Property(typeof(BotMemoryClass), "GoalEnemy");
+            _GoalEnemyProp = AccessTools.Property(typeof(BotMemoryClass), name: "GoalEnemy");
             return AccessTools.Method(typeof(EnemyInfo), nameof(EnemyInfo.SetVisible));
         }
 

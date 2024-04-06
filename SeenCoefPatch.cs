@@ -7,9 +7,6 @@ using System;
 using System.Reflection;
 using UnityEngine;
 using Comfort.Common;
-using EFT.Utilities;
-using System.Globalization;
-using UnityEngine.UIElements;
 using EFT.InventoryLogic;
 using System.Diagnostics;
 
@@ -404,19 +401,19 @@ namespace ThatsLit
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 35f);
                         foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.15f) / 0.15f);
                         enemyDisFactor = Mathf.Clamp01(dis / 10f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
+                        poseScale = poseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_small02":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 25f);
                         foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.15f) / 0.15f);
                         enemyDisFactor = Mathf.Clamp01(dis / 8f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
+                        poseScale = poseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_small03":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 40f);
                         foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.1f) / 0.15f);
                         enemyDisFactor = Mathf.Clamp01(dis / 10f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
+                        poseScale = poseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_dry03":
                         angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 30f);
@@ -428,7 +425,7 @@ namespace ThatsLit
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 35f);
                         foliageDisFactor = 1f - Mathf.Clamp01((mainPlayer.foliageDisH - 0.15f) / 0.15f);
                         enemyDisFactor = Mathf.Clamp01(dis / 25f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0; // crouch (0.45) -> 0%, prone (0.05) -> 100%
+                        poseScale = poseFactor == 0.45f ? 1f : 0;
                         break;
                     case "bush_dry02":
                         angleFactor = 1;

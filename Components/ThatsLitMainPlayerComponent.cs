@@ -234,7 +234,7 @@ namespace ThatsLit.Components
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
             if (!skipDetailCheck && Time.time > lastCheckedDetails + 0.5f)
             {
-                if (GPUInstancerDetailManager.activeManagerList.Count == 0)
+                if (GPUInstancerDetailManager.activeManagerList?.Count == 0)
                 {
                     skipDetailCheck = true;
                 }
@@ -652,7 +652,7 @@ namespace ThatsLit.Components
             recentDetailCount3x3 = 0;
             var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
             if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return;
-            var terrain = hit.transform.GetComponent<Terrain>();
+            var terrain = hit.transform?.GetComponent<Terrain>();
             GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
 
             if (!terrain || !manager || !manager.isInitialized) return;
@@ -850,16 +850,16 @@ namespace ThatsLit.Components
                 {
                     for (int terrainCellY = 0; terrainCellY < spData.cellRowAndCollumnCountPerTerrain; ++terrainCellY)
                     {
-                        BaseCellClass cell;
-                        if (spData.GetCell(BaseCellClass.CalculateHash(terrainCellX, 0, terrainCellY), out cell))
+                        BaseCellClass abstractCell;
+                        if (spData.GetCell(BaseCellClass.CalculateHash(terrainCellX, 0, terrainCellY), out abstractCell))
                         {
-                            CellClass gclass965 = (CellClass)cell;
-                            if (gclass965.detailMapData != null)
+                            CellClass cell = (CellClass)abstractCell;
+                            if (cell.detailMapData != null)
                             {
                                 for (int cellResX = 0; cellResX < resolutionPerCell; ++cellResX)
                                 {
                                     for (int cellResY = 0; cellResY < resolutionPerCell; ++cellResY)
-                                        detailLayer[cellResX + terrainCellX * resolutionPerCell, cellResY + terrainCellY * resolutionPerCell] = gclass965.detailMapData[layer][cellResX + cellResY * resolutionPerCell];
+                                        detailLayer[cellResX + terrainCellX * resolutionPerCell, cellResY + terrainCellY * resolutionPerCell] = cell.detailMapData[layer][cellResX + cellResY * resolutionPerCell];
                                 }
                             }
                         }
