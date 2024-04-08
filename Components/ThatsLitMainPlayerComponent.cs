@@ -47,7 +47,7 @@ namespace ThatsLit.Components
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
         // PlayerSpiritAura is Visceral Bodies compat
 
-        float awakeAt, lastCheckedLights, lastCheckedFoliages, lastCheckedDetails;
+        float awakeAt, lastCheckedLights, lastCheckedFoliages, lastCheckedDetails = 10;
         // Note: If vLight > 0, other counts may be skipped
 
         // public Vector3 envCamOffset = new Vector3(0, 2, 0);
@@ -243,6 +243,7 @@ namespace ThatsLit.Components
                 if (GPUInstancerDetailManager.activeManagerList?.Count == 0)
                 {
                     skipDetailCheck = true;
+                    Logger.LogInfo($"Active detail managers not found, disabling detail check...");
                 }
                 else
                 {
@@ -665,13 +666,13 @@ namespace ThatsLit.Components
             Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
             var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
 
-            if (detailsHere5x5 == null)
+            if (detailsHere5x5 == null) // Initialize
             {
                 foreach (var mgr in GPUInstancerDetailManager.activeManagerList)
                 {
                     if (MAX_DETAIL_TYPES < mgr.prototypeList.Count)
                     {
-                        MAX_DETAIL_TYPES = manager.prototypeList.Count + 2;
+                        MAX_DETAIL_TYPES = mgr.prototypeList.Count + 2;
                     }
                 }
                 detailsHere5x5 = new DetailInfo[MAX_DETAIL_TYPES * 5 * 5];
@@ -907,7 +908,6 @@ namespace ThatsLit.Components
                 mid = 0;
                 return false;
             }
-
             int dir = 0;
             IEnumerable<int> it = null;
             if (dis < 10f || verticalAxisAngle < -15f)
@@ -918,7 +918,8 @@ namespace ThatsLit.Components
             else
             {
                 scoreProne = scoreRegular = 0;
-                var dirFlat = (new Vector2(enemyDirection.x, enemyDirection.z)).normalized;
+
+                var dirFlat = new Vector2(enemyDirection.x, enemyDirection.z).normalized;
                 var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
                 if (angle >= -22.5f && angle <= 22.5f)
                 {
@@ -963,6 +964,7 @@ namespace ThatsLit.Components
                 else throw new Exception($"[That's Lit] Invalid angle to enemy: {angle}");
             }
 
+            if (detailsHere5x5 == null) return; // Could be resizing?
             foreach (var pos in it)
             {
                 for (int i = 0; i < MAX_DETAIL_TYPES; i++)
