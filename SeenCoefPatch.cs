@@ -566,12 +566,12 @@ namespace ThatsLit
                      && rand > 0.0001f)
                         __result *= 100;
                 }
-                else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor) __result *= (1f - factor * 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value); // Half the reaction time regardles angle half of the time at 100% score
+                else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.4f * ThatsLitPlugin.BrightnessImpactScale.Value); // 0.7x the reaction time regardles angle half of the time at 100% score
                 else if (factor < -0.9f) __result *= 1f - (factor * (2f - cqb - cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
                 else if (factor < -0.5f) __result *= 1f - (factor * (1.5f - 0.75f * cqb - 0.75f * cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
                 else if (factor < -0.2f) __result *= 1f - factor * cqb * ThatsLitPlugin.DarknessImpactScale.Value;
                 else if (factor < 0f) __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value;
-                else if (factor > 0f) __result /= 1f + (factor / 2f) * ThatsLitPlugin.BrightnessImpactScale.Value;
+                else if (factor > 0f) __result /= 1f + (factor / 3f) * ThatsLitPlugin.BrightnessImpactScale.Value;
             }
 
             if (ThatsLitPlugin.EnableMovementImpact.Value)
