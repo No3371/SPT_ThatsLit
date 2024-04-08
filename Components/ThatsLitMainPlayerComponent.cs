@@ -579,12 +579,15 @@ namespace ThatsLit.Components
                         EFT.UI.ConsoleScreen.Log($"[That's Lit Benchmark Sample] Update: {benchmarkSampleUpdate,8:0.000} / SeenCoef: {benchmarkSampleSeenCoef,8:0.000} / Encountering: {benchmarkSampleEncountering,8:0.000} / ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000} / ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000} / GUI: {benchmarkSampleGUI,8:0.000} ms");
                 }
 #if DEBUG_DETAILS
-            GUILayout.Label(string.Format(" DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df) 3x3: {2}", lastFinalDetailScoreNearest, lastDisFactorNearest, recentDetailCount3x3));
-            GUILayout.Label(string.Format(" {0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
-            for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
-                if (detailsHere5x5[i].casted)
-                    GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
-            Utility.GUILayoutDrawAsymetricMeter((int)(lastFinalDetailScoreNearest / 0.0999f));
+            if (detailsHere5x5 != null)
+            {
+                GUILayout.Label(string.Format(" DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df) 3x3: {2}", arg0: lastFinalDetailScoreNearest, lastDisFactorNearest, recentDetailCount3x3));
+                GUILayout.Label(string.Format(" {0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
+                for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
+                    if (detailsHere5x5[i].casted)
+                        GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
+                Utility.GUILayoutDrawAsymetricMeter((int)(lastFinalDetailScoreNearest / 0.0999f));
+            }
 #endif
                 // GUILayout.Label($"MID  DETAIL_LOW: { scoreCache[16] } DETAIL_MID: {scoreCache[17]}");
                 // GUILayout.Label($"  N  DETAIL_LOW: { scoreCache[0] } DETAIL_MID: {scoreCache[1]}");
@@ -629,7 +632,7 @@ namespace ThatsLit.Components
             cloud = WeatherController.Instance.WeatherCurve.Cloudiness;
         }
 
-        public DetailInfo[] detailsHere5x5 = new DetailInfo[MAX_DETAIL_TYPES * 25]; // MAX_DETAIL_TYPES(24) x 25;
+        public DetailInfo[] detailsHere5x5;
         public struct DetailInfo
         {
             public bool casted;
@@ -645,7 +648,7 @@ namespace ThatsLit.Components
         void CheckTerrainDetails()
         {
             Array.Clear(detailScoreFrameCache, 0, detailScoreFrameCache.Length);
-            Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
+            if (detailsHere5x5 != null) Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
             recentDetailCount3x3 = 0;
             var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
             if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return;
@@ -661,6 +664,25 @@ namespace ThatsLit.Components
 
             Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
             var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
+
+            if (detailsHere5x5 == null)
+            {
+                foreach (var mgr in GPUInstancerDetailManager.activeManagerList)
+                {
+                    if (MAX_DETAIL_TYPES < mgr.prototypeList.Count)
+                    {
+                        MAX_DETAIL_TYPES = manager.prototypeList.Count + 2;
+                    }
+                }
+                detailsHere5x5 = new DetailInfo[MAX_DETAIL_TYPES * 5 * 5];
+                Logger.LogInfo($"Set MAX_DETAIL_TYPES to {MAX_DETAIL_TYPES}");
+            }
+
+            if (MAX_DETAIL_TYPES < manager.prototypeList.Count)
+            {
+                MAX_DETAIL_TYPES = manager.prototypeList.Count + 2;
+                detailsHere5x5 = new DetailInfo[MAX_DETAIL_TYPES * 5 * 5];
+            }
 
             for (int d = 0; d < manager.prototypeList.Count; d++)
             {
@@ -983,6 +1005,6 @@ namespace ThatsLit.Components
             yield return 5 * (3 + yOffset) + 3 + xOffset;
         }
 
-        const int MAX_DETAIL_TYPES = 24;
+        int MAX_DETAIL_TYPES = 20;
     }
 }
