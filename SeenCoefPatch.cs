@@ -574,18 +574,21 @@ namespace ThatsLit
                 else if (factor > 0f) __result /= 1f + (factor / 2f) * ThatsLitPlugin.BrightnessImpactScale.Value;
             }
 
-            if (__instance.Owner.Mover.Sprinting)
-                __result *= 1 + (rand2 / 5f) * Mathf.Clamp01((visionAngleDelta - 25f) / 65f); // When facing away (25~90deg), sprinting bots takes up to 20% longer to spot the player
-            else if (!__instance.Owner.Mover.IsMoving)
+            if (ThatsLitPlugin.EnableMovementImpact.Value)
             {
-                float delta = __result * (rand4 / 5f); // When not moving, bots takes up to 20% shorter to spot the player
-                __result = Mathf.Max(original, __result - delta);
-            }
+                if (__instance.Owner.Mover.Sprinting)
+                    __result *= 1 + (rand2 / 5f) * Mathf.Clamp01((visionAngleDelta - 25f) / 65f); // When facing away (25~90deg), sprinting bots takes up to 20% longer to spot the player
+                else if (!__instance.Owner.Mover.IsMoving)
+                {
+                    float delta = __result * (rand4 / 5f); // When not moving, bots takes up to 20% shorter to spot the player
+                    __result = Mathf.Max(original, __result - delta);
+                }
 
-            if (poseFactor > 0.45f && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.01f)
-            {
-                float delta = __result * (rand2 / 5f) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.25f); // Depends on the player's speed, bots takes up to 20% shorter to spot the player;
-                __result = Mathf.Max(original, __result - delta);
+                if (poseFactor > 0.45f && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.01f)
+                {
+                    float delta = __result * (rand2 / 5f) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.25f); // Depends on the player's speed, bots takes up to 20% shorter to spot the player;
+                    __result = Mathf.Max(original, __result - delta);
+                }
             }
 
 
