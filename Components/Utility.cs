@@ -65,6 +65,8 @@ namespace ThatsLit
         {
             prone = 0;
             crouch = 0;
+            if (name == null) return; // Somehow happens on raid start?
+
             if (num == 0)
             {
                 prone = 0;
@@ -140,7 +142,7 @@ namespace ThatsLit
             {
                 if (Time.frameCount % 47 == 0 && name != lastLogged)
                 {
-                    NotificationManagerClass.DisplayWarningNotification(string.Format("That's Lit Debug: Missing terrain detail: {0}", name));
+                    NotificationManagerClass.DisplayWarningNotification(string.Format("That's Lit: Missing terrain detail: {0}, please report with a screenshot looking down to the ground", name));
                     lastLogged = name;
                 }
             }
