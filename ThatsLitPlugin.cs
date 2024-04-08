@@ -117,7 +117,7 @@ namespace ThatsLit
                                                      new ConfigDescription("Scale the buff/nerf to bots from the mod. 0% = use the original value. Adjust this to balance your game to your liking. This is mainly provided for people whose game somehow becomes too easy with the mod.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 98}));
             FinalOffset                = Config.Bind(category, "Final Offset", 0f, "(Not recommanded because it's easy to mess up the balance, try Final Impact Scale first) Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa. Applied after Final Impact Scale.");
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss.");
-            EnableMovementImpact              = Config.Bind(category, "MovementImpact", true, "Should movement makes the player slightly more visible (especially when running). This option is provided because SAIN is including similiar feature (though their effectiveness is still unknown).");
+            EnableMovementImpact       = Config.Bind(category, "MovementImpact", true, "Should sprinting bots spot player slower & Should moving (esp. sprinting) player get spotted slightly faster. This option is provided because SAIN is including similiar (player side only) feature (though their effectiveness is unknown yet.");
 
             category                   = "6. Info";
             ScoreInfo                  = Config.Bind(category, "Lighting Info", true, "Shown at the upper left corner.");
