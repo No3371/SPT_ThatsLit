@@ -275,6 +275,9 @@ namespace ThatsLit
 
             switch (templateId)
             {
+                case "6284bd5f95250a29bc628a30": // scope_all_holosun_hs401g5 = scope_all_milkor_m2a1_reflex_sight
+                    laser = true;
+                    break;
                 case "544909bb4bdc2d6f028b4577": // tactical_all_insight_anpeq15
                 case "57fd23e32459772d0805bcf1": // tactical_all_holosun_ls321
                 case "5c06595c0db834001a66af6c": // tactical_all_insight_la5
