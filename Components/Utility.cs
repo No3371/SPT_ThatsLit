@@ -142,7 +142,7 @@ namespace ThatsLit
             {
                 if (Time.frameCount % 47 == 0 && name != lastLogged)
                 {
-                    NotificationManagerClass.DisplayWarningNotification(string.Format("That's Lit: Missing terrain detail: {0}, please report with a screenshot looking down to the ground", name));
+                    NotificationManagerClass.DisplayWarningNotification(string.Format("That's Lit: Missing terrain detail: {0}", name));
                     lastLogged = name;
                 }
             }
