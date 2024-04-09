@@ -617,6 +617,19 @@ namespace ThatsLit.Components
                         else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
                     if (Time.time < awakeAt + 10)
                         GUILayout.Label(" [That's Lit HUD] Can be disabled in plugin settings.");
+
+                    if (cloud <= -1.4f)
+                        GUILayout.Label(" ☀☀☀");
+                    else if (cloud <= -0.9f)
+                        GUILayout.Label(" ☀☀");
+                    else if (cloud <= -0.4f)
+                        GUILayout.Label(" ☀");
+                    else if (cloud >= 1.4f)
+                        GUILayout.Label(" ☁☁☁");
+                    else if (cloud >= 0.9f)
+                        GUILayout.Label(" ☁☁");
+                    else if (cloud >= 0.4f)
+                        GUILayout.Label(" ☁");
                 }
             }
             if (!ThatsLitPlugin.DebugInfo.Value) skip = true;
