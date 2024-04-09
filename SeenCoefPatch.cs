@@ -202,8 +202,8 @@ namespace ThatsLit
 
                 bool botIsInside = __instance.Owner.AIData.IsInside;
                 bool playerIsInside = mainPlayer.MainPlayer.AIData.IsInside;
-                if (!botIsInside && playerIsInside && Time.time - mainPlayer.lastOutside > 1f)
-                    __result *= 1 + (rand3 * 25 + (isGoalEnemy ? 0f : rand2 * 5f) + Mathf.Clamp01(0.05f * visionAngleDeltaVertical)) * (0.5f * Mathf.Clamp01(dis / (isGoalEnemy ? 100f : 50f)) + 0.5f * Mathf.Clamp01((visionAngleDelta - (isGoalEnemy ? 25f : 10f)) / 45f));
+                if (!botIsInside && playerIsInside && Time.time - mainPlayer.lastOutside > 1.5f)
+                    __result *= 1 + (rand3 * 20 + (isGoalEnemy ? 0f : rand2 * 5f) + Mathf.Clamp01(0.05f * visionAngleDeltaVertical)) * (0.5f * Mathf.Clamp01(dis / (isGoalEnemy ? 100f : 50f)) + 0.4f * Mathf.Clamp01((visionAngleDelta - (isGoalEnemy ? 25f : 10f)) / 45f));
             }
 
             float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
@@ -577,7 +577,7 @@ namespace ThatsLit
             if (ThatsLitPlugin.EnableMovementImpact.Value)
             {
                 if (__instance.Owner.Mover.Sprinting)
-                    __result *= 1 + (rand2 / 5f) * Mathf.Clamp01((visionAngleDelta - 25f) / 65f); // When facing away (25~90deg), sprinting bots takes up to 20% longer to spot the player
+                    __result *= 1 + (rand2 / 4f) * Mathf.Clamp01((visionAngleDelta - 20f) / 70f); // When facing away (25~90deg), sprinting bots takes up to 25% longer to spot the player
                 else if (!__instance.Owner.Mover.IsMoving)
                 {
                     float delta = __result * (rand4 / 5f); // When not moving, bots takes up to 20% shorter to spot the player
