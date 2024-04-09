@@ -473,7 +473,7 @@ namespace ThatsLit.Components
             //     }
             // }
 
-            if (Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.6f : 0.33f))
+            if (ThatsLitPlugin.EnableEquipmentCheck.Value && Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.6f : 0.33f))
             {
                 lastCheckedLights = Time.time;
                 Utility.DetermineShiningEquipments(MainPlayer, out var vLight, out var vLaser, out var irLight, out var irLaser, out var vLightSub, out var vLaserSub, out var irLightSub, out var irLaserSub);
