@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Comfort.Common;
 using EFT;
+using EFT.EnvironmentEffect;
 using EFT.UI;
 using EFT.Weather;
 using GPUInstancer;
@@ -65,6 +66,9 @@ namespace ThatsLit.Components
         AsyncGPUReadbackRequest gquReq;
         internal float lastOutside;
         internal bool isWinterCache;
+        internal float ambientShadownRating, bunkerFactor;
+        internal float lastInBunkerTime, lastOutBunkerTime;
+        internal Vector3 lastInBunderPos;
         // float benchMark1, benchMark2;
         public void Awake()
         {
@@ -234,10 +238,35 @@ namespace ThatsLit.Components
                 _benchmarkSW = null;
             #endregion
 
-            if (!MainPlayer.AIData.IsInside) lastOutside = Time.time;
             IsDebugSampleFrame = ThatsLitPlugin.DebugInfo.Value && Time.frameCount % 47 == 0;
 
+
             Vector3 bodyPos = MainPlayer.MainParts[BodyPartType.body].Position;
+            Vector3 headPos = MainPlayer.MainParts[BodyPartType.head].Position;
+            Vector3 lhPos = MainPlayer.MainParts[BodyPartType.leftArm].Position;
+            Vector3 rhPos = MainPlayer.MainParts[BodyPartType.rightArm].Position;
+            Vector3 lPos = MainPlayer.MainParts[BodyPartType.leftLeg].Position;
+            Vector3 rPos = MainPlayer.MainParts[BodyPartType.rightLeg].Position;
+
+            if (!MainPlayer.AIData.IsInside) lastOutside = Time.time;
+            
+            if (EnvironmentManager.Instance.InBunker && lastOutBunkerTime >= lastInBunkerTime)
+            {
+                lastInBunkerTime = Time.time;
+                lastInBunderPos = bodyPos;
+            }
+
+            if (!EnvironmentManager.Instance.InBunker && lastOutBunkerTime < lastInBunkerTime)
+            {
+                lastOutBunkerTime = Time.time;
+            }
+
+            if (lastOutBunkerTime < lastInBunkerTime && bodyPos.SqrDistance(lastInBunderPos) > 2.25f) bunkerFactor += Time.deltaTime;
+            else bunkerFactor -= Time.deltaTime * 5;
+
+            bunkerFactor = Mathf.Clamp(bunkerFactor, 0, 10);
+
+
             if (!skipDetailCheck && Time.time > lastCheckedDetails + 0.5f)
             {
                 if (GPUInstancerDetailManager.activeManagerList?.Count == 0)
@@ -352,6 +381,63 @@ namespace ThatsLit.Components
                         break;
                     }
             }
+
+            // Ambient shadow
+            if (TOD_Sky.Instance != null)
+            switch (Time.frameCount % 5)
+            {
+                case 0:
+                    {
+                        var ray = new Ray(headPos, TOD_Sky.Instance.LightDirection);
+                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                        {
+                            ambientShadownRating += 10f * Time.deltaTime;
+                        }
+                        else ambientShadownRating -= 22f * Time.deltaTime;
+                        break;
+                    }
+                case 1:
+                    {
+                        var ray = new Ray(lPos, TOD_Sky.Instance.LightDirection);
+                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                        {
+                            ambientShadownRating += 10f * Time.deltaTime;
+                        }
+                        else ambientShadownRating -= 22f * Time.deltaTime;
+                        break;
+                    }
+                case 2:
+                    {
+                        var ray = new Ray(rPos, TOD_Sky.Instance.LightDirection);
+                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                        {
+                            ambientShadownRating += 10f * Time.deltaTime;
+                        }
+                        else ambientShadownRating -= 22f * Time.deltaTime;
+                        break;
+                    }
+                case 3:
+                    {
+                        var ray = new Ray(lhPos, TOD_Sky.Instance.LightDirection);
+                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                        {
+                            ambientShadownRating += 10f * Time.deltaTime;
+                        }
+                        else ambientShadownRating -= 22f * Time.deltaTime;
+                        break;
+                    }
+                case 4:
+                    {
+                        var ray = new Ray(rhPos, TOD_Sky.Instance.LightDirection);
+                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                        {
+                            ambientShadownRating += 10f * Time.deltaTime;
+                        }
+                        else ambientShadownRating -= 22f * Time.deltaTime;
+                        break;
+                    }
+            }
+            ambientShadownRating = Mathf.Clamp(ambientShadownRating, 0, 10f);
 
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
@@ -558,6 +644,7 @@ namespace ThatsLit.Components
                     }
                 }
                 GUILayout.Label(string.Format(" IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) AMB: {5:0.00} LIT: {6:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore, ambScoreSample, litFactorSample));
+                GUILayout.Label($"AMB: { ambientShadownRating } BNKR: { bunkerFactor }");
                 //GUILayout.Label(text: "PIXELS:");
                 //GUILayout.Label(lastValidPixels.ToString());
                 GUILayout.Label(string.Format(" AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));

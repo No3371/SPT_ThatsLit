@@ -88,11 +88,17 @@ namespace ThatsLit.Components
             thisFrame.avgLumNonDark = lum / (float) (thisFrame.pixels - thisFrame.pxD);
             thisFrame.avgLumMultiFrames = (thisFrame.avgLum + frame1.avgLum + frame2.avgLum + frame3.avgLum + frame4.avgLum + frame5.avgLum) / 6f;
             UpdateLumTrackers(thisFrame.avgLumMultiFrames);
+            
+            float insideTime = Time.time - player.lastOutside;
+            if (insideTime < 0) insideTime = 0;
 
             baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
-            ambienceScore = CalculateAmbienceScore(locationId, time, cloud, out sunLightScore, out moonLightScore, Time.time - player.lastOutside); // The base brightness with sun/moon/cloud
+            baseAmbienceScore -= (baseAmbienceScore - -1f) * (0.45f * Mathf.Pow(player.bunkerFactor / 10f, 2) + 0.15f * Mathf.Clamp((insideTime - 2f) / 3f, 0, 1f)); // Handle bunker darkness
+
+            ambienceScore = CalculateAmbienceScore(locationId, time, cloud, out sunLightScore, out moonLightScore, insideTime); // The base brightness with sun/moon/cloud
+            ambienceScore -= (ambienceScore - -1f) * (0.4f + 0.4f * Mathf.Clamp(insideTime / 3f, 0, 1f)) * Mathf.Pow(player.ambientShadownRating / 10f, 2) * GetMapAmbienceCoef(locationId, time); // From ambient shadow
             
-            if (player.isWinterCache && Time.time - player.lastOutside < 2f) // Debuff from winter environment when outside
+            if (player.isWinterCache && insideTime < 2f) // Debuff from winter environment when outside
             {
                 ambienceScore *= 1 + Mathf.Clamp01((sunLightScore + moonLightScore - 0.1f) / 0.2f) * 0.1f;
             }
@@ -545,7 +551,7 @@ namespace ThatsLit.Components
             if (time >= 5 && time < 7.5f) // 0 ~ 0.5f
                 return 0.5f * GetTimeProgress(time, 5, 7.5f);
             else if (time >= 7.5f && time < 12f) // 0.5f ~ 1
-                return 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12);
+                return 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12f);
             else if (time >= 12 && time < 15) // 1 ~ 1
                 return 1;
             else if (time >= 15 && time < 18) // 1 ~ 0.8f
@@ -647,7 +653,7 @@ namespace ThatsLit.Components
             return maxMoonlightScore;
         }
         protected virtual float MinBaseAmbienceScore { get => -0.9f; }
-        protected virtual float MaxBaseAmbienceScore { get => 0; }
+        protected virtual float MaxBaseAmbienceScore { get => 0.05f; }
         /// <summary>
         /// The ambience change between c-1 and c1 during the darkest hours
         /// </summary>
