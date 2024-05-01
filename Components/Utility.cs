@@ -81,18 +81,18 @@ namespace ThatsLit
             )
             {
                 prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 20f), 2) * Mathf.Min(num, 50); // Needs cluster
-                crouch = 0.005f * Mathf.Min(num, 20);
+                crouch = 0.0035f * Mathf.Min(num, 10);
             }
             else if (name.EndsWith("27bbce")) // Grass_new_3_D_27bbce, shorter and smaller, cross shape
             {
-                prone = 0.008f * num;
+                prone = 0.008f * Mathf.Min(num, 25);
                 crouch = 0;
             }
             else if (name.EndsWith("fa097b")
                   || name.EndsWith("2adee9")) // low res, bigger yellower grass cross
             {
                 prone = 0.06f * num; 
-                crouch = 0.01f * num;
+                crouch = 0.009f * num;
             }
             else if (name.EndsWith("eb7931"))
             {
