@@ -95,6 +95,7 @@ namespace ThatsLit
             float disFactor = 0;
             bool inThermalView = false;
             bool inNVGView = false;
+            float insideTime = Mathf.Max(0, Time.time - mainPlayer.lastOutside);
 
 
             BotNightVisionData nightVision = __instance.Owner.NightVision;
@@ -202,7 +203,7 @@ namespace ThatsLit
 
                 bool botIsInside = __instance.Owner.AIData.IsInside;
                 bool playerIsInside = mainPlayer.MainPlayer.AIData.IsInside;
-                if (!botIsInside && playerIsInside && Time.time - mainPlayer.lastOutside > 1.5f)
+                if (!botIsInside && playerIsInside && insideTime >= 1)
                     __result *= 1 + (rand3 * 20 + (isGoalEnemy ? 0f : rand2 * 5f) + Mathf.Clamp01(0.05f * visionAngleDeltaVertical)) * (0.5f * Mathf.Clamp01(dis / (isGoalEnemy ? 100f : 50f)) + 0.4f * Mathf.Clamp01((visionAngleDelta - (isGoalEnemy ? 25f : 10f)) / 45f));
             }
 
@@ -280,6 +281,7 @@ namespace ThatsLit
             var xyFacingFactor = 0f;
             var layingVerticaltInVisionFactor = 0f;
             var detailScore = 0f;
+            var detailScoreRaw = 0f;
             if (!inThermalView && !mainPlayer.skipDetailCheck)
             {
                 mainPlayer.CalculateDetailScore(-eyeToEnemyBody, dis, visionAngleDeltaVertical, out float scoreProne, out float scoreRegular);
@@ -321,7 +323,7 @@ namespace ThatsLit
                         detailScore = scoreRegular / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
                     }
 
-
+                    detailScoreRaw = detailScore;
                     detailScore *= 1f + disFactor / 2f; // At 110m+, 1.5x effective
                     if (canSeeLight) detailScore /= 2f - disFactor; // Lights impact less from afar
 
@@ -534,6 +536,13 @@ namespace ThatsLit
 
             if (!mainPlayer.disabledLit && Mathf.Abs(score) >= 0.15f) // Skip works
             {
+                if (mainPlayer.isWinterCache) {
+                    var emptiness = 1f - mainPlayer.foliageScore * detailScoreRaw;
+                    emptiness *= 1f - insideTime;
+                    disFactor *= 0.65f + 0.35f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
+                    
+                }
+
                 if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight ? 0.3f : 1f); // Darkness will be far more effective from afar
                 else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
 
