@@ -26,7 +26,7 @@ namespace ThatsLit
         private static float nearestRecent;
 
         [PatchPostfix]
-        public static void PatchPostfix(EnemyInfo __instance, BifacialTransform BotTransform, BifacialTransform enemy, ref float __result)
+        public static void PatchPostfix(EnemyInfo __instance, BifacialTransform BotTransform, BifacialTransform enemy, float personalLastSeenTime, Vector3 personalLastSeenPos, ref float __result)
         {
             // if (ThatsLitPlugin.DevMode.Value && ThatsLitPlugin.DevModeInvisible.Value)
             // {
@@ -67,7 +67,9 @@ namespace ThatsLit
 
             nearestRecent += 0.5f;
             var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
-            float sinceSeen = Time.time - __instance.TimeLastSeen;
+            float sinceSeen = Time.time - personalLastSeenTime;
+            float lastSeenPosDelta = (__instance.Person.Position - __instance.EnemyLastPosition).magnitude;
+            float lastSeenPosDeltaSqr = lastSeenPosDelta * lastSeenPosDelta;
             bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
             float stealthNegation = 0;
 
@@ -177,7 +179,7 @@ namespace ThatsLit
                 // (unscaled) 30deg -> 8%, 45deg->20%, 60deg -> 41%, 75deg->69%, 80deg->80%, 85deg->92%
                 // Overlook close enemies at higher attitude and in low pose
                 var overheadChance = Mathf.Clamp01(weight) * (1.025f - poseFactor / 2f); // prone: 1.0x, crouch: 0.8x, stand: 0.5x
-                overheadChance *= Mathf.Clamp01((__instance.Person.Position - __instance.EnemyLastPosition).magnitude / 15f); // Seen nearby
+                overheadChance *= Mathf.Clamp01(lastSeenPosDelta / 15f); // Seen nearby
                 overheadChance *= 1 - pSpeedFactor * 0.1f;
                 overheadChance = Mathf.Clamp01(overheadChance + (rand3 - 0.5f) * 2f * 0.1f);
 
