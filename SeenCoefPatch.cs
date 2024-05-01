@@ -20,9 +20,7 @@ namespace ThatsLit
 
         protected override MethodBase GetTargetMethod()
         {
-            _enemyRel = AccessTools.Property(typeof(BotMemoryClass), "GoalEnemy");
-            Type enemyInfoType = _enemyRel.PropertyType;
-            return ReflectionHelper.FindMethodByArgTypes(enemyInfoType, new Type[] { typeof(BifacialTransform), typeof(BifacialTransform), typeof(BotDifficultySettingsClass), typeof(AIData), typeof(float), typeof(Vector3) }); ;
+            return ReflectionHelper.FindMethodByArgTypes(typeof(EnemyInfo), new Type[] { typeof(BifacialTransform), typeof(BifacialTransform), typeof(BotDifficultySettingsClass), typeof(AIData), typeof(float), typeof(Vector3) }); ;
         }
 
         private static float nearestRecent;
