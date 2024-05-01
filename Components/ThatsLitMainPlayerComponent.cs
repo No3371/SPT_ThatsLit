@@ -28,7 +28,8 @@ namespace ThatsLit.Components
         public bool disabledLit;
         readonly int RESOLUTION = 32 * ThatsLitPlugin.ResLevel.Value;
         public const int POWER = 3;
-        public RenderTexture rt, envRt;
+        public RenderTexture rt;
+        Texture slowRT;
         public Camera cam, envCam;
         // public Texture2D envTex, envDebugTex;
         Unity.Collections.NativeArray<Color32> observed;
@@ -153,6 +154,7 @@ namespace ThatsLit.Components
             }
 
             rt = new RenderTexture(RESOLUTION, RESOLUTION, 0, RenderTextureFormat.ARGB32);
+            if (ThatsLitPlugin.DebugSlowTexture.Value) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
             rt.useMipMap = false;
             rt.filterMode = FilterMode.Point;
             rt.Create();
@@ -180,6 +182,7 @@ namespace ThatsLit.Components
                 display.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
                 display.RectTransform().sizeDelta = new Vector2(160, 160);
                 display.texture = rt;
+                if (ThatsLitPlugin.DebugSlowTexture.Value) display.texture = slowRT;
                 display.RectTransform().anchoredPosition = new Vector2(-720, -360);
 
 
@@ -381,6 +384,8 @@ namespace ThatsLit.Components
                         break;
                     }
             }
+
+            if (ThatsLitPlugin.DebugSlowTexture.Value && Time.frameCount % 61 == 0) Graphics.CopyTexture(rt, slowRT);
 
             // Ambient shadow
             if (TOD_Sky.Instance != null)
