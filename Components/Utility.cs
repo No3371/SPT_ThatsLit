@@ -275,9 +275,6 @@ namespace ThatsLit
 
             switch (templateId)
             {
-                case "6284bd5f95250a29bc628a30": // scope_all_holosun_hs401g5 = scope_all_milkor_m2a1_reflex_sight
-                    laser = true;
-                    break;
                 case "544909bb4bdc2d6f028b4577": // tactical_all_insight_anpeq15
                 case "57fd23e32459772d0805bcf1": // tactical_all_holosun_ls321
                 case "5c06595c0db834001a66af6c": // tactical_all_insight_la5
@@ -356,8 +353,10 @@ namespace ThatsLit
                 case "5b07dd285acfc4001754240d": // tactical_all_steiner_las_tac_2
                 case "5c079ed60db834001a66b372": // tactical_tt_dlp_tactical_precision_laser_sight
                 case "5cc9c20cd7f00c001336c65d": // tactical_all_ncstar_tactical_blue_laser
-                case "5bffcf7a0db83400232fea79": // pistolgrip_tt_pm_laser_tt_206
-                    laser = true;
+                case "5bffcf7a0db83400232fea79": // pistolgrip_tt_pm_laser_tt_206  !always on
+                case "5b30b0dc5acfc400153b7124": // scope_all_holosun_hs401g5
+                case "6284bd5f95250a29bc628a30": // scope_all_milkor_m2a1_reflex_sight
+                    laser = true; 
                     break;
                 case "5d10b49bd7ad1a1a560708b0": // tactical_all_insight_anpeq2
                     switch (selectedMode)
