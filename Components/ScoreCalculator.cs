@@ -216,6 +216,7 @@ namespace ThatsLit.Components
             lumScore = Mathf.Clamp(lumScore, -1, 1);
             thisFrame.score = lumScore;
             thisFrame.ambienceScore = ambienceScore;
+            thisFrame.baseAmbienceScore = baseAmbienceScore;
 
             var topScoreMultiFrames = FindHighestScoreRecentFrame(true, lumScore);
             var bottomScoreMultiFrames = FindLowestScoreRecentFrame(true, lumScore);

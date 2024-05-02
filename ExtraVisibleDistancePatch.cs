@@ -75,16 +75,24 @@ namespace ThatsLit
                 float compensation = (scope? scopeDis : 200) - __instance.Owner.LookSensor.VisibleDist;
                 if (compensation > 0) addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation * ThatsLitPlugin.LitVisionDistanceScale.Value;
             }
-            else if (nvgActive && scoreCalculator.frame0.ambienceScore < 0)
+            else if (nvgActive && scoreCalculator.frame0.ambienceScore < 0) // Base + Sun/Moon < 0
             {
                 float scale;
                 if (scoreCalculator.irLight) scale = 4f;
                 else if (scoreCalculator.irLaser) scale = 3.5f;
                 else scale = 3f;
-                scale = Mathf.Lerp(1, scale, Mathf.Clamp01(scoreCalculator.frame0.ambienceScore / -1f));
+                scale = Mathf.Lerp(1, scale, Mathf.Clamp01(scoreCalculator.frame0.ambienceScore / -1f)); // The darker the ambience, the more effective the NVG is
 
                 float extra = __instance.Owner.LookSensor.VisibleDist * scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
-                addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(100, extra);
+                addVisibility += UnityEngine.Random.Range(0.25f, 1f) * Mathf.Min(100, extra); // 0.25x~1x of extra capped at 100m
+            }
+            else if (!nvgActive && __instance.Owner.LookSensor.VisibleDist < 50) // 
+            {
+                float litDiff = scoreCalculator.frame0.multiFrameLitScore - scoreCalculator.frame0.baseAmbienceScore; // The visibility provided by sun/moon + lightings
+                litDiff = Mathf.Clamp(litDiff, 0, 2f) / 2f;
+
+                float extra = (50 - __instance.Owner.LookSensor.VisibleDist) * litDiff;
+                addVisibility += UnityEngine.Random.Range(0.5f, 1f) * extra; // 0.5x ~ 1x of compensation to 50m
             }
 
 #region BENCHMARK

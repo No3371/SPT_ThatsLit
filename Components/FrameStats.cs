@@ -7,7 +7,7 @@
         public float avgLum, avgLumMultiFrames;
         public float avgLumNonDark;
         public int pixels;
-        public float score, ambienceScore;
+        public float score, ambienceScore, baseAmbienceScore;
         public float multiFrameLitScore;
 
         public float RatioShinePixels => pxS / (float)pixels;
