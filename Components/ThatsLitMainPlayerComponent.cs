@@ -328,7 +328,7 @@ namespace ThatsLit.Components
             else camPos = Time.frameCount % 6;
             var camHeight = MainPlayer.IsInPronePose ? 0.45f : 2.2f;
             var targetHeight = MainPlayer.IsInPronePose ? 0.2f : 0.7f;
-            var horizontalScale = MainPlayer.IsInPronePose ? 1.2f : 1;
+            var horizontalScale = MainPlayer.IsInPronePose ? 1.2f : 0.8f;
             switch (Time.frameCount % 6)
             {
                 case 0:
@@ -347,13 +347,13 @@ namespace ThatsLit.Components
                     }
                 case 1:
                     {
-                        cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
+                        cam.transform.localPosition = new Vector3(horizontalScale, camHeight, horizontalScale);
                         cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
                         break;
                     }
                 case 2:
                     {
-                        cam.transform.localPosition = new Vector3(0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
+                        cam.transform.localPosition = new Vector3(horizontalScale, camHeight, -horizontalScale);
                         cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
                         break;
                     }
@@ -362,6 +362,11 @@ namespace ThatsLit.Components
                         if (MainPlayer.IsInPronePose)
                         {
                             cam.transform.localPosition = new Vector3(0, 2f, 0);
+                            cam.transform.LookAt(MainPlayer.Transform.Original.position);
+                        }
+                        else if (MainPlayer.PoseLevel < 0.5f)
+                        {
+                            cam.transform.localPosition = new Vector3(0, 0, 0);
                             cam.transform.LookAt(MainPlayer.Transform.Original.position);
                         }
                         else
@@ -373,13 +378,13 @@ namespace ThatsLit.Components
                     }
                 case 4:
                     {
-                        cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, -0.7f * horizontalScale);
+                        cam.transform.localPosition = new Vector3(-horizontalScale, camHeight, -horizontalScale);
                         cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
                         break;
                     }
                 case 5:
                     {
-                        cam.transform.localPosition = new Vector3(-0.7f * horizontalScale, camHeight, 0.7f * horizontalScale);
+                        cam.transform.localPosition = new Vector3(-horizontalScale, camHeight, horizontalScale);
                         cam.transform.LookAt(MainPlayer.Transform.Original.position + Vector3.up * targetHeight);
                         break;
                     }
