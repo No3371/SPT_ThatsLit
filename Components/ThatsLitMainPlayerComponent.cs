@@ -624,17 +624,17 @@ namespace ThatsLit.Components
                         GUILayout.Label(" [That's Lit HUD] Can be disabled in plugin settings.");
 
                     if (cloud <= -1.4f)
-                        GUILayout.Label(" ☀☀☀");
+                        GUILayout.Label("  CLEAR ☀☀☀");
                     else if (cloud <= -0.9f)
-                        GUILayout.Label(" ☀☀");
+                        GUILayout.Label("  CLEAR ☀☀");
                     else if (cloud <= -0.4f)
-                        GUILayout.Label(" ☀");
+                        GUILayout.Label("  CLEAR ☀");
                     else if (cloud >= 1.4f)
-                        GUILayout.Label(" ☁☁☁");
+                        GUILayout.Label("  CLOUDY ☁☁☁");
                     else if (cloud >= 0.9f)
-                        GUILayout.Label(" ☁☁");
+                        GUILayout.Label("  CLOUDY ☁☁");
                     else if (cloud >= 0.4f)
-                        GUILayout.Label(" ☁");
+                        GUILayout.Label("  CLOUDY ☁");
                 }
             }
             if (!ThatsLitPlugin.DebugInfo.Value) skip = true;
