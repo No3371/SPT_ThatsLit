@@ -14,7 +14,7 @@ namespace ThatsLit.Components
         internal float lum3s, lum1s, lum10s;
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
-        float scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
+        float scoreRawBase, scoreRaw0, scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
         float foliageBonusSmooth, detailBonusSmooth;
         internal static System.Diagnostics.Stopwatch _benchmarkSW;
         public ScoreCalculator()
@@ -106,6 +106,7 @@ namespace ThatsLit.Components
 
             // Bunker: Bunker is overall moderately lit
             baseAmbienceScore = Mathf.Lerp(baseAmbienceScore, BunkerBaseAmbienceTarget, bunkerTimeFactor * Mathf.Clamp01(insideTime / 10) * 0.65f);
+            if (Time.frameCount % 47 == 0) scoreRawBase = baseAmbienceScore;
 
             var ambienceScore = baseAmbienceScore;
             float insideCoef2to9s = Mathf.Clamp01((insideTime - 2) / 7f); // 0 ~ 2 sec => 0%, 9 sec => 100%
@@ -143,6 +144,7 @@ namespace ThatsLit.Components
             ambienceScore -= foliageBonusSmooth * moonLightScore / 2f * outside1s;
             ambienceScore -= detailBonusSmooth * moonLightScore / 2f * ambienceShadowFactor * outside1s; // Requires not lit by sun/moon
             ambienceScore = Mathf.Clamp(ambienceScore, MinBaseAmbienceScore, 1f);
+            if (Time.frameCount % 47 == 0) scoreRaw0 = ambienceScore;
 
 
             //float score = CalculateTotalPixelScore(time, thisFrame.pxS, thisFrame.pxH, thisFrame.pxHM, thisFrame.pxM, thisFrame.pxML, thisFrame.pxL, thisFrame.pxD);
@@ -275,7 +277,7 @@ namespace ThatsLit.Components
                 lowLightPixelsRatioSample = (frame0.RatioLowPixels + frame1.RatioLowPixels + frame2.RatioLowPixels + frame3.RatioLowPixels + frame4.RatioLowPixels + frame5.RatioLowPixels) / 6f;
                 darkPixelsRatioSample = (frame0.RatioDarkPixels + frame1.RatioDarkPixels + frame2.RatioDarkPixels + frame3.RatioDarkPixels + frame4.RatioDarkPixels + frame5.RatioDarkPixels) / 6f;
             }
-            if (layout) infoCache = $"  PIXELS: {shinePixelsRatioSample * 100:000}% - {highLightPixelsRatioSample * 100:000}% - {highMidLightPixelsRatioSample * 100:000}% - { midLightPixelsRatioSample * 100:000}% - {midLowLightPixelsRatioSample * 100:000}% - {lowLightPixelsRatioSample * 100:000}% | {darkPixelsRatioSample * 100:000}% (AVG Sample)\n  AvgLumMF: {frame0.avgLumMultiFrames:0.000} / {GetMinAmbianceLum():0.000} ~ {GetMaxAmbianceLum():0.000} ({GetAmbianceLumRange():0.000})\n   Sun: {sunLightScore:0.000}/{GetMaxSunlightScore():0.000}, Moon: {moonLightScore:0.000}/{GetMaxMoonlightScore():0.000}\n  SCORE : {scoreRaw1:＋0.00;－0.00;+0.00} -> {scoreRaw2:＋0.00;－0.00;+0.00} -> {scoreRaw3:＋0.00;－0.00;+0.00} -> {scoreRaw4:＋0.00;－0.00;+0.00} (SAMPLE)";            
+            if (layout) infoCache = $"  PIXELS: {shinePixelsRatioSample * 100:000}% - {highLightPixelsRatioSample * 100:000}% - {highMidLightPixelsRatioSample * 100:000}% - { midLightPixelsRatioSample * 100:000}% - {midLowLightPixelsRatioSample * 100:000}% - {lowLightPixelsRatioSample * 100:000}% | {darkPixelsRatioSample * 100:000}% (AVG Sample)\n  AvgLumMF: {frame0.avgLumMultiFrames:0.000} / {GetMinAmbianceLum():0.000} ~ {GetMaxAmbianceLum():0.000} ({GetAmbianceLumRange():0.000})\n   Sun: {sunLightScore:0.000}/{GetMaxSunlightScore():0.000}, Moon: {moonLightScore:0.000}/{GetMaxMoonlightScore():0.000}\n  SCORE : {scoreRawBase:＋0.00;－0.00;+0.00} -> {scoreRaw0:＋0.00;－0.00;+0.00} -> {scoreRaw1:＋0.00;－0.00;+0.00} -> {scoreRaw2:＋0.00;－0.00;+0.00} -> {scoreRaw3:＋0.00;－0.00;+0.00} -> {scoreRaw4:＋0.00;－0.00;+0.00} (SAMPLE)";            
             GUILayout.Label(infoCache);
             // GUILayout.Label(string.Format("  PIXELS: {0:000}% - {1:000}% - {2:000}% - {3:000}% - {4:000}% - {5:000}% | {6:000}% (AVG Sample)", shinePixelsRatioSample * 100, highLightPixelsRatioSample * 100, highMidLightPixelsRatioSample * 100, midLightPixelsRatioSample * 100, midLowLightPixelsRatioSample * 100, lowLightPixelsRatioSample * 100, darkPixelsRatioSample * 100));
             // GUILayout.Label(string.Format("  AvgLumMF: {0:0.000} / {1:0.000} ~ {2:0.000} ({3:0.000})", frame0.avgLumMultiFrames, GetMinAmbianceLum(), GetMaxAmbianceLum(), GetAmbianceLumRange()));
