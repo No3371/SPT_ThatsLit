@@ -159,10 +159,21 @@ namespace ThatsLit.Components
             rt.filterMode = FilterMode.Point;
             rt.Create();
 
-            //cam = GameObject.Instantiate<Camera>(Singleton<PlayerCameraController>.Instance.Camera);
-            cam = new GameObject().AddComponent<Camera>();
+            cam = GameObject.Instantiate<Camera>(CameraClass.Instance.OpticCameraManager.Camera);
+            cam.gameObject.name = "That's Lit Camera";
+            foreach (var c in cam.gameObject.GetComponents<MonoBehaviour>())
+            switch (c) {
+                case VolumetricLightRenderer volumetricLightRenderer:
+                case AreaLightManager areaLightManager:
+                    break;
+                default:
+                    MonoBehaviour.Destroy(c);
+                    break;
+            }
+            cam.gameObject.name = "[That's Lit CAM]";
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = Color.white;
+            cam.backgroundColor = new Color (0, 0, 0, 0);
+
             cam.transform.SetParent(MainPlayer.Transform.Original);
 
             cam.nearClipPlane = 0.001f;
@@ -326,7 +337,7 @@ namespace ThatsLit.Components
             var camPos = 0;
             if (lockPos != -1) camPos = lockPos;
             else camPos = Time.frameCount % 6;
-            var camHeight = MainPlayer.IsInPronePose ? 0.45f : 2.2f;
+            var camHeight = MainPlayer.IsInPronePose ? 0.45f : 2.2f * (0.6f + 0.4f * MainPlayer.PoseLevel);
             var targetHeight = MainPlayer.IsInPronePose ? 0.2f : 0.7f;
             var horizontalScale = MainPlayer.IsInPronePose ? 1.2f : 0.8f;
             switch (Time.frameCount % 6)
@@ -364,9 +375,9 @@ namespace ThatsLit.Components
                             cam.transform.localPosition = new Vector3(0, 2f, 0);
                             cam.transform.LookAt(MainPlayer.Transform.Original.position);
                         }
-                        else if (MainPlayer.PoseLevel < 0.5f)
+                        else if (MainPlayer.PoseLevel < 0.5f) // mid Crouch-Stand
                         {
-                            cam.transform.localPosition = new Vector3(0, 0, 0);
+                            cam.transform.localPosition = new Vector3(0, -0.4f, 0.35f);
                             cam.transform.LookAt(MainPlayer.Transform.Original.position);
                         }
                         else

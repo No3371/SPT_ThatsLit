@@ -432,7 +432,7 @@ namespace ThatsLit.Components
             public void Execute(int index)
             {
                 Color32 c = tex[index];
-                if (c == Color.white)
+                if (c == Color.white || c.a <= 0.5f)
                     return;
 
                 var pxLum = (c.r + c.g + c.b) / 765f;
