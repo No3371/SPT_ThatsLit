@@ -81,7 +81,7 @@ namespace ThatsLit
             )
             {
                 prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 20f), 2) * Mathf.Min(num, 50); // Needs cluster
-                crouch = 0.0035f * Mathf.Min(num, 10);
+                crouch = 0.0035f * Mathf.Min(num, 5);
             }
             else if (name.EndsWith("27bbce")) // Grass_new_3_D_27bbce, shorter and smaller, cross shape
             {
