@@ -630,6 +630,7 @@ namespace ThatsLit.Components
         float litFactorSample, ambScoreSample;
         float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleGUI;
         int guiFrame;
+        string infoCache1, infoCache2;
         private void OnGUI()
         {
             #region BENCHMARK
@@ -700,34 +701,43 @@ namespace ThatsLit.Components
                         _benchmarkSWGUI?.Reset();
                     }
                 }
-                GUILayout.Label(string.Format(" IMPACT: {0:0.00} -> {1:0.00} ({2:0.00} <- {3:0.00} <- {4:0.00}) AMB: {5:0.00} LIT: {6:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore, ambScoreSample, litFactorSample));
-                GUILayout.Label($"AMB: { ambientShadownRating } BNKR: { bunkerFactor }");
+                // GUILayout.Label(string.Format(" IMPACT: {0:0.000} -> {1:0.000} ({2:0.000} <- {3:0.000} <- {4:0.000}) AMB: {5:0.00} LIT: {6:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore, ambScoreSample, litFactorSample));
                 //GUILayout.Label(text: "PIXELS:");
                 //GUILayout.Label(lastValidPixels.ToString());
-                GUILayout.Label(string.Format(" AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));
+                // GUILayout.Label(string.Format(" AFFECTED: {0} (+{1}) / ENCOUNTER: {2}", calced, calcedLastFrame, encounter));
 
-                GUILayout.Label(string.Format(" FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
+                // GUILayout.Label(string.Format(" FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
 
-                var poseFactor = MainPlayer.AIData.Player.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
-                if (MainPlayer.AIData.Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
+                var poseFactor = MainPlayer.PoseLevel / MainPlayer.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
+                if (MainPlayer.IsInPronePose) poseFactor -= 0.4f; // prone: 0
                 poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
                                      // GUILayout.Label(string.Format(" POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
                                      // GUILayout.Label(string.Format(" {0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
-                GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime()));
-                if (scoreCalculator != null) GUILayout.Label(string.Format(" LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
+                float fog = WeatherController.Instance?.WeatherCurve?.Fog ?? 0;
+                float rain = WeatherController.Instance?.WeatherCurve?.Rain ?? 0;
+                float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
+                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { rawTerrainScoreSample :0.000} FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000} INSIDE: { Time.time - lastOutside:0.000} AMB: { ambientShadownRating:0.000} BNKR: { bunkerTimeClamped:0.000}";
+                GUILayout.Label(infoCache1);
+                // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
+                if (scoreCalculator != null) GUILayout.Label(string.Format("  LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
                 // GUILayout.Label(string.Format(" {0} ({1})", activeRaidSettings?.LocationId, activeRaidSettings?.SelectedLocation?.Name));
                 // GUILayout.Label(string.Format(" {0:0.00000}ms / {1:0.00000}ms", benchMark1, benchMark2));
+                // if (Time.frameCount % 2997 == 0)
+                //         if (guiFrame < Time.frameCount && DebugCountId.idCount != null) EFT.UI.ConsoleScreen.Log($"[That's Lit Bot Id Observation] { DebugCountId.idCount[0] } / { DebugCountId.idCount[1] } / { DebugCountId.idCount[2] } / { DebugCountId.idCount[3] } / { DebugCountId.idCount[4] } / { DebugCountId.idCount[5] } / { DebugCountId.idCount[6] } / { DebugCountId.idCount[7] } / { DebugCountId.idCount[8] } / { DebugCountId.idCount[9] }");
+                
                 if (ThatsLitPlugin.EnableBenchmark.Value)
                 {
-                    GUILayout.Label(string.Format(" Update: {0,8:0.000}\n SeenCoef: {1,8:0.000}\n Encountering: {2,8:0.000}\n ExtraVisDis: {3,8:0.000}\n ScoreCalculator: {4,8:0.000}\n Info(+Debug): {5,8:0.000} ms", benchmarkSampleUpdate, benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleGUI));
+                    GUILayout.Label(string.Format("  Update: {0,8:0.000}\n  SeenCoef: {1,8:0.000}\n  Encountering: {2,8:0.000}\n  ExtraVisDis: {3,8:0.000}\n  ScoreCalculator: {4,8:0.000}\n  Info(+Debug): {5,8:0.000} ms", benchmarkSampleUpdate, benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleGUI));
                     if (Time.frameCount % 6000 == 0)
-                        EFT.UI.ConsoleScreen.Log($"[That's Lit Benchmark Sample] Update: {benchmarkSampleUpdate,8:0.000} / SeenCoef: {benchmarkSampleSeenCoef,8:0.000} / Encountering: {benchmarkSampleEncountering,8:0.000} / ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000} / ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000} / GUI: {benchmarkSampleGUI,8:0.000} ms");
+                        if (guiFrame < Time.frameCount) EFT.UI.ConsoleScreen.Log($"[That's Lit Benchmark Sample] Update: {benchmarkSampleUpdate,8:0.000} / SeenCoef: {benchmarkSampleSeenCoef,8:0.000} / Encountering: {benchmarkSampleEncountering,8:0.000} / ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000} / ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000} / GUI: {benchmarkSampleGUI,8:0.000} ms");
                 }
 #if DEBUG_DETAILS
             if (detailsHere5x5 != null)
             {
-                GUILayout.Label(string.Format(" DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df) 3x3: {2}", arg0: lastFinalDetailScoreNearest, lastDisFactorNearest, recentDetailCount3x3));
-                GUILayout.Label(string.Format(" {0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
+                infoCache2 = $"DETAIL (SAMPLE): {lastFinalDetailScoreNearest:+0.00;-0.00;+0.00} ({lastDisFactorNearest:0.000}df) 3x3: {recentDetailCount3x3}\n  {Utility.DetermineDir(lastTriggeredDetailCoverDirNearest)} {lastNearest:0.00}m {lastTiltAngle} {lastRotateAngle}";
+                GUILayout.Label(infoCache2);
+                // GUILayout.Label(string.Format(" DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df) 3x3: {2}", arg0: lastFinalDetailScoreNearest, lastDisFactorNearest, recentDetailCount3x3));
+                // GUILayout.Label(string.Format(" {0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
                 for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
                     if (detailsHere5x5[i].casted)
                         GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
