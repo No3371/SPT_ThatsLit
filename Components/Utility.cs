@@ -754,5 +754,16 @@ namespace ThatsLit
             }
             else return "?";
         }
+        internal static T ExpensiveCopyComponent<T>(T original, GameObject destination, System.Reflection.BindingFlags bindingFlags) where T : Component
+        {
+            System.Type type = original.GetType();
+            Component copy = destination.AddComponent(type);
+            System.Reflection.FieldInfo[] fields = type.GetFields(bindingFlags);
+            foreach (System.Reflection.FieldInfo field in fields)
+            {
+                field.SetValue(copy, field.GetValue(original));
+            }
+            return copy as T;
+        }
     }
 }
