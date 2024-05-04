@@ -178,7 +178,7 @@ namespace ThatsLit.Components
             cam.transform.SetParent(MainPlayer.Transform.Original);
 
             cam.nearClipPlane = 0.001f;
-            cam.farClipPlane = 10f;
+            cam.farClipPlane = 5f;
 
             cam.cullingMask = LayerMaskClass.PlayerMask;
             cam.fieldOfView = 44;
