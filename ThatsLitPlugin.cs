@@ -25,10 +25,23 @@ namespace ThatsLit
         public const int TarkovVersion = 29197;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.380.10";
-
+        public const string ModVersion = "1.380.20";
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.8.0";
+        private static long modVersionComparable;
+
+        public static long ModVersionComparable
+        {
+            get
+            {
+                if (modVersionComparable == 0)
+                {
+                    var splitted = ModVersion.Split('.');
+                    modVersionComparable = int.Parse(splitted[0]) * 1_000000_000 + int.Parse(splitted[1]) * 1_000000 + int.Parse(splitted[2]);
+                }
+                return modVersionComparable;
+            }
+        }
     }
 
     [BepInPlugin("bastudio.thatslit", ModName, ModVersion)]
