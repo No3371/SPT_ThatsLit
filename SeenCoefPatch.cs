@@ -90,6 +90,19 @@ namespace ThatsLit
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToEnemyBody);
             var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToEnemyBody.x, 0, eyeToEnemyBody.z), eyeToEnemyBody) * (eyeToEnemyBody.y >= 0 ? 1f : -1f); // negative if looking down (higher), 0 when looking straight... 
+            // Vanilla is multiplying the final SeenCoef with 1E-05
+            // Probably to guarantee the continuance of the bot attention
+            // However this includes situations that the player has moved at least a bit and the bot is running/facing side/away
+            // This part, in a very conservative way, tries to randomly delay the reaction
+            if (sinceSeen < __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN
+                && lastSeenPosDeltaSqr < __instance.Owner.Settings.FileSettings.Look.DIST_SQRT_REPEATED_SEEN
+                && __result < 0.5f)
+            {
+                __result += (0.5f - __result)
+                            * (rand1 * Mathf.Clamp01(visionAngleDelta / 90f)) // Scale-capped by horizontal vision angle delta
+                            * (rand3 * Mathf.Clamp01(lastSeenPosDelta / 5f)) // Scale-capped by player position delta to last
+                            * (__instance.Owner.Mover.Sprinting? 1f : 0.75f); 
+            }
 
             var dis = eyeToEnemyBody.magnitude;
             float disFactor = 0;
