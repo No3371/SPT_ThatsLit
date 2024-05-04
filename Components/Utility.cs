@@ -137,6 +137,8 @@ namespace ThatsLit
                 crouch = 0.006f * num;
             }
 
+            else if (name.EndsWith("d17180")) {} // Flat grass paste (found in Custom)
+            else if (name.EndsWith("e84f39")) {} // super tiny little grass
             else if (name.EndsWith("e9cd39")) {} // rock
             else if (ThatsLitPlugin.DebugInfo.Value)
             {
