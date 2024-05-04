@@ -640,7 +640,7 @@ namespace ThatsLit.Components
             bool skip = false;
             if (disabledLit && Time.time - awakeAt < 30f)
             {
-                if (!ThatsLitPlugin.HideMapTip.Value) GUILayout.Label(" [That's Lit] Lit detection on this map is not supported or disabled in configs.");
+                if (!ThatsLitPlugin.HideMapTip.Value) GUILayout.Label("  [That's Lit] Lit detection on this map is not supported or disabled in configs.");
                 if (!ThatsLitPlugin.DebugInfo.Value) skip = true;
             }
             if (!skip)
@@ -655,7 +655,7 @@ namespace ThatsLit.Components
                         if (MainPlayer.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
                         else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
                     if (Time.time < awakeAt + 10)
-                        GUILayout.Label(" [That's Lit HUD] Can be disabled in plugin settings.");
+                        GUILayout.Label("  [That's Lit HUD] Can be disabled in plugin settings.");
 
                     if (cloud <= -1.1f)
                         GUILayout.Label("  CLEAR ☀☀☀");
@@ -674,7 +674,7 @@ namespace ThatsLit.Components
             if (!ThatsLitPlugin.DebugInfo.Value) skip = true;
             if (!skip)
             {
-                scoreCalculator?.CalledOnGUI();
+                scoreCalculator?.CalledOnGUI(guiFrame < Time.frameCount);
                 if (IsDebugSampleFrame)
                 {
                     litFactorSample = scoreCalculator?.litScoreFactor ?? 0;
