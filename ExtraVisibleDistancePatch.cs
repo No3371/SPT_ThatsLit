@@ -88,6 +88,13 @@ namespace ThatsLit
                 extra *= 1f - (EFT.Weather.WeatherController.Instance?.WeatherCurve?.Fog?? 0f);
                 addVisibility += UnityEngine.Random.Range(0.25f, 1f) * Mathf.Min(100, extra); // 0.25x~1x of extra capped at 100m
             }
+            else if (!nvgActive && scoreCalculator.frame0.ambienceScore > 0)
+            {
+                float extra = __instance.Owner.LookSensor.VisibleDist * (1f + scoreCalculator.frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
+                extra *= 1f - (EFT.Weather.WeatherController.Instance?.WeatherCurve?.Fog?? 0f);
+                extra *= 1f - Mathf.Clamp01(mainPlayer.ambientShadownRating / 10f);
+                addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(50, extra); // Up to 20% bonus from unobstructed strong sun/moon light
+            } 
             else if (!nvgActive && __instance.Owner.LookSensor.VisibleDist < 50) // 
             {
                 float litDiff = scoreCalculator.frame0.multiFrameLitScore - scoreCalculator.frame0.baseAmbienceScore; // The visibility provided by sun/moon + lightings
