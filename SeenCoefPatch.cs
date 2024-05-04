@@ -181,10 +181,10 @@ namespace ThatsLit
 
             var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
             if (!canSeeLight && inNVGView && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
-            if (visionAngleDelta > 105) canSeeLight = false;
+            if (visionAngleDelta > 90) canSeeLight = false;
             var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
             if (!canSeeLaser && inNVGView && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
-            if (visionAngleDelta > 105) canSeeLaser = false;
+            if (visionAngleDelta > 85) canSeeLaser = false;
 
             // Overhead overlooking
             if (sinceSeen > 15f && !canSeeLight)
