@@ -66,7 +66,7 @@ namespace ThatsLit
             float pSpeedFactor = Mathf.Clamp01(mainPlayer.MainPlayer.MovementContext.ClampedSpeed / 2f);
 
             nearestRecent += 0.5f;
-            var caution = __instance.Owner.Id % 9; // 0 -> HIGH, 1,2,3 -> MID, 4,5,6,7,8 -> LOW
+            var caution = __instance.Owner.Id % 10; // 0 -> HIGH, 1 -> HIGH-MID, 2,3,4 -> MID, 5,6,7,8,9 -> LOW
             float sinceSeen = Time.time - personalLastSeenTime;
             float lastSeenPosDelta = (__instance.Person.Position - __instance.EnemyLastPosition).magnitude;
             float lastSeenPosDeltaSqr = lastSeenPosDelta * lastSeenPosDelta;
@@ -202,9 +202,18 @@ namespace ThatsLit
                     case 0:
                         overheadChance /= 2f;
                         break;
+                    case 1:
+                        overheadChance /= 1.5f;
+                        break;
+                    case 2:
                     case 3:
                     case 4:
+                        break;
                     case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
                         overheadChance *= 1.2f;
                         break;
                 }
@@ -344,20 +353,24 @@ namespace ThatsLit
                     {
                         case 0:
                             detailScore /= 2f;
-                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f); // nerf starting from looking 5deg up to down (scaled by down to -25deg) and scaled by dis 15 ~ 0
                             break;
                         case 1:
-                        case 3:
-                        case 2:
-                            detailScore *= 1.25f;
-                            detailScore *= 1f - cqb * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                            detailScore /= 1.5f;
+                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 40f); // nerf starting from looking 5deg up (scaled by down to -40deg) and scaled by dis 15 ~ 0
                             break;
+                        case 2:
+                        case 3:
                         case 4:
+                            detailScore *= 1f - cqb10mSquared * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 40f);
+                            break;
                         case 5:
                         case 6:
                         case 7:
                         case 8:
-                            detailScore *= 1f - cqbSmooth * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f);
+                        case 9:
+                            detailScore *= 1.2f;
+                            detailScore *= 1f - cqb5m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 50f); // nerf starting from looking 5deg up (scaled by down to -50deg) and scaled by dis 5 ~ 0
                             break;
                     }
 
@@ -513,34 +526,35 @@ namespace ThatsLit
                         bushRat = false;
                         break;
                 }
-                var overallFactor = Mathf.Clamp01(angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor);
-                if (canSeeLight || (canSeeLaser && rand3 < 0.2f)) overallFactor /= 2f;
-                if (bushRat && overallFactor > 0.01f)
+                var bushRatFactor = Mathf.Clamp01(angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor);
+                if (canSeeLight || (canSeeLaser && rand3 < 0.2f)) bushRatFactor /= 2f;
+                if (bushRat && bushRatFactor > 0.01f)
                 {
                     if (nearestAI) mainPlayer.foliageCloaking = bushRat;
                     __result = Mathf.Max(__result, dis);
                     switch (caution)
                     {
                         case 0:
-                            if (rand2 > 0.01f) __result *= 1 + 4 * overallFactor * UnityEngine.Random.Range(0.2f, 0.4f);
-                            cqb *= 1 - overallFactor * 0.5f;
-                            cqbSmooth *= 1 - overallFactor * 0.5f;
-                            break;
                         case 1:
-                        case 3:
-                        case 2:
-                            if (rand3 > 0.005f) __result *= 1 + 8 * overallFactor * UnityEngine.Random.Range(0.3f, 0.65f);
-                            cqb *= 1 - overallFactor * 0.8f;
-                            cqbSmooth *= 1 - overallFactor * 0.8f;
+                            if (rand2 > 0.01f) __result *= 1 + 4 * bushRatFactor * UnityEngine.Random.Range(0.2f, 0.4f);
+                            cqb5m *= 1 - bushRatFactor * 0.5f;
+                            cqb10mSquared *= 1 - bushRatFactor * 0.5f;
                             break;
+                        case 2:
+                        case 3:
                         case 4:
+                            if (rand3 > 0.005f) __result *= 1 + 8 * bushRatFactor * UnityEngine.Random.Range(0.3f, 0.65f);
+                            cqb5m *= 1 - bushRatFactor * 0.8f;
+                            cqb10mSquared *= 1 - bushRatFactor * 0.8f;
+                            break;
                         case 5:
                         case 6:
                         case 7:
                         case 8:
-                            if (rand1 > 0.001f) __result *= 1 + 6 * overallFactor * UnityEngine.Random.Range(0.5f, 1.0f);
-                            cqb *= 1 - overallFactor;
-                            cqbSmooth *= 1 - overallFactor;
+                        case 9:
+                            if (rand1 > 0.001f) __result *= 1 + 6 * bushRatFactor * UnityEngine.Random.Range(0.5f, 1.0f);
+                            cqb5m *= 1 - bushRatFactor;
+                            cqb10mSquared *= 1 - bushRatFactor;
                             break;
                     }
                 }
