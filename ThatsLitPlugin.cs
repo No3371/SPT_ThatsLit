@@ -97,7 +97,7 @@ namespace ThatsLit
             VagueHintChance            = Config.Bind(category,
                                                      "Vague Hint Chance",
                                                      0.6f,
-                                                     new ConfigDescription("The chance to cancel a bot's visual confirmation on you and instead only tell it it's spotted from roughly your direction, when it's not even facing your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+                                                     new ConfigDescription("The chance to cancel a bot's visual confirmation on you and instead only tell it it's spotted from roughly your direction, when the system say you are visible to it but it's not even facing your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
 
             category                   = "4. Grasses";
             EnabledGrasses             = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
@@ -144,29 +144,6 @@ namespace ThatsLit
             category                   = "9. Balance";
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss. Makes bosses EASY.");
             EnableEquipmentCheck         = Config.Bind(category, "Equipment Check", true, "Whether the mod checks your equipments. Disabling this stops lights/lasers detection and makes stealth EASY.");
-            // DevMode = Config.Bind(category, "Dev Mode", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // DevModeInvisible = Config.Bind(category, "Dev Mode Invisible", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // NoGPUReq = Config.Bind(category, "NoGPUReq", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideMinBaseAmbienceScore = Config.Bind(category, "MinBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideMaxBaseAmbienceScore = Config.Bind(category, "MaxBaseAmbienceScore", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideMinAmbienceLum = Config.Bind(category, "MinAmbienceLum", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideMaxAmbienceLum = Config.Bind(category, "MaxAmbienceLum", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverridePixelLumScoreScale = Config.Bind(category, "PixelLumScoreScale", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideMaxSunLightScore = Config.Bind(category, "MaxSunLightScore", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideMaxMoonLightScore = Config.Bind(category, "MaxMoonLightScore", 1f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideScore0 = Config.Bind(category, "Score0", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideScore1 = Config.Bind(category, "Score1", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideScore2 = Config.Bind(category, "Score2", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideScore3 = Config.Bind(category, "Score3", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideScore4 = Config.Bind(category, "Score4", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideScore5 = Config.Bind(category, "Score5", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideScore6 = Config.Bind(category, "Score6", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideThreshold0 = Config.Bind(category, "Threshold0", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideThreshold1 = Config.Bind(category, "Threshold1", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideThreshold2 = Config.Bind(category, "Threshold2", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideThreshold3 = Config.Bind(category, "Threshold3", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideThreshold4 = Config.Bind(category, "Threshold4", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            // OverrideThreshold5 = Config.Bind(category, "Threshold5", 0f, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced = true }));
         }
 
         public static ConfigEntry<bool> ScoreInfo { get; private set; }
@@ -237,7 +214,7 @@ namespace ThatsLit
             new SeenCoefPatch().Enable();
             new EncounteringPatch().Enable();
             new ExtraVisibleDistancePatch().Enable();
-            // new SoundOverlapPatch().Enable();
+            // new DebugCountId().Enable();
         }
 
         private void Update()
