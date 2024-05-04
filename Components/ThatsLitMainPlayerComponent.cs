@@ -33,7 +33,7 @@ namespace ThatsLit.Components
         public Camera cam, envCam;
         // public Texture2D envTex, envDebugTex;
         Unity.Collections.NativeArray<Color32> observed;
-        public float lastCalcFrom, lastCalcTo, lastScore, lastFactor1, lastFactor2;
+        public float lastCalcFrom, lastCalcTo, lastScore, lastFactor1, lastFactor2, rawTerrainScoreSample;
         public int calced = 0, calcedLastFrame = 0, encounter;
         public int lockPos = -1;
         public RawImage display;
@@ -68,7 +68,11 @@ namespace ThatsLit.Components
         AsyncGPUReadbackRequest gquReq;
         internal float lastOutside;
         internal bool isWinterCache;
-        internal float ambientShadownRating, bunkerFactor;
+        /// <summary>
+        /// 0~10
+        /// </summary>
+        internal float ambientShadownRating;
+        internal float bunkerTimeClamped;
         internal float lastInBunkerTime, lastOutBunkerTime;
         internal Vector3 lastInBunderPos;
         // float benchMark1, benchMark2;
@@ -276,10 +280,10 @@ namespace ThatsLit.Components
                 lastOutBunkerTime = Time.time;
             }
 
-            if (lastOutBunkerTime < lastInBunkerTime && bodyPos.SqrDistance(lastInBunderPos) > 2.25f) bunkerFactor += Time.deltaTime;
-            else bunkerFactor -= Time.deltaTime * 5;
+            if (lastOutBunkerTime < lastInBunkerTime && bodyPos.SqrDistance(lastInBunderPos) > 2.25f) bunkerTimeClamped += Time.deltaTime;
+            else bunkerTimeClamped -= Time.deltaTime * 5;
 
-            bunkerFactor = Mathf.Clamp(bunkerFactor, 0, 10);
+            bunkerTimeClamped = Mathf.Clamp(bunkerTimeClamped, 0, 10);
 
 
             if (!skipDetailCheck && Time.time > lastCheckedDetails + 0.5f)
@@ -296,7 +300,8 @@ namespace ThatsLit.Components
                     if (ThatsLitPlugin.TerrainInfo.Value)
                     {
                         CalculateDetailScore(Vector3.zero, 0, 0, out terrainScoreHintProne, out terrainScoreHintRegular);
-                        terrainScoreHintRegular /= (MainPlayer.PoseLevel / MainPlayer.Physical.MaxPoseLevel * 0.6f + 0.4f + 0.1f);
+                        var pf = MainPlayer.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f;
+                        terrainScoreHintRegular /= (pf + 0.1f + 0.25f * (pf-0.45f)/0.55f);
                     }
                 }
             }

@@ -74,12 +74,12 @@ namespace ThatsLit
             float stealthNegation = 0;
 
             System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = mainPlayer.MainPlayer.MainParts;
-            Vector3 eyeToEnemyBody = playerParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
+            Vector3 eyeToPlayerBody = playerParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
 
             var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
             bool isInPronePose = __instance.Person.AIData.Player.IsInPronePose;
             if (isInPronePose) poseFactor -= 0.4f; // prone: 0
-            poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
+            poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f (Prevent devide by zero)
             poseFactor = Mathf.Clamp01(poseFactor);
 
             float rand1 = UnityEngine.Random.Range(0f, 1f);
@@ -88,8 +88,10 @@ namespace ThatsLit
             float rand4 = UnityEngine.Random.Range(0f, 1f);
 
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
-            var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToEnemyBody);
-            var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToEnemyBody.x, 0, eyeToEnemyBody.z), eyeToEnemyBody) * (eyeToEnemyBody.y >= 0 ? 1f : -1f); // negative if looking down (higher), 0 when looking straight... 
+            var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
+            // negative if looking down (from higher pos), 0 when looking straight...
+            var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody) * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
+
             // Vanilla is multiplying the final SeenCoef with 1E-05
             // Probably to guarantee the continuance of the bot attention
             // However this includes situations that the player has moved at least a bit and the bot is running/facing side/away
@@ -104,7 +106,7 @@ namespace ThatsLit
                             * (__instance.Owner.Mover.Sprinting? 1f : 0.75f); 
             }
 
-            var dis = eyeToEnemyBody.magnitude;
+            var dis = eyeToPlayerBody.magnitude;
             float disFactor = 0;
             bool inThermalView = false;
             bool inNVGView = false;
@@ -162,23 +164,6 @@ namespace ThatsLit
                                                                                                                           // disFactorLong = Mathf.Lerp(0, disFactorLong, sinceSeen / (8f * (1.2f - disFactorLong)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
             }
 
-
-            // if (mainPlayer.fog > 0 && dis > 15) __result *= 1 + (dis - 15f) * Mathf.Clamp01(mainPlayer.fog / 0.1f);
-            // 10 -> 15 as not tested
-            // Considering 0.1 fogginess blocks 10m+ view in 3.7+
-            // 0m  @0.087f -> 1x
-            // 10m  @0.087f -> 1x
-            // 15m  @0.087f -> 5.35x
-            // 100m @0.087f -> 79.3x
-            // 10m  @0.012f -> 1x
-            // 15m  @0.012f -> 1.012x
-            // 100m @0.012f -> 1.216x
-
-
-            // Vector3 EyeToEnemyHead = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.head].Position;
-            // Vector3 EyeToEnemyLeg = mainPlayer.MainPlayer.MainParts[BodyPartType.body].Position - __instance.Owner.GetPlayer.MainParts[BodyPartType.leftLeg].Position;
-            // var visionAngleToEnemyHead = Vector3.Angle(botVisionDir, EyeToEnemyHead);
-
             var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
             if (!canSeeLight && inNVGView && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
             if (visionAngleDelta > 90) canSeeLight = false;
@@ -186,7 +171,9 @@ namespace ThatsLit
             if (!canSeeLaser && inNVGView && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
             if (visionAngleDelta > 85) canSeeLaser = false;
 
+            // ======
             // Overhead overlooking
+            // ======
             if (sinceSeen > 15f && !canSeeLight)
             {
                 var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
@@ -226,9 +213,15 @@ namespace ThatsLit
                 bool botIsInside = __instance.Owner.AIData.IsInside;
                 bool playerIsInside = mainPlayer.MainPlayer.AIData.IsInside;
                 if (!botIsInside && playerIsInside && insideTime >= 1)
-                    __result *= 1 + (rand3 * 20 + (isGoalEnemy ? 0f : rand2 * 5f) + Mathf.Clamp01(0.05f * visionAngleDeltaVertical)) * (0.5f * Mathf.Clamp01(dis / (isGoalEnemy ? 100f : 50f)) + 0.4f * Mathf.Clamp01((visionAngleDelta - (isGoalEnemy ? 25f : 10f)) / 45f));
+                {
+                    var insideImpact = dis * Mathf.Clamp01(visionAngleDeltaVertical / 40f) * Mathf.Clamp01(visionAngleDelta / 60f) * (isGoalEnemy? 0.05f : 0.5f); // 50m -> 2.5/25 (BEST ANGLE), 10m -> 0.5/5
+                    __result *= 1 + insideImpact * (0.75f + rand3 * 0.05f * caution);
+                }
             }
 
+            // ======
+            // Global random overlooking
+            // ======
             float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
             if (canSeeLight) globalOverlookChance /= 2f;
             if (isGoalEnemy)
@@ -238,7 +231,7 @@ namespace ThatsLit
             }
             if (rand4 < globalOverlookChance)
             {
-                __result *= 10 + rand1 * 100; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
+                __result *= 10 + rand1 * 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
             }
 
             float score, factor;
@@ -252,7 +245,7 @@ namespace ThatsLit
             else
             {
                 score = mainPlayer.MultiFrameLitScore; // -1 ~ 1
-                if (score < 0 && inNVGView) // The score was not reduced (toward 0) for IR lights, process the score here
+                if (score < 0 && inNVGView) // IR lights are not accounted in the score, process the score for each bot here
                 {
                     if (mainPlayer.scoreCalculator.irLight) score /= 2;
                     else if (mainPlayer.scoreCalculator.irLaser) score /= 1.75f;
@@ -302,19 +295,16 @@ namespace ThatsLit
                 __result += rand2 + rand3 * 2f * disFactor;
             }
 
-            float lastPosDis = (__instance.EnemyLastPosition - __instance.Person.Position).magnitude;
+            var cqb5m = 1f - Mathf.Clamp01((dis - 1f) / 5f); // 6+ -> 0, 1f -> 1
+            var cqb15m = 1f - Mathf.Clamp01((dis - 1f) / 15f); // 6+ -> 0, 1f -> 1                                                               // Fix for blind bots who are already touching us
 
-            var cqb = 1f - Mathf.Clamp01((dis - 1f) / 5f); // 6+ -> 0, 1f -> 1
-            var cqb15m = 1f - Mathf.Clamp01((dis - 1f) / 15f); // 6+ -> 0, 1f -> 1
-                                                               // Fix for blind bots who are already touching us
-
-            var cqbSmooth = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
-            cqbSmooth *= cqbSmooth; // 6m -> 25%, 1m -> 100%
+            var cqb10mSquared = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
+            cqb10mSquared *= cqb10mSquared; // 6m -> 25%, 1m -> 100%
 
             // Scale down cqb factors for AIs facing away
-            cqb *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
+            cqb5m *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
             cqb15m *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
-            cqbSmooth *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
+            cqb10mSquared *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
 
             var xyFacingFactor = 0f;
             var layingVerticaltInVisionFactor = 0f;
@@ -322,10 +312,10 @@ namespace ThatsLit
             var detailScoreRaw = 0f;
             if (!inThermalView && !mainPlayer.skipDetailCheck)
             {
-                mainPlayer.CalculateDetailScore(-eyeToEnemyBody, dis, visionAngleDeltaVertical, out float scoreProne, out float scoreRegular);
-                if (scoreProne > 0.1f || scoreRegular > 0.1f)
+                mainPlayer.CalculateDetailScore(-eyeToPlayerBody, dis, visionAngleDeltaVertical, out float terrainScoreProne, out float terrainScoreCrouch);
+                if (terrainScoreProne > 0.1f || terrainScoreCrouch > 0.1f)
                 {
-                    if (isInPronePose) // Deal with player laying on slope and being very visible even with grasses
+                    if (isInPronePose) // Handles cases where the player is laying on slopes and being very visible even with grasses
                     {
                         Vector3 playerLegPos = (playerParts[BodyPartType.leftLeg].Position + playerParts[BodyPartType.rightLeg].Position) / 2f;
                         var playerLegToHead = playerParts[BodyPartType.head].Position - playerLegPos;
@@ -354,16 +344,16 @@ namespace ThatsLit
                         else if (layingVerticaltInVisionFactor <= 0 && layingVerticaltInVisionFactor >= -90f) layingVerticaltInVisionFactor = layingVerticaltInVisionFactor / -15f; // "-> /"
                         else layingVerticaltInVisionFactor = 0; // other cases grasses should take effect
 
-                        detailScore = scoreProne * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
+                        detailScore = terrainScoreProne * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
                     }
                     else
                     {
-                        detailScore = scoreRegular / (poseFactor + 0.1f) * (1f - cqbSmooth) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
+                        detailScore = terrainScoreCrouch / (poseFactor + 0.1f + 0.25f * (poseFactor-0.45f)/0.55f) * (1f - cqb10mSquared) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
                     }
 
                     detailScoreRaw = detailScore;
                     detailScore *= 1f + disFactor / 2f; // At 110m+, 1.5x effective
-                    if (canSeeLight) detailScore /= 2f - disFactor; // Lights impact less from afar
+                    if (canSeeLight) detailScore /= 2f - disFactor; // Flashlights impact less from afar
 
                     switch (caution)
                     {
@@ -390,20 +380,22 @@ namespace ThatsLit
                             break;
                     }
 
+                    // Applying terrain detail stealth
+                    // 0.1% chance does not work (very low because bots can track after spotting)
                     if (UnityEngine.Random.Range(0f, 1.001f) < Mathf.Clamp01(detailScore))
                     {
                         float detailImpact;
                         if (detailScore > 1 && isInPronePose) // But if the score is high and is proning (because the score is not capped to 1 even when crouching), make it "blink" so there's a chance to get hidden again
                         {
-                            detailImpact = UnityEngine.Random.Range(2, 4f) + UnityEngine.Random.Range(0, 5f) * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // Allow diving back into the grass field
+                            detailImpact = UnityEngine.Random.Range(2, 4f) + UnityEngine.Random.Range(0, 5f) * Mathf.Clamp01(lastSeenPosDelta / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // Allow diving back into the grass field
                             stealthNegation = 0.6f;
                         }
-                        else detailImpact = 9f * Mathf.Clamp01(lastPosDis / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen;
+                        else detailImpact = 9f * Mathf.Clamp01(lastSeenPosDelta / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen;
                         __result *= 1 + detailImpact;
                         if (__result < dis / 10f) __result = dis / 10f;
                         if (nearestAI)
                         {
-                            mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToEnemyBody;
+                            mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToPlayerBody;
                         }
                     }
                 }
@@ -591,7 +583,6 @@ namespace ThatsLit
                     var emptiness = 1f - mainPlayer.foliageScore * detailScoreRaw;
                     emptiness *= 1f - insideTime;
                     disFactor *= 0.65f + 0.35f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
-                    
                 }
 
                 if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight ? 0.3f : 1f); // Darkness will be far more effective from afar
@@ -610,11 +601,10 @@ namespace ThatsLit
                 factor = Mathf.Clamp(factor, -0.975f, 0.975f);
 
                 // Absoulute offset
-                // f-0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (6m)
-                // f-1, 1m => 
-                var secondsOffset = (Mathf.Pow(Mathf.Abs(factor), 2)) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqbSmooth, 1f - 0.5f * cqbSmooth);
+                // f-0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (10m)
+                var secondsOffset = Mathf.Pow(factor, 2) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqb10mSquared, 1f - 0.5f * cqb10mSquared);
                 secondsOffset *= -1; // Inversed (negative value now delay the visual)
-                secondsOffset *= factor < 0 ? 1 : 0.1f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
+                secondsOffset *= factor < 0 ? 1 : 0.5f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
                 secondsOffset *= factor > 0 ? ThatsLitPlugin.BrightnessImpactScale.Value : ThatsLitPlugin.DarknessImpactScale.Value;
                 __result += secondsOffset;
                 if (__result < 0) __result = 0;
@@ -629,31 +619,31 @@ namespace ThatsLit
                     float rand = UnityEngine.Random.Range(0f, 1f);
                     rand /= 1f + 0.5f * Mathf.Clamp01(-0.85f - factor) / 0.1f; // 45deg at f-0.95 => 40% -> 26%, 90deg at f-0.95 => 58%
                     var cqbCancel = rand < cqbCancelChance;
-                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1 - (cqbSmooth + cqb) * (cqbCancel ? 0.1f : 1f))
+                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1 - (cqb10mSquared + cqb5m) * (cqbCancel ? 0.1f : 1f))
                      && rand > 0.0001f)
                         __result *= 100;
                 }
-                else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.4f * ThatsLitPlugin.BrightnessImpactScale.Value); // 0.7x the reaction time regardles angle half of the time at 100% score
-                else if (factor < -0.9f) __result *= 1f - (factor * (2f - cqb - cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
-                else if (factor < -0.5f) __result *= 1f - (factor * (1.5f - 0.75f * cqb - 0.75f * cqbSmooth) * ThatsLitPlugin.DarknessImpactScale.Value);
-                else if (factor < -0.2f) __result *= 1f - factor * cqb * ThatsLitPlugin.DarknessImpactScale.Value;
+                else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.34f * ThatsLitPlugin.BrightnessImpactScale.Value); // At 100% brightness, 90% 0.66x the reaction time regardles angle half of the time
+                else if (factor < -0.9f) __result *= 1f - (factor * (2f - cqb5m - cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value);
+                else if (factor < -0.5f) __result *= 1f - (factor * (1.5f - 0.75f * cqb5m - 0.75f * cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value);
+                else if (factor < -0.2f) __result *= 1f - factor * cqb5m * ThatsLitPlugin.DarknessImpactScale.Value;
                 else if (factor < 0f) __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value;
-                else if (factor > 0f) __result /= 1f + (factor / 3f) * ThatsLitPlugin.BrightnessImpactScale.Value;
+                else if (factor > 0f) __result /= 1f + (factor / 4f) * ThatsLitPlugin.BrightnessImpactScale.Value;
             }
 
             if (ThatsLitPlugin.EnableMovementImpact.Value)
             {
                 if (__instance.Owner.Mover.Sprinting)
-                    __result *= 1 + (rand2 / 4f) * Mathf.Clamp01((visionAngleDelta - 20f) / 70f); // When facing away (25~90deg), sprinting bots takes up to 25% longer to spot the player
+                    __result *= 1 + (rand2 / (4f - caution * 0.1f)) * Mathf.Clamp01((visionAngleDelta - 20f) / 70f); // When facing away (25~90deg), sprinting bots takes up to 25% longer to spot the player
                 else if (!__instance.Owner.Mover.IsMoving)
                 {
-                    float delta = __result * (rand4 / 5f); // When not moving, bots takes up to 20% shorter to spot the player
+                    float delta = __result * (rand4 / (5f + caution * 0.1f)); // When not moving, bots takes up to 20% shorter to spot the player
                     __result = Mathf.Max(original, __result - delta);
                 }
 
-                if (poseFactor > 0.45f && mainPlayer.MainPlayer.MovementContext.ClampedSpeed > 0.01f)
+                if (poseFactor > 0.45f && pSpeedFactor > 0.01f)
                 {
-                    float delta = __result * (rand2 / 5f) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.25f); // Depends on the player's speed, bots takes up to 20% shorter to spot the player;
+                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.3f); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed;
                     __result = Mathf.Max(original, __result - delta);
                 }
             }
@@ -676,6 +666,7 @@ namespace ThatsLit
             {
                 mainPlayer.lastCalcTo = __result;
                 mainPlayer.lastFactor2 = factor;
+                mainPlayer.rawTerrainScoreSample = detailScoreRaw;
             }
             mainPlayer.calced++;
             mainPlayer.calcedLastFrame++;

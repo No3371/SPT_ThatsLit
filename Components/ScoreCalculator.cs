@@ -91,52 +91,65 @@ namespace ThatsLit.Components
             
             float insideTime = Time.time - player.lastOutside;
             if (insideTime < 0) insideTime = 0;
+            float outside1s = Mathf.Clamp01(1f - insideTime);
 
-            baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
-            baseAmbienceScore -= (baseAmbienceScore - -1f) * (0.45f * Mathf.Pow(player.bunkerFactor / 10f, 2) + 0.15f * Mathf.Clamp((insideTime - 2f) / 3f, 0, 1f)); // Handle bunker darkness
+            float ambienceShadowFactor = Mathf.Pow(player.ambientShadownRating / 10f, 2);
 
-            ambienceScore = CalculateAmbienceScore(locationId, time, cloud, out sunLightScore, out moonLightScore, insideTime); // The base brightness with sun/moon/cloud
-            ambienceScore -= (ambienceScore - -1f) * (0.4f + 0.4f * Mathf.Clamp(insideTime / 3f, 0, 1f)) * Mathf.Pow(player.ambientShadownRating / 10f, 2) * GetMapAmbienceCoef(locationId, time); // From ambient shadow
+            var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
+
+            // =====
+            // Handle bunker environment
+            // =====
+            float bunkerTimeFactor = Mathf.Pow(player.bunkerTimeClamped / 10f, 2);
+            // var bunkerOffset = (baseAmbienceScore - MinBaseAmbienceScore) * (0.5f * bunkerTimeFactor + 0.15f * Mathf.Clamp01((insideTime - 2f) / 3f)); 
+            // baseAmbienceScore -= bunkerOffset;
+
+            // Bunker: Bunker is overall moderately lit
+            baseAmbienceScore = Mathf.Lerp(baseAmbienceScore, BunkerBaseAmbienceTarget, bunkerTimeFactor * Mathf.Clamp01(insideTime / 10) * 0.65f);
+
+            var ambienceScore = baseAmbienceScore;
+            float insideCoef2to9s = Mathf.Clamp01((insideTime - 2) / 7f); // 0 ~ 2 sec => 0%, 9 sec => 100%
+            var locCloudiness = Mathf.Lerp(cloud, 1.3f, bunkerTimeFactor); // So it's always considered "cloudy" in bunker
+            ambienceScore += Mathf.Clamp01((locCloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact; // Weather offset
+            moonLightScore = CalculateMoonLight(locationId, time, locCloudiness);
+            sunLightScore = CalculateSunLight(locationId, time, locCloudiness);
+            ambienceScore += (moonLightScore + sunLightScore) * (1f - ambienceShadowFactor);
             
             if (player.isWinterCache && insideTime < 2f) // Debuff from winter environment when outside
             {
                 ambienceScore *= 1 + Mathf.Clamp01((sunLightScore + moonLightScore - 0.1f) / 0.2f) * 0.1f;
             }
 
-            // Simulate the extra darkness in grassy field/forest
+            // Strengthen darkness when around foliage and grasses
             float foliageBonus = 0;
-            if (player.foliageCount > 9)
+            if (player.foliageCount > 4)
             {
-                foliageBonus += moonLightScore * 0.05f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
-                foliageBonus += sunLightScore * 0.03f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
+                foliageBonus += moonLightScore * 0.02f * Mathf.Min(10, player.foliageCount) * Mathf.Clamp01(player.foliageScore / 1f);
+                foliageBonus += sunLightScore * 0.02f * Mathf.Min(10, player.foliageCount) * Mathf.Clamp01(player.foliageScore / 1f);
             }
-            else if (player.foliageCount > 6)
+            else
             {
-                foliageBonus += moonLightScore * 0.06f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
-                foliageBonus += sunLightScore * 0.025f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
-            }
-            else if (player.foliageCount > 4)
-            {
-                foliageBonus += moonLightScore * 0.025f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
+                foliageBonus += moonLightScore * 0.02f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
             }
 
             if (foliageBonus > foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, Time.fixedDeltaTime);
             else if (foliageBonus < foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, 0.25f);
 
-            if (player.recentDetailCount3x3 >= 50 && detailBonusSmooth < 1f) detailBonusSmooth = Mathf.Clamp01(detailBonusSmooth + Time.fixedDeltaTime);
+            if (player.recentDetailCount3x3 > 15) detailBonusSmooth = Mathf.Clamp01( + Time.fixedDeltaTime * Mathf.Clamp01((player.recentDetailCount3x3 - 15f) / 75f));
             else detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, 0, 0.3f);
 
             foliageBonusSmooth *= player.isWinterCache? 0.2f : 1f; // Debuff from winter environment
-            ambienceScore -= foliageBonusSmooth;
-            ambienceScore -= detailBonusSmooth * 0.1f;
-            ambienceScore = Mathf.Clamp(ambienceScore, -1f, 1f);
+            detailBonusSmooth *= player.isWinterCache? 0.5f : 1f; // Debuff from winter environment
+            ambienceScore -= foliageBonusSmooth * moonLightScore / 2f * outside1s;
+            ambienceScore -= detailBonusSmooth * moonLightScore / 2f * ambienceShadowFactor * outside1s; // Requires not lit by sun/moon
+            ambienceScore = Mathf.Clamp(ambienceScore, MinBaseAmbienceScore, 1f);
 
 
             //float score = CalculateTotalPixelScore(time, thisFrame.pxS, thisFrame.pxH, thisFrame.pxHM, thisFrame.pxM, thisFrame.pxML, thisFrame.pxL, thisFrame.pxD);
             //score /= (float)thisFrame.pixels;
             float lowAmbienceScoreFactor = (1f - ambienceScore) / 2f;
             float lumScore = (thisFrame.avgLum - minAmbienceLum) * lumScoreScale / lowAmbienceScoreFactor;
-            float hightLightedPixelFactor = 1f * thisFrame.RatioShinePixels + 0.75f * thisFrame.RatioHighPixels + 0.4f * thisFrame.RatioHighMidPixels + 0.15f * thisFrame.RatioMidPixels;
+            float hightLightedPixelFactor = 0.9f * thisFrame.RatioShinePixels + 0.75f * thisFrame.RatioHighPixels + 0.4f * thisFrame.RatioHighMidPixels + 0.15f * thisFrame.RatioMidPixels;
             lumScore *= 1 + hightLightedPixelFactor;
             lumScore = Mathf.Clamp(lumScore, 0, 2);
             if (Time.frameCount % 47 == 0) scoreRaw1 = lumScore + ambienceScore;
@@ -147,7 +160,8 @@ namespace ThatsLit.Components
             var bottomAvgLumMultiFrames = FindLowestAvgLumRecentFrame(true, thisFrame.avgLum);
             //var contrastMultiFrames = topScoreMultiFrames - bottomScoreMultiFrames; // a.k.a all sides contrast
 
-
+            // Outside, at lit up zone in dark ambience
+            lumScore *= 1 + 0.1f * lowAmbienceScoreFactor;
 
             //if (contrastMultiFrames < 0.3f) // Low contrast, enhance darkness
             //{
@@ -170,7 +184,7 @@ namespace ThatsLit.Components
             if (Time.frameCount % 47 == 0) scoreRaw2 = lumScore + ambienceScore;
 
             // Extra score for multi frames(sides) contrast in darkness
-            // For exmaple, lights on the floor contributes not much to the score but should make one much more visible
+            // For exmaple, lighting rods on the floor contributes not much to the score but should make one much more visible
             var avgLumContrast = topAvgLumMultiFrames - bottomAvgLumMultiFrames; // a.k.a all sides contrast
             avgLumContrast -= 0.01f;
             avgLumContrast = Mathf.Clamp01(avgLumContrast);
@@ -194,8 +208,6 @@ namespace ThatsLit.Components
             //    score = Mathf.Lerp(score, topScoreMultiFrames, Mathf.Clamp(avgContrastFactor, 0, 1));
             //}
 
-            // if (player.MainPlayer.AIData.GetFlare) lumScore = Mathf.Max(lumScore, Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(-ambienceScore))); // GetFlare is not what I thought!!!!!!
-
             if (vLight || vLaser || vLightSub || vLaserSub)
             {
                 expectedFinalScore = lumScore + ambienceScore;
@@ -208,12 +220,14 @@ namespace ThatsLit.Components
             }
             if (Time.frameCount % 47 == 0) scoreRaw4 = lumScore + ambienceScore;
 
+
             litScoreFactor = Mathf.Pow(Mathf.Clamp(lumScore, 0, 2f) / 2f, 2); // positive
             litScoreFactor /= 1 + Mathf.Max(ambienceScore, 0);
             litScoreFactor = Mathf.Max(litScoreFactor, 0);
-            lumScore -= lumScore * 0.25f * Mathf.Clamp01(ambienceScore); // When ambience is already above 0, reduce lumScore contribution
+            lumScore -= lumScore * 0.25f * Mathf.Clamp01(ambienceScore + 0.05f); // When ambience is already above -0.05, reduce lumScore contribution
             lumScore += ambienceScore;
             lumScore = Mathf.Clamp(lumScore, -1, 1);
+
             thisFrame.score = lumScore;
             thisFrame.ambienceScore = ambienceScore;
             thisFrame.baseAmbienceScore = baseAmbienceScore;
@@ -238,7 +252,10 @@ namespace ThatsLit.Components
 
         }
 
-        internal float baseAmbienceScore, ambienceScore, litScoreFactor;
+        /// <summary>
+        /// The percentage of score provided by observed brightness (from 3d lightings)
+        /// </summary>
+        internal float litScoreFactor;
         float shinePixelsRatioSample, highLightPixelsRatioSample, highMidLightPixelsRatioSample, midLightPixelsRatioSample, midLowLightPixelsRatioSample, lowLightPixelsRatioSample, darkPixelsRatioSample;
         float sunLightScore, moonLightScore;
         string infoCache;
@@ -519,18 +536,6 @@ namespace ThatsLit.Components
 
         }
 
-        /// <returns>-1 ~ 1</returns>
-        protected virtual float CalculateAmbienceScore (string locationId, float time, float cloudiness, out float sun, out float moon, float insideTime = 0)
-        {
-            float insideCoef = Mathf.Clamp01((insideTime - 2) / 7f); // 0 ~ 2 sec => 0%, 12 sec => 100%
-            float ambience = CalculateBaseAmbienceScore(locationId, time);
-            ambience -= Mathf.Abs(ambience - MinBaseAmbienceScore) * (1f - IndoorAmbienceScale) * insideCoef * (CalculateSunLightTimeFactor(locationId, time) + CalculateMoonLightTimeFactor(locationId, time) / 2f); // Indoor offset; Max sunlight is much brighter than max moonlight
-            ambience += Mathf.Clamp01((cloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact;
-            moon = CalculateMoonLight(locationId, time, cloudiness);
-            sun = CalculateSunLight(locationId, time, cloudiness);
-            return ambience + (moon + sun) * Mathf.Lerp(1, IndoorSunMoonScale, insideCoef);
-        }
-
         protected virtual float CalculateBaseAmbienceScore(string locationId, float time)
         {
             return Mathf.Lerp(GetMinBaseAmbienceLitScore(locationId, time), GetMaxBaseAmbienceLitScore(locationId, time), GetMapAmbienceCoef(locationId, time));
@@ -579,7 +584,7 @@ namespace ThatsLit.Components
         protected virtual float CalculateMoonLight(string locationId, float time, float cloudiness)
         {
             cloudiness = 1 - cloudiness; // difference from 1
-            if (cloudiness > 1) cloudiness = Mathf.Lerp(cloudiness, 1, 0.25f);
+            if (cloudiness > 1) cloudiness = Mathf.Lerp(cloudiness, 1, 0.25f); // Balancing days of -1.5 cloudiness, which seems more common in 3.7+
             float maxMoonlightScore = GetMaxMoonlightScore();
             return cloudiness * maxMoonlightScore * CalculateMoonLightTimeFactor(locationId, time);
         }
@@ -663,9 +668,9 @@ namespace ThatsLit.Components
         /// </summary>
         /// <value></value>
         protected virtual float NonCloudinessBaseAmbienceScoreImpact { get => 0.1f; }
+        protected virtual float BunkerBaseAmbienceTarget { get => -0.2f; }
         protected virtual float MaxMoonlightScore { get => 0.3f; }
         protected virtual float MaxSunlightScore { get => 0.1f; }
-        protected virtual float IndoorSunMoonScale { get => 0f; }
         protected virtual float IndoorAmbienceScale { get => 0.5f; }
         protected virtual float MinAmbienceLum { get => 0.01f; }
         protected virtual float MaxAmbienceLum { get => 0.1f; }
@@ -745,7 +750,7 @@ namespace ThatsLit.Components
 
     public class LighthouseScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.92f;
+        protected override float MinBaseAmbienceScore => -0.88f;
         protected override float NonCloudinessBaseAmbienceScoreImpact => 0.05f;
         protected override float PixelLumScoreScale { get => 2.5f; }
         protected override float ThresholdShine { get => 0.4f; }
@@ -762,6 +767,7 @@ namespace ThatsLit.Components
         protected override float MaxSunlightScore => 0;
         protected override float MaxMoonlightScore => 0.2f;
         protected override float PixelLumScoreScale { get => 2.2f; }
+        protected override float BunkerBaseAmbienceTarget { get => -0.45f; }
     }
     public class InterchangeScoreCalculator : ScoreCalculator
     {
