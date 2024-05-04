@@ -41,9 +41,10 @@ namespace ThatsLit.Components
 
         public float foliageScore;
         internal int foliageCount;
-        internal Vector2 foliageDir;
-        internal float foliageDisH, foliageDisV;
-        internal string foliage;
+        // internal Vector2 foliageDir;
+        // internal float foliageDisH, foliageDisV;
+        // internal string foliage;
+        internal (string name, Vector2 dir, float dis)[] foliage;
         internal bool foliageCloaking;
         Collider[] collidersCache;
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
@@ -301,6 +302,7 @@ namespace ThatsLit.Components
             }
             if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.75f : 0.4f))
             {
+                if (foliage == null) foliage = new (string name, Vector2 dir, float dis)[ThatsLitPlugin.FoliageSamples.Value];
                 UpdateFoliageScore(bodyPos);
             }
 
@@ -520,7 +522,8 @@ namespace ThatsLit.Components
         {
             lastCheckedFoliages = Time.time;
             foliageScore = 0;
-            foliageDir = Vector2.zero;
+            // foliageDir = Vector2.zero;
+            Array.Clear(foliage, 0, foliage.Length);
 
             if (!skipFoliageCheck)
             {
@@ -529,14 +532,13 @@ namespace ThatsLit.Components
 
                 int count = Physics.OverlapSphereNonAlloc(bodyPos, 4f, collidersCache, foliageLayerMask);
                 float closet = 9999f;
-                foliage = null;
 
                 for (int i = 0; i < count; i++)
                 {
                     if (collidersCache[i].gameObject.transform.root.gameObject.layer == 8) continue; // Somehow sometimes player spines are tagged PlayerSpiritAura, VB or vanilla?
                     if (collidersCache[i].gameObject.GetComponent<Terrain>()) continue; // Somehow sometimes terrains can be casted
-                    Vector3 dir = (collidersCache[i].transform.position - bodyPos);
-                    float dis = dir.magnitude;
+                    Vector3 bodyToFoliage = (collidersCache[i].transform.position - bodyPos);
+                    float dis = bodyToFoliage.magnitude;
                     if (dis < 0.25f) foliageScore += 1f;
                     else if (dis < 0.35f) foliageScore += 0.9f;
                     else if (dis < 0.5f) foliageScore += 0.8f;
@@ -546,23 +548,39 @@ namespace ThatsLit.Components
                     else if (dis < 2f) foliageScore += 0.2f;
                     else foliageScore += 0.1f;
 
-                    if (dis < closet)
+                    for (int j = 0; j < foliage.Length; j++)
                     {
-                        closet = dis;
-                        foliageDir = new Vector2(dir.x, dir.z);
-                        foliage = collidersCache[i]?.gameObject.transform.parent.gameObject.name;
+                        if (foliage[j] == default)
+                        {
+                            foliage[j] = (collidersCache[i]?.gameObject.transform.parent.gameObject.name, new Vector2(bodyToFoliage.x, bodyToFoliage.z), dis);
+                            break;
+                        }
+
+                        if (dis < foliage[j].dis)
+                        {
+                            Array.Copy(foliage, j, foliage, j+1, foliage.Length - j - 1);
+                            foliage[j] = (collidersCache[i]?.gameObject.transform.parent.gameObject.name, new Vector3(bodyToFoliage.x, bodyToFoliage.z), dis);
+                            break;
+                        }
                     }
                 }
-                if (foliage != null) foliage = Regex.Replace(foliage, @"(.+?)\s?(\(\d+\))?", "$1");
+                for (int j = 0; j < foliage.Length; j++)
+                {
+                    var f = foliage[j];
+                    if (f.name != null) f.name = Regex.Replace(f.name, @"(.+?)\s?(\(\d+\))?", "$1");
+                    foliage[j] = f;
+
+                    f.dis = f.dir.magnitude; // Use horizontal distance
+                }
 
                 foliageCount = count;
 
-                if (count > 0)
-                {
-                    // foliageScore /= (float) count;
-                    foliageDisH = foliageDir.magnitude;
-                    foliageDisV = Mathf.Abs(foliageDir.y);
-                }
+                // if (count > 0)
+                // {
+                //     // foliageScore /= (float) count;
+                //     foliageDisH = foliageDir.magnitude;
+                //     foliageDisV = Mathf.Abs(foliageDir.y);
+                // }
                 switch (count)
                 {
                     case 1:
