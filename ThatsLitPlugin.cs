@@ -54,13 +54,13 @@ namespace ThatsLit
             Config.Bind(category,
                         "Performance",
                         true,
-                        new ConfigDescription("The mod takes away at least several fps. Actual overhead varies from machine to machine, some lose 5, some lose 20. You can try giving up the brightness module   if the performance is not acceptable.",
+                        new ConfigDescription("The mod takes away at least several fps. Actual overhead varies from machine to machine, some lose 5, some lose 20. You can try giving up the brightness module if the performance is not acceptable.",
                                                          null,
                                                          new ConfigurationManagerAttributes() { ReadOnly = true }));
             Config.Bind(category,
                         "Balance",
                         true,
-                        new ConfigDescription("The mod aims to make AIs reasonable without making it easy. However, SAIN or other mods can change bots, and everyone has different configurations, so you may have different experience than mine with default That's Lit configs. (Quite some people has bots too blind with That's Lit installed) If you have balance issue, consider raising SAIN difficulty (first) or tweaking scales below.",
+                        new ConfigDescription("The mod aims to make AIs reasonable without making it easy. However, SAIN or other mods can change bots, and everyone has different configurations, so you may have different experience than mine with default That's Lit configs. Check \"Recommended Mods\" on the mod page for more info.",
                                                          null,
                                                          new ConfigurationManagerAttributes() { ReadOnly = true }));
             Config.Bind(category,
