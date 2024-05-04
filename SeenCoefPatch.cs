@@ -561,7 +561,14 @@ namespace ThatsLit
             }
             // BUSH RAT ----------------------------------------------------------------------------------------------------------------
 
-            if (!mainPlayer.disabledLit && Mathf.Abs(score) >= 0.15f) // Skip works
+            if (mainPlayer.disabledLit && ThatsLitPlugin.AlternativeReactionFluctuation.Value)
+            {
+                // https://www.desmos.com/calculator/jbghqfxwha
+                float cautionFactor = (caution / 9f - 0.5f) * (0.05f + 0.5f * rand4 * rand4); // -0.5(faster)~0.5(slower) squared curve distribution
+                __result += cautionFactor;
+                __result *= 1f + cautionFactor / 2f; // Factor in bot class
+            }
+            else if (!mainPlayer.disabledLit && Mathf.Abs(score) >= 0.05f) // Skip works
             {
                 if (mainPlayer.isWinterCache) {
                     var emptiness = 1f - mainPlayer.foliageScore * detailScoreRaw;
