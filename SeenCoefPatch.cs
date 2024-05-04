@@ -659,6 +659,12 @@ namespace ThatsLit
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
+            // Up to 33% penalty
+            if (__result < 0.5f * original)
+            {
+                __result = 0.5f * original;
+            }
+
             __result += ThatsLitPlugin.FinalOffset.Value;
             if (__result < 0.005f) __result = 0.005f;
 
