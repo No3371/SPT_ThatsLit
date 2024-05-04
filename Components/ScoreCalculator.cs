@@ -241,8 +241,9 @@ namespace ThatsLit.Components
         internal float baseAmbienceScore, ambienceScore, litScoreFactor;
         float shinePixelsRatioSample, highLightPixelsRatioSample, highMidLightPixelsRatioSample, midLightPixelsRatioSample, midLowLightPixelsRatioSample, lowLightPixelsRatioSample, darkPixelsRatioSample;
         float sunLightScore, moonLightScore;
+        string infoCache;
 
-        internal virtual void CalledOnGUI ()
+        internal virtual void CalledOnGUI (bool layout = false)
         {
             // Utility.GUILayoutDrawAsymetricMeter((int)(baseAmbienceScore / 0.0999f));
             // Utility.GUILayoutDrawAsymetricMeter((int)(ambienceScore / 0.0999f));
@@ -257,10 +258,12 @@ namespace ThatsLit.Components
                 lowLightPixelsRatioSample = (frame0.RatioLowPixels + frame1.RatioLowPixels + frame2.RatioLowPixels + frame3.RatioLowPixels + frame4.RatioLowPixels + frame5.RatioLowPixels) / 6f;
                 darkPixelsRatioSample = (frame0.RatioDarkPixels + frame1.RatioDarkPixels + frame2.RatioDarkPixels + frame3.RatioDarkPixels + frame4.RatioDarkPixels + frame5.RatioDarkPixels) / 6f;
             }
-            GUILayout.Label(string.Format("PIXELS: {0:000}% - {1:000}% - {2:000}% - {3:000}% - {4:000}% - {5:000}% | {6:000}% (AVG Sample)", shinePixelsRatioSample * 100, highLightPixelsRatioSample * 100, highMidLightPixelsRatioSample * 100, midLightPixelsRatioSample * 100, midLowLightPixelsRatioSample * 100, lowLightPixelsRatioSample * 100, darkPixelsRatioSample * 100));
-            GUILayout.Label(string.Format("AvgLumMF: {0:0.000} / {1:0.000} ~ {2:0.000} ({3:0.000})", frame0.avgLumMultiFrames, GetMinAmbianceLum(), GetMaxAmbianceLum(), GetAmbianceLumRange()));
-            GUILayout.Label(string.Format("Sun: {0:0.000}/{1:0.000}, Moon: {2:0.000}/{3:0.000}", sunLightScore, GetMaxSunlightScore(), moonLightScore, GetMaxMoonlightScore()));
-            GUILayout.Label(string.Format("SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} (SAMPLE)", scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4));
+            if (layout) infoCache = $"  PIXELS: {shinePixelsRatioSample * 100:000}% - {highLightPixelsRatioSample * 100:000}% - {highMidLightPixelsRatioSample * 100:000}% - { midLightPixelsRatioSample * 100:000}% - {midLowLightPixelsRatioSample * 100:000}% - {lowLightPixelsRatioSample * 100:000}% | {darkPixelsRatioSample * 100:000}% (AVG Sample)\n  AvgLumMF: {frame0.avgLumMultiFrames:0.000} / {GetMinAmbianceLum():0.000} ~ {GetMaxAmbianceLum():0.000} ({GetAmbianceLumRange():0.000})\n   Sun: {sunLightScore:0.000}/{GetMaxSunlightScore():0.000}, Moon: {moonLightScore:0.000}/{GetMaxMoonlightScore():0.000}\n  SCORE : {scoreRaw1:＋0.00;－0.00;+0.00} -> {scoreRaw2:＋0.00;－0.00;+0.00} -> {scoreRaw3:＋0.00;－0.00;+0.00} -> {scoreRaw4:＋0.00;－0.00;+0.00} (SAMPLE)";            
+            GUILayout.Label(infoCache);
+            // GUILayout.Label(string.Format("  PIXELS: {0:000}% - {1:000}% - {2:000}% - {3:000}% - {4:000}% - {5:000}% | {6:000}% (AVG Sample)", shinePixelsRatioSample * 100, highLightPixelsRatioSample * 100, highMidLightPixelsRatioSample * 100, midLightPixelsRatioSample * 100, midLowLightPixelsRatioSample * 100, lowLightPixelsRatioSample * 100, darkPixelsRatioSample * 100));
+            // GUILayout.Label(string.Format("  AvgLumMF: {0:0.000} / {1:0.000} ~ {2:0.000} ({3:0.000})", frame0.avgLumMultiFrames, GetMinAmbianceLum(), GetMaxAmbianceLum(), GetAmbianceLumRange()));
+            // GUILayout.Label(string.Format("  Sun: {0:0.000}/{1:0.000}, Moon: {2:0.000}/{3:0.000}", sunLightScore, GetMaxSunlightScore(), moonLightScore, GetMaxMoonlightScore()));
+            // GUILayout.Label(string.Format("  SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} (SAMPLE)", scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4));
             
             Utility.GUILayoutDrawAsymetricMeter((int)(frame0.score / 0.0999f));
         }
