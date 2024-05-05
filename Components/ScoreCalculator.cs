@@ -797,6 +797,16 @@ namespace ThatsLit.Components
         protected override float MaxAmbienceLum => 0.008f;
         protected override float PixelLumScoreScale { get => 2f; }
         protected override float IndoorAmbienceScale => 0.2f;
+        protected override float CalculateMoonLightTimeFactor(string locationId, float time)
+        {
+            if (time > 23.9 && time < 0) // 0 ~ 1
+                return 0.1f * (24f - time);
+            else if (time >= 0 && time < 3.5f) // 0 ~ 1
+                return 0.1f + 0.9f * GetTimeProgress(time, 0, 2f);
+            else if (time >= 3.5f && time < 5) // 1 ~ 0
+                return 1f - GetTimeProgress(time, 3.5f, 5f);
+            else return 0;
+        }
     }
     public class ShorelineScoreCalculator : ScoreCalculator
     {
