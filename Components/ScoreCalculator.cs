@@ -673,15 +673,15 @@ namespace ThatsLit.Components
             return maxMoonlightScore;
         }
         protected virtual float MinBaseAmbienceScore { get => -0.9f; }
-        protected virtual float MaxBaseAmbienceScore { get => 0.05f; }
+        protected virtual float MaxBaseAmbienceScore { get => 0.0f; }
         /// <summary>
         /// The ambience change between c-1 and c1 during the darkest hours
         /// </summary>
         /// <value></value>
         protected virtual float NonCloudinessBaseAmbienceScoreImpact { get => 0.1f; }
-        protected virtual float BunkerBaseAmbienceTarget { get => -0.2f; }
+        protected virtual float BunkerBaseAmbienceTarget { get => -0.3f; }
         protected virtual float MaxMoonlightScore { get => 0.3f; }
-        protected virtual float MaxSunlightScore { get => 0.1f; }
+        protected virtual float MaxSunlightScore { get => 0.25f; }
         protected virtual float IndoorAmbienceScale { get => 0.5f; }
         protected virtual float MinAmbienceLum { get => 0.01f; }
         protected virtual float MaxAmbienceLum { get => 0.1f; }
@@ -712,7 +712,8 @@ namespace ThatsLit.Components
     }
     public class ReserveScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.85f;
+        protected override float MinBaseAmbienceScore => -0.88f;
+        protected override float MaxBaseAmbienceScore => -0.05f;
         protected override float MinAmbienceLum => 0.011f;
         protected override float MaxAmbienceLum => 0.011f;
         protected override float ThresholdShine { get => 0.4f; }
@@ -726,7 +727,7 @@ namespace ThatsLit.Components
 
     public class WoodsScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.87f;
+        protected override float MinBaseAmbienceScore => -0.9f;
         protected override float MinAmbienceLum => 0.015f;
         protected override float MaxAmbienceLum => 0.017f;
         protected override float ThresholdShine { get => 0.2f; }
@@ -784,7 +785,6 @@ namespace ThatsLit.Components
     {
         protected override float MinBaseAmbienceScore => -0.7f;
         protected override float NonCloudinessBaseAmbienceScoreImpact { get => 0.15f; }
-        protected override float MaxSunlightScore => 0;
         protected override float MaxMoonlightScore => 0.2f;
         protected override float PixelLumScoreScale { get => 2.2f; }
         protected override float BunkerBaseAmbienceTarget { get => -0.45f; }
@@ -792,7 +792,8 @@ namespace ThatsLit.Components
     public class InterchangeScoreCalculator : ScoreCalculator
     {
         protected override float MinBaseAmbienceScore => -0.8f;
-        protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.66f;
+        protected override float MaxBaseAmbienceScore { get => -0.1f; } // indoor
+        protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.75f;
         protected override float MinAmbienceLum => 0.008f;
         protected override float MaxAmbienceLum => 0.008f;
         protected override float PixelLumScoreScale { get => 2f; }
@@ -851,7 +852,7 @@ namespace ThatsLit.Components
         protected override float ThresholdMid { get => 0.02f; }
         protected override float ThresholdMidLow { get => 0.01f; }
         protected override float ThresholdLow { get => 0.005f; }
-        protected override float PixelLumScoreScale { get => 3f; }
+        protected override float PixelLumScoreScale { get => 1.5f; }
 
         protected override float GetMapAmbienceCoef(string locationId, float time)
         {
