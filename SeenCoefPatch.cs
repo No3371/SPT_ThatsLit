@@ -638,17 +638,17 @@ namespace ThatsLit
             if (ThatsLitPlugin.EnableMovementImpact.Value)
             {
                 if (__instance.Owner.Mover.Sprinting)
-                    __result *= 1 + (rand2 / (4f - caution * 0.1f)) * Mathf.Clamp01((visionAngleDelta - 20f) / 70f); // When facing away (25~90deg), sprinting bots takes up to 25% longer to spot the player
+                    __result *= 1 + (rand2 / (4f - caution * 0.1f)) * Mathf.Clamp01((visionAngleDelta - 30f) / 60f); // When facing away (30~60deg), sprinting bots takes up to 25% longer to spot the player
                 else if (!__instance.Owner.Mover.IsMoving)
                 {
                     float delta = __result * (rand4 / (5f + caution * 0.1f)); // When not moving, bots takes up to 20% shorter to spot the player
-                    __result = Mathf.Max(original, __result - delta);
+                    __result -= delta;
                 }
 
                 if (poseFactor > 0.45f && pSpeedFactor > 0.01f)
                 {
-                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.3f); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed;
-                    __result = Mathf.Max(original, __result - delta);
+                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.35f); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed;
+                    __result -= delta;
                 }
             }
 
@@ -663,7 +663,7 @@ namespace ThatsLit
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
-            // Up to 33% penalty
+            // Up to 50% penalty
             if (__result < 0.5f * original)
             {
                 __result = 0.5f * original;
