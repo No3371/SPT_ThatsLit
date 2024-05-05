@@ -103,6 +103,9 @@ namespace ThatsLit.Components
 
             var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
 
+            baseAmbienceScore += (MinBaseAmbienceScore - baseAmbienceScore) * (player.overheadHaxRating / 10f) * 0.15f;
+
+
             // =====
             // Handle bunker environment
             // =====

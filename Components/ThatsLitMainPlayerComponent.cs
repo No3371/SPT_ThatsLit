@@ -471,7 +471,14 @@ namespace ThatsLit.Components
                 }
                 ambientShadownRating = Mathf.Clamp(ambientShadownRating, 0, 10f);
             }
+
+            if (OverheadHaxCast(bodyPos, out var haxHit))
+            {
+                overheadHaxRating += Time.timeScale * Mathf.Clamp01(10f - haxHit.distance);
             }
+            else 
+                overheadHaxRating -= Time.timeScale * 2f;
+            overheadHaxRating = Mathf.Clamp(overheadHaxRating, 0f, 10f);
 
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
@@ -540,6 +547,19 @@ namespace ThatsLit.Components
             if (!observed.IsCreated) return;
             MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
             observed.Dispose();
+        }
+        internal float overheadHaxRating;
+        // internal float overheadHaxRatingFactor;
+        private bool OverheadHaxCast (Vector3 from, out RaycastHit hit)
+        {
+            Vector3 cast = new Vector3(0, 1, 0);
+            int slice = Time.frameCount % 6;
+            int expansion = (Time.frameCount % 24) / 6;
+            cast = Quaternion.Euler((expansion + 1) * 10, 0, 0) * cast;
+            cast = Quaternion.Euler(0, slice * -60f, 0) * cast;
+            
+            var ray = new Ray(from, cast);
+            return RaycastIgnoreGlass(ray, 25, ambienceRaycastMask, out hit);
         }
         private bool RaycastIgnoreGlass (Ray ray, float distance, LayerMask mask, out RaycastHit hit, int depth = 0)
         {
@@ -768,7 +788,7 @@ namespace ThatsLit.Components
                 float fog = WeatherController.Instance?.WeatherCurve?.Fog ?? 0;
                 float rain = WeatherController.Instance?.WeatherCurve?.Rain ?? 0;
                 float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
-                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { rawTerrainScoreSample :0.000} FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000} INSIDE: { Time.time - lastOutside:0.000} AMB: { ambientShadownRating:0.000} BNKR: { bunkerTimeClamped:0.000}";
+                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { rawTerrainScoreSample :0.000} FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambientShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
                 GUILayout.Label(infoCache1);
                 // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
                 if (scoreCalculator != null) GUILayout.Label(string.Format("  LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
