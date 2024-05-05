@@ -387,11 +387,6 @@ namespace ThatsLit.Components
                             cam.transform.localPosition = new Vector3(0, 2f, 0);
                             cam.transform.LookAt(MainPlayer.Transform.Original.position);
                         }
-                        else if (MainPlayer.PoseLevel < 0.5f) // mid Crouch-Stand
-                        {
-                            cam.transform.localPosition = new Vector3(0, -0.4f, 0.35f);
-                            cam.transform.LookAt(MainPlayer.Transform.Original.position);
-                        }
                         else
                         {
                             cam.transform.localPosition = new Vector3(0, -0.5f, 0.35f);
