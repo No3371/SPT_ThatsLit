@@ -68,7 +68,7 @@ namespace ThatsLit
                 _benchmarkSW = null;
 #endregion
 
-            float pSpeedFactor = Mathf.Clamp01((mainPlayer.MainPlayer.Velocity.magnitude - 0.5f) / 4f);
+            float pSpeedFactor = Mathf.Clamp01((mainPlayer.MainPlayer.Velocity.magnitude - 1f) / 4f);
 
             nearestRecent += 0.5f;
             var caution = __instance.Owner.Id % 10; // 0 -> HIGH, 1 -> HIGH-MID, 2,3,4 -> MID, 5,6,7,8,9 -> LOW
