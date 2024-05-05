@@ -278,7 +278,8 @@ namespace ThatsLit
             var foliageImpact = mainPlayer.foliageScore * (1f - factor);
             Vector2 bestMatchFoliageDir = Vector2.zero;
             float bestMatchDeg = 360f;
-            foreach (var f in mainPlayer.foliage) {
+            for (int i = 0; i < Math.Min(ThatsLitPlugin.FoliageSamples.Value, mainPlayer.foliageCount); i++) {
+                var f = mainPlayer.foliage[i];
                 if (f == default) break;
                 var fDeg = Vector2.Angle(new Vector2(-eyeToPlayerBody.x, -eyeToPlayerBody.z), f.dir);
                 if (fDeg < bestMatchDeg)
@@ -419,7 +420,7 @@ namespace ThatsLit
                 float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
                 bool bushRat = true;
 
-                (string name, Vector2 dir, float dis) nearestFoliage = mainPlayer.foliage[0];
+                FoliageInfo nearestFoliage = mainPlayer.foliage[0];
                 switch (nearestFoliage.name)
                 {
                     case "filbert_big01":

@@ -45,7 +45,9 @@ namespace ThatsLit.Components
         // internal Vector2 foliageDir;
         // internal float foliageDisH, foliageDisV;
         // internal string foliage;
-        internal (string name, Vector2 dir, float dis)[] foliage;
+        internal FoliageInfo[] foliage;
+        internal bool isFoliageSorted;
+        internal Vector3 lastFoliageCheckPos;
         internal bool foliageCloaking;
         Collider[] collidersCache;
         public LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
@@ -88,6 +90,7 @@ namespace ThatsLit.Components
 
             awakeAt = Time.time;
             collidersCache = new Collider[16];
+            if (foliage == null) foliage = new FoliageInfo[16];
 
             Singleton<ThatsLitMainPlayerComponent>.Instance = this;
             MainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
@@ -313,11 +316,32 @@ namespace ThatsLit.Components
                     }
                 }
             }
-            if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.75f : 0.4f))
+
+            #region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
-                if (foliage == null) foliage = new (string name, Vector2 dir, float dis)[ThatsLitPlugin.FoliageSamples.Value];
+                if (_benchmarkSWFoliageCheck == null) _benchmarkSWFoliageCheck = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSWFoliageCheck.IsRunning)
+                {
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (Foliage Check)";
+                    NotificationManagerClass.DisplayWarningNotification(message);
+                    Logger.LogWarning(message);
+                }
+                _benchmarkSWFoliageCheck.Start();
+            }
+            else if (_benchmarkSWFoliageCheck != null)
+                _benchmarkSWFoliageCheck = null;
+            #endregion
+
+            if (!isFoliageSorted) isFoliageSorted = SlicedBubbleSort(foliage, foliageCount * 3 / 2, foliageCount);
+            if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.7f : 0.35f))
+            {
                 UpdateFoliageScore(bodyPos);
             }
+
+            #region BENCHMARK
+            _benchmarkSWFoliageCheck?.Stop();
+            #endregion
 
             if (disabledLit)
             {
@@ -582,124 +606,144 @@ namespace ThatsLit.Components
             else return false;
         }
 
-        private void UpdateFoliageScore(Vector3 bodyPos)
+        /// <summary>
+        /// This get called every frame. It performs bubble sort on the "foliage" array by the element's dis (float).
+        /// The sort is sliced by frame, and only "step" steps are performed every frame.
+        /// if any swap is performed in steps, set the local sorted bool to false;
+        /// </summary>
+        /// <param name="step">Steps to perform this frame</param>
+        private bool SlicedBubbleSort<T>(T[] subject, int step, int valid) where T : IComparable<T>
         {
-            #region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
+            var sorted = true;
+
+            // Iterate through the array from 0 ~ N-1 as long as step is not used up, swap if left is bigger
+            // if a full loop is done and no swap has been performed, set isFoliageSorted to true and return
+            // if a full loop is done and any swap has been performed, loop again
+            int right = Mathf.Min(valid - 1, subject.Length - 1);
+            while (step > 0)
             {
-                if (_benchmarkSWFoliageCheck == null) _benchmarkSWFoliageCheck = new System.Diagnostics.Stopwatch();
-                if (_benchmarkSWFoliageCheck.IsRunning)
+                for (int i = 0; i < right; i++)
                 {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (Foliage Check)";
-                    NotificationManagerClass.DisplayWarningNotification(message);
-                    Logger.LogWarning(message);
-                }
-                _benchmarkSWFoliageCheck.Start();
-            }
-            else if (_benchmarkSWFoliageCheck != null)
-                _benchmarkSWFoliageCheck = null;
-            #endregion
-
-            lastCheckedFoliages = Time.time;
-            foliageScore = 0;
-            // foliageDir = Vector2.zero;
-            Array.Clear(foliage, 0, foliage.Length);
-
-            if (!skipFoliageCheck)
-            {
-                for (int i = 0; i < collidersCache.Length; i++)
-                    collidersCache[i] = null;
-
-                int count = Physics.OverlapSphereNonAlloc(bodyPos, 4f, collidersCache, foliageLayerMask);
-
-                for (int i = 0; i < count; i++)
-                {
-                    if (collidersCache[i].gameObject.transform.root.gameObject.layer == 8) continue; // Somehow sometimes player spines are tagged PlayerSpiritAura, VB or vanilla?
-                    if (collidersCache[i].gameObject.GetComponent<Terrain>()) continue; // Somehow sometimes terrains can be casted
-                    Vector3 bodyToFoliage = (collidersCache[i].transform.position - bodyPos);
-                    float dis = bodyToFoliage.magnitude;
-                    if (dis < 0.25f) foliageScore += 1f;
-                    else if (dis < 0.35f) foliageScore += 0.9f;
-                    else if (dis < 0.5f) foliageScore += 0.8f;
-                    else if (dis < 0.6f) foliageScore += 0.7f;
-                    else if (dis < 0.7f) foliageScore += 0.5f;
-                    else if (dis < 1f) foliageScore += 0.3f;
-                    else if (dis < 2f) foliageScore += 0.2f;
-                    else foliageScore += 0.1f;
-
-                    for (int j = 0; j < foliage.Length; j++)
+                    if (subject[i].CompareTo(subject[i + 1]) > 0)
                     {
-                        if (foliage[j] == default)
+                        var temp = subject[i];
+                        subject[i] = subject[i + 1];
+                        subject[i + 1] = temp;
+                        sorted = false;
+                        step--;
+                    }
+
+                    if (i == right - 1)
+                    {
+                        if (sorted)
                         {
-                            foliage[j] = (collidersCache[i]?.gameObject.transform.parent.gameObject.name, new Vector2(bodyToFoliage.x, bodyToFoliage.z), dis);
-                            break;
+                            return true;
                         }
 
-                        if (dis < foliage[j].dis)
-                        {
-                            Array.Copy(foliage, j, foliage, j+1, foliage.Length - j - 1);
-                            foliage[j] = (collidersCache[i]?.gameObject.transform.parent.gameObject.name, new Vector3(bodyToFoliage.x, bodyToFoliage.z), dis);
-                            break;
-                        }
+                        i = -1;
+                        sorted = true;
                     }
                 }
-                for (int j = 0; j < foliage.Length; j++)
-                {
-                    var f = foliage[j];
-                    if (f.name != null) f.name = Regex.Replace(f.name, @"(.+?)\s?(\(\d+\))?", "$1");
-                    foliage[j] = f;
-
-                    f.dis = f.dir.magnitude; // Use horizontal distance
-                }
-
-                foliageCount = count;
-
-                // if (count > 0)
-                // {
-                //     // foliageScore /= (float) count;
-                //     foliageDisH = foliageDir.magnitude;
-                //     foliageDisV = Mathf.Abs(foliageDir.y);
-                // }
-                switch (count)
-                {
-                    case 1:
-                        foliageScore /= 3.3f;
-                        break;
-                    case 2:
-                        foliageScore /= 2.8f;
-                        break;
-                    case 3:
-                        foliageScore /= 2.3f;
-                        break;
-                    case 4:
-                        foliageScore /= 1.8f;
-                        break;
-                    case 5:
-                    case 6:
-                        foliageScore /= 1.2f;
-                        break;
-                    case 11:
-                    case 12:
-                    case 13:
-                        foliageScore /= 1.15f;
-                        break;
-                    case 14:
-                    case 15:
-                    case 16:
-                        foliageScore /= 1.25f;
-                        break;
-                    case 17:
-                    case 18:
-                    case 19:
-                    case 20:
-                        foliageScore /= 1.4f;
-                        break;
-                }
             }
 
-            #region BENCHMARK
-            _benchmarkSWFoliageCheck?.Stop();
-            #endregion
+            return false;
+        }
+
+        private void UpdateFoliageScore(Vector3 bodyPos)
+        {
+            lastCheckedFoliages = Time.time;
+            foliageScore = 0;
+
+            // Skip if basically standing still
+            if ((bodyPos - lastFoliageCheckPos).magnitude < 0.05f)
+            {
+                return;
+            }
+
+            Array.Clear(foliage, 0, foliage.Length);
+            Array.Clear(collidersCache, 0, collidersCache.Length);
+
+            if (skipFoliageCheck) return;
+
+            int castedCount = Physics.OverlapSphereNonAlloc(bodyPos, 4f, collidersCache, foliageLayerMask);
+            int validCount = 0;
+
+            for (int i = 0; i < castedCount; i++)
+            {
+                Collider casted = collidersCache[i];
+                if (casted.gameObject.transform.root.gameObject.layer == 8) continue; // Somehow sometimes player spines are tagged PlayerSpiritAura, VB or vanilla?
+                if (casted.gameObject.GetComponent<Terrain>()) continue; // Somehow sometimes terrains can be casted
+                Vector3 bodyToFoliage = casted.transform.position - bodyPos;
+
+                float dis = bodyToFoliage.magnitude;
+                if (dis < 0.25f) foliageScore += 1f;
+                else if (dis < 0.35f) foliageScore += 0.9f;
+                else if (dis < 0.5f) foliageScore += 0.8f;
+                else if (dis < 0.6f) foliageScore += 0.7f;
+                else if (dis < 0.7f) foliageScore += 0.5f;
+                else if (dis < 1f) foliageScore += 0.3f;
+                else if (dis < 2f) foliageScore += 0.2f;
+                else foliageScore += 0.1f;
+
+                string fname = casted?.transform.parent.gameObject.name;
+                if (string.IsNullOrWhiteSpace(fname)) continue;
+
+                if (ThatsLitPlugin.FoliageSamples.Value == 1 && (foliage[0] == default || dis < foliage[0].dis)) // don't bother
+                {
+                    foliage[0] = new FoliageInfo(fname, new Vector3(bodyToFoliage.x, bodyToFoliage.z), dis);
+                    validCount = 1;
+                    continue;
+                }
+                else foliage[validCount] = new FoliageInfo(fname, new Vector3(bodyToFoliage.x, bodyToFoliage.z), dis);
+                validCount++;
+            }
+
+            for (int j = 0; j < validCount; j++)
+            {
+                var f = foliage[j];
+                f.name = Regex.Replace(f.name, @"(.+?)\s?(\(\d+\))?", "$1");
+                f.dis = f.dir.magnitude; // Use horizontal distance to replace casted 3D distance
+                foliage[j] = f;
+            }
+            isFoliageSorted = false;
+            if (foliage.Length == 1 || validCount == 1)
+            {
+                isFoliageSorted = true;
+            }
+
+            switch (castedCount)
+            {
+                case 1:
+                    foliageScore /= 3.3f;
+                    break;
+                case 2:
+                    foliageScore /= 2.8f;
+                    break;
+                case 3:
+                    foliageScore /= 2.3f;
+                    break;
+                case 4:
+                    foliageScore /= 1.8f;
+                    break;
+                case 5:
+                case 6:
+                    foliageScore /= 1.2f;
+                    break;
+                case 11:
+                case 12:
+                case 13:
+                    foliageScore /= 1.15f;
+                    break;
+                case 14:
+                case 15:
+                case 16:
+                    foliageScore /= 1.25f;
+                    break;
+            }
+
+            foliageCount = validCount;
+
+            lastFoliageCheckPos = bodyPos;
         }
 
         private void OnDestroy()
