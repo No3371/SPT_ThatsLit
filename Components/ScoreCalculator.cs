@@ -770,6 +770,15 @@ namespace ThatsLit.Components
         protected override float ThresholdMid { get => 0.1f; }
         protected override float ThresholdMidLow { get => 0.04f; }
         protected override float ThresholdLow { get => 0.015f; }
+
+        internal override float CalculateSunLightTimeFactor(string locationId, float time)
+        {
+            if (time >= 15 && time < 20) // 1 ~ 0.5f
+                return 1f - 0.3f * GetTimeProgress(time, 15, 20);
+            else if (time >= 20 && time < 21.5f) // 0.5 ~ 0f
+                return 0.7f * (1f - GetTimeProgress(time, 20, 21.5f));
+            else return base.CalculateSunLightTimeFactor(locationId, time);
+        }
     }
     public class CustomsScoreCalculator : ScoreCalculator
     {
