@@ -128,7 +128,7 @@ namespace ThatsLit.Components
                         if (ThatsLitPlugin.EnableStreets.Value) scoreCalculator = new StreetsScoreCalculator();
                         break;
                     case "Sandbox":
-                        if (ThatsLitPlugin.EnableGroundZero.Value) scoreCalculator = new StreetsScoreCalculator();
+                        if (ThatsLitPlugin.EnableGroundZero.Value) scoreCalculator = new GroundZeroScoreCalculator();
                         break;
                     case "Shoreline":
                         if (ThatsLitPlugin.EnableShoreline.Value) scoreCalculator = new ShorelineScoreCalculator();
