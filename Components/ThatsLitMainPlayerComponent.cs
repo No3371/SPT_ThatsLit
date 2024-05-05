@@ -29,7 +29,8 @@ namespace ThatsLit.Components
         public bool disabledLit;
         readonly int RESOLUTION = 32 * ThatsLitPlugin.ResLevel.Value;
         public const int POWER = 3;
-        public RenderTexture rt;
+        // public RenderTexture rt;
+        public CustomRenderTexture rt;
         Texture slowRT;
         public Camera cam, envCam;
         // public Texture2D envTex, envDebugTex;
@@ -100,62 +101,69 @@ namespace ThatsLit.Components
             isWinterCache = session.Session.IsWinter;
             activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
 
-            if (ThatsLitPlugin.EnabledLighting.Value)
+            switch (activeRaidSettings?.LocationId)
             {
-                switch (activeRaidSettings?.LocationId)
-                {
-                    case "Lighthouse":
-                        if (ThatsLitPlugin.EnableLighthouse.Value) scoreCalculator = new LighthouseScoreCalculator();
-                        break;
-                    case "Woods":
-                        if (ThatsLitPlugin.EnableWoods.Value) scoreCalculator = new WoodsScoreCalculator();
-                        break;
-                    case "factory4_night":
-                        if (ThatsLitPlugin.EnableFactoryNight.Value) scoreCalculator = GetInGameDayTime() > 12 ? null : new NightFactoryScoreCalculator();
-                        skipFoliageCheck = true;
-                        skipDetailCheck = true;
-                        break;
-                    case "factory4_day":
-                        scoreCalculator = null;
-                        skipFoliageCheck = true;
-                        skipDetailCheck = true;
-                        break;
-                    case "bigmap": // Customs
-                        if (ThatsLitPlugin.EnableCustoms.Value) scoreCalculator = new CustomsScoreCalculator();
-                        break;
-                    case "RezervBase": // Reserve
-                        if (ThatsLitPlugin.EnableReserve.Value) scoreCalculator = new ReserveScoreCalculator();
-                        break;
-                    case "Interchange":
-                        if (ThatsLitPlugin.EnableInterchange.Value) scoreCalculator = new InterchangeScoreCalculator();
-                        break;
-                    case "TarkovStreets":
-                        if (ThatsLitPlugin.EnableStreets.Value) scoreCalculator = new StreetsScoreCalculator();
-                        break;
-                    case "Sandbox":
-                        if (ThatsLitPlugin.EnableGroundZero.Value) scoreCalculator = new GroundZeroScoreCalculator();
-                        break;
-                    case "Shoreline":
-                        if (ThatsLitPlugin.EnableShoreline.Value) scoreCalculator = new ShorelineScoreCalculator();
-                        break;
-                    case "laboratory":
-                        // scoreCalculator = new LabScoreCalculator();
-                        scoreCalculator = null;
-                        skipFoliageCheck = true;
-                        skipDetailCheck = true;
-                        break;
-                    case null:
-                        if (ThatsLitPlugin.EnableHideout.Value) scoreCalculator = new HideoutScoreCalculator();
-                        skipFoliageCheck = true;
-                        skipDetailCheck = true;
-                        break;
-                    default:
-                        break;
-                }
+                case "factory4_night":
+                case "factory4_day":
+                case "laboratory":
+                case null:
+                    skipFoliageCheck = true;
+                    skipDetailCheck = true;
+                    break;
+                default:
+                    skipFoliageCheck = false;
+                    skipDetailCheck = !ThatsLitPlugin.EnabledGrasses.Value;
+                    break;
             }
 
-            if (!ThatsLitPlugin.EnabledGrasses.Value)
-                skipDetailCheck = true;
+            if (ThatsLitPlugin.EnabledLighting.Value) EnableBrightness();
+
+        }
+
+        void EnableBrightness ()
+        {
+            if (scoreCalculator == null)
+            switch (activeRaidSettings?.LocationId)
+            {
+                case "Lighthouse":
+                    if (ThatsLitPlugin.EnableLighthouse.Value) scoreCalculator = new LighthouseScoreCalculator();
+                    break;
+                case "Woods":
+                    if (ThatsLitPlugin.EnableWoods.Value) scoreCalculator = new WoodsScoreCalculator();
+                    break;
+                case "factory4_night":
+                    if (ThatsLitPlugin.EnableFactoryNight.Value) scoreCalculator = GetInGameDayTime() > 12 ? null : new NightFactoryScoreCalculator();
+                    break;
+                case "factory4_day":
+                    scoreCalculator = null;
+                    break;
+                case "bigmap": // Customs
+                    if (ThatsLitPlugin.EnableCustoms.Value) scoreCalculator = new CustomsScoreCalculator();
+                    break;
+                case "RezervBase": // Reserve
+                    if (ThatsLitPlugin.EnableReserve.Value) scoreCalculator = new ReserveScoreCalculator();
+                    break;
+                case "Interchange":
+                    if (ThatsLitPlugin.EnableInterchange.Value) scoreCalculator = new InterchangeScoreCalculator();
+                    break;
+                case "TarkovStreets":
+                    if (ThatsLitPlugin.EnableStreets.Value) scoreCalculator = new StreetsScoreCalculator();
+                    break;
+                case "Sandbox":
+                    if (ThatsLitPlugin.EnableGroundZero.Value) scoreCalculator = new GroundZeroScoreCalculator();
+                    break;
+                case "Shoreline":
+                    if (ThatsLitPlugin.EnableShoreline.Value) scoreCalculator = new ShorelineScoreCalculator();
+                    break;
+                case "laboratory":
+                    scoreCalculator = null;
+                    break;
+                case null:
+                    if (ThatsLitPlugin.EnableHideout.Value) scoreCalculator = new HideoutScoreCalculator();
+                    break;
+                default:
+                    break;
+            }
 
             if (scoreCalculator == null)
             {
@@ -163,76 +171,73 @@ namespace ThatsLit.Components
                 return;
             }
 
-            rt = new RenderTexture(RESOLUTION, RESOLUTION, 0, RenderTextureFormat.ARGB32);
-            if (ThatsLitPlugin.DebugSlowTexture.Value) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
-            rt.useMipMap = false;
-            rt.filterMode = FilterMode.Point;
-            rt.Create();
-
-            cam = GameObject.Instantiate<Camera>(CameraClass.Instance.OpticCameraManager.Camera);
-            cam.gameObject.name = "That's Lit Camera";
-            foreach (var c in cam.gameObject.GetComponents<MonoBehaviour>())
-            switch (c) {
-                case VolumetricLightRenderer volumetricLightRenderer:
-                case AreaLightManager areaLightManager:
-                    break;
-                default:
-                    MonoBehaviour.Destroy(c);
-                    break;
+            if (rt == null)
+            {
+                // rt = new RenderTexture(RESOLUTION, RESOLUTION, 0, RenderTextureFormat.ARGB32);
+                rt = new CustomRenderTexture(RESOLUTION, RESOLUTION, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+                rt.depth = 0;
+                rt.doubleBuffered = true;
+                rt.useMipMap = false;
+                rt.filterMode = FilterMode.Point;
+                rt.Create();
             }
-            cam.gameObject.name = "[That's Lit CAM]";
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color (0, 0, 0, 0);
 
-            cam.transform.SetParent(MainPlayer.Transform.Original);
+            if (cam == null)
+            {
+                cam = GameObject.Instantiate<Camera>(CameraClass.Instance.OpticCameraManager.Camera);
+                cam.gameObject.name = "That's Lit Camera";
+                foreach (var c in cam.gameObject.GetComponents<MonoBehaviour>())
+                switch (c) {
+                    case VolumetricLightRenderer volumetricLightRenderer:
+                    case AreaLightManager areaLightManager:
+                        break;
+                    default:
+                        MonoBehaviour.Destroy(c);
+                        break;
+                }
+                cam.gameObject.name = "[That's Lit CAM]";
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = new Color (0, 0, 0, 0);
 
-            cam.nearClipPlane = 0.001f;
-            cam.farClipPlane = 5f;
+                cam.transform.SetParent(MainPlayer.Transform.Original);
 
-            cam.cullingMask = LayerMaskClass.PlayerMask;
-            cam.fieldOfView = 44;
+                cam.nearClipPlane = 0.001f;
+                cam.farClipPlane = 5f;
 
-            cam.targetTexture = rt;
+                cam.cullingMask = LayerMaskClass.PlayerMask;
+                cam.fieldOfView = 44;
 
+                cam.targetTexture = rt;
+            }
+            else cam.enabled = true;
 
 
             if (ThatsLitPlugin.DebugTexture.Value)
             {
-                //debugTex = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
-                display = new GameObject().AddComponent<RawImage>();
-                display.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
-                display.RectTransform().sizeDelta = new Vector2(160, 160);
-                display.texture = rt;
-                if (ThatsLitPlugin.DebugSlowTexture.Value) display.texture = slowRT;
-                display.RectTransform().anchoredPosition = new Vector2(-720, -360);
-
-
-                //envRt = new RenderTexture(RESOLUTION, RESOLUTION, 0);
-                //envRt.filterMode = FilterMode.Point;
-                //envRt.Create();
-
-                //envTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
-
-                //envCam = new GameObject().AddComponent<Camera>();
-                //envCam.clearFlags = CameraClearFlags.SolidColor;
-                //envCam.backgroundColor = Color.white;
-                //envCam.transform.SetParent(MainPlayer.Transform.Original);
-                //envCam.transform.localPosition = Vector3.up * 3;
-
-                //envCam.nearClipPlane = 0.01f;
-
-                //envCam.cullingMask = ~LayerMaskClass.PlayerMask;
-                //envCam.fieldOfView = 75;
-
-                //envCam.targetTexture = envRt;
-
-                //envDebugTex = new Texture2D(RESOLUTION / 2, RESOLUTION / 2);
-                //displayEnv = new GameObject().AddComponent<RawImage>();
-                //displayEnv.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
-                //displayEnv.RectTransform().sizeDelta = new Vector2(160, 160);
-                //displayEnv.texture = envDebugTex;
-                //displayEnv.RectTransform().anchoredPosition = new Vector2(-560, -360);
+                if (display == null)
+                {
+                    display = new GameObject().AddComponent<RawImage>();
+                    display.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
+                    display.RectTransform().sizeDelta = new Vector2(160, 160);
+                    display.texture = rt;
+                    display.RectTransform().anchoredPosition = new Vector2(-720, -360);
+                }
+                else display.enabled = true;
+                if (ThatsLitPlugin.DebugSlowTexture.Value)
+                {
+                    if (slowRT == null) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
+                    display.texture = slowRT;
+                }
             }
+
+            disabledLit = scoreCalculator == null;
+        }
+
+        void DisableBrightness ()
+        {
+            if (cam) cam.enabled = false;
+            if (display) display.enabled = false;
+            disabledLit = true;
         }
 
         internal static System.Diagnostics.Stopwatch _benchmarkSW, _benchmarkSWGUI, _benchmarkSWFoliageCheck, _benchmarkSWTerrainCheck;
@@ -317,7 +322,7 @@ namespace ThatsLit.Components
                 }
             }
 
-            #region BENCHMARK
+#region BENCHMARK
             if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSWFoliageCheck == null) _benchmarkSWFoliageCheck = new System.Diagnostics.Stopwatch();
@@ -331,7 +336,7 @@ namespace ThatsLit.Components
             }
             else if (_benchmarkSWFoliageCheck != null)
                 _benchmarkSWFoliageCheck = null;
-            #endregion
+#endregion
 
             if (!isFoliageSorted) isFoliageSorted = SlicedBubbleSort(foliage, foliageCount * 3 / 2, foliageCount);
             if (Time.time > lastCheckedFoliages + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.7f : 0.35f))
@@ -339,27 +344,32 @@ namespace ThatsLit.Components
                 UpdateFoliageScore(bodyPos);
             }
 
-            #region BENCHMARK
+#region BENCHMARK
             _benchmarkSWFoliageCheck?.Stop();
-            #endregion
+#endregion
 
-            if (disabledLit)
+            if (disabledLit && ThatsLitPlugin.EnabledLighting.Value)
             {
-                #region BENCHMARK
+                EnableBrightness();
+#region BENCHMARK
                 _benchmarkSW?.Stop();
-                #endregion
+#endregion
+                return;
+            }
+            else if (!disabledLit && !ThatsLitPlugin.EnabledLighting.Value)
+            {
+                DisableBrightness();
+#region BENCHMARK
+                _benchmarkSW?.Stop();
+#endregion
                 return;
             }
 
-            if (!ThatsLitPlugin.EnabledLighting.Value)
+            if (disabledLit)
             {
-                if (cam?.enabled ?? false) GameObject.Destroy(cam.gameObject);
-                if (rt != null) rt.Release();
-                if (display?.enabled ?? false) GameObject.Destroy(display);
-                disabledLit = true;
-                #region BENCHMARK
+#region BENCHMARK
                 _benchmarkSW?.Stop();
-                #endregion
+#endregion
                 return;
             }
 
@@ -435,7 +445,7 @@ namespace ThatsLit.Components
                     }
             }
 
-            if (ThatsLitPlugin.DebugSlowTexture.Value && Time.frameCount % 61 == 0) Graphics.CopyTexture(rt, slowRT);
+            if (ThatsLitPlugin.DebugSlowTexture.Value && Time.frameCount % 61 == 0 && display?.enabled == true) Graphics.CopyTexture(rt, slowRT);
 
             // Ambient shadow
             if (TOD_Sky.Instance != null)
@@ -570,7 +580,9 @@ namespace ThatsLit.Components
             // if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
             if (!observed.IsCreated) return;
-            MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
+            MultiFrameLitScore = 0;
+            if (ThatsLitPlugin.EnabledLighting.Value && !disabledLit)
+                MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
             observed.Dispose();
         }
         internal float overheadHaxRating;
@@ -744,6 +756,34 @@ namespace ThatsLit.Components
             foliageCount = validCount;
 
             lastFoliageCheckPos = bodyPos;
+        }
+
+        void HandleConfigEvents (bool enable)
+        {
+            if (enable)
+                ThatsLitPlugin.DebugTexture.SettingChanged += HandleDebugTextureSettingChanged;
+            else
+                ThatsLitPlugin.DebugTexture.SettingChanged -= HandleDebugTextureSettingChanged;
+
+            if (enable)
+                ThatsLitPlugin.DebugSlowTexture.SettingChanged += HandleDebugSlowTextureSettingChanged;
+            else
+                ThatsLitPlugin.DebugSlowTexture.SettingChanged -= HandleDebugSlowTextureSettingChanged;
+        }
+
+        private void HandleDebugTextureSettingChanged(object sender, EventArgs e)
+        {
+            if (display) display.enabled = ThatsLitPlugin.DebugTexture.Value;
+        }
+    
+        private void HandleDebugSlowTextureSettingChanged(object sender, EventArgs e)
+        {
+            if (ThatsLitPlugin.DebugSlowTexture.Value)
+            {
+                if (slowRT == null) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
+                if (display) display.texture = slowRT;
+            }
+            else if (display) display.texture = rt;
         }
 
         private void OnDestroy()
