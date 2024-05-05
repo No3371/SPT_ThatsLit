@@ -144,7 +144,9 @@ namespace ThatsLit
             {
                 if (Time.frameCount % 47 == 0 && name != lastLogged)
                 {
-                    NotificationManagerClass.DisplayWarningNotification(string.Format("That's Lit: Missing terrain detail: {0}", name));
+                    string message = string.Format("That's Lit: Missing terrain detail: {0}", name);
+                    NotificationManagerClass.DisplayWarningNotification(message);
+                    Logger.LogWarning(message);
                     lastLogged = name;
                 }
             }
@@ -439,7 +441,12 @@ namespace ThatsLit
                         laser = setup.laser;
                         laserIsIR = setup.laserIsIR;
                     }
-                    else if (ThatsLitMainPlayerComponent.IsDebugSampleFrame) Logger.LogError($"Unknown device: {templateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(templateId)?.Name}");
+                    else if (ThatsLitMainPlayerComponent.IsDebugSampleFrame)
+                    {
+                        string message = $"[That's Lit] Unknown device: {templateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(templateId)?.Name}";
+                        NotificationManagerClass.DisplayWarningNotification(message);
+                        Logger.LogWarning(message);
+                    }
                     break;
             }
         }

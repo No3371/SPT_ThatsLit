@@ -230,7 +230,7 @@ namespace ThatsLit.Components
             }
         }
 
-        internal static System.Diagnostics.Stopwatch _benchmarkSW, _benchmarkSWGUI;
+        internal static System.Diagnostics.Stopwatch _benchmarkSW, _benchmarkSWGUI, _benchmarkSWFoliageCheck, _benchmarkSWTerrainCheck;
 
         private void Update()
         {
@@ -250,7 +250,12 @@ namespace ThatsLit.Components
                 {
                     _benchmarkSW = new System.Diagnostics.Stopwatch();
                 }
-                if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
+                if (_benchmarkSW.IsRunning)
+                {
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped!";
+                    NotificationManagerClass.DisplayWarningNotification(message);
+                    Logger.LogWarning(message);
+                }
                 _benchmarkSW.Start();
             }
             else if (_benchmarkSW != null)
@@ -523,8 +528,36 @@ namespace ThatsLit.Components
             #endregion
         }
 
+        void LateUpdate()
+        {
+            if (disabledLit) return;
+            GetWeatherStats(out fog, out rain, out cloud);
+
+            //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
+            // if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
+
+            if (!observed.IsCreated) return;
+            MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
+            observed.Dispose();
+        }
         private void UpdateFoliageScore(Vector3 bodyPos)
         {
+            #region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
+            {
+                if (_benchmarkSWFoliageCheck == null) _benchmarkSWFoliageCheck = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSWFoliageCheck.IsRunning)
+                {
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (Foliage Check)";
+                    NotificationManagerClass.DisplayWarningNotification(message);
+                    Logger.LogWarning(message);
+                }
+                _benchmarkSWFoliageCheck.Start();
+            }
+            else if (_benchmarkSWFoliageCheck != null)
+                _benchmarkSWFoliageCheck = null;
+            #endregion
+
             lastCheckedFoliages = Time.time;
             foliageScore = 0;
             // foliageDir = Vector2.zero;
@@ -605,19 +638,10 @@ namespace ThatsLit.Components
                         break;
                 }
             }
-        }
 
-        void LateUpdate()
-        {
-            if (disabledLit) return;
-            GetWeatherStats(out fog, out rain, out cloud);
-
-            //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
-            // if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
-
-            if (!observed.IsCreated) return;
-            MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
-            observed.Dispose();
+            #region BENCHMARK
+            _benchmarkSWFoliageCheck?.Stop();
+            #endregion
         }
 
         private void OnDestroy()
@@ -628,16 +652,21 @@ namespace ThatsLit.Components
 
         }
         float litFactorSample, ambScoreSample;
-        float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleGUI;
+        float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleFoliageCheck, benchmarkSampleTerrainCheck, benchmarkSampleGUI;
         int guiFrame;
-        string infoCache1, infoCache2;
+        string infoCache1, infoCache2, infoCacheBenchmark;
         private void OnGUI()
         {
             #region BENCHMARK
             if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSWGUI == null) _benchmarkSWGUI = new System.Diagnostics.Stopwatch();
-                if (_benchmarkSWGUI.IsRunning) throw new Exception("Wrong assumption");
+                if (_benchmarkSWGUI.IsRunning)
+                {
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped!";
+                    NotificationManagerClass.DisplayWarningNotification(message);
+                    Logger.LogWarning(message);
+                }
                 _benchmarkSWGUI.Start();
             }
             else if (_benchmarkSWGUI != null)
@@ -693,6 +722,8 @@ namespace ThatsLit.Components
                         if (ScoreCalculator._benchmarkSW != null) benchmarkSampleScoreCalculator = (ScoreCalculator._benchmarkSW.ElapsedMilliseconds / 47f);
                         if (_benchmarkSW != null) benchmarkSampleUpdate = (_benchmarkSW.ElapsedMilliseconds / 47f);
                         if (_benchmarkSWGUI != null) benchmarkSampleGUI = (_benchmarkSWGUI.ElapsedMilliseconds / 47f);
+                        if (_benchmarkSWFoliageCheck != null) benchmarkSampleFoliageCheck = (_benchmarkSWFoliageCheck.ElapsedMilliseconds / 47f);
+                        if (_benchmarkSWTerrainCheck != null) benchmarkSampleTerrainCheck = (_benchmarkSWTerrainCheck.ElapsedMilliseconds / 47f);
                         SeenCoefPatch._benchmarkSW?.Reset();
                         EncounteringPatch._benchmarkSW?.Reset();
                         ExtraVisibleDistancePatch._benchmarkSW?.Reset();
@@ -727,7 +758,8 @@ namespace ThatsLit.Components
                 
                 if (ThatsLitPlugin.EnableBenchmark.Value)
                 {
-                    GUILayout.Label(string.Format("  Update: {0,8:0.000}\n  SeenCoef: {1,8:0.000}\n  Encountering: {2,8:0.000}\n  ExtraVisDis: {3,8:0.000}\n  ScoreCalculator: {4,8:0.000}\n  Info(+Debug): {5,8:0.000} ms", benchmarkSampleUpdate, benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleGUI));
+                    if (guiFrame < Time.frameCount) infoCacheBenchmark = $"  Update: {benchmarkSampleUpdate,8:0.000}\n    Foliage: {benchmarkSampleFoliageCheck,8:0.000}\n    Terrain: {benchmarkSampleTerrainCheck,8:0.000}\n  SeenCoef: {benchmarkSampleSeenCoef,8:0.000}\n  Encountering: {benchmarkSampleEncountering,8:0.000}\n  ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000}\n  ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000}\n  Info(+Debug): {benchmarkSampleGUI,8:0.000} ms";
+                    GUILayout.Label(infoCacheBenchmark);
                     if (Time.frameCount % 6000 == 0)
                         if (guiFrame < Time.frameCount) EFT.UI.ConsoleScreen.Log($"[That's Lit Benchmark Sample] Update: {benchmarkSampleUpdate,8:0.000} / SeenCoef: {benchmarkSampleSeenCoef,8:0.000} / Encountering: {benchmarkSampleEncountering,8:0.000} / ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000} / ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000} / GUI: {benchmarkSampleGUI,8:0.000} ms");
                 }
@@ -817,6 +849,22 @@ namespace ThatsLit.Components
                 return;
             }
 
+            #region BENCHMARK
+            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
+            {
+                if (_benchmarkSWTerrainCheck == null) _benchmarkSWTerrainCheck = new System.Diagnostics.Stopwatch();
+                if (_benchmarkSWTerrainCheck.IsRunning)
+                {
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (TerrainCheck)";
+                    NotificationManagerClass.DisplayWarningNotification(message);
+                    Logger.LogWarning(message);
+                }
+                _benchmarkSWTerrainCheck.Start();
+            }
+            else if (_benchmarkSWTerrainCheck != null)
+                _benchmarkSWTerrainCheck = null;
+            #endregion
+    
             Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
             var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
 
@@ -939,6 +987,9 @@ namespace ThatsLit.Components
                     }
             }
 
+            #region BENCHMARK
+            _benchmarkSWTerrainCheck?.Stop();
+            #endregion
             // scoreCache[16] = 0;
             // scoreCache[17] = 0;
             // foreach (var pos in IterateDetailIndex3x3)

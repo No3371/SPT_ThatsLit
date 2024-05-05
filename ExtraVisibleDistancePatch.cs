@@ -40,7 +40,12 @@ namespace ThatsLit
             if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
                 if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
-                if (_benchmarkSW.IsRunning) throw new Exception("Wrong assumption");
+                if (_benchmarkSW.IsRunning)
+                {
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped!";
+                    NotificationManagerClass.DisplayWarningNotification(message);
+                    Logger.LogWarning(message);
+                }
                 _benchmarkSW.Start();
             }
             else if (_benchmarkSW != null)
