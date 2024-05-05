@@ -628,11 +628,11 @@ namespace ThatsLit
                         __result *= 100;
                 }
                 else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.34f * ThatsLitPlugin.BrightnessImpactScale.Value); // At 100% brightness, 90% 0.66x the reaction time regardles angle half of the time
-                else if (factor < -0.9f) __result *= 1f - (factor * (2f - cqb5m - cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value);
-                else if (factor < -0.5f) __result *= 1f - (factor * (1.5f - 0.75f * cqb5m - 0.75f * cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value);
-                else if (factor < -0.2f) __result *= 1f - factor * cqb5m * ThatsLitPlugin.DarknessImpactScale.Value;
-                else if (factor < 0f) __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value;
-                else if (factor > 0f) __result /= 1f + (factor / 5f) * ThatsLitPlugin.BrightnessImpactScale.Value;
+                else if (factor < -0.9f) __result *= 1f - Mathf.Clamp01((factor * (2f - cqb5m - cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value));
+                else if (factor < -0.5f) __result *= 1f - Mathf.Clamp01((factor * (1.5f - 0.75f * cqb5m - 0.75f * cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value));
+                else if (factor < -0.2f) __result *= 1f - Mathf.Clamp01(factor * cqb5m * ThatsLitPlugin.DarknessImpactScale.Value);
+                else if (factor < 0f) __result *= 1f - Mathf.Clamp01((factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value);
+                else if (factor > 0f) __result /= 1f + Mathf.Clamp01((factor / 5f) * ThatsLitPlugin.BrightnessImpactScale.Value);
             }
 
             if (ThatsLitPlugin.EnableMovementImpact.Value)
