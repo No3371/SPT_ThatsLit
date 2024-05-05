@@ -664,10 +664,10 @@ namespace ThatsLit.Components
                 switch (count)
                 {
                     case 1:
-                        foliageScore /= 3f;
+                        foliageScore /= 3.3f;
                         break;
                     case 2:
-                        foliageScore /= 2.7f;
+                        foliageScore /= 2.8f;
                         break;
                     case 3:
                         foliageScore /= 2.3f;
@@ -676,7 +676,24 @@ namespace ThatsLit.Components
                         foliageScore /= 1.8f;
                         break;
                     case 5:
+                    case 6:
                         foliageScore /= 1.2f;
+                        break;
+                    case 11:
+                    case 12:
+                    case 13:
+                        foliageScore /= 1.15f;
+                        break;
+                    case 14:
+                    case 15:
+                    case 16:
+                        foliageScore /= 1.25f;
+                        break;
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                        foliageScore /= 1.4f;
                         break;
                 }
             }
