@@ -832,6 +832,8 @@ namespace ThatsLit.Components
                         ScoreCalculator._benchmarkSW?.Reset();
                         _benchmarkSW?.Reset();
                         _benchmarkSWGUI?.Reset();
+                        _benchmarkSWFoliageCheck?.Reset();
+                        _benchmarkSWTerrainCheck?.Reset();
                     }
                 }
                 // GUILayout.Label(string.Format(" IMPACT: {0:0.000} -> {1:0.000} ({2:0.000} <- {3:0.000} <- {4:0.000}) AMB: {5:0.00} LIT: {6:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore, ambScoreSample, litFactorSample));
