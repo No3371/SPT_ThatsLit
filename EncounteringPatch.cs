@@ -97,7 +97,7 @@ namespace ThatsLit.Patches.Vision
                 if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
                 if (_benchmarkSW.IsRunning)
                 {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped!";
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (Encountering)";
                     NotificationManagerClass.DisplayWarningNotification(message);
                     Logger.LogWarning(message);
                 }

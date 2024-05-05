@@ -58,7 +58,7 @@ namespace ThatsLit
                 if (_benchmarkSW == null) _benchmarkSW = new Stopwatch();
                 if (_benchmarkSW.IsRunning)
                 {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped!";
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (SeenCoef)";
                     NotificationManagerClass.DisplayWarningNotification(message);
                     Logger.LogWarning(message);
                 }

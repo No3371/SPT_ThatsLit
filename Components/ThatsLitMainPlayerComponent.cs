@@ -258,7 +258,7 @@ namespace ThatsLit.Components
                 }
                 if (_benchmarkSW.IsRunning)
                 {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped!";
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (Update)";
                     NotificationManagerClass.DisplayWarningNotification(message);
                     Logger.LogWarning(message);
                 }
@@ -765,7 +765,7 @@ namespace ThatsLit.Components
                 if (_benchmarkSWGUI == null) _benchmarkSWGUI = new System.Diagnostics.Stopwatch();
                 if (_benchmarkSWGUI.IsRunning)
                 {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped!";
+                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (GUI)";
                     NotificationManagerClass.DisplayWarningNotification(message);
                     Logger.LogWarning(message);
                 }

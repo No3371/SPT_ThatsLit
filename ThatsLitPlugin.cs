@@ -157,6 +157,9 @@ namespace ThatsLit
             category                   = "9. Balance";
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss. Makes bosses EASY.");
             EnableEquipmentCheck         = Config.Bind(category, "Equipment Check", true, "Whether the mod checks your equipments. Disabling this stops lights/lasers detection and makes stealth EASY.");
+            // ExtraDarknessImpactScale        = Config.Bind(category, "Darkness Impact Scale", 0f, new ConfigDescription("Additionaly scale how AI noticing players slower due to darkness. If 100% is not enough for you.", new AcceptableValueRange<float>(0, 1.0f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
+            // ExtraBrightnessImpactScale      = Config.Bind(category, "Brightness Impact Scale", 0f, new ConfigDescription("Additionaly Scale how AI noticing players faster due to brightness. If 100% is not enough for you.", new AcceptableValueRange<float>(0f, 1.0f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
+            
         }
 
         public static ConfigEntry<bool> ScoreInfo { get; private set; }
@@ -174,8 +177,12 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableEquipmentCheck { get; private set; }
         public static ConfigEntry<bool> AlternativeReactionFluctuation { get; private set; }
         public static ConfigEntry<float> ScoreOffset { get; private set; }
+        public static float CombinedDarknessImpactScale { get => DarknessImpactScale.Value + ExtraDarknessImpactScale.Value;}
+        public static float CombinedBrightnessImpactScale { get => BrightnessImpactScale.Value + ExtraBrightnessImpactScale.Value;}
         public static ConfigEntry<float> DarknessImpactScale { get; private set; }
         public static ConfigEntry<float> BrightnessImpactScale { get; private set; }
+        public static ConfigEntry<float> ExtraDarknessImpactScale { get; private set; }
+        public static ConfigEntry<float> ExtraBrightnessImpactScale { get; private set; }
         public static ConfigEntry<float> LitVisionDistanceScale { get; private set; }
         public static ConfigEntry<float> FinalOffset { get; private set; }
         public static ConfigEntry<float> FinalImpactScale { get; private set; }
