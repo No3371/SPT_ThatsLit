@@ -158,8 +158,9 @@ namespace ThatsLit.Components
 
             //float score = CalculateTotalPixelScore(time, thisFrame.pxS, thisFrame.pxH, thisFrame.pxHM, thisFrame.pxM, thisFrame.pxML, thisFrame.pxL, thisFrame.pxD);
             //score /= (float)thisFrame.pixels;
-            float lowAmbienceScoreFactor = (1f - ambienceScore) / 2f;
-            float lumScore = (thisFrame.avgLum - minAmbienceLum) * lumScoreScale / lowAmbienceScoreFactor;
+            float lowAmbienceScoreFactor = Mathf.Max(0.5f - ambienceScore, 0) / 1.5f;
+            float lowAmbienceScoreFactorSqr = lowAmbienceScoreFactor * lowAmbienceScoreFactor;
+            float lumScore = (thisFrame.avgLum - minAmbienceLum) * lumScoreScale * (1+2f*lowAmbienceScoreFactorSqr) * (0.1f + lowAmbienceScoreFactor);
             float hightLightedPixelFactor = 0.9f * thisFrame.RatioShinePixels + 0.75f * thisFrame.RatioHighPixels + 0.4f * thisFrame.RatioHighMidPixels + 0.15f * thisFrame.RatioMidPixels;
             lumScore *= 1 + hightLightedPixelFactor;
             lumScore = Mathf.Clamp(lumScore, 0, 2);
@@ -170,9 +171,6 @@ namespace ThatsLit.Components
             var topAvgLumMultiFrames = FindHighestAvgLumRecentFrame(true, thisFrame.avgLum);
             var bottomAvgLumMultiFrames = FindLowestAvgLumRecentFrame(true, thisFrame.avgLum);
             //var contrastMultiFrames = topScoreMultiFrames - bottomScoreMultiFrames; // a.k.a all sides contrast
-
-            // Outside, at lit up zone in dark ambience
-            lumScore *= 1 + 0.1f * lowAmbienceScoreFactor;
 
             //if (contrastMultiFrames < 0.3f) // Low contrast, enhance darkness
             //{
