@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
 using EFT.EnvironmentEffect;
 using EFT.UI;
 using EFT.Weather;
@@ -231,6 +232,7 @@ namespace ThatsLit.Components
         }
 
         internal static System.Diagnostics.Stopwatch _benchmarkSW, _benchmarkSWGUI, _benchmarkSWFoliageCheck, _benchmarkSWTerrainCheck;
+        static readonly LayerMask ambienceRaycastMask = (1 << LayerMask.NameToLayer("Terrain")) | (1 << LayerMask.NameToLayer("HighPolyCollider"))  | (1 << LayerMask.NameToLayer("LowPolyCollider")) | (1 << LayerMask.NameToLayer("Grass")) | (1 << LayerMask.NameToLayer("Foliage"));
 
         private void Update()
         {
@@ -412,60 +414,64 @@ namespace ThatsLit.Components
 
             // Ambient shadow
             if (TOD_Sky.Instance != null)
-            switch (Time.frameCount % 5)
             {
-                case 0:
-                    {
-                        var ray = new Ray(headPos, TOD_Sky.Instance.LightDirection);
-                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                Vector3 ambienceDir = scoreCalculator.CalculateSunLightTimeFactor(activeRaidSettings.LocationId, GetInGameDayTime()) > 0f ? TOD_Sky.Instance.LocalSunDirection : TOD_Sky.Instance.LightDirection;
+                switch (Time.frameCount % 5)
+                {
+                    case 0:
                         {
-                            ambientShadownRating += 10f * Time.deltaTime;
+                            var ray = new Ray(headPos, ambienceDir);
+                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            {
+                                ambientShadownRating += 10f * Time.deltaTime;
+                            }
+                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            break;
                         }
-                        else ambientShadownRating -= 22f * Time.deltaTime;
-                        break;
-                    }
-                case 1:
-                    {
-                        var ray = new Ray(lPos, TOD_Sky.Instance.LightDirection);
-                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                    case 1:
                         {
-                            ambientShadownRating += 10f * Time.deltaTime;
+                            var ray = new Ray(lPos, ambienceDir);
+                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            {
+                                ambientShadownRating += 10f * Time.deltaTime;
+                            }
+                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            break;
                         }
-                        else ambientShadownRating -= 22f * Time.deltaTime;
-                        break;
-                    }
-                case 2:
-                    {
-                        var ray = new Ray(rPos, TOD_Sky.Instance.LightDirection);
-                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                    case 2:
                         {
-                            ambientShadownRating += 10f * Time.deltaTime;
+                            var ray = new Ray(rPos, ambienceDir);
+                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            {
+                                ambientShadownRating += 10f * Time.deltaTime;
+                            }
+                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            break;
                         }
-                        else ambientShadownRating -= 22f * Time.deltaTime;
-                        break;
-                    }
-                case 3:
-                    {
-                        var ray = new Ray(lhPos, TOD_Sky.Instance.LightDirection);
-                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                    case 3:
                         {
-                            ambientShadownRating += 10f * Time.deltaTime;
+                            var ray = new Ray(lhPos, ambienceDir);
+                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            {
+                                ambientShadownRating += 10f * Time.deltaTime;
+                            }
+                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            break;
                         }
-                        else ambientShadownRating -= 22f * Time.deltaTime;
-                        break;
-                    }
-                case 4:
-                    {
-                        var ray = new Ray(rhPos, TOD_Sky.Instance.LightDirection);
-                        if (Physics.Raycast(ray, out var hit, 1000, LayerMaskClass.HighPolyWithTerrainMaskAI))
+                    case 4:
                         {
-                            ambientShadownRating += 10f * Time.deltaTime;
+                            var ray = new Ray(rhPos, ambienceDir);
+                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            {
+                                ambientShadownRating += 10f * Time.deltaTime;
+                            }
+                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            break;
                         }
-                        else ambientShadownRating -= 22f * Time.deltaTime;
-                        break;
-                    }
+                }
+                ambientShadownRating = Mathf.Clamp(ambientShadownRating, 0, 10f);
             }
-            ambientShadownRating = Mathf.Clamp(ambientShadownRating, 0, 10f);
+            }
 
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
@@ -535,6 +541,26 @@ namespace ThatsLit.Components
             MultiFrameLitScore = scoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, this, GetInGameDayTime(), activeRaidSettings.LocationId) ?? 0;
             observed.Dispose();
         }
+        private bool RaycastIgnoreGlass (Ray ray, float distance, LayerMask mask, out RaycastHit hit, int depth = 0)
+        {
+            if (Physics.Raycast(ray, out hit, distance, mask))
+            {
+                BallisticCollider c = hit.collider?.gameObject?.GetComponent<BallisticCollider>();
+                if (c == null) hit.collider?.transform?.parent?.GetComponent<BallisticCollider>();
+                if (c != null && c?.TypeOfMaterial == MaterialType.Glass || c?.TypeOfMaterial == MaterialType.GlassShattered)
+                {
+                    ray.origin = hit.point + ray.direction.normalized * 0.25f;
+                    var dis = hit.distance + 0.25f;
+                    if (depth > 3) return false;
+                    if (RaycastIgnoreGlass(ray, distance - dis, mask, out hit, depth++))
+                        hit.distance += dis;
+                    else return false;
+                }
+                return true;
+            }
+            else return false;
+        }
+
         private void UpdateFoliageScore(Vector3 bodyPos)
         {
             #region BENCHMARK

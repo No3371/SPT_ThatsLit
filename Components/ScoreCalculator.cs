@@ -607,7 +607,7 @@ namespace ThatsLit.Components
             return cloudiness * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
         }
 
-        protected virtual float CalculateSunLightTimeFactor(string locationId, float time)
+        internal virtual float CalculateSunLightTimeFactor(string locationId, float time)
         {
             if (time >= 5 && time < 6) // 0 ~ 0.1
                 return GetTimeProgress(time, 5, 6) * 0.1f;
@@ -798,7 +798,7 @@ namespace ThatsLit.Components
         protected override float ThresholdMid { get => 0.1f; }
         protected override float ThresholdMidLow { get => 0.025f; }
         protected override float NonCloudinessBaseAmbienceScoreImpact => 0.1f;
-        protected override float CalculateSunLightTimeFactor(string locationId, float time)
+        internal override float CalculateSunLightTimeFactor(string locationId, float time)
         {
             if (time >= 5.5 && time < 6.5) // 0 ~ 0.1
                 return GetTimeProgress(time, 5, 6) * 0.1f;
@@ -938,7 +938,7 @@ namespace ThatsLit.Components
         protected override float GetMapAmbienceCoef(string locationId, float time) => 0;
         protected override float CalculateMoonLight(string locationId, float time, float cloudiness) => 0;
         protected override float CalculateMoonLightTimeFactor(string locationId, float time) => 0;
-        protected override float CalculateSunLightTimeFactor(string locationId, float time) => 0;
+        internal override float CalculateSunLightTimeFactor(string locationId, float time) => 0;
     }
 
     public class LabScoreCalculator : ScoreCalculator
