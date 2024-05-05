@@ -97,7 +97,6 @@ namespace ThatsLit
             {
                 float extra = __instance.Owner.LookSensor.VisibleDist * (1f + scoreCalculator.frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
                 extra *= 1f - (EFT.Weather.WeatherController.Instance?.WeatherCurve?.Fog?? 0f);
-                extra *= 1f - Mathf.Clamp01(mainPlayer.ambientShadownRating / 10f);
                 addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(50, extra); // Up to 20% bonus capped at 50m from unobstructed strong sun/moon light
             } 
             else if (!nvgActive && __instance.Owner.LookSensor.VisibleDist < 50) // 
