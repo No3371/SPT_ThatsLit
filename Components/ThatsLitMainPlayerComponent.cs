@@ -611,7 +611,6 @@ namespace ThatsLit.Components
                     collidersCache[i] = null;
 
                 int count = Physics.OverlapSphereNonAlloc(bodyPos, 4f, collidersCache, foliageLayerMask);
-                float closet = 9999f;
 
                 for (int i = 0; i < count; i++)
                 {

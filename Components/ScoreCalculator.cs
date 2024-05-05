@@ -7,6 +7,13 @@ using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
+// === SCORE CALIBRATION TARGET EXAMPLE===
+// Base on DARKEST HOUR + MAX CLOUDINESS
+// CLOUDINESS 1.0 -> SCORE -0.2~0.2f (SUN) MapMinBaseAmbience~0.5 (MOON)
+// CLOUDINESS -1.5 -> SCORE 0.05~0.5f (SUN) -0.3~0 (MOON)
+// CLOUDINESS 0 -> SCORE 0~0.4f (SUN) -0.6~-0.3 (MOON)
+// ===================
+
 namespace ThatsLit.Components
 {
     public class ScoreCalculator
