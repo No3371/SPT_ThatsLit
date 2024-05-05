@@ -72,7 +72,8 @@ namespace ThatsLit.Components
         /// <summary>
         /// 0~10
         /// </summary>
-        internal float ambientShadownRating;
+        internal float ambienceShadownRating;
+        internal float AmbienceShadowFactor => Mathf.Pow(ambienceShadownRating / 10f, 2); 
         internal float bunkerTimeClamped;
         internal float lastInBunkerTime, lastOutBunkerTime;
         internal Vector3 lastInBunderPos;
@@ -423,9 +424,9 @@ namespace ThatsLit.Components
                             var ray = new Ray(headPos, ambienceDir);
                             if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
                             {
-                                ambientShadownRating += 10f * Time.deltaTime;
+                                ambienceShadownRating += 10f * Time.deltaTime;
                             }
-                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            else ambienceShadownRating -= 22f * Time.deltaTime;
                             break;
                         }
                     case 1:
@@ -433,9 +434,9 @@ namespace ThatsLit.Components
                             var ray = new Ray(lPos, ambienceDir);
                             if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
                             {
-                                ambientShadownRating += 10f * Time.deltaTime;
+                                ambienceShadownRating += 10f * Time.deltaTime;
                             }
-                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            else ambienceShadownRating -= 22f * Time.deltaTime;
                             break;
                         }
                     case 2:
@@ -443,9 +444,9 @@ namespace ThatsLit.Components
                             var ray = new Ray(rPos, ambienceDir);
                             if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
                             {
-                                ambientShadownRating += 10f * Time.deltaTime;
+                                ambienceShadownRating += 10f * Time.deltaTime;
                             }
-                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            else ambienceShadownRating -= 22f * Time.deltaTime;
                             break;
                         }
                     case 3:
@@ -453,9 +454,9 @@ namespace ThatsLit.Components
                             var ray = new Ray(lhPos, ambienceDir);
                             if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
                             {
-                                ambientShadownRating += 10f * Time.deltaTime;
+                                ambienceShadownRating += 10f * Time.deltaTime;
                             }
-                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            else ambienceShadownRating -= 22f * Time.deltaTime;
                             break;
                         }
                     case 4:
@@ -463,13 +464,13 @@ namespace ThatsLit.Components
                             var ray = new Ray(rhPos, ambienceDir);
                             if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
                             {
-                                ambientShadownRating += 10f * Time.deltaTime;
+                                ambienceShadownRating += 10f * Time.deltaTime;
                             }
-                            else ambientShadownRating -= 22f * Time.deltaTime;
+                            else ambienceShadownRating -= 22f * Time.deltaTime;
                             break;
                         }
                 }
-                ambientShadownRating = Mathf.Clamp(ambientShadownRating, 0, 10f);
+                ambienceShadownRating = Mathf.Clamp(ambienceShadownRating, 0, 10f);
             }
 
             if (OverheadHaxCast(bodyPos, out var haxHit))
@@ -788,7 +789,7 @@ namespace ThatsLit.Components
                 float fog = WeatherController.Instance?.WeatherCurve?.Fog ?? 0;
                 float rain = WeatherController.Instance?.WeatherCurve?.Rain ?? 0;
                 float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
-                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { rawTerrainScoreSample :0.000} FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambientShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
+                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { rawTerrainScoreSample :0.000} FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
                 GUILayout.Label(infoCache1);
                 // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
                 if (scoreCalculator != null) GUILayout.Label(string.Format("  LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));

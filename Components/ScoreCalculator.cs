@@ -99,7 +99,7 @@ namespace ThatsLit.Components
             if (insideTime < 0) insideTime = 0;
             float outside1s = Mathf.Clamp01(1f - insideTime);
 
-            float ambienceShadowFactor = Mathf.Pow(player.ambientShadownRating / 10f, 2);
+            float ambienceShadowFactor = player.AmbienceShadowFactor;
 
             var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
 
