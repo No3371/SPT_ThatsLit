@@ -1119,7 +1119,7 @@ namespace ThatsLit.Components
         IEnumerator BuildAllTerrainDetailMapCoroutine(Terrain priority = null)
         {
             yield return new WaitForSeconds(1); // Grass Cutter
-            // EFT.UI.ConsoleScreen.Log($"JOB: Staring gathering terrain details..." );
+            Logger.LogInfo($"[{ activeRaidSettings.LocationId }] Starting building terrain detail maps at { Time.time }...");
             bool allDisabled = true;
             var mgr = priority.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
             if (mgr != null && mgr.enabled)
@@ -1149,11 +1149,14 @@ namespace ThatsLit.Components
                 else terrainDetailMaps[terrain] = null;
             }
             if (allDisabled) skipDetailCheck = true;
+            Logger.LogInfo($"[{ activeRaidSettings.LocationId }] Finished building terrain detail maps at { Time.time }... (AllDisabled: {allDisabled})");
         }
         IEnumerator BuildTerrainDetailMapCoroutine(Terrain terrain, List<int[,]> detailMapData)
         {
             var mgr = terrain.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
             if (mgr == null || !mgr.isInitialized) yield break;
+            float time = Time.time;
+            Logger.LogInfo($"[{activeRaidSettings.LocationId }] Starting building detail map of {terrain.name} at {time}...");
             if (!terrainSpatialPartitions.TryGetValue(terrain, out var spData))
             {
                 spData = terrainSpatialPartitions[terrain] = AccessTools.Field(typeof(GPUInstancerDetailManager), "spData").GetValue(mgr) as SpatialPartitionClass;
@@ -1195,6 +1198,7 @@ namespace ThatsLit.Components
                     }
                 }
             }
+            Logger.LogInfo($"[{ activeRaidSettings.LocationId }] Finished building detail map of {terrain.name} at { Time.time }... Costed { Time.time - time }");
         }
 
         int GetDetailInfoIndex(int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
