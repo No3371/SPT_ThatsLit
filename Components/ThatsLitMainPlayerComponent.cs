@@ -751,7 +751,6 @@ namespace ThatsLit.Components
             if (display) GameObject.Destroy(display);
             if (cam) GameObject.Destroy(cam);
             if (rt) rt.Release();
-
         }
         float litFactorSample, ambScoreSample;
         float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleFoliageCheck, benchmarkSampleTerrainCheck, benchmarkSampleGUI;
@@ -937,14 +936,16 @@ namespace ThatsLit.Components
         Dictionary<Terrain, SpatialPartitionClass> terrainSpatialPartitions = new Dictionary<Terrain, SpatialPartitionClass>();
         Dictionary<Terrain, List<int[,]>> terrainDetailMaps = new Dictionary<Terrain, List<int[,]>>();
         float terrainScoreHintProne, terrainScoreHintRegular;
-        // GameObject marker;
-        // float[] scoreCache = new float[18];
+        internal Vector3 lastTerrainCheckPos;
         void CheckTerrainDetails()
         {
+            Vector3 position = MainPlayer.MainParts[BodyPartType.body].Position;
+            if ((position - lastTerrainCheckPos).magnitude < 0.15f) return;
+
             Array.Clear(detailScoreFrameCache, 0, detailScoreFrameCache.Length);
             if (detailsHere5x5 != null) Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
             recentDetailCount3x3 = 0;
-            var ray = new Ray(MainPlayer.MainParts[BodyPartType.head].Position, Vector3.down);
+            var ray = new Ray(position, Vector3.down);
             if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return;
             var terrain = hit.transform?.GetComponent<Terrain>();
             GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
@@ -1094,6 +1095,7 @@ namespace ThatsLit.Components
                     }
             }
 
+            lastTerrainCheckPos = position;
             #region BENCHMARK
             _benchmarkSWTerrainCheck?.Stop();
             #endregion
