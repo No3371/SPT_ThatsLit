@@ -590,7 +590,7 @@ namespace ThatsLit
                     disFactor *= 0.65f + 0.35f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
                 }
 
-                if (factor < 0) factor *= 1 + disFactor * ((1 - poseFactor) * 0.8f) * (canSeeLight ? 0.3f : 1f); // Darkness will be far more effective from afar
+                if (factor < 0) factor *= 1 + disFactor * Mathf.Clamp01(1.2f - poseFactor) * (canSeeLight ? 0.2f : 1f) * (canSeeLaser ? 0.9f : 1f); // Darkness will be far more effective from afar
                 else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
 
                 if (factor < 0 && inNVGView)
@@ -609,7 +609,6 @@ namespace ThatsLit
                 // f-0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (10m)
                 var secondsOffset = Mathf.Pow(factor, 2) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqb10mSquared, 1f - 0.5f * cqb10mSquared);
                 secondsOffset *= -1; // Inversed (negative value now delay the visual)
-                secondsOffset *= factor < 0 ? 1 : 0.5f; // Give positive factor a smaller offset because the normal values are like 0.15 or something
                 secondsOffset *= factor > 0 ? ThatsLitPlugin.BrightnessImpactScale.Value : ThatsLitPlugin.DarknessImpactScale.Value;
                 __result += secondsOffset;
                 if (__result < 0) __result = 0;
@@ -633,7 +632,7 @@ namespace ThatsLit
                 else if (factor < -0.5f) __result *= 1f - (factor * (1.5f - 0.75f * cqb5m - 0.75f * cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value);
                 else if (factor < -0.2f) __result *= 1f - factor * cqb5m * ThatsLitPlugin.DarknessImpactScale.Value;
                 else if (factor < 0f) __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value;
-                else if (factor > 0f) __result /= 1f + (factor / 4f) * ThatsLitPlugin.BrightnessImpactScale.Value;
+                else if (factor > 0f) __result /= 1f + (factor / 5f) * ThatsLitPlugin.BrightnessImpactScale.Value;
             }
 
             if (ThatsLitPlugin.EnableMovementImpact.Value)
