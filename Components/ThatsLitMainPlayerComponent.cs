@@ -819,7 +819,7 @@ namespace ThatsLit.Components
                     if (guiFrame < Time.frameCount) infoCacheBenchmark = $"  Update: {benchmarkSampleUpdate,8:0.000}\n    Foliage: {benchmarkSampleFoliageCheck,8:0.000}\n    Terrain: {benchmarkSampleTerrainCheck,8:0.000}\n  SeenCoef: {benchmarkSampleSeenCoef,8:0.000}\n  Encountering: {benchmarkSampleEncountering,8:0.000}\n  ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000}\n  ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000}\n  Info(+Debug): {benchmarkSampleGUI,8:0.000} ms";
                     GUILayout.Label(infoCacheBenchmark);
                     if (Time.frameCount % 6000 == 0)
-                        if (guiFrame < Time.frameCount) EFT.UI.ConsoleScreen.Log($"[That's Lit Benchmark Sample] Update: {benchmarkSampleUpdate,8:0.000} / SeenCoef: {benchmarkSampleSeenCoef,8:0.000} / Encountering: {benchmarkSampleEncountering,8:0.000} / ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000} / ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000} / GUI: {benchmarkSampleGUI,8:0.000} ms");
+                        if (guiFrame < Time.frameCount) EFT.UI.ConsoleScreen.Log(infoCacheBenchmark);
                 }
 #if DEBUG_DETAILS
             if (detailsHere5x5 != null)
