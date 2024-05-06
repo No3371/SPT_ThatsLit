@@ -614,31 +614,37 @@ namespace ThatsLit
                 __result += secondsOffset;
                 if (__result < 0) __result = 0;
 
+
                 // The scaling here allows the player to stay in the dark without being seen
                 // The reason why scaling is needed is because SeenCoef will change dramatically depends on vision angles
                 // Absolute offset alone won't work for different vision angles
                 if (factor < 0)
                 {
+                    // At cqb range, nullify the forced stealth belowa accoring to vision angle
                     var cqbCancelChance = Mathf.Clamp01((visionAngleDelta - 15f) / 85f); // 0~15deg (in front) => 0%, 45deg() => 40%, 90deg => 88%
-                                                                                         // So even at 1m (cqb = 0), if the AI is facing 45+ deg away, there's a chance cqb check is bypassed
-                    float rand = UnityEngine.Random.Range(0f, 1f);
-                    rand /= 1f + 0.5f * Mathf.Clamp01(-0.85f - factor) / 0.1f; // At -0.95f -> -33% the chance to cancel cqb check 
+                                                                                         // If the AI is facing 15+ deg away, there's a chance cqb check is bypassed
+
+                    float combinedCqb10 = cqb10mSquared * (0.7f + 0.3f * rand2 * poseFactor) + cqb5m; // at 5m => 0.25 + 0, at 3m => 0.49+0.4, at 1m => 0.81+0.8, at 0m => 1+1
+                    combinedCqb10 *= 0.9f + 0.4f * pSpeedFactor;
+
+                    float cancel = UnityEngine.Random.Range(0f, 1f);
+                    cancel /= 1f + 0.5f * Mathf.Clamp01(-0.8f - factor) / 0.15f; // -0.8 ~ -0.95f -> At most reduce 33% chance to cancel cqb stealth nullification
                     // 45deg at f-0.95 => 40% -> 26%, 90deg at f-0.95 => 58%
-                    var cqbCancel = rand < cqbCancelChance;
+                    var cqbCancel = cancel < cqbCancelChance;
 
-                    float combinedCqbFactor = cqb10mSquared * (0.7f + 0.3f * rand2 * poseFactor) + cqb5m; // at 5m => 0.25 + 0, at 3m => 0.49+0.4, at 1m => 0.81+0.8
-                    combinedCqbFactor *= 0.9f + 0.4f * pSpeedFactor;
-
-                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1f - combinedCqbFactor * (cqbCancel ? 0.1f : 1f)))
+                    // Roll a force stealth
+                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1f - combinedCqb10 * (cqbCancel ? 0.1f : 1f))) // At 3m, the chance of force stealth is 0.11 or 0.911 (cqb nullification cancelled)
                     {
                         __result *= 100;
                     }
+                    else if (factor < -0.85f)  __result *= 1f - (factor * (2f - combinedCqb10) * ThatsLitPlugin.DarknessImpactScale.Value); // -0.9f, ccqb:0 => 2.8x / -0.85f, ccqb:0 => 2.7x
+                    else if (factor < -0.6f)   __result *= 1f - (factor * (2f - combinedCqb10) * 0.8f * ThatsLitPlugin.DarknessImpactScale.Value); // -0.6f, ccqb:0 => 1.96x / -0.85f, ccqb:0 => 2.36x
+                    else if (factor < -0.4f)   __result *= 1f - (factor * (2f - combinedCqb10) * 0.6f * ThatsLitPlugin.DarknessImpactScale.Value); // -0.4f, ccqb:0 => 1.48x / -0.6f => 1.72f
+                    else if (factor < -0.2f)   __result *= 1f - (factor * (2 - combinedCqb10) * 0.5f * ThatsLitPlugin.DarknessImpactScale.Value); // -0.2f, cqb5:0 => 1.2x / -0.4f, cqb5:0 => 1.4x
+                    else if (factor < 0f)      __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value; // -0.2f => 1.13x
+
                 }
                 else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.34f * ThatsLitPlugin.BrightnessImpactScale.Value); // At 100% brightness, 90% 0.66x the reaction time regardles angle half of the time
-                else if (factor < -0.9f) __result *= 1f - Mathf.Clamp01((factor * (2f - cqb5m - cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value));
-                else if (factor < -0.5f) __result *= 1f - Mathf.Clamp01((factor * (1.5f - 0.75f * cqb5m - 0.75f * cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value));
-                else if (factor < -0.2f) __result *= 1f - Mathf.Clamp01(factor * cqb5m * ThatsLitPlugin.DarknessImpactScale.Value);
-                else if (factor < 0f) __result *= 1f - Mathf.Clamp01((factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value);
                 else if (factor > 0f) __result /= 1f + Mathf.Clamp01((factor / 5f) * ThatsLitPlugin.BrightnessImpactScale.Value);
             }
 
