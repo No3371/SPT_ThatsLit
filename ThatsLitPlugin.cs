@@ -150,7 +150,6 @@ namespace ThatsLit
             category                   = "8. Debug";
             DebugInfo                  = Config.Bind(category, "Debug Info (Expensive)", false, "A lot of gibberish.");
             DebugTexture               = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
-            DebugSlowTexture               = Config.Bind(category, "Slow Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
             EnableHideout              = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
             EnableBenchmark              = Config.Bind(category, "Benchmark", false, "");
 
@@ -168,7 +167,6 @@ namespace ThatsLit
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> HideMapTip { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
-        public static ConfigEntry<bool> DebugSlowTexture { get; private set; }
         public static ConfigEntry<bool> EnabledMod { get; private set; }
         public static ConfigEntry<bool> EnabledLighting { get; private set; }
         public static ConfigEntry<bool> EnabledEncountering { get; private set; }

@@ -214,20 +214,16 @@ namespace ThatsLit.Components
 
             if (ThatsLitPlugin.DebugTexture.Value)
             {
+                if (slowRT == null) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
                 if (display == null)
                 {
                     display = new GameObject().AddComponent<RawImage>();
                     display.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
                     display.RectTransform().sizeDelta = new Vector2(160, 160);
-                    display.texture = rt;
+                    display.texture = slowRT;
                     display.RectTransform().anchoredPosition = new Vector2(-720, -360);
                 }
                 else display.enabled = true;
-                if (ThatsLitPlugin.DebugSlowTexture.Value)
-                {
-                    if (slowRT == null) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
-                    display.texture = slowRT;
-                }
             }
 
             disabledLit = scoreCalculator == null;
@@ -445,7 +441,7 @@ namespace ThatsLit.Components
                     }
             }
 
-            if (ThatsLitPlugin.DebugSlowTexture.Value && Time.frameCount % 61 == 0 && display?.enabled == true) Graphics.CopyTexture(rt, slowRT);
+            if (ThatsLitPlugin.DebugTexture.Value && Time.frameCount % 61 == 0 && display?.enabled == true) Graphics.CopyTexture(rt, slowRT);
 
             // Ambient shadow
             if (TOD_Sky.Instance != null)
@@ -764,26 +760,11 @@ namespace ThatsLit.Components
                 ThatsLitPlugin.DebugTexture.SettingChanged += HandleDebugTextureSettingChanged;
             else
                 ThatsLitPlugin.DebugTexture.SettingChanged -= HandleDebugTextureSettingChanged;
-
-            if (enable)
-                ThatsLitPlugin.DebugSlowTexture.SettingChanged += HandleDebugSlowTextureSettingChanged;
-            else
-                ThatsLitPlugin.DebugSlowTexture.SettingChanged -= HandleDebugSlowTextureSettingChanged;
         }
 
         private void HandleDebugTextureSettingChanged(object sender, EventArgs e)
         {
             if (display) display.enabled = ThatsLitPlugin.DebugTexture.Value;
-        }
-    
-        private void HandleDebugSlowTextureSettingChanged(object sender, EventArgs e)
-        {
-            if (ThatsLitPlugin.DebugSlowTexture.Value)
-            {
-                if (slowRT == null) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
-                if (display) display.texture = slowRT;
-            }
-            else if (display) display.texture = rt;
         }
 
         private void OnDestroy()
