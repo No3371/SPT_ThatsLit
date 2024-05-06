@@ -270,7 +270,7 @@ namespace ThatsLit
             if (it_vLight)
             {
                 vLight = true;
-                return; // Early return
+                return; // Early return because visible light is determining
             }
 
             vLight |= it_vLight;
@@ -290,7 +290,7 @@ namespace ThatsLit
             if (it_vLight)
             {
                 vLight = true;
-                return; // Early return
+                return; // Early return because visible light is determining
             }
             
             vLight |= it_vLight;
