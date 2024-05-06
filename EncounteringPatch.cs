@@ -50,35 +50,38 @@ namespace ThatsLit.Patches.Vision
                 _benchmarkSW = null;
 #endregion
 
-            Vector3 look = __instance.Owner.GetPlayer.LookDirection;
-            Vector3 to = __instance.Person.Position - __instance.Owner.Position;
-            var angle = Vector3.Angle(look, to);
+            Vector3 botLookDir = __instance.Owner.GetPlayer.LookDirection;
+            Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
+            var visionDeviation = Vector3.Angle(botLookDir, botEyeToPlayerBody);
 
-            float rand = UnityEngine.Random.Range(-1f, 1f);
-            float rand2 = UnityEngine.Random.Range(-1f, 1f);
+            float srand = UnityEngine.Random.Range(-1f, 1f);
+            float srand2 = UnityEngine.Random.Range(-1f, 1f);
+            float rand3 = UnityEngine.Random.Range(0, 1f); // Don't go underground
 
             // Vague hint instead, if the bot is facing away
             if (!Utility.IsBoss(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault))
             {
-                if (angle > 75 && rand < Mathf.Clamp01(((angle - 75f) / 45f) * ThatsLitPlugin.VagueHintChance.Value))
+                float angleRating = Mathf.Clamp01((visionDeviation - 65f) / 55f); // 0-1 from 70 to 115+deg
+                if (rand3 < angleRating * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value)) // EX: At 115deg 60% chance to replace with vague hint
                 {
-                    var vagueSource = __instance.Owner.Position + to * (0.75f + 0.25f * rand);
-                    vagueSource += (Vector3.right * rand2 + Vector3.forward * (rand2 - rand) / 2f) * to.sqrMagnitude / (100f * (1.5f + rand));
+                    var vagueSource = __instance.Owner.Position + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
+                    vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * botEyeToPlayerBody.magnitude /3f;
+                    vagueSource += Vector3.up * rand3 * botEyeToPlayerBody.magnitude /3f;
                     __instance.Owner.Memory.Spotted(false, vagueSource);
                     return false; // Cancel visibllity (SetVisible does not only get called for the witness... ex: for group members )
                 }
             }
 
 
-            if (Time.time - __instance.PersonalSeenTime > 7f && (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 36f)
+            if (Time.time - __instance.PersonalSeenTime >= 7f + rand3 * 5f && (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 36f + rand3 * 28f)
             {
                 if (Singleton<ThatsLitMainPlayerComponent>.Instance) Singleton<ThatsLitMainPlayerComponent>.Instance.encounter++;
                 __state = new State()
                 {
                     triggered = true,
-                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f + rand * 10f,
+                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f + srand * 10f,
                     botSprinting = __instance.Owner?.Mover?.Sprinting ?? false,
-                    visionDeviation = angle
+                    visionDeviation = visionDeviation
                 };
             }
 
