@@ -552,15 +552,15 @@ namespace ThatsLit
                         case 0:
                         case 1:
                             if (rand2 > 0.01f) __result *= 1 + 4 * bushRatFactor * UnityEngine.Random.Range(0.2f, 0.4f);
-                            cqb5m *= 1 - bushRatFactor * 0.5f;
-                            cqb10mSquared *= 1 - bushRatFactor * 0.5f;
+                            cqb5m *= 1f - bushRatFactor * 0.5f;
+                            cqb10mSquared *= 1f - bushRatFactor * 0.5f;
                             break;
                         case 2:
                         case 3:
                         case 4:
                             if (rand3 > 0.005f) __result *= 1 + 8 * bushRatFactor * UnityEngine.Random.Range(0.3f, 0.65f);
-                            cqb5m *= 1 - bushRatFactor * 0.8f;
-                            cqb10mSquared *= 1 - bushRatFactor * 0.8f;
+                            cqb5m *= 1f - bushRatFactor * 0.8f;
+                            cqb10mSquared *= 1f - bushRatFactor * 0.8f;
                             break;
                         case 5:
                         case 6:
@@ -568,8 +568,8 @@ namespace ThatsLit
                         case 8:
                         case 9:
                             if (rand1 > 0.001f) __result *= 1 + 6 * bushRatFactor * UnityEngine.Random.Range(0.5f, 1.0f);
-                            cqb5m *= 1 - bushRatFactor;
-                            cqb10mSquared *= 1 - bushRatFactor;
+                            cqb5m *= 1f - bushRatFactor;
+                            cqb10mSquared *= 1f - bushRatFactor;
                             break;
                     }
                 }
