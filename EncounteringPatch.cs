@@ -11,11 +11,9 @@ namespace ThatsLit.Patches.Vision
 {
     public class EncounteringPatch : ModulePatch
     {
-        private static PropertyInfo _GoalEnemyProp;
         internal static System.Diagnostics.Stopwatch _benchmarkSW;
         protected override MethodBase GetTargetMethod()
         {
-            _GoalEnemyProp = AccessTools.Property(typeof(BotMemoryClass), name: "GoalEnemy");
             return AccessTools.Method(typeof(EnemyInfo), nameof(EnemyInfo.SetVisible));
         }
 
@@ -23,8 +21,8 @@ namespace ThatsLit.Patches.Vision
         {
             public bool triggered;
             public bool unexpected;
-            public bool sprinting;
-            public float angle;
+            public bool botSprinting;
+            public float visionDeviation;
         }
 
         [PatchPrefix]
@@ -56,11 +54,12 @@ namespace ThatsLit.Patches.Vision
             Vector3 to = __instance.Person.Position - __instance.Owner.Position;
             var angle = Vector3.Angle(look, to);
 
+            float rand = UnityEngine.Random.Range(-1f, 1f);
+            float rand2 = UnityEngine.Random.Range(-1f, 1f);
+
             // Vague hint instead, if the bot is facing away
             if (!Utility.IsBoss(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault))
             {
-                float rand = UnityEngine.Random.Range(-1f, 1f);
-                float rand2 = UnityEngine.Random.Range(-1f, 1f);
                 if (angle > 75 && rand < Mathf.Clamp01(((angle - 75f) / 45f) * ThatsLitPlugin.VagueHintChance.Value))
                 {
                     var vagueSource = __instance.Owner.Position + to * (0.75f + 0.25f * rand);
@@ -71,10 +70,16 @@ namespace ThatsLit.Patches.Vision
             }
 
 
-            if (Time.time - __instance.PersonalSeenTime > 10f && (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 49f)
+            if (Time.time - __instance.PersonalSeenTime > 7f && (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 36f)
             {
                 if (Singleton<ThatsLitMainPlayerComponent>.Instance) Singleton<ThatsLitMainPlayerComponent>.Instance.encounter++;
-                __state = new State () { triggered = true, unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 45f * UnityEngine.Random.Range(1, 2f), sprinting = __instance.Owner?.Mover?.Sprinting ?? false, angle = angle };
+                __state = new State()
+                {
+                    triggered = true,
+                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f + rand * 10f,
+                    botSprinting = __instance.Owner?.Mover?.Sprinting ?? false,
+                    visionDeviation = angle
+                };
             }
 
 #region BENCHMARK
@@ -87,10 +92,11 @@ namespace ThatsLit.Patches.Vision
         public static void PatchPostfix(EnemyInfo __instance, State __state)
         {
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return;
-            if (!__state.triggered || __instance.Owner.Memory.GoalEnemy != __instance) return; // __instance.Owner.Memory.GoalEnemy may has been changed in the method body
+            if (!__state.triggered || __instance.Owner.Memory.GoalEnemy != __instance) return; // Not triggering the patch OR the bot is engaging others
 
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;
+
 #region BENCHMARK
             if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
@@ -107,21 +113,23 @@ namespace ThatsLit.Patches.Vision
                 _benchmarkSW = null;
 #endregion
 
-            if (__state.sprinting)
+            if (__state.botSprinting)
             {
-                __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.45f) * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(__state.angle/15f));
-                if (UnityEngine.Random.Range(0f, 1f) < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(__state.angle/30f)) aim.NextShotMiss();
+                // Force a ~0.45s delay
+                __instance.Owner.AimingData.SetNextAimingDelay(
+                    UnityEngine.Random.Range(0f, 0.45f)
+                    * (__state.unexpected? 1f : 0.5f)
+                    * Mathf.Clamp01(__state.visionDeviation/15f));
+
+                // ~20% chance to force a miss
+                if (UnityEngine.Random.Range(0f, 1f) < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(__state.visionDeviation/30f))
+                    aim.NextShotMiss();
             }
             else if (__state.unexpected)
             {
-                __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.15f) * Mathf.Clamp01(__state.angle/15f));
+                // Force a ~0.15s delay
+                __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.15f) * Mathf.Clamp01(__state.visionDeviation/15f));
             }
-
-            // Not sure if it really is a useful patch
-            // if (aim is GClass388 g388 && !__instance.Owner.WeaponManager.ShootController.IsAiming)
-            // {
-            //     g388.ScatteringData.CurScatering += __instance.Owner.Settings.Current.CurrentMaxScatter * UnityEngine.Random.Range(0f, 0.15f) * Mathf.Clamp01((__state.angle - 30f)/45f);
-            // }
 
 #region BENCHMARK
             _benchmarkSW?.Stop();
