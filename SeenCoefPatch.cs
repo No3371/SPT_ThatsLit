@@ -652,9 +652,9 @@ namespace ThatsLit
                     __result -= delta;
                 }
 
-                if (poseFactor > 0.45f && pSpeedFactor > 0.01f)
+                if (pSpeedFactor > 0.01f)
                 {
-                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.35f); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed;
+                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.35f) * Mathf.Clamp01(poseFactor); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed (when not proning);
                     __result -= delta;
                 }
             }
