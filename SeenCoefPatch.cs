@@ -622,11 +622,17 @@ namespace ThatsLit
                     var cqbCancelChance = Mathf.Clamp01((visionAngleDelta - 15f) / 85f); // 0~15deg (in front) => 0%, 45deg() => 40%, 90deg => 88%
                                                                                          // So even at 1m (cqb = 0), if the AI is facing 45+ deg away, there's a chance cqb check is bypassed
                     float rand = UnityEngine.Random.Range(0f, 1f);
-                    rand /= 1f + 0.5f * Mathf.Clamp01(-0.85f - factor) / 0.1f; // 45deg at f-0.95 => 40% -> 26%, 90deg at f-0.95 => 58%
+                    rand /= 1f + 0.5f * Mathf.Clamp01(-0.85f - factor) / 0.1f; // At -0.95f -> -33% the chance to cancel cqb check 
+                    // 45deg at f-0.95 => 40% -> 26%, 90deg at f-0.95 => 58%
                     var cqbCancel = rand < cqbCancelChance;
-                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1 - (cqb10mSquared + cqb5m) * (cqbCancel ? 0.1f : 1f))
-                     && rand > 0.0001f)
+
+                    float combinedCqbFactor = cqb10mSquared * (0.7f + 0.3f * rand2 * poseFactor) + cqb5m; // at 5m => 0.25 + 0, at 3m => 0.49+0.4, at 1m => 0.81+0.8
+                    combinedCqbFactor *= 0.9f + 0.4f * pSpeedFactor;
+
+                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1f - combinedCqbFactor * (cqbCancel ? 0.1f : 1f)))
+                    {
                         __result *= 100;
+                    }
                 }
                 else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.34f * ThatsLitPlugin.BrightnessImpactScale.Value); // At 100% brightness, 90% 0.66x the reaction time regardles angle half of the time
                 else if (factor < -0.9f) __result *= 1f - Mathf.Clamp01((factor * (2f - cqb5m - cqb10mSquared) * ThatsLitPlugin.DarknessImpactScale.Value));
