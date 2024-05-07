@@ -803,6 +803,22 @@ namespace ThatsLit.Components
         protected override float MaxAmbienceLum => 0.008f;
         protected override float PixelLumScoreScale { get => 2f; }
         protected override float IndoorAmbienceScale => 0.2f;
+
+        // Characters in the basement floor gets lit up by ambience lighting
+        protected override float CalculateBaseAmbienceScore(string locationId, float time)
+        {
+            ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
+            if (Physics.Raycast(new Ray(p.MainPlayer.MainParts[BodyPartType.head].Position, Vector3.up), out var hit, 5, LayerMaskClass.LowPolyColliderLayerMask))
+            {
+                if (hit.transform.gameObject.scene.name == "Shopping_Mall_parking_work" && p.transform.position.y < 23.5f)
+                {
+                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time), -0.5f , p.overheadHaxRating * 0.5f);
+                }
+            }
+
+            return base.CalculateBaseAmbienceScore(locationId, time);
+        }
+
         protected override float CalculateMoonLightTimeFactor(string locationId, float time)
         {
             if (time > 23.9 && time < 0) // 0 ~ 1
