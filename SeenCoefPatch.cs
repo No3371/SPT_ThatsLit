@@ -194,7 +194,7 @@ namespace ThatsLit
                 // Overlook close enemies at higher attitude and in low pose
                 var overheadChance = Mathf.Clamp01(weight) * (1.025f - poseFactor / 2f); // prone: 1.0x, crouch: 0.8x, stand: 0.5x
                 overheadChance *= Mathf.Clamp01(lastSeenPosDelta / 15f); // Seen nearby
-                overheadChance *= 1 - pSpeedFactor * 0.1f;
+                overheadChance *= 1f - pSpeedFactor * 0.2f;
                 overheadChance = Mathf.Clamp01(overheadChance + (rand3 - 0.5f) * 2f * 0.1f);
 
                 switch (caution)
@@ -227,7 +227,7 @@ namespace ThatsLit
                 bool playerIsInside = mainPlayer.MainPlayer.AIData.IsInside;
                 if (!botIsInside && playerIsInside && insideTime >= 1)
                 {
-                    var insideImpact = dis * Mathf.Clamp01(visionAngleDeltaVertical / 40f) * Mathf.Clamp01(visionAngleDelta / 60f) * (isGoalEnemy? 0.05f : 0.5f); // 50m -> 2.5/25 (BEST ANGLE), 10m -> 0.5/5
+                    var insideImpact = dis * Mathf.Clamp01(visionAngleDeltaVertical / 40f) * Mathf.Clamp01(visionAngleDelta / 60f) * (0.3f * seenPosDeltaFactorSqr + 0.7f * sinceSeenFactorSqr); // 50m -> 2.5/25 (BEST ANGLE), 10m -> 0.5/5
                     __result *= 1 + insideImpact * (0.75f + rand3 * 0.05f * caution);
                 }
             }
@@ -235,9 +235,9 @@ namespace ThatsLit
             // ======
             // Global random overlooking
             // ======
-            float globalOverlookChance = 0.05f * disFactor / poseFactor;
-            if (canSeeLight) globalOverlookChance /= 2f;
-            if (rand4 < globalOverlookChance * seenPosDeltaFactorSqr * sinceSeenFactorSqr)
+            float globalOverlookChance = 0.01f / poseFactor; // Not scaled by disFactor because this is intended to mess with bot aiming and tracking for a bit.
+            if (canSeeLight) globalOverlookChance /= 2f - disFactor;
+            if (rand5 < globalOverlookChance * (0.5f + notSeenRecentAndNear))
             {
                 __result *= 10 + rand1 * 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
             }
@@ -616,7 +616,8 @@ namespace ThatsLit
             }
             else if (!mainPlayer.disabledLit && Mathf.Abs(score) >= 0.05f) // Skip works
             {
-                if (mainPlayer.isWinterCache) {
+                if (mainPlayer.isWinterCache)
+                {
                     var emptiness = 1f - mainPlayer.foliageScore * detailScoreRaw;
                     emptiness *= 1f - insideTime;
                     disFactor *= 0.65f + 0.35f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
@@ -693,7 +694,7 @@ namespace ThatsLit
 
                 if (pSpeedFactor > 0.01f)
                 {
-                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * Mathf.Clamp01((score - -1f) / 0.35f) * Mathf.Clamp01(poseFactor); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed (when not proning);
+                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * (1f - extremeDarkFactor) * Mathf.Clamp01(poseFactor); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed (when not proning);
                     __result -= delta;
                 }
             }
