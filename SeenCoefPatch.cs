@@ -626,9 +626,10 @@ namespace ThatsLit
 
                 // Absoulute offset
                 // f-0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (10m)
-                var secondsOffset = Mathf.Pow(factor, 2) * Mathf.Sign(factor) * UnityEngine.Random.Range(0.5f - 0.5f * cqb10mSquared, 1f - 0.5f * cqb10mSquared);
-                secondsOffset *= -1; // Inversed (negative value now delay the visual)
-                secondsOffset *= factor > 0 ? ThatsLitPlugin.BrightnessImpactScale.Value : ThatsLitPlugin.DarknessImpactScale.Value;
+                var secondsOffset = -1f * Mathf.Pow(factor, 2) * Mathf.Sign(factor) * (UnityEngine.Random.Range(0.5f, 1f) - 0.5f * cqb10mSquared); // Base
+                secondsOffset += (original * (10f + rand1 * 20f) * (0.1f + 0.9f * sinceSeenFactorSqr * seenPosDeltaFactorSqr) * extremeDarkFactor) / poseFactor; // Makes night factory makes sense (filtered by extremeDarkFactor)
+                secondsOffset *= botImpactType == BotImpactType.DEFAULT? 1f : 0.5f;
+                secondsOffset *= secondsOffset > 0 ? ThatsLitPlugin.BrightnessImpactScale.Value : ThatsLitPlugin.DarknessImpactScale.Value;
                 __result += secondsOffset;
                 if (__result < 0) __result = 0;
 
@@ -650,16 +651,16 @@ namespace ThatsLit
                     // 45deg at f-0.95 => 40% -> 26%, 90deg at f-0.95 => 58%
                     var cqbCancel = cancel < cqbCancelChance;
 
-                    // Roll a force stealth
-                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1f - combinedCqb10 * (cqbCancel ? 0.1f : 1f))) // At 3m, the chance of force stealth is 0.11 or 0.911 (cqb nullification cancelled)
+                    // === Roll a forced stealth boost ===
+                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1f - combinedCqb10 * (cqbCancel ? 0.1f : 1f)) * (0.4f + 0.6f * notSeenRecentAndNear)) // At 3m, the chance of force stealth is 0.11 or 0.911 (cqb nullification cancelled)
                     {
                         __result *= 100;
                     }
-                    else if (factor < -0.85f)  __result *= 1f - (factor * (2f - combinedCqb10) * ThatsLitPlugin.DarknessImpactScale.Value); // -0.9f, ccqb:0 => 2.8x / -0.85f, ccqb:0 => 2.7x
-                    else if (factor < -0.6f)   __result *= 1f - (factor * (2f - combinedCqb10) * 0.8f * ThatsLitPlugin.DarknessImpactScale.Value); // -0.6f, ccqb:0 => 1.96x / -0.85f, ccqb:0 => 2.36x
-                    else if (factor < -0.4f)   __result *= 1f - (factor * (2f - combinedCqb10) * 0.6f * ThatsLitPlugin.DarknessImpactScale.Value); // -0.4f, ccqb:0 => 1.48x / -0.6f => 1.72f
-                    else if (factor < -0.2f)   __result *= 1f - (factor * (2 - combinedCqb10) * 0.5f * ThatsLitPlugin.DarknessImpactScale.Value); // -0.2f, cqb5:0 => 1.2x / -0.4f, cqb5:0 => 1.4x
-                    else if (factor < 0f)      __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value; // -0.2f => 1.13x
+                    else if (factor < -0.85f)  __result *= 1f - (factor * (2f - combinedCqb10) * 1.5f * ThatsLitPlugin.DarknessImpactScale.Value) * (0.7f + 0.3f * notSeenRecentAndNear); // -0.9f, ccqb:0 => 3.7x / -0.85f, ccqb:0 => 3.04x / -1f, ccqb:0 => 4
+                    else if (factor < -0.6f)   __result *= 1f - (factor * (2f - combinedCqb10) * ThatsLitPlugin.DarknessImpactScale.Value) * (0.7f + 0.3f * notSeenRecentAndNear); // -0.6f, ccqb:0 => 2.2x / -0.85f, ccqb:0 => 2.7x
+                    else if (factor < -0.4f)   __result *= 1f - (factor * (2f - combinedCqb10) * 0.6f * ThatsLitPlugin.DarknessImpactScale.Value * (0.7f + 0.3f * notSeenRecentAndNear)); // -0.4f, ccqb:0 => 1.48x / -0.6f => 1.72f
+                    else if (factor < -0.2f)   __result *= 1f - (factor * (2 - combinedCqb10) * 0.5f * ThatsLitPlugin.DarknessImpactScale.Value * (0.7f + 0.3f * notSeenRecentAndNear)); // -0.2f, cqb5:0 => 1.2x / -0.4f, cqb5:0 => 1.4x
+                    else if (factor < 0f)      __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value * (0.7f + 0.3f * notSeenRecentAndNear); // -0.2f => 1.13x
 
                 }
                 else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.34f * ThatsLitPlugin.BrightnessImpactScale.Value); // At 100% brightness, 90% 0.66x the reaction time regardles angle half of the time
