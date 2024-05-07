@@ -249,19 +249,35 @@ namespace ThatsLit
                 score = factor = 0;
             }
             else if (inThermalView)
-                score = factor = 1f;
+                score = factor = 0.7f;
             else
             {
                 score = mainPlayer.MultiFrameLitScore; // -1 ~ 1
+
+                if (score < 0 && inNVGView)
+                {
+                    if (score < -0.85f)
+                        score *= UnityEngine.Random.Range(0.6f, 0.8f); // It's really dark, slightly scale down
+                    else if (score < -0.65f)
+                        score *= UnityEngine.Random.Range(0.5f, 0.7f); // It's quite dark, scale down
+                    else if (score < 0)
+                        score *= 0.35f; // It's not really that dark, scale down massively
+                }
+
                 if (score < 0 && inNVGView) // IR lights are not accounted in the score, process the score for each bot here
                 {
-                    if (mainPlayer.scoreCalculator.irLight) score /= 2;
-                    else if (mainPlayer.scoreCalculator.irLaser) score /= 1.75f;
-                    else if (mainPlayer.scoreCalculator.irLightSub) score /= 1.3f;
-                    else if (mainPlayer.scoreCalculator.irLaserSub) score /= 1.1f;
+                    float compensationTarget = score;
+                    if (mainPlayer.scoreCalculator.irLight) compensationTarget = 0.4f;
+                    else if (mainPlayer.scoreCalculator.irLaser) compensationTarget = 0f;
+                    else if (mainPlayer.scoreCalculator.irLightSub) compensationTarget = 0f;
+                    else if (mainPlayer.scoreCalculator.irLaserSub) compensationTarget = 0f;
+                    score += Mathf.Clamp(compensationTarget - score, 0, 1) * (score / -1f);
                 }
 
                 factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
+
+                if (factor < 0) factor *= 1 + disFactor * Mathf.Clamp01(1.2f - poseFactor) * (canSeeLight ? 0.2f : 1f) * (canSeeLaser ? 0.9f : 1f); // Darkness will be far more effective from afar
+                else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
             }
 
             bool nearestAI = false;
@@ -604,19 +620,6 @@ namespace ThatsLit
                     var emptiness = 1f - mainPlayer.foliageScore * detailScoreRaw;
                     emptiness *= 1f - insideTime;
                     disFactor *= 0.65f + 0.35f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
-                }
-
-                if (factor < 0) factor *= 1 + disFactor * Mathf.Clamp01(1.2f - poseFactor) * (canSeeLight ? 0.2f : 1f) * (canSeeLaser ? 0.9f : 1f); // Darkness will be far more effective from afar
-                else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
-
-                if (factor < 0 && inNVGView)
-                {
-                    if (factor < -0.85f)
-                        factor *= UnityEngine.Random.Range(0.4f, 0.75f); // It's really dark, slightly scale down
-                    else if (factor < -0.7f)
-                        factor *= UnityEngine.Random.Range(0.25f, 0.45f); // It's quite dark, scale down
-                    else if (factor < 0)
-                        factor *= 0.1f; // It's not really that dark, scale down massively
                 }
 
                 factor = Mathf.Clamp(factor, -0.975f, 0.975f);
