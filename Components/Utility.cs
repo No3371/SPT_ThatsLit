@@ -115,18 +115,18 @@ namespace ThatsLit
                 prone = 0.008f * Mathf.Min(num, 25);
                 crouch = 0;
             }
-            else if (name.EndsWith("fa097b")
+            else if (name.EndsWith("fa097b") // Grass_new_2_D_fa097b, denser and slightly bigger grass cluster
                   || name.EndsWith("2adee9")) // low res, bigger yellower grass cross
             {
                 prone = 0.06f * num; 
-                crouch = 0.009f * num;
+                crouch = 0.009f * Mathf.Min(num, 15);
             }
-            else if (name.EndsWith("eb7931"))
+            else if (name.EndsWith("eb7931")) // brown, dense, somewhat tall
             {
                 prone = 0.06f * num; 
                 crouch = 0.01f * num;
             }
-            else if (name.EndsWith("adb33a"))
+            else if (name.EndsWith("adb33a")) // wheat like
             {
                 prone = 0.02f * num;
                 crouch = 0.02f * num;

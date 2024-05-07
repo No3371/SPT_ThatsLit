@@ -311,7 +311,10 @@ namespace ThatsLit.Components
                     lastCheckedDetails = Time.time;
                     if (ThatsLitPlugin.TerrainInfo.Value)
                     {
-                        CalculateDetailScore(Vector3.zero, 0, 0, out terrainScoreHintProne, out terrainScoreHintRegular);
+                        var score = CalculateDetailScore(Vector3.zero, 0, 0);
+                        terrainScoreHintProne = score.prone;
+                        terrainScoreHintRegular = score.regular;
+
                         var pf = MainPlayer.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f;
                         terrainScoreHintRegular /= (pf + 0.1f + 0.25f * (pf-0.45f)/0.55f);
                     }
@@ -982,7 +985,7 @@ namespace ThatsLit.Components
             Vector3 position = MainPlayer.MainParts[BodyPartType.body].Position;
             if ((position - lastTerrainCheckPos).magnitude < 0.15f) return;
 
-            Array.Clear(detailScoreFrameCache, 0, detailScoreFrameCache.Length);
+            Array.Clear(detailScoreCache, 0, detailScoreCache.Length);
             if (detailsHere5x5 != null) Array.Clear(detailsHere5x5, 0, detailsHere5x5.Length);
             recentDetailCount3x3 = 0;
             var ray = new Ray(position, Vector3.down);
@@ -1250,79 +1253,124 @@ namespace ThatsLit.Components
 
         int GetDetailInfoIndex(int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
 
-        (bool, float, float)[] detailScoreFrameCache = new (bool, float, float)[10];
-        public void CalculateDetailScore(Vector3 enemyDirection, float dis, float verticalAxisAngle, out float scoreProne, out float scoreRegular)
-        {
-            bool TryGetCache(int index, out float low, out float mid)
-            {
-                (bool, float, float) cache = detailScoreFrameCache[index];
-                if (cache.Item1)
-                {
-                    low = cache.Item2;
-                    mid = cache.Item3;
-                    return true;
-                }
-                low = 0;
-                mid = 0;
-                return false;
-            }
+        TerrainDetailScore[] detailScoreCache = new TerrainDetailScore[20];
+        public TerrainDetailScore CalculateDetailScore(Vector3 enemyDirection, float dis, float verticalAxisAngle)
+        {    
             int dir = 0;
             IEnumerable<int> it = null;
-            if (dis < 10f || verticalAxisAngle < -15f)
+            TerrainDetailScore cache = default;
+            float scaling = 1f;
+            
+            if (verticalAxisAngle < -20f) // Far but high enough to ignore direction
             {
-                if (TryGetCache(dir = 5, out scoreProne, out scoreRegular)) return;
-                it = IterateDetailIndex3x3;
+                if (dis >= 10)
+                {
+                    if (TryGetCache(dir = 5, out cache)) return cache;
+                    it = IterateDetailIndex3x3;
+                }
+                else
+                {
+                    if (TryGetCache(dir = 10, out cache)) return cache; // scaled down mid 3x3
+                    it = IterateDetailIndex3x3;
+                    scaling = 4f/9f;
+                }
             }
-            else
+            else if (dis < 10f && verticalAxisAngle < -10f) // Very close and not looking down
             {
-                scoreProne = scoreRegular = 0;
-
                 var dirFlat = new Vector2(enemyDirection.x, enemyDirection.z).normalized;
                 var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
                 if (angle >= -22.5f && angle <= 22.5f)
                 {
-                    if (TryGetCache(dir = 8, out scoreProne, out scoreRegular)) return;
+                    if (TryGetCache(dir = 10 + 8, out cache))  return cache;
+                    it = IterateDetailIndex2x3InversedTN;
+                }
+                else if (angle >= 22.5f && angle <= 67.5f)
+                {
+                    if (TryGetCache(dir = 10 + 9, out cache))  return cache;
+                    it = IterateDetailIndex2x2NE;
+                }
+                else if (angle >= 67.5f && angle <= 112.5f)
+                {
+                    if (TryGetCache(dir = 10 + 6, out cache))  return cache;
+                    it = IterateDetailIndex2x3InversedTE;
+                }
+                else if (angle >= 112.5f && angle <= 157.5f)
+                {
+                    if (TryGetCache(dir = 10 + 3, out cache))  return cache;
+                    it = IterateDetailIndex2x2SE;
+                }
+                else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
+                {
+                    if (TryGetCache(dir = 10 + 2, out cache))  return cache;
+                    it = IterateDetailIndex2x3InversedTS;
+                }
+                else if (angle >= -157.5f && angle <= -112.5f)
+                {
+                    if (TryGetCache(dir = 10 + 1, out cache))  return cache;
+                    it = IterateDetailIndex2x2SW;
+                }
+                else if (angle >= -112.5f && angle <= -67.5f)
+                {
+                    if (TryGetCache(dir = 10 + 4, out cache))  return cache;
+                    it = IterateDetailIndex2x3InversedTW;
+                }
+                else if (angle >= -67.5f && angle <= -22.5f)
+                {
+                    if (TryGetCache(dir = 10 + 7, out cache))  return cache;
+                    it = IterateDetailIndex2x2NW;
+                }
+
+                scaling = 9f/4f;
+            }
+            else
+            {
+                var dirFlat = new Vector2(enemyDirection.x, enemyDirection.z).normalized;
+                var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
+                if (angle >= -22.5f && angle <= 22.5f)
+                {
+                    if (TryGetCache(dir = 8, out cache))  return cache;
                     it = IterateDetailIndex3x3N;
                 }
                 else if (angle >= 22.5f && angle <= 67.5f)
                 {
-                    if (TryGetCache(dir = 9, out scoreProne, out scoreRegular)) return;
+                    if (TryGetCache(dir = 9, out cache))  return cache;
                     it = IterateDetailIndex3x3NE;
                 }
                 else if (angle >= 67.5f && angle <= 112.5f)
                 {
-                    if (TryGetCache(dir = 6, out scoreProne, out scoreRegular)) return;
+                    if (TryGetCache(dir = 6, out cache))  return cache;
                     it = IterateDetailIndex3x3E;
                 }
                 else if (angle >= 112.5f && angle <= 157.5f)
                 {
-                    if (TryGetCache(dir = 3, out scoreProne, out scoreRegular)) return;
+                    if (TryGetCache(dir = 3, out cache))  return cache;
                     it = IterateDetailIndex3x3SE;
                 }
                 else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
                 {
-                    if (TryGetCache(dir = 2, out scoreProne, out scoreRegular)) return;
+                    if (TryGetCache(dir = 2, out cache))  return cache;
                     it = IterateDetailIndex3x3S;
                 }
                 else if (angle >= -157.5f && angle <= -112.5f)
                 {
-                    if (TryGetCache(dir = 1, out scoreProne, out scoreRegular)) return;
+                    if (TryGetCache(dir = 1, out cache))  return cache;
                     it = IterateDetailIndex3x3SW;
                 }
                 else if (angle >= -112.5f && angle <= -67.5f)
                 {
-                    if (TryGetCache(dir = 4, out scoreProne, out scoreRegular)) return;
+                    if (TryGetCache(dir = 4, out cache))  return cache;
                     it = IterateDetailIndex3x3W;
                 }
                 else if (angle >= -67.5f && angle <= -22.5f)
                 {
-                    if (TryGetCache(dir = 7, out scoreProne, out scoreRegular)) return;
+                    if (TryGetCache(dir = 7, out cache))  return cache;
                     it = IterateDetailIndex3x3NW;
                 }
                 else throw new Exception($"[That's Lit] Invalid angle to enemy: {angle}");
             }
 
-            if (detailsHere5x5 == null) return; // Could be resizing?
+            if (detailsHere5x5 == null) return cache; // Could be resizing?
+
             foreach (var pos in it)
             {
                 for (int i = 0; i < MAX_DETAIL_TYPES; i++)
@@ -1330,12 +1378,21 @@ namespace ThatsLit.Components
                     var info = detailsHere5x5[pos * MAX_DETAIL_TYPES + i];
                     if (!info.casted) continue;
                     Utility.CalculateDetailScore(info.name, info.count, out var s1, out var s2);
-                    scoreProne += s1;
-                    scoreRegular += s2;
+                    s1 *= scaling;
+                    s2 *= scaling;
+                    cache.prone += s1;
+                    cache.regular += s2;
                 }
             }
 
-            detailScoreFrameCache[dir] = (true, scoreProne, scoreRegular);
+            detailScoreCache[dir] = cache;
+            return cache;
+
+            bool TryGetCache(int index, out TerrainDetailScore cache)
+            {
+                cache = detailScoreCache[index];
+                return cache.cached;
+            }
         }
 
         IEnumerable<int> IterateDetailIndex3x3N => IterateIndex3x3In5x5(0, 1);
@@ -1346,10 +1403,17 @@ namespace ThatsLit.Components
         IEnumerable<int> IterateDetailIndex3x3NW => IterateIndex3x3In5x5(-1, 1);
         IEnumerable<int> IterateDetailIndex3x3SE => IterateIndex3x3In5x5(1, -1);
         IEnumerable<int> IterateDetailIndex3x3SW => IterateIndex3x3In5x5(-1, -1);
+        IEnumerable<int> IterateDetailIndex2x3InversedTN => IterateIndexCrossShape3x3In5x5Center(horizontal: true, N: true);
+        IEnumerable<int> IterateDetailIndex2x3InversedTE => IterateIndexCrossShape3x3In5x5Center(vertical: true, W: true);
+        IEnumerable<int> IterateDetailIndex2x3InversedTW => IterateIndexCrossShape3x3In5x5Center(vertical: true, W: true);
+        IEnumerable<int> IterateDetailIndex2x3InversedTS => IterateIndexCrossShape3x3In5x5Center(horizontal: true, S: true);
+        IEnumerable<int> IterateDetailIndex2x2NE => IterateIndex2x2In5x5(2, 1);
+        IEnumerable<int> IterateDetailIndex2x2NW => IterateIndex2x2In5x5(1, 1);
+        IEnumerable<int> IterateDetailIndex2x2SE => IterateIndex2x2In5x5(2, 2);
+        IEnumerable<int> IterateDetailIndex2x2SW => IterateIndex2x2In5x5(1, 2);
         IEnumerable<int> IterateDetailIndex3x3 => IterateIndex3x3In5x5(0, 0);
+
         /// <param name="xOffset">WestSide(-x) => -1, EstSide(+x) => 1</param>
-        /// <param name="yOffset"></param>
-        /// <returns></returns>
         IEnumerable<int> IterateIndex3x3In5x5(int xOffset, int yOffset)
         {
             yield return 5 * (1 + yOffset) + 1 + xOffset;
@@ -1365,6 +1429,79 @@ namespace ThatsLit.Components
             yield return 5 * (3 + yOffset) + 3 + xOffset;
         }
 
+        IEnumerable<int> IterateIndex2x2In5x5(int xOffset, int yOffset)
+        {
+            if (xOffset > 3 || yOffset > 3) throw new Exception("[That's Lit] Terrain detail grid access out of Bound");
+            yield return 5 * yOffset + xOffset;
+            yield return 5 * yOffset + xOffset + 1;
+
+            yield return 5 * (yOffset + 1) + xOffset;
+            yield return 5 * (yOffset + 1) + xOffset + 1;
+        }
+
+        IEnumerable<int> IterateIndexCrossShape3x3In5x5Center(bool horizontal = false, bool vertical = false, bool N = false, bool E = false, bool S = false, bool W = false)
+        {
+            // yield return 5 * 1 + 1;
+            if (vertical || N) yield return 5 * 1 + 2;
+            // yield return 5 * 1 + 3;
+
+            if (horizontal || W) yield return 5 * 2 + 1;
+            if (horizontal || vertical) yield return 5 * 2 + 2;
+            if (horizontal || E) yield return 5 * 2 + 3;
+
+            // yield return 5 * 3 + 1;
+            if (vertical || S) yield return 5 * 3 + 2;
+            // yield return 5 * 3 + 3;
+        }
+
         int MAX_DETAIL_TYPES = 20;
+    }
+
+    public struct TerrainDetailScore
+    {
+        public bool cached;
+        public float prone;
+        public float regular;
+
+        public TerrainDetailScore(bool item1, float item2, float item3)
+        {
+            cached = item1;
+            prone = item2;
+            regular = item3;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is TerrainDetailScore other &&
+                   cached == other.cached &&
+                   prone == other.prone &&
+                   regular == other.regular;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 1044908159;
+            hashCode = hashCode * -1521134295 + cached.GetHashCode();
+            hashCode = hashCode * -1521134295 + prone.GetHashCode();
+            hashCode = hashCode * -1521134295 + regular.GetHashCode();
+            return hashCode;
+        }
+
+        public void Deconstruct(out bool item1, out float item2, out float item3)
+        {
+            item1 = cached;
+            item2 = prone;
+            item3 = regular;
+        }
+
+        public static implicit operator (bool, float, float)(TerrainDetailScore value)
+        {
+            return (value.cached, value.prone, value.regular);
+        }
+
+        public static implicit operator TerrainDetailScore((bool, float, float, float, float) value)
+        {
+            return new TerrainDetailScore(value.Item1, value.Item2, value.Item3);
+        }
     }
 }

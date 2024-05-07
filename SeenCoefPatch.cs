@@ -321,8 +321,8 @@ namespace ThatsLit
             var detailScoreRaw = 0f;
             if (!inThermalView && !mainPlayer.skipDetailCheck)
             {
-                mainPlayer.CalculateDetailScore(-eyeToPlayerBody, dis, visionAngleDeltaVertical, out float terrainScoreProne, out float terrainScoreCrouch);
-                if (terrainScoreProne > 0.1f || terrainScoreCrouch > 0.1f)
+                var terrainScore = mainPlayer.CalculateDetailScore(-eyeToPlayerBody, dis, visionAngleDeltaVertical);
+                if (terrainScore.prone > 0.1f || terrainScore.regular > 0.1f)
                 {
                     if (isInPronePose) // Handles cases where the player is laying on slopes and being very visible even with grasses
                     {
@@ -353,25 +353,28 @@ namespace ThatsLit
                         else if (layingVerticaltInVisionFactor <= 0 && layingVerticaltInVisionFactor >= -90f) layingVerticaltInVisionFactor = layingVerticaltInVisionFactor / -15f; // "-> /"
                         else layingVerticaltInVisionFactor = 0; // other cases grasses should take effect
 
-                        detailScore = terrainScoreProne * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
+                        detailScore = terrainScore.prone * Mathf.Clamp01(1f - layingVerticaltInVisionFactor * xyFacingFactor);
                     }
                     else
                     {
-                        detailScore = terrainScoreCrouch / (poseFactor + 0.1f + 0.25f * (poseFactor-0.45f)/0.55f) * (1f - cqb10mSquared) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
+                        detailScore = terrainScore.regular / (poseFactor + 0.1f + 0.25f * (poseFactor-0.45f)/0.55f) * (1f - cqb10mSquared) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
                     }
+
+                    detailScore = Mathf.Min(detailScore, 2.5f - poseFactor); // Cap extreme grasses for high poses
 
                     detailScoreRaw = detailScore;
                     detailScore *= 1f + disFactor / 2f; // At 110m+, 1.5x effective
                     if (canSeeLight) detailScore /= 2f - disFactor; // Flashlights impact less from afar
+                    if (canSeeLaser) detailScore *= 0.8f + 0.2f * disFactor; // Flashlights impact less from afar
 
                     switch (caution)
                     {
                         case 0:
-                            detailScore /= 2f;
+                            detailScore /= 1.5f;
                             detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f); // nerf starting from looking 5deg up to down (scaled by down to -25deg) and scaled by dis 15 ~ 0
                             break;
                         case 1:
-                            detailScore /= 1.5f;
+                            detailScore /= 1.25f;
                             detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 40f); // nerf starting from looking 5deg up (scaled by down to -40deg) and scaled by dis 15 ~ 0
                             break;
                         case 2:
@@ -394,14 +397,17 @@ namespace ThatsLit
                     if (UnityEngine.Random.Range(0f, 1.001f) < Mathf.Clamp01(detailScore))
                     {
                         float detailImpact;
-                        if (detailScore > 1 && isInPronePose) // But if the score is high and is proning (because the score is not capped to 1 even when crouching), make it "blink" so there's a chance to get hidden again
+                        detailImpact = 19f * Mathf.Clamp01(notSeenRecentAndNear + 0.25f * Mathf.Clamp01(detailScore - 1f)) * (0.05f + disFactorSmooth); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen;
+
+                        // After spotted, the palyer could be tracked and lose all detail impact
+                        // If the score is extra high and is proning, gives a change to get away  (the score is not capped to 1 even when crouching)
+                        if (detailScore > 1 && isInPronePose)
                         {
-                            detailImpact = UnityEngine.Random.Range(2, 4f) + UnityEngine.Random.Range(0, 5f) * Mathf.Clamp01(lastSeenPosDelta / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // Allow diving back into the grass field
-                            stealthNegation = 0.6f;
+                            detailImpact += (2f + rand5 * 3f) * (1f - disFactorSmooth) * (2f - visionAngleDelta90Clamped);
+                            deNullification = 0.5f;
                         }
-                        else detailImpact = 9f * Mathf.Clamp01(lastSeenPosDelta / (10f * Mathf.Clamp01(1f - disFactor + 0.05f))); // The closer it is the more the player need to move to gain bonus from grasses, if has been seen;
                         __result *= 1 + detailImpact;
-                        if (__result < dis / 10f) __result = dis / 10f;
+
                         if (nearestAI)
                         {
                             mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToPlayerBody;
