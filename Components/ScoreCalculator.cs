@@ -892,9 +892,9 @@ namespace ThatsLit.Components
 
     public class GroundZeroScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.82f;
+        protected override float MinBaseAmbienceScore => -0.75f;
         protected override float MaxBaseAmbienceScore => -0.1f;
-        protected override float MaxSunlightScore { get => 0.2f; }
+        protected override float MaxSunlightScore { get => 0.25f; }
         protected override float MaxMoonlightScore { get => 0.1f; }
         protected override float MinAmbienceLum { get => 0.011f; }
         protected override float MaxAmbienceLum { get => 0.111f; }
@@ -904,7 +904,7 @@ namespace ThatsLit.Components
         protected override float ThresholdMid { get => 0.02f; }
         protected override float ThresholdMidLow { get => 0.01f; }
         protected override float ThresholdLow { get => 0.005f; }
-        protected override float PixelLumScoreScale { get => 1.5f; }
+        protected override float PixelLumScoreScale { get => 1.6f; }
 
         protected override float GetMapAmbienceCoef(string locationId, float time)
         {
@@ -937,8 +937,8 @@ namespace ThatsLit.Components
         protected override float CalculateBaseAmbienceScore(string locationId, float time)
         {
             float playerY = Singleton<ThatsLitMainPlayerComponent>.Instance.MainPlayer.Transform.Original.position.y;
-            var reduction = Mathf.Clamp01((15.5f - playerY) / 2f);
-            return Mathf.Max(base.CalculateBaseAmbienceScore(locationId, time) - 0.5f * reduction, MinBaseAmbienceScore);
+            var reduction = Mathf.Clamp01((14.7f - playerY) / 1.5f) * 0.6f;
+            return Mathf.Max(base.CalculateBaseAmbienceScore(locationId, time) - reduction, MinBaseAmbienceScore);
         }
     }
 
