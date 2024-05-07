@@ -98,20 +98,6 @@ namespace ThatsLit
             // negative if looking down (from higher pos), 0 when looking straight...
             var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody) * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
 
-            // Vanilla is multiplying the final SeenCoef with 1E-05
-            // Probably to guarantee the continuance of the bot attention
-            // However this includes situations that the player has moved at least a bit and the bot is running/facing side/away
-            // This part, in a very conservative way, tries to randomly delay the reaction
-            if (sinceSeen < __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN
-                && lastSeenPosDeltaSqr < __instance.Owner.Settings.FileSettings.Look.DIST_SQRT_REPEATED_SEEN
-                && __result < 0.5f)
-            {
-                __result += (0.5f - __result)
-                            * (rand1 * Mathf.Clamp01(visionAngleDelta / 90f)) // Scale-capped by horizontal vision angle delta
-                            * (rand3 * Mathf.Clamp01(lastSeenPosDelta / 5f)) // Scale-capped by player position delta to last
-                            * (__instance.Owner.Mover.Sprinting? 1f : 0.75f); 
-            }
-
             var dis = eyeToPlayerBody.magnitude;
             float disFactor = 0;
             bool inThermalView = false;
@@ -647,6 +633,20 @@ namespace ThatsLit
                 }
                 else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.34f * ThatsLitPlugin.BrightnessImpactScale.Value); // At 100% brightness, 90% 0.66x the reaction time regardles angle half of the time
                 else if (factor > 0f) __result /= 1f + Mathf.Clamp01((factor / 5f) * ThatsLitPlugin.BrightnessImpactScale.Value);
+            }
+
+            // Vanilla is multiplying the final SeenCoef with 1E-05
+            // Probably to guarantee the continuance of the bot attention
+            // However this includes situations that the player has moved at least a bit and the bot is running/facing side/away
+            // This part, in a very conservative way, tries to randomly delay the reaction
+            if (sinceSeen < __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN
+                && lastSeenPosDeltaSqr < __instance.Owner.Settings.FileSettings.Look.DIST_SQRT_REPEATED_SEEN
+                && __result < 0.5f)
+            {
+                __result += (0.5f - __result)
+                            * (rand1 * Mathf.Clamp01(visionAngleDelta / 90f)) // Scale-capped by horizontal vision angle delta
+                            * (rand3 * Mathf.Clamp01(lastSeenPosDelta / 5f)) // Scale-capped by player position delta to last
+                            * (__instance.Owner.Mover.Sprinting? 1f : 0.75f); 
             }
 
             if (ThatsLitPlugin.EnableMovementImpact.Value)
