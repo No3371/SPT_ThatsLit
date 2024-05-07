@@ -101,7 +101,8 @@ namespace ThatsLit
             EnableCustoms              = Config.Bind(category, "Customs", true, "Enable darkness/brightness on the map.");
             EnableStreets              = Config.Bind(category, "Streets", true, "Enable darkness/brightness on the map.");
             EnableGroundZero              = Config.Bind(category, "Ground Zero", true, "Enable darkness/brightness on the map.");
-
+            // ShadowlessGroundZero       = Config.Bind(category, "ShadowlessGroundZero", true, "The top half of some big buildings in Ground Zero does not have proper colliders and thus mess with Ambience Shadow calculation. If you really feel it's a big problem, enable this to address the issue.");
+            
             category                   = "3. Encountering Patch";
             EnabledEncountering        = Config.Bind(category,
                                                      "Enable",
@@ -195,6 +196,8 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableGroundZero { get; private set; }
         public static ConfigEntry<bool> EnableWoods { get; private set; }
         public static ConfigEntry<bool> EnableHideout { get; private set; }
+        public static ConfigEntry<bool> ShadowlessGroundZero { get; private set; }
+        public static ConfigEntry<bool> ShadowlessStreets { get; private set; }
         public static ConfigEntry<bool> EnableBenchmark { get; private set; }
         public static ConfigEntry<int> ResLevel { get; private set; }
         public static ConfigEntry<int> FoliageSamples { get; private set; }

@@ -28,11 +28,9 @@ namespace ThatsLit
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, BifacialTransform BotTransform, BifacialTransform enemy, float personalLastSeenTime, Vector3 personalLastSeenPos, ref float __result)
         {
-            // if (ThatsLitPlugin.DevMode.Value && ThatsLitPlugin.DevModeInvisible.Value)
-            // {
-            //     __result = 8888;
-            //     return;
-            // }
+            // Don't use GoalEnemy here because it only change when engaging new enemy (it'll stay forever if not engaged with new enemy)
+            // Also they could search without having visual?
+
             if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value || ThatsLitPlugin.FinalImpactScale.Value == 0) return;
             WildSpawnType spawnType = __instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault;
             BotImpactType botImpactType = Utility.GetBotImpactType(spawnType);

@@ -23,6 +23,12 @@ using SpatialPartitionClass = GClass1067<GClass1052>;
 
 namespace ThatsLit.Components
 {
+    // TODO:
+    // # Experiment: Full body lit check
+    // Assign player thorax to layer N and set ShadowCastingMode on
+    // un-cull N for all Lights
+    // Cull N for FPS cam
+    // Un-Cull N for TL cam
     public class ThatsLitMainPlayerComponent : MonoBehaviour
     {
         public static bool IsDebugSampleFrame { get; set; }
