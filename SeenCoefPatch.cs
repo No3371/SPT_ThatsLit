@@ -214,14 +214,9 @@ namespace ThatsLit
             // ======
             // Global random overlooking
             // ======
-            float globalOverlookChance = Mathf.Clamp01(ThatsLitPlugin.GlobalRandomOverlookChance.Value) * disFactor / poseFactor;
+            float globalOverlookChance = 0.05f * disFactor / poseFactor;
             if (canSeeLight) globalOverlookChance /= 2f;
-            if (isGoalEnemy)
-            {
-                if (sinceSeen < 10f) globalOverlookChance = 0;
-                else globalOverlookChance *= UnityEngine.Random.Range(0.15f, 0.5f);
-            }
-            if (rand4 < globalOverlookChance)
+            if (rand4 < globalOverlookChance * seenPosDeltaFactorSqr * sinceSeenFactorSqr)
             {
                 __result *= 10 + rand1 * 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
             }

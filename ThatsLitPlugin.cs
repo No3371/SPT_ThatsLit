@@ -116,14 +116,10 @@ namespace ThatsLit
             EnabledGrasses             = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
 
             category                   = "5. Tweaks";
-            GlobalRandomOverlookChance = Config.Bind(category,
-                                                     "Global Random Overlook Chance",
-                                                     0.01f,
-                                                     new ConfigDescription("The chance for all AIs to simply overlook in 1 vision check.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 100 }));
             FoliageImpactScale         = Config.Bind(category,
-                                                     "Foliage Impact Scale",
-                                                     1f,
-                                                     new ConfigDescription("Scale the strength of extra chance to be overlooked from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+                                            "Foliage Impact Scale",
+                                            1f,
+                                            new ConfigDescription("Scale the strength of extra chance to be overlooked from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
             FinalImpactScale         = Config.Bind(category,
                                                      "Final Impact Scale",
                                                      1f,
@@ -185,7 +181,6 @@ namespace ThatsLit
         public static ConfigEntry<float> FinalOffset { get; private set; }
         public static ConfigEntry<float> FinalImpactScale { get; private set; }
         public static ConfigEntry<float> VagueHintChance { get; private set; }
-        public static ConfigEntry<float> GlobalRandomOverlookChance { get; private set; }
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
         public static ConfigEntry<bool> IncludeBosses { get; private set; }
         public static ConfigEntry<bool> LessFoliageCheck { get; private set; }
