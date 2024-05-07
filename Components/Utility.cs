@@ -10,49 +10,56 @@ using UnityEngine;
 
 namespace ThatsLit
 {
+    public enum BotImpactType
+    {
+        BOSS,
+        FOLLOWER,
+        DEFAULT
+    }
     public static class Utility
     {
-        public static bool IsBoss (WildSpawnType type) => type switch {
-            WildSpawnType.bossBoar => true,
-            WildSpawnType.bossBoarSniper => true,
-            WildSpawnType.bossBully => true,
-            WildSpawnType.bossGluhar => true,
-            WildSpawnType.bossKilla => true,
-            WildSpawnType.bossKnight => true,
-            WildSpawnType.bossKojaniy => true,
-            WildSpawnType.bossSanitar => true,
-            WildSpawnType.bossTagilla => true,
-            WildSpawnType.bossZryachiy => true,
-            WildSpawnType.ravangeZryachiyEvent => true,
-            WildSpawnType.peacefullZryachiyEvent => true,
-            WildSpawnType.bossKolontay => true,
-            WildSpawnType.arenaFighter => true,
-            WildSpawnType.arenaFighterEvent => true,
-            WildSpawnType.followerGluharScout => true,
-            WildSpawnType.followerGluharAssault => true,
-            WildSpawnType.followerGluharSecurity => true,
-            WildSpawnType.followerGluharSnipe => true,
-            WildSpawnType.followerBigPipe => true,
-            WildSpawnType.followerBirdEye => true,
-            WildSpawnType.followerBoar => true,
-            WildSpawnType.followerBoarClose1 => true,
-            WildSpawnType.followerBoarClose2 => true,
-            WildSpawnType.followerBully => true,
-            WildSpawnType.followerKojaniy => true,
-            WildSpawnType.followerSanitar => true,
-            WildSpawnType.followerTagilla => true,
-            WildSpawnType.followerZryachiy => true,
-            WildSpawnType.followerKolontayAssault => true,
-            WildSpawnType.followerKolontaySecurity => true,
-            WildSpawnType.sectantPriest => true,
-            WildSpawnType.sectantWarrior => true,
-            WildSpawnType.sectactPriestEvent => true,
-            WildSpawnType.gifter => true,
-            WildSpawnType.pmcBot => true,
-            WildSpawnType.exUsec => true,
-            WildSpawnType.crazyAssaultEvent => true,
-            WildSpawnType.marksman => true, // scav_sniper
-            _ => false
+        
+        public static BotImpactType GetBotImpactType (WildSpawnType type) => type switch {
+            WildSpawnType.bossBoar => BotImpactType.BOSS,
+            WildSpawnType.bossBoarSniper => BotImpactType.BOSS,
+            WildSpawnType.bossBully => BotImpactType.BOSS,
+            WildSpawnType.bossGluhar => BotImpactType.BOSS,
+            WildSpawnType.bossKilla => BotImpactType.BOSS,
+            WildSpawnType.bossKnight => BotImpactType.BOSS,
+            WildSpawnType.bossKojaniy => BotImpactType.BOSS,
+            WildSpawnType.bossSanitar => BotImpactType.BOSS,
+            WildSpawnType.bossTagilla => BotImpactType.BOSS,
+            WildSpawnType.bossZryachiy => BotImpactType.BOSS,
+            WildSpawnType.ravangeZryachiyEvent => BotImpactType.BOSS,
+            WildSpawnType.peacefullZryachiyEvent => BotImpactType.BOSS,
+            WildSpawnType.bossKolontay => BotImpactType.BOSS,
+            WildSpawnType.arenaFighter => BotImpactType.FOLLOWER,
+            WildSpawnType.arenaFighterEvent => BotImpactType.FOLLOWER,
+            WildSpawnType.followerGluharScout => BotImpactType.FOLLOWER,
+            WildSpawnType.followerGluharAssault => BotImpactType.FOLLOWER,
+            WildSpawnType.followerGluharSecurity => BotImpactType.FOLLOWER,
+            WildSpawnType.followerGluharSnipe => BotImpactType.FOLLOWER,
+            WildSpawnType.followerBigPipe => BotImpactType.FOLLOWER,
+            WildSpawnType.followerBirdEye => BotImpactType.FOLLOWER,
+            WildSpawnType.followerBoar => BotImpactType.FOLLOWER,
+            WildSpawnType.followerBoarClose1 => BotImpactType.FOLLOWER,
+            WildSpawnType.followerBoarClose2 => BotImpactType.FOLLOWER,
+            WildSpawnType.followerBully => BotImpactType.FOLLOWER,
+            WildSpawnType.followerKojaniy => BotImpactType.FOLLOWER,
+            WildSpawnType.followerSanitar => BotImpactType.FOLLOWER,
+            WildSpawnType.followerTagilla => BotImpactType.FOLLOWER,
+            WildSpawnType.followerZryachiy => BotImpactType.FOLLOWER,
+            WildSpawnType.followerKolontayAssault => BotImpactType.FOLLOWER,
+            WildSpawnType.followerKolontaySecurity => BotImpactType.FOLLOWER,
+            WildSpawnType.sectantPriest => BotImpactType.BOSS,
+            WildSpawnType.sectantWarrior => BotImpactType.FOLLOWER,
+            WildSpawnType.sectactPriestEvent => BotImpactType.BOSS,
+            WildSpawnType.gifter => BotImpactType.BOSS,
+            WildSpawnType.pmcBot => BotImpactType.FOLLOWER,
+            WildSpawnType.exUsec => BotImpactType.FOLLOWER,
+            WildSpawnType.crazyAssaultEvent => BotImpactType.FOLLOWER,
+            WildSpawnType.marksman => BotImpactType.FOLLOWER, // scav_sniper
+            _ => BotImpactType.DEFAULT
         };
         public static bool IsBossNerfExcluded (WildSpawnType type) => type switch {
             // WildSpawnType.bossTagilla => true,

@@ -35,7 +35,8 @@ namespace ThatsLit
             // }
             if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value || ThatsLitPlugin.FinalImpactScale.Value == 0) return;
             WildSpawnType spawnType = __instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault;
-            if ((!ThatsLitPlugin.IncludeBosses.Value && Utility.IsBoss(spawnType))
+            BotImpactType botImpactType = Utility.GetBotImpactType(spawnType);
+            if ((!ThatsLitPlugin.IncludeBosses.Value && botImpactType == BotImpactType.BOSS)
              || Utility.IsBossNerfExcluded(spawnType)) return;
 
 
@@ -414,7 +415,7 @@ namespace ThatsLit
 
             // BUSH RAT ----------------------------------------------------------------------------------------------------------------
             /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-            if (!inThermalView && mainPlayer.foliage != null && !Utility.IsBoss(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault)
+            if (!inThermalView && mainPlayer.foliage != null && botImpactType != BotImpactType.BOSS
              && (!__instance.HaveSeen || lastSeenPosDelta > 30f + rand1 * 20f || sinceSeen > 150f + 150f*rand3 && lastSeenPosDelta > 10f + 10f*rand2))
             {
                 float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
@@ -542,7 +543,7 @@ namespace ThatsLit
                         break;
                 }
                 var bushRatFactor = Mathf.Clamp01(angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor);
-                if (canSeeLight || (canSeeLaser && rand3 < 0.2f)) bushRatFactor /= 2f;
+                if (botImpactType == BotImpactType.FOLLOWER || canSeeLight || (canSeeLaser && rand3 < 0.2f)) bushRatFactor /= 2f;
                 if (bushRat && bushRatFactor > 0.01f)
                 {
                     if (nearestAI) mainPlayer.foliageCloaking = bushRat;
@@ -667,6 +668,7 @@ namespace ThatsLit
 
 
             __result = Mathf.Lerp(original, __result, ThatsLitPlugin.FinalImpactScale.Value); // just seen (0s) => original, 0
+            __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
 
             if (__result > original) // That's Lit delaying the bot
             {

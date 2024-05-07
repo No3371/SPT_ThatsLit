@@ -59,7 +59,8 @@ namespace ThatsLit.Patches.Vision
             float rand3 = UnityEngine.Random.Range(0, 1f); // Don't go underground
 
             // Vague hint instead, if the bot is facing away
-            if (!Utility.IsBoss(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault))
+            BotImpactType botImpactType = Utility.GetBotImpactType(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault);
+            if (botImpactType != BotImpactType.BOSS)
             {
                 float angleRating = Mathf.Clamp01((visionDeviation - 65f) / 55f); // 0-1 from 70 to 115+deg
                 if (rand3 < angleRating * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value)) // EX: At 115deg 60% chance to replace with vague hint
