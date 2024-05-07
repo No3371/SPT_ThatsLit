@@ -452,7 +452,7 @@ namespace ThatsLit.Components
                     case 0:
                         {
                             var ray = new Ray(headPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
                             {
                                 ambienceShadownRating += 10f * Time.deltaTime;
                             }
@@ -462,7 +462,7 @@ namespace ThatsLit.Components
                     case 1:
                         {
                             var ray = new Ray(lPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
                             {
                                 ambienceShadownRating += 10f * Time.deltaTime;
                             }
@@ -472,7 +472,7 @@ namespace ThatsLit.Components
                     case 2:
                         {
                             var ray = new Ray(rPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
                             {
                                 ambienceShadownRating += 10f * Time.deltaTime;
                             }
@@ -482,7 +482,7 @@ namespace ThatsLit.Components
                     case 3:
                         {
                             var ray = new Ray(lhPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
                             {
                                 ambienceShadownRating += 10f * Time.deltaTime;
                             }
@@ -492,7 +492,7 @@ namespace ThatsLit.Components
                     case 4:
                         {
                             var ray = new Ray(rhPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1000, ambienceRaycastMask, out var hit))
+                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
                             {
                                 ambienceShadownRating += 10f * Time.deltaTime;
                             }
