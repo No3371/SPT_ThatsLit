@@ -237,7 +237,7 @@ namespace ThatsLit.Components
         }
 
         internal static System.Diagnostics.Stopwatch _benchmarkSW, _benchmarkSWGUI, _benchmarkSWFoliageCheck, _benchmarkSWTerrainCheck;
-        static readonly LayerMask ambienceRaycastMask = (1 << LayerMask.NameToLayer("Terrain")) | (1 << LayerMask.NameToLayer("HighPolyCollider"))  | (1 << LayerMask.NameToLayer("LowPolyCollider")) | (1 << LayerMask.NameToLayer("Grass")) | (1 << LayerMask.NameToLayer("Foliage"));
+        static readonly LayerMask ambienceRaycastMask = (1 << LayerMask.NameToLayer("Terrain")) | (1 << LayerMask.NameToLayer("HighPolyCollider")) | (1 << LayerMask.NameToLayer("Grass")) | (1 << LayerMask.NameToLayer("Foliage"));
 
         private void Update()
         {
@@ -446,60 +446,50 @@ namespace ThatsLit.Components
             // Ambient shadow
             if (TOD_Sky.Instance != null)
             {
-                Vector3 ambienceDir = scoreCalculator.CalculateSunLightTimeFactor(activeRaidSettings.LocationId, GetInGameDayTime()) > 0f ? TOD_Sky.Instance.LocalSunDirection : TOD_Sky.Instance.LightDirection;
+                Ray ray = default;
+                Vector3 ambienceDir = scoreCalculator.CalculateSunLightTimeFactor(activeRaidSettings.LocationId, GetInGameDayTime()) > 0.05f ? TOD_Sky.Instance.LocalSunDirection : TOD_Sky.Instance.LightDirection;
                 switch (Time.frameCount % 5)
                 {
                     case 0:
                         {
-                            var ray = new Ray(headPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
-                            {
-                                ambienceShadownRating += 10f * Time.deltaTime;
-                            }
-                            else ambienceShadownRating -= 22f * Time.deltaTime;
+                            ray = new Ray(headPos, ambienceDir);
                             break;
                         }
                     case 1:
                         {
-                            var ray = new Ray(lPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
-                            {
-                                ambienceShadownRating += 10f * Time.deltaTime;
-                            }
-                            else ambienceShadownRating -= 22f * Time.deltaTime;
+                            ray = new Ray(lPos, ambienceDir);
                             break;
                         }
                     case 2:
                         {
-                            var ray = new Ray(rPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
-                            {
-                                ambienceShadownRating += 10f * Time.deltaTime;
-                            }
-                            else ambienceShadownRating -= 22f * Time.deltaTime;
+                            ray = new Ray(rPos, ambienceDir);
                             break;
                         }
                     case 3:
                         {
-                            var ray = new Ray(lhPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
-                            {
-                                ambienceShadownRating += 10f * Time.deltaTime;
-                            }
-                            else ambienceShadownRating -= 22f * Time.deltaTime;
+                            ray = new Ray(lhPos, ambienceDir);
                             break;
                         }
                     case 4:
                         {
-                            var ray = new Ray(rhPos, ambienceDir);
-                            if (RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask, out var hit))
-                            {
-                                ambienceShadownRating += 10f * Time.deltaTime;
-                            }
-                            else ambienceShadownRating -= 22f * Time.deltaTime;
+                            ray = new Ray(rhPos, ambienceDir);
                             break;
                         }
                 }
+
+                var casted1 = RaycastIgnoreGlass(ray, 2000, ambienceRaycastMask, out var highPolyHit, out var lastPenetrated); // Anything high poly that is not glass
+                
+                    // if (Time.frameCount % 213 == 0)
+                    //     EFT.UI.ConsoleScreen.Log($"---");
+                // Fuck GZ buildings (low poly)
+                bool casted2 = false;
+                
+                // if (!casted1) casted2 = RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask_lowPriority, out var lowPolyHit, out var _, 0, 3) && lastPenetrated.distance < lowPolyHit.distance; // high/low poly any non-glass that is further than 0 or casted glass
+                if (casted1 || casted2)
+                {
+                    ambienceShadownRating += 10f * Time.deltaTime;
+                }
+                else ambienceShadownRating -= 22f * Time.deltaTime;
                 ambienceShadownRating = Mathf.Clamp(ambienceShadownRating, 0, 10f);
             }
 
@@ -592,26 +582,55 @@ namespace ThatsLit.Components
             cast = Quaternion.Euler(0, slice * -60f, 0) * cast;
             
             var ray = new Ray(from, cast);
-            return RaycastIgnoreGlass(ray, 25, ambienceRaycastMask, out hit);
+            return RaycastIgnoreGlass(ray, 25, ambienceRaycastMask, out hit, out var lp);
         }
-        private bool RaycastIgnoreGlass (Ray ray, float distance, LayerMask mask, out RaycastHit hit, int depth = 0)
+        private bool RaycastIgnoreGlass (Ray ray, float distance, LayerMask mask, out RaycastHit hit, out RaycastHit lastPenetrated, int depth = 0, int maxDepth = 10)
         {
+            lastPenetrated = default;
+            hit = default;
+            if (distance < 0 || depth++ >= maxDepth) return false;
+
             if (Physics.Raycast(ray, out hit, distance, mask))
             {
+                // if (Time.frameCount % 213 == 0)
+                //     EFT.UI.ConsoleScreen.Log($"{hit.collider?.name}");
                 BallisticCollider c = hit.collider?.gameObject?.GetComponent<BallisticCollider>();
                 if (c == null) hit.collider?.transform?.parent?.GetComponent<BallisticCollider>();
-                if (c != null && c?.TypeOfMaterial == MaterialType.Glass || c?.TypeOfMaterial == MaterialType.GlassShattered)
+                if ((c == null || (c?.TypeOfMaterial) != MaterialType.Glass) && (c?.TypeOfMaterial) != MaterialType.GlassShattered)
                 {
-                    ray.origin = hit.point + ray.direction.normalized * 0.25f;
-                    var dis = hit.distance + 0.25f;
-                    if (depth > 3) return false;
-                    if (RaycastIgnoreGlass(ray, distance - dis, mask, out hit, depth++))
-                        hit.distance += dis;
-                    else return false;
+                    // if (Time.frameCount % 213 == 0)
+                    //     EFT.UI.ConsoleScreen.Log($"{hit.distance:0.0}m -------> {hit.collider?.name}");
+                    return true; // no ballistic or not glass
                 }
-                return true;
+                else // Glass
+                {
+                    lastPenetrated = hit;
+                    ray.origin = hit.point + ray.direction.normalized * 0.1f;
+                    hit.distance += 0.1f;
+                    var layer = hit.collider.gameObject.layer;
+                    if (hit.collider?.gameObject) hit.collider.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast"); // ignore raycast
+
+                    // if (Time.frameCount % 213 == 0)
+                    //     EFT.UI.ConsoleScreen.Log($"-- #{depth} {lastPenetrated.collider?.gameObject.name} +{hit.distance}m -->");
+
+                    RaycastHit hit2 = default;
+                    if (RaycastIgnoreGlass(ray, distance - hit.distance, mask, out hit2, out lastPenetrated, depth))
+                    {
+                        if (hit.collider?.gameObject) hit.collider.gameObject.layer = layer; // ignore raycast
+                        hit.distance += hit2.distance;
+                        // if (Time.frameCount % 213 == 0)
+                        //     EFT.UI.ConsoleScreen.Log($"{hit.distance:0.0}m -------> {hit.collider?.name}");
+                        return true; // Solid hit
+                    }
+
+                    if (hit.collider?.gameObject) hit.collider.gameObject.layer = layer; // ignore raycast
+
+                    // if (Time.frameCount % 213 == 0)
+                    //     EFT.UI.ConsoleScreen.Log($"--- #{depth} - - - -  -  -  -    -    -    -");
+                    return false; // Pen quota used up and no solid hit
+                }
             }
-            else return false;
+            return false; // nothing
         }
 
         /// <summary>
