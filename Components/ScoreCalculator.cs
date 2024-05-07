@@ -809,8 +809,12 @@ namespace ThatsLit.Components
                 return 0.1f * (24f - time);
             else if (time >= 0 && time < 3.5f) // 0 ~ 1
                 return 0.1f + 0.9f * GetTimeProgress(time, 0, 2f);
-            else if (time >= 3.5f && time < 5) // 1 ~ 0
-                return 1f - GetTimeProgress(time, 3.5f, 5f);
+            else if (time >= 3.5f && time < 4.33) // 1 ~ 0
+                return 1f - 0.6f * GetTimeProgress(time, 3.5f, 4.33f); 
+            else if (time >= 4.33f && time < 4.416f) // 1 ~ 0
+                return 0.4f - 0.2f * GetTimeProgress(time,  4.33f, 4.416f); // How interesting, the moon lose its brightness in 5 mins
+            else if (time >= 4.416f && time < 5) // 1 ~ 0
+                return 0.2f - GetTimeProgress(time, 4.416f, 5f);
             else return 0;
         }
     }
