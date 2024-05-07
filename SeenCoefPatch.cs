@@ -76,8 +76,17 @@ namespace ThatsLit
             float sinceSeen = Time.time - personalLastSeenTime;
             float lastSeenPosDelta = (__instance.Person.Position - __instance.EnemyLastPosition).magnitude;
             float lastSeenPosDeltaSqr = lastSeenPosDelta * lastSeenPosDelta;
-            bool isGoalEnemy = __instance.Owner.Memory.GoalEnemy == __instance;
-            float stealthNegation = 0;
+
+            var sinceSeenFactorSqr = Mathf.Clamp01(sinceSeen / __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN);
+            var sinceSeenFactorSqrSlow = Mathf.Clamp01(sinceSeen / __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN * 2f);
+            var seenPosDeltaFactorSqr = Mathf.Clamp01((float) (lastSeenPosDelta / __instance.Owner.Settings.FileSettings.Look.DIST_REPEATED_SEEN / 3f));
+            sinceSeenFactorSqr = sinceSeenFactorSqr * sinceSeenFactorSqr;
+            sinceSeenFactorSqrSlow = sinceSeenFactorSqrSlow * sinceSeenFactorSqrSlow;
+            seenPosDeltaFactorSqr = seenPosDeltaFactorSqr * seenPosDeltaFactorSqr;
+
+            float notSeenRecentAndNear = (Mathf.Clamp01(seenPosDeltaFactorSqr + sinceSeenFactorSqrSlow) + sinceSeenFactorSqr / 3f);
+
+            float deNullification = 0;
 
             System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = mainPlayer.MainPlayer.MainParts;
             Vector3 eyeToPlayerBody = playerParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
@@ -92,14 +101,17 @@ namespace ThatsLit
             float rand2 = UnityEngine.Random.Range(0f, 1f);
             float rand3 = UnityEngine.Random.Range(0f, 1f);
             float rand4 = UnityEngine.Random.Range(0f, 1f);
+            float rand5 = UnityEngine.Random.Range(0f, 1f);
 
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
+            var visionAngleDelta90Clamped = visionAngleDelta / 90f;
             // negative if looking down (from higher pos), 0 when looking straight...
             var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody) * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
 
             var dis = eyeToPlayerBody.magnitude;
             float disFactor = 0;
+            float disFactorSmooth = 0;
             bool inThermalView = false;
             bool inNVGView = false;
             float insideTime = Mathf.Max(0, Time.time - mainPlayer.lastOutside);
@@ -149,19 +161,28 @@ namespace ThatsLit
                 // var disFactorLong = Mathf.Clamp01((dis - 10) / 300f);
                 // To scale down various sneaking bonus
                 // The bigger the distance the bigger it is, capped to 110m
+                disFactorSmooth = (disFactor + disFactor * disFactor) * 0.5f; // 0.25df => 0.156dfs / 0.5df => 0.325dfs / 0.75df => 0.656dfs
                 disFactor = disFactor * disFactor; // A slow accelerating curve, 110m => 1, 10m => 0, 50m => 0.16
                                                    // The disFactor is to scale up effectiveness of various mechanics by distance
                                                    // Once player is seen, it should be suppressed unless the player is out fo visual for sometime, to prevent interrupting long range fight
-                disFactor = Mathf.Lerp(0, disFactor, sinceSeen / (8f * (1.2f - disFactor)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
+                float t = sinceSeen / (8f * (1.2f - disFactor)) / (0.33f + 0.67f * seenPosDeltaFactorSqr * sinceSeenFactorSqr);
+                disFactor = Mathf.Lerp(0, disFactor, t); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
                                                                                                                           // disFactorLong = Mathf.Lerp(0, disFactorLong, sinceSeen / (8f * (1.2f - disFactorLong)) / (isGoalEnemy ? 0.33f : 1f)); // Takes 1.6 seconds out of visual for the disFactor to reset for AIs at 110m away, 9.6s for 10m, 8.32s for 50m, if it's targeting the player, 3x the time
+                disFactorSmooth = Mathf.Lerp(0, disFactorSmooth, t);
             }
 
             var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
             if (!canSeeLight && inNVGView && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
-            if (visionAngleDelta > 90) canSeeLight = false;
+            var canSeeLightSub = mainPlayer.scoreCalculator?.vLightSub ?? false;
+            if (!canSeeLightSub && inNVGView && (mainPlayer.scoreCalculator?.irLightSub ?? false)) canSeeLightSub = true;
             var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
             if (!canSeeLaser && inNVGView && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
+            var canSeeLaserSub = mainPlayer.scoreCalculator?.vLaserSub ?? false;
+            if (!canSeeLaserSub && inNVGView && (mainPlayer.scoreCalculator?.irLaserSub ?? false)) canSeeLaserSub = true;
+            if (visionAngleDelta > 110) canSeeLight = false;
             if (visionAngleDelta > 85) canSeeLaser = false;
+            if (visionAngleDelta > 110) canSeeLightSub = false;
+            if (visionAngleDelta > 85) canSeeLaserSub = false;
 
             // ======
             // Overhead overlooking
@@ -558,6 +579,12 @@ namespace ThatsLit
             }
             // BUSH RAT ----------------------------------------------------------------------------------------------------------------
 
+
+            var extremeDarkFactor = Mathf.Clamp01((score - -0.7f) / -0.3f);
+            extremeDarkFactor *= extremeDarkFactor;
+            var notSoExtremeDarkFactor = Mathf.Clamp01((score - -0.5f) / -0.5f);
+            notSoExtremeDarkFactor *= notSoExtremeDarkFactor;
+
             if (mainPlayer.disabledLit && ThatsLitPlugin.AlternativeReactionFluctuation.Value)
             {
                 // https://www.desmos.com/calculator/jbghqfxwha
@@ -668,8 +695,11 @@ namespace ThatsLit
             if (__result > original) // That's Lit delaying the bot
             {
                 // In ~0.2s after being seen, stealth is nullfied (fading between 0.1~0.2)
-                float lerp = 1f - Mathf.Clamp01(sinceSeen - 0.1f / UnityEngine.Random.Range(0.01f, 0.1f)) - stealthNegation;
-                __result = Mathf.Lerp(__result, original, Mathf.Clamp01(lerp)); // just seen (0s) => original, 0.1s => modified
+                // To prevent interrupt fighting
+                float nullification = 1f - sinceSeen / 0.2f; // 0.1s => 50%, 0.2s => 0%
+                nullification *= rand5;
+                nullification -= deNullification; // Allow features to interrupt the nullification
+                __result = Mathf.Lerp(__result, original, Mathf.Clamp01(nullification)); // just seen (0s) => original, 0.1s => modified
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
