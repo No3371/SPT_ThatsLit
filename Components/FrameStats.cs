@@ -4,7 +4,7 @@
     {
         public int pxS, pxH, pxHM, pxM, pxML, pxL, pxD;
         public int brighterPixels, darkerPixels;
-        public float avgLum, avgLumMultiFrames;
+        public float lum, avgLum, avgLumMultiFrames;
         public float avgLumNonDark;
         public int pixels;
         public float score, ambienceScore, baseAmbienceScore;

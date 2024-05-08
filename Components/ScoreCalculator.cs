@@ -61,7 +61,7 @@ namespace ThatsLit.Components
             StartCountPixels(tex, thS, thH, thHM, thM, thML, thL);
         }
         
-        public float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
+        public virtual float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
         {
 #region BENCHMARK
             if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
@@ -78,14 +78,11 @@ namespace ThatsLit.Components
             else if (_benchmarkSW != null)
                 _benchmarkSW = null;
 #endregion
-
-            float minAmbienceLum = MinAmbienceLum;
             // if (ThatsLitPlugin.DevMode.Value)
             //     minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
             float maxAmbienceLum = MaxAmbienceLum;
             // if (ThatsLitPlugin.DevMode.Value)
             //     maxAmbienceLum = ThatsLitPlugin.OverrideMaxAmbienceLum.Value;
-            float lumScoreScale = PixelLumScoreScale;
             // if (ThatsLitPlugin.DevMode.Value)
             //     lumScoreScale = ThatsLitPlugin.OverridePixelLumScoreScale.Value;
 
@@ -95,10 +92,10 @@ namespace ThatsLit.Components
             frame2 = frame1;
             frame1 = frame0;
             FrameStats thisFrame = default;
-            CompleteCountPixels(out thisFrame.pxS, out thisFrame.pxH, out thisFrame.pxHM, out thisFrame.pxM, out thisFrame.pxML, out thisFrame.pxL, out thisFrame.pxD, out float lum, out float lumNonDark, out thisFrame.pixels);
+            CompleteCountPixels(out thisFrame.pxS, out thisFrame.pxH, out thisFrame.pxHM, out thisFrame.pxM, out thisFrame.pxML, out thisFrame.pxL, out thisFrame.pxD, out thisFrame.lum, out float lumNonDark, out thisFrame.pixels);
             if (thisFrame.pixels == 0) thisFrame.pixels = RESOLUTION * RESOLUTION;
-            thisFrame.avgLum = lum / (float)thisFrame.pixels;
-            thisFrame.avgLumNonDark = lum / (float) (thisFrame.pixels - thisFrame.pxD);
+            thisFrame.avgLum = thisFrame.lum / (float)thisFrame.pixels;
+            thisFrame.avgLumNonDark = thisFrame.lum / (float) (thisFrame.pixels - thisFrame.pxD);
             thisFrame.avgLumMultiFrames = (thisFrame.avgLum + frame1.avgLum + frame2.avgLum + frame3.avgLum + frame4.avgLum + frame5.avgLum) / 6f;
             UpdateLumTrackers(thisFrame.avgLumMultiFrames);
             
@@ -166,11 +163,8 @@ namespace ThatsLit.Components
             //float score = CalculateTotalPixelScore(time, thisFrame.pxS, thisFrame.pxH, thisFrame.pxHM, thisFrame.pxM, thisFrame.pxML, thisFrame.pxL, thisFrame.pxD);
             //score /= (float)thisFrame.pixels;
             float lowAmbienceScoreFactor = Mathf.Max(0.5f - ambienceScore, 0) / 1.5f;
-            float lowAmbienceScoreFactorSqr = lowAmbienceScoreFactor * lowAmbienceScoreFactor;
-            float lumScore = (thisFrame.avgLum - minAmbienceLum) * lumScoreScale * (1+2f*lowAmbienceScoreFactorSqr) * (0.1f + lowAmbienceScoreFactor);
             float hightLightedPixelFactor = 0.9f * thisFrame.RatioShinePixels + 0.75f * thisFrame.RatioHighPixels + 0.4f * thisFrame.RatioHighMidPixels + 0.15f * thisFrame.RatioMidPixels;
-            lumScore *= 1 + hightLightedPixelFactor;
-            lumScore = Mathf.Clamp(lumScore, 0, 2);
+            float lumScore = CalculateRawLumScore(thisFrame, lowAmbienceScoreFactor, hightLightedPixelFactor);
             if (Time.frameCount % 47 == 0) scoreRaw1 = lumScore + ambienceScore;
 
             //var topScoreMultiFrames = FindHighestScoreRecentFrame(true, score);
@@ -208,7 +202,7 @@ namespace ThatsLit.Components
             compensationTarget *= 1 + hightLightedPixelFactor * lowAmbienceScoreFactor;
             var expectedFinalScore = lumScore + ambienceScore;
             var compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2); // contrast:0.1 -> final toward 0.1, contrast:0.5 -> final toward 0.25
-            lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor; // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
+            lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor * MultiFrameContrastImpactScale; // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
             if (Time.frameCount % 47 == 0) scoreRaw3 = lumScore + ambienceScore;
 
             //The average score of other frames(sides)
@@ -416,6 +410,15 @@ namespace ThatsLit.Components
             thresholdMidLow = 0.04f;
             thresholdLow = 0.02f;
         }
+
+        protected virtual float CalculateRawLumScore (FrameStats thisFrame, float lowAmbienceScoreFactor, float hightLightedPixelFactor)
+        {
+            float lumScore = (thisFrame.avgLum - MinAmbienceLum) * PixelLumScoreScale * (1+2f*lowAmbienceScoreFactor* lowAmbienceScoreFactor) * (0.1f + lowAmbienceScoreFactor);
+            lumScore *= 1 + hightLightedPixelFactor;
+            lumScore = Mathf.Clamp(lumScore, 0, 2);
+            return lumScore;
+        }
+
         protected virtual void GetPixelScores(float tlf, out float scoreShine, out float scoreHigh, out float scoreHighMid, out float scoreMid, out float scoreMidLow, out float scoreLow, out float scoreDark)
         {
             // if (ThatsLitPlugin.DevMode.Value)
@@ -704,7 +707,7 @@ namespace ThatsLit.Components
         protected virtual float ScoreMidLow { get => 0.1f; }
         protected virtual float ScoreLow { get => 0.05f; }
         protected virtual float ScoreDark { get => 0; }
-        protected virtual float AvgLumContrastOffset { get => -0.05f; }
+        protected virtual float MultiFrameContrastImpactScale { get => 1; }
     }
     public class HideoutScoreCalculator : ScoreCalculator
     {
@@ -796,6 +799,8 @@ namespace ThatsLit.Components
     }
     public class InterchangeScoreCalculator : ScoreCalculator
     {
+        private bool isPlayerInParking;
+
         protected override float MinBaseAmbienceScore => -0.8f;
         protected override float MaxBaseAmbienceScore { get => -0.1f; } // indoor
         protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.75f;
@@ -803,20 +808,79 @@ namespace ThatsLit.Components
         protected override float MaxAmbienceLum => 0.008f;
         protected override float PixelLumScoreScale { get => 2f; }
         protected override float IndoorAmbienceScale => 0.2f;
+        bool IsPlayerInParking
+        {
+            get => isPlayerInParking;
+            set
+            {
+                if (isPlayerInParking != value)
+                {
+                    TimeEnterOrLeaveParking = Time.time;
+                }
+                isPlayerInParking = value;
+            }
+        }
+        float TimeEnterOrLeaveParking { get; set; }
+        float ParkingTransitionFactor => Mathf.Clamp01((Time.time - TimeEnterOrLeaveParking) / 5f);
+        float rawCloud;
+        protected override float MultiFrameContrastImpactScale
+        {
+            get
+            {
+                if (!IsPlayerInParking) return base.MultiFrameContrastImpactScale;
+                else return Mathf.Lerp(base.MultiFrameContrastImpactScale, 0.5f, ParkingTransitionFactor);
+            }
+        }
+
+        internal override void CalledOnGUI(bool layout = false)
+        {
+            base.CalledOnGUI(layout);
+            if (isPlayerInParking) GUILayout.Label($"// PARKING: {ParkingTransitionFactor}");
+        }
+
+        protected override float CalculateMoonLight(string locationId, float time, float cloudiness)
+        {
+            if (IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.2f, ParkingTransitionFactor);
+            return base.CalculateMoonLight(locationId, time, cloudiness);
+        }
+
+        protected override float CalculateSunLight(string locationId, float time, float cloudiness)
+        {
+            if (IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.2f, ParkingTransitionFactor);
+            return base.CalculateSunLight(locationId, time, cloudiness);
+        }
+
+        public override float CalculateMultiFrameScore(NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
+        {
+            rawCloud = cloud;
+
+            ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
+            IsPlayerInParking = Physics.Raycast(new Ray(p.MainPlayer.MainParts[BodyPartType.head].Position, Vector3.up), out var hit, 5, LayerMaskClass.LowPolyColliderLayerMask)
+                             && hit.transform.gameObject.scene.name == "Shopping_Mall_parking_work" && p.transform.position.y < 23.5f;
+            return base.CalculateMultiFrameScore(tex, cloud, fog, rain, player, time, locationId);
+        }
 
         // Characters in the basement floor gets lit up by ambience lighting
         protected override float CalculateBaseAmbienceScore(string locationId, float time)
         {
             ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
-            if (Physics.Raycast(new Ray(p.MainPlayer.MainParts[BodyPartType.head].Position, Vector3.up), out var hit, 5, LayerMaskClass.LowPolyColliderLayerMask))
-            {
-                if (hit.transform.gameObject.scene.name == "Shopping_Mall_parking_work" && p.transform.position.y < 23.5f)
-                {
-                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time), -0.5f , p.overheadHaxRating * 0.5f);
-                }
-            }
+            if (IsPlayerInParking)
+                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time), -0.65f + 0.15f * rawCloud , p.overheadHaxRatingFactor * 0.9f * ParkingTransitionFactor);
 
             return base.CalculateBaseAmbienceScore(locationId, time);
+        }
+
+        protected override float CalculateRawLumScore (FrameStats thisFrame, float lowAmbienceScoreFactor, float hightLightedPixelFactor)
+        {
+            if (!IsPlayerInParking)
+                return base.CalculateRawLumScore(thisFrame, lowAmbienceScoreFactor, hightLightedPixelFactor);
+
+            ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
+            float lumScore = (thisFrame.avgLum - MinAmbienceLum) * (PixelLumScoreScale*1.2f) * (1+2f*lowAmbienceScoreFactor* lowAmbienceScoreFactor) * (0.1f + lowAmbienceScoreFactor);
+            lumScore *= 1f - (thisFrame.RatioDarkPixels + thisFrame.RatioLowPixels * 0.75f + thisFrame.RatioMidLowPixels * 0.5f) * (1f - rawCloud * 0.15f) * p.overheadHaxRatingFactor * ParkingTransitionFactor;
+            lumScore *= 1 + hightLightedPixelFactor;
+            lumScore = Mathf.Clamp(lumScore, 0.1f, 2); // When there is no sun/moon light the player model is pitch black
+            return lumScore;
         }
 
         protected override float CalculateMoonLightTimeFactor(string locationId, float time)

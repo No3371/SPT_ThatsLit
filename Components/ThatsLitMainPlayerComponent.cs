@@ -509,6 +509,7 @@ namespace ThatsLit.Components
             else 
                 overheadHaxRating -= Time.timeScale * 2f;
             overheadHaxRating = Mathf.Clamp(overheadHaxRating, 0f, 10f);
+            overheadHaxRatingFactor = Mathf.Pow(overheadHaxRating / 10f, 2);
 
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
@@ -581,7 +582,7 @@ namespace ThatsLit.Components
             observed.Dispose();
         }
         internal float overheadHaxRating;
-        // internal float overheadHaxRatingFactor;
+        internal float overheadHaxRatingFactor;
         private bool OverheadHaxCast (Vector3 from, out RaycastHit hit)
         {
             Vector3 cast = new Vector3(0, 1, 0);
