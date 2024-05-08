@@ -23,7 +23,7 @@ namespace ThatsLit.Components
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
         float scoreRawBase, scoreRaw0, scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
-        float detailBonusSmooth;
+        internal float detailBonusSmooth;
         internal static System.Diagnostics.Stopwatch _benchmarkSW;
         public ScoreCalculator()
         {

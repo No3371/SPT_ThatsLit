@@ -902,7 +902,7 @@ namespace ThatsLit.Components
                 float fog = WeatherController.Instance?.WeatherCurve?.Fog ?? 0;
                 float rain = WeatherController.Instance?.WeatherCurve?.Rain ?? 0;
                 float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
-                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000} 3x3:( { recentDetailCount3x3 } ) FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
+                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000} 3x3:( { recentDetailCount3x3 } ) (score-{ scoreCalculator?.detailBonusSmooth })  FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
                 GUILayout.Label(infoCache1);
                 // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
                 if (scoreCalculator != null) GUILayout.Label(string.Format("  LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
@@ -925,7 +925,7 @@ namespace ThatsLit.Components
                 GUILayout.Label(infoCache2);
                 // GUILayout.Label(string.Format(" DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df) 3x3: {2}", arg0: lastFinalDetailScoreNearest, lastDisFactorNearest, recentDetailCount3x3));
                 // GUILayout.Label(string.Format(" {0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
-                for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++)
+                for (int i = GetDetailInfoIndex(2, 2, 0); i < GetDetailInfoIndex(3, 2, 0); i++) // List the underfoot
                     if (detailsHere5x5[i].casted)
                         GUILayout.Label($"  { detailsHere5x5[i].count } Detail#{i}({ detailsHere5x5[i].name }))");
                 Utility.GUILayoutDrawAsymetricMeter((int)(lastFinalDetailScoreNearest / 0.0999f));
@@ -1257,6 +1257,7 @@ namespace ThatsLit.Components
             Logger.LogInfo($"[{ activeRaidSettings.LocationId }] Finished building detail map of {terrain.name} at { Time.time }... Costed { Time.time - time }");
         }
 
+        // Layout: [block of all detail types at the pos] * maxX * maxY 
         int GetDetailInfoIndex(int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
 
         TerrainDetailScore[] detailScoreCache = new TerrainDetailScore[20];
@@ -1458,7 +1459,7 @@ namespace ThatsLit.Components
         IEnumerable<int> IterateDetailIndex2x2SW => IterateIndex2x2In5x5(1, 2);
         IEnumerable<int> IterateDetailIndex3x3 => IterateIndex3x3In5x5(0, 0);
 
-        /// <param name="xOffset">WestSide(-x) => -1, EstSide(+x) => 1</param>
+        /// xOffset and yOffset decides the center of the 3x3
         IEnumerable<int> IterateIndex3x3In5x5(int xOffset, int yOffset)
         {
             yield return 5 * (1 + yOffset) + 1 + xOffset;
@@ -1474,6 +1475,7 @@ namespace ThatsLit.Components
             yield return 5 * (3 + yOffset) + 3 + xOffset;
         }
 
+        /// xOffset and yOffset decides the LT corner of the 2x2
         IEnumerable<int> IterateIndex2x2In5x5(int xOffset, int yOffset)
         {
             if (xOffset > 3 || yOffset > 3) throw new Exception("[That's Lit] Terrain detail grid access out of Bound");
