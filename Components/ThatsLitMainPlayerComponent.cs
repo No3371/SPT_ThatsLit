@@ -1422,7 +1422,7 @@ namespace ThatsLit.Components
 
             for (int i = 0; i < MAX_DETAIL_TYPES; i++)
             {
-                var info = detailsHere5x5[MAX_DETAIL_TYPES + i];
+                var info = detailsHere5x5[(2*5+2) * MAX_DETAIL_TYPES + i];
                 if (!info.casted) continue;
                 Utility.CalculateDetailScore(info.name, info.count, out var s1, out var s2);
                 s1 *= scaling;
