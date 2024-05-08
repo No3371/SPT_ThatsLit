@@ -651,8 +651,10 @@ namespace ThatsLit
                     // 45deg at f-0.95 => 40% -> 26%, 90deg at f-0.95 => 58%
                     var cqbCancel = cancel < cqbCancelChance;
 
+                    var attentionCancel = Mathf.InverseLerp(-0.9f, -1f, score);
+
                     // === Roll a forced stealth boost ===
-                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1f - combinedCqb10 * (cqbCancel ? 0.1f : 1f)) * (0.4f + 0.6f * notSeenRecentAndNear)) // At 3m, the chance of force stealth is 0.11 or 0.911 (cqb nullification cancelled)
+                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1f - combinedCqb10 * (cqbCancel ? 0.1f : 1f)) * (0.4f + 0.6f * (notSeenRecentAndNear + rand5 * 0.1f * attentionCancel))) // At 3m, the chance of force stealth is 0.11 or 0.911 (cqb nullification cancelled)
                     {
                         __result *= 100;
                     }
