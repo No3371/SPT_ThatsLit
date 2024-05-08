@@ -1411,6 +1411,35 @@ namespace ThatsLit.Components
             }
         }
 
+        public TerrainDetailScore CalculateCenterDetailScore(bool unscaled = false)
+        {
+            TerrainDetailScore cache = default;
+            float scaling = unscaled? 1f : 9f;
+            if (TryGetCache(0, out cache))  return cache;
+
+            if (detailsHere5x5 == null) return cache; // Could be resizing?
+
+            for (int i = 0; i < MAX_DETAIL_TYPES; i++)
+            {
+                var info = detailsHere5x5[MAX_DETAIL_TYPES + i];
+                if (!info.casted) continue;
+                Utility.CalculateDetailScore(info.name, info.count, out var s1, out var s2);
+                s1 *= scaling;
+                s2 *= scaling;
+                cache.prone += s1;
+                cache.regular += s2;
+            }
+
+            cache.cached = true;
+            detailScoreCache[0] = cache;
+            return cache;
+
+            bool TryGetCache(int index, out TerrainDetailScore cache)
+            {
+                cache = detailScoreCache[index];
+                return cache.cached;
+            }
+        }
         IEnumerable<int> IterateDetailIndex3x3N => IterateIndex3x3In5x5(0, 1);
         IEnumerable<int> IterateDetailIndex3x3E => IterateIndex3x3In5x5(1, 0);
         IEnumerable<int> IterateDetailIndex3x3W => IterateIndex3x3In5x5(-1, 0);

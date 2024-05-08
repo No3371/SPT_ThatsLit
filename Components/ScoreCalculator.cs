@@ -23,7 +23,7 @@ namespace ThatsLit.Components
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
         float scoreRawBase, scoreRaw0, scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
-        float foliageBonusSmooth, detailBonusSmooth;
+        float detailBonusSmooth;
         internal static System.Diagnostics.Stopwatch _benchmarkSW;
         public ScoreCalculator()
         {
@@ -129,33 +129,31 @@ namespace ThatsLit.Components
             sunLightScore = CalculateSunLight(locationId, time, locCloudiness);
             ambienceScore += (moonLightScore + sunLightScore) * (1f - ambienceShadowFactor);
             
+            // =====
+            // Scale up ambience score in winter raidsm given any light (regardless ambience shadow)
+            // =====
             if (player.isWinterCache && insideTime < 2f) // Debuff from winter environment when outside
             {
-                ambienceScore *= 1 + Mathf.Clamp01((sunLightScore + moonLightScore - 0.1f) / 0.2f) * 0.1f;
+                ambienceScore *= 1 + 0.2f * Mathf.Clamp01((sunLightScore + moonLightScore) / 0.5f);
             }
 
-            // Strengthen darkness when around foliage and grasses
-            float foliageBonus = 0;
-            if (player.foliageCount > 4)
+            // =====
+            // Ambience score reduction from dense grasses
+            // =====
+
+            var detailScaling = (player.CalculateDetailScore(Vector3.zero, 0, 0).regular + player.CalculateCenterDetailScore().regular) / 2f;
+            detailScaling = Mathf.Clamp01(detailScaling);
+            detailScaling *= Mathf.Clamp01(player.recentDetailCount3x3/ 100f);
+            detailScaling *= detailScaling;
+            detailScaling *= Mathf.InverseLerp(0, MinBaseAmbienceScore, ambienceScore);
+            detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, 0.2f * detailScaling, Time.fixedDeltaTime);
+
+            if (player.isWinterCache)
             {
-                foliageBonus += moonLightScore * 0.02f * Mathf.Min(10, player.foliageCount) * Mathf.Clamp01(player.foliageScore / 1f);
-                foliageBonus += sunLightScore * 0.02f * Mathf.Min(10, player.foliageCount) * Mathf.Clamp01(player.foliageScore / 1f);
-            }
-            else
-            {
-                foliageBonus += moonLightScore * 0.02f * player.foliageCount * Mathf.Clamp01(player.foliageScore / 1f);
+                detailBonusSmooth *= 0.5f; // Debuff from winter environment
             }
 
-            if (foliageBonus > foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, Time.fixedDeltaTime);
-            else if (foliageBonus < foliageBonusSmooth) foliageBonusSmooth = Mathf.Lerp(foliageBonusSmooth, foliageBonus, 0.25f);
-
-            if (player.recentDetailCount3x3 > 15) detailBonusSmooth = Mathf.Clamp01( + Time.fixedDeltaTime * Mathf.Clamp01((player.recentDetailCount3x3 - 15f) / 75f));
-            else detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, 0, 0.3f);
-
-            foliageBonusSmooth *= player.isWinterCache? 0.2f : 1f; // Debuff from winter environment
-            detailBonusSmooth *= player.isWinterCache? 0.5f : 1f; // Debuff from winter environment
-            ambienceScore -= foliageBonusSmooth * moonLightScore / 2f * outside1s;
-            ambienceScore -= detailBonusSmooth * moonLightScore / 2f * ambienceShadowFactor * outside1s; // Requires not lit by sun/moon
+            ambienceScore -= detailBonusSmooth * outside1s;
             ambienceScore = Mathf.Clamp(ambienceScore, MinBaseAmbienceScore, 1f);
             if (Time.frameCount % 47 == 0) scoreRaw0 = ambienceScore;
 
