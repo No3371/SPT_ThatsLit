@@ -1260,14 +1260,23 @@ namespace ThatsLit.Components
         int GetDetailInfoIndex(int x5x5, int y5x5, int detailId) => (y5x5 * 5 + x5x5) * MAX_DETAIL_TYPES + detailId;
 
         TerrainDetailScore[] detailScoreCache = new TerrainDetailScore[20];
+        /// <summary>
+        /// Calculate new or retrieve cached score for the specified enemy dir, dis, vertical vision angle
+        /// </summary>
         public TerrainDetailScore CalculateDetailScore(Vector3 enemyDirection, float dis, float verticalAxisAngle)
         {    
-            int dir = 0;
+            int dir = 5;
             IEnumerable<int> it = null;
             TerrainDetailScore cache = default;
             float scaling = 1f;
             
-            if (verticalAxisAngle < -20f) // Far but high enough to ignore direction
+            
+            if (enemyDirection == Vector3.zero) // This should never happens for actual enemies
+            {
+                if (TryGetCache(dir = 5, out cache)) return cache;
+                it = IterateDetailIndex3x3;
+            }
+            else if (verticalAxisAngle < -20f) // Looking down and ignore distance and direction
             {
                 if (dis >= 10)
                 {
@@ -1276,7 +1285,7 @@ namespace ThatsLit.Components
                 }
                 else
                 {
-                    if (TryGetCache(dir = 10, out cache)) return cache; // scaled down mid 3x3
+                    if (TryGetCache(dir = 15, out cache)) return cache; // scaled down mid 3x3
                     it = IterateDetailIndex3x3;
                     scaling = 4f/9f;
                 }
@@ -1391,6 +1400,7 @@ namespace ThatsLit.Components
                 }
             }
 
+            cache.cached = true;
             detailScoreCache[dir] = cache;
             return cache;
 
