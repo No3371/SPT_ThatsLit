@@ -138,15 +138,16 @@ namespace ThatsLit.Components
             }
 
             // =====
-            // Ambience score reduction from dense grasses
+            // Ambience score reduction from dense grasses in nights
             // =====
-
-            var detailScaling = (player.CalculateDetailScore(Vector3.zero, 0, 0).regular + player.CalculateCenterDetailScore().regular) / 2f;
+            var detailScaling = (player.CalculateDetailScore(Vector3.zero, 0, 0).prone * 0.667f + player.CalculateCenterDetailScore().prone) * 0.333f;
             detailScaling = Mathf.Clamp01(detailScaling);
-            detailScaling *= Mathf.Clamp01(player.recentDetailCount3x3/ 100f);
+            detailScaling *= Mathf.Clamp01(player.recentDetailCount3x3/ 75f);
             detailScaling *= detailScaling;
-            detailScaling *= Mathf.InverseLerp(0, MinBaseAmbienceScore, ambienceScore);
-            detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, 0.2f * detailScaling, Time.fixedDeltaTime);
+            detailScaling *= Mathf.InverseLerp(-0.1f, MinBaseAmbienceScore, ambienceScore);
+            detailScaling *= NightTerrainImpactScale; // max 0.2
+            if (detailScaling > detailBonusSmooth) detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, detailScaling, Time.fixedDeltaTime * 2.5f);
+            else if (detailScaling < detailBonusSmooth) detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, detailScaling, Time.fixedDeltaTime * 6f);
 
             if (player.isWinterCache)
             {
@@ -154,7 +155,7 @@ namespace ThatsLit.Components
             }
 
             ambienceScore -= detailBonusSmooth * outside1s;
-            ambienceScore = Mathf.Clamp(ambienceScore, -1f, 1f);
+            ambienceScore = Mathf.Clamp(ambienceScore, -0.95f, 1f);
             if (Time.frameCount % 47 == 0) scoreRaw0 = ambienceScore;
 
 
@@ -628,8 +629,8 @@ namespace ThatsLit.Components
                 return 1;
             else if (time >= 15 && time < 19) // 1 ~ 0.5f
                 return 1f - GetTimeProgress(time, 15, 19) * 0.5f;
-            else if (time >= 19 && time < 21.5f) // 0.5 ~ 0f
-                return 0.5f - GetTimeProgress(time, 19, 21.5f) * 0.5f;
+            else if (time >= 19 && time < 22f) // 0.5 ~ 0f
+                return 0.5f - GetTimeProgress(time, 19, 22f) * 0.5f;
             else return 0;
         }
 
@@ -705,7 +706,8 @@ namespace ThatsLit.Components
         protected virtual float ScoreMidLow { get => 0.1f; }
         protected virtual float ScoreLow { get => 0.05f; }
         protected virtual float ScoreDark { get => 0; }
-        protected virtual float MultiFrameContrastImpactScale { get => 1; }
+        protected virtual float MultiFrameContrastImpactScale { get => 1f; }
+        protected virtual float NightTerrainImpactScale { get => 0.2f; }
     }
     public class HideoutScoreCalculator : ScoreCalculator
     {
@@ -733,7 +735,7 @@ namespace ThatsLit.Components
 
     public class WoodsScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.85f;
+        protected override float MinBaseAmbienceScore => -0.75f;
         protected override float MinAmbienceLum => 0.015f;
         protected override float MaxAmbienceLum => 0.017f;
         protected override float ThresholdShine { get => 0.2f; }
@@ -742,6 +744,7 @@ namespace ThatsLit.Components
         protected override float ThresholdMid { get => 0.02f; }
         protected override float ThresholdMidLow { get => 0.01f; }
         protected override float ThresholdLow { get => 0.005f; }
+        protected override float NightTerrainImpactScale { get => 0.3f; }
         protected override float GetMapAmbienceCoef(string locationId, float time)
         {
             if (time >= 5 && time < 7.5f) // 0 ~ 0.5f
@@ -754,10 +757,10 @@ namespace ThatsLit.Components
                 return 1f - 0.2f * Mathf.InverseLerp(15, 18, time);
             else if (time >= 18 && time < 20f) // 1 ~ 0.35
                 return 0.8f - 0.4f * Mathf.InverseLerp(18, 20f, time);
-            else if (time >= 20 && time < 22f)
-                return 0.4f - 0.3f * Mathf.InverseLerp(20, 22f, time);
-            else if (time >= 22 && time < 24) // 0 ~ 0.1
-                return 0.1f * Mathf.InverseLerp(22, 24, time);
+            else if (time >= 20 && time < 23f)
+                return 0.4f - 0.3f * Mathf.InverseLerp(20, 23f, time);
+            else if (time >= 23 && time < 24) // 0 ~ 0.1
+                return 0.1f;
             else if (time >= 0 && time < 3) // 0 ~ 0.1
                 return 0.1f;
             else if (time >= 3 && time < 5) // 0.1 ~ 0
