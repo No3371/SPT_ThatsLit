@@ -154,7 +154,7 @@ namespace ThatsLit.Components
             }
 
             ambienceScore -= detailBonusSmooth * outside1s;
-            ambienceScore = Mathf.Clamp(ambienceScore, MinBaseAmbienceScore, 1f);
+            ambienceScore = Mathf.Clamp(ambienceScore, -1f, 1f);
             if (Time.frameCount % 47 == 0) scoreRaw0 = ambienceScore;
 
 
@@ -733,7 +733,7 @@ namespace ThatsLit.Components
 
     public class WoodsScoreCalculator : ScoreCalculator
     {
-        protected override float MinBaseAmbienceScore => -0.9f;
+        protected override float MinBaseAmbienceScore => -0.85f;
         protected override float MinAmbienceLum => 0.015f;
         protected override float MaxAmbienceLum => 0.017f;
         protected override float ThresholdShine { get => 0.2f; }
@@ -745,23 +745,23 @@ namespace ThatsLit.Components
         protected override float GetMapAmbienceCoef(string locationId, float time)
         {
             if (time >= 5 && time < 7.5f) // 0 ~ 0.5f
-                return 0.5f * GetTimeProgress(time, 5, 7.5f);
+                return 0.5f * Mathf.InverseLerp(5, 7.5f, time);
             else if (time >= 7.5f && time < 12f) // 0.5f ~ 1
-                return 0.5f + 0.5f * GetTimeProgress(time, 7.5f, 12);
-            else if (time >= 12 && time < 15) // 1 ~ 1
+                return 0.5f + 0.5f * Mathf.InverseLerp(7.5f, 12, time);
+            else if (time >= 12f && time < 15f) // 1 ~ 1
                 return 1;
-            else if (time >= 15 && time < 18) // 1 ~ 0.8f
-                return 1f - 0.2f * GetTimeProgress(time, 18, 20);
+            else if (time >= 15f && time < 18f) // 1 ~ 0.8f
+                return 1f - 0.2f * Mathf.InverseLerp(15, 18, time);
             else if (time >= 18 && time < 20f) // 1 ~ 0.35
-                return 0.8f - 0.45f * GetTimeProgress(time, 18, 20f);
-            else if (time >= 20 && time < 21.5f)
-                return 0.35f - 0.35f * GetTimeProgress(time, 20, 21.5f);
+                return 0.8f - 0.4f * Mathf.InverseLerp(18, 20f, time);
+            else if (time >= 20 && time < 22f)
+                return 0.4f - 0.3f * Mathf.InverseLerp(20, 22f, time);
             else if (time >= 22 && time < 24) // 0 ~ 0.1
-                return 0.1f * GetTimeProgress(time, 22, 24);
+                return 0.1f * Mathf.InverseLerp(22, 24, time);
             else if (time >= 0 && time < 3) // 0 ~ 0.1
                 return 0.1f;
             else if (time >= 3 && time < 5) // 0.1 ~ 0
-                return 0.1f - 0.1f * GetTimeProgress(time, 3, 5);
+                return 0.1f - 0.1f * Mathf.InverseLerp(3, 5, time);
             else return 0;
         }
     }

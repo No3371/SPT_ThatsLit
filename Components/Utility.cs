@@ -101,10 +101,14 @@ namespace ThatsLit
                 return;
             }
 
-            if (name.EndsWith("e2eb60")
-             || name.EndsWith("df6e82")
-             || name.EndsWith("7c58e7")
-             || name.EndsWith("994963")
+            if (name.EndsWith("e2eb60")) // Main grasses in Woods, half of crouching char tall
+            {
+                prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 20f), 2) * Mathf.Min(num, 50); // Needs cluster
+                crouch = 0.0035f * Mathf.Min(num, 8);
+            }
+            else if (name.EndsWith("df6e82")
+                  || name.EndsWith("7c58e7")
+                  || name.EndsWith("994963")
             )
             {
                 prone = 0.05f * Mathf.Pow(Mathf.Clamp01(num / 20f), 2) * Mathf.Min(num, 50); // Needs cluster
