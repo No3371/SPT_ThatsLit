@@ -821,16 +821,16 @@ namespace ThatsLit.Components
 
         protected override float CalculateMoonLightTimeFactor(string locationId, float time)
         {
-            if (time > 23.9 && time < 0) // 0 ~ 1
+            if (time > 23.9 && time < 0)
                 return 0.1f * (24f - time);
-            else if (time >= 0 && time < 3.5f) // 0 ~ 1
+            else if (time >= 0 && time < 3.5f) 
                 return 0.1f + 0.9f * GetTimeProgress(time, 0, 2f);
-            else if (time >= 3.5f && time < 4.33) // 1 ~ 0
-                return 1f - 0.6f * GetTimeProgress(time, 3.5f, 4.33f); 
-            else if (time >= 4.33f && time < 4.416f) // 1 ~ 0
-                return 0.4f - 0.2f * GetTimeProgress(time,  4.33f, 4.416f); // How interesting, the moon lose its brightness in 5 mins
-            else if (time >= 4.416f && time < 5) // 1 ~ 0
-                return 0.2f - GetTimeProgress(time, 4.416f, 5f);
+            else if (time >= 3.5f && time < 4.33) 
+                return 1f - 0.5f * GetTimeProgress(time, 3.5f, 4.33f); 
+            else if (time >= 4.33f && time < 4.416f) 
+                return 0.5f - 0.3f * GetTimeProgress(time,  4.33f, 4.416f); // How interesting, the moon lose its brightness in 5 mins
+            else if (time >= 4.416f && time < 5)
+                return 0.3f - GetTimeProgress(time, 4.416f, 5f);
             else return 0;
         }
     }
