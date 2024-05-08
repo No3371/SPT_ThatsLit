@@ -318,8 +318,8 @@ namespace ThatsLit
                 __result += rand2 + rand3 * 2f * disFactor;
             }
 
-            var cqb5m = 1f - Mathf.Clamp01((dis - 1f) / 5f); // 6+ -> 0, 1f -> 1
-            var cqb15m = 1f - Mathf.Clamp01((dis - 1f) / 15f); // 6+ -> 0, 1f -> 1                                                               // Fix for blind bots who are already touching us
+            var cqb5m = Mathf.InverseLerp(5f, 0f, dis - 1f); // 6+ -> 0, 1f -> 1
+            var cqb15m = Mathf.InverseLerp(15f, 0f, dis - 1f); // 6+ -> 0, 1f -> 1                                                               // Fix for blind bots who are already touching us
 
             var cqb10mSquared = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
             cqb10mSquared *= cqb10mSquared; // 6m -> 25%, 1m -> 100%
