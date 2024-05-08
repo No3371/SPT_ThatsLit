@@ -321,8 +321,8 @@ namespace ThatsLit.Components
                         terrainScoreHintProne = score.prone;
                         terrainScoreHintRegular = score.regular;
 
-                        var pf = MainPlayer.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f;
-                        terrainScoreHintRegular /= (pf + 0.1f + 0.25f * (pf-0.45f)/0.55f);
+                        var pf = (MainPlayer.PoseLevel / MainPlayer.AIData.Player.Physical.MaxPoseLevel) * 0.6f + 0.4f;
+                        terrainScoreHintRegular /= (pf + 0.1f + 0.25f * Mathf.InverseLerp(0.45f, 0.55f, pf));
                     }
                 }
             }
@@ -902,7 +902,7 @@ namespace ThatsLit.Components
                 float fog = WeatherController.Instance?.WeatherCurve?.Fog ?? 0;
                 float rain = WeatherController.Instance?.WeatherCurve?.Rain ?? 0;
                 float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
-                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { rawTerrainScoreSample :0.000} FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
+                if (guiFrame < Time.frameCount) infoCache1 = $"  IMPACT: {lastCalcFrom:0.000} -> {lastCalcTo:0.000} ({lastFactor2:0.000} <- {lastFactor1:0.000} <- {lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {calced} (+{calcedLastFrame}) / ENCOUNTER: {encounter}\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000} 3x3:( { recentDetailCount3x3 } ) FOLIAGE: {foliageScore:0.000} ({foliageCount}) (H{foliage?[0].dis:0.00} to {foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {GetInGameDayTime():0.000} / WINTER: {isWinterCache}\n  POSE: {poseFactor} SPEED: { MainPlayer.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
                 GUILayout.Label(infoCache1);
                 // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
                 if (scoreCalculator != null) GUILayout.Label(string.Format("  LIGHT: [{0}] / LASER: [{1}] / LIGHT2: [{2}] / LASER2: [{3}]", scoreCalculator.vLight ? "V" : scoreCalculator.irLight ? "I" : "-", scoreCalculator.vLaser ? "V" : scoreCalculator.irLaser ? "I" : "-", scoreCalculator.vLightSub ? "V" : scoreCalculator.irLightSub ? "I" : "-", scoreCalculator.vLaserSub ? "V" : scoreCalculator.irLaserSub ? "I" : "-"));
