@@ -371,7 +371,8 @@ namespace ThatsLit
                     }
                     else
                     {
-                        detailScore = terrainScore.regular / (poseFactor + 0.1f + 0.25f * (poseFactor-0.45f)/0.55f) * (1f - cqb10mSquared) * Mathf.Clamp01(1f - (5f - visionAngleDeltaVertical) / 30f); // nerf when < looking down
+                        detailScore = terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, poseFactor));
+                        detailScore *= (1f - cqb10mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVertical); // nerf when high pose or < 10m or  looking down
                     }
 
                     detailScore = Mathf.Min(detailScore, 2.5f - poseFactor); // Cap extreme grasses for high poses
