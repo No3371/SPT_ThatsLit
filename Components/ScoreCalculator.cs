@@ -107,7 +107,7 @@ namespace ThatsLit.Components
 
             var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
 
-            baseAmbienceScore += (MinBaseAmbienceScore - baseAmbienceScore) * (player.overheadHaxRating / 10f) * 0.15f;
+            baseAmbienceScore += (MinBaseAmbienceScore - baseAmbienceScore) * player.OverheadHaxRatingFactor * 0.15f;
 
 
             // =====
@@ -832,6 +832,8 @@ namespace ThatsLit.Components
             }
         }
 
+        bool IsOverhead { get; set; }
+
         internal override void CalledOnGUI(bool layout = false)
         {
             base.CalledOnGUI(layout);
@@ -855,8 +857,16 @@ namespace ThatsLit.Components
             rawCloud = cloud;
 
             ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
-            IsPlayerInParking = Physics.Raycast(new Ray(p.MainPlayer.MainParts[BodyPartType.head].Position, Vector3.up), out var hit, 5, LayerMaskClass.LowPolyColliderLayerMask)
-                             && hit.transform.gameObject.scene.name == "Shopping_Mall_parking_work" && p.transform.position.y < 23.5f;
+            bool isParking = false;
+            IsOverhead = false;
+
+            if (Physics.Raycast(new Ray(p.MainPlayer.MainParts[BodyPartType.head].Position, Vector3.up), out var hit, 5, LayerMaskClass.LowPolyColliderLayerMask))
+            {
+                IsOverhead = true;
+                if (hit.transform.gameObject.scene.name == "Shopping_Mall_parking_work" && p.transform.position.y < 23.5f) isParking = true;
+            }
+
+            if (IsPlayerInParking != isParking) isPlayerInParking = isParking;
             return base.CalculateMultiFrameScore(tex, cloud, fog, rain, player, time, locationId);
         }
 
@@ -865,7 +875,12 @@ namespace ThatsLit.Components
         {
             ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
             if (IsPlayerInParking)
-                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time), -0.65f + 0.15f * rawCloud , p.overheadHaxRatingFactor * 0.9f * ParkingTransitionFactor);
+                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time), -0.65f + 0.15f * rawCloud , (p.OverheadHaxRatingFactor * p.OverheadHaxRatingFactor) * 0.9f * ParkingTransitionFactor);
+            else if (IsOverhead)
+            {
+                float fading = Mathf.Clamp01((p.transform.position.y - 22f) / 2.5f);
+                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time), -0.35f + 0.2f * rawCloud , (p.OverheadHaxRatingFactor * p.OverheadHaxRatingFactor) * 0.9f * fading);
+            }
 
             return base.CalculateBaseAmbienceScore(locationId, time);
         }
@@ -877,7 +892,7 @@ namespace ThatsLit.Components
 
             ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
             float lumScore = (thisFrame.avgLum - MinAmbienceLum) * (PixelLumScoreScale*1.2f) * (1+2f*lowAmbienceScoreFactor* lowAmbienceScoreFactor) * (0.1f + lowAmbienceScoreFactor);
-            lumScore *= 1f - (thisFrame.RatioDarkPixels + thisFrame.RatioLowPixels * 0.75f + thisFrame.RatioMidLowPixels * 0.5f) * (1f - rawCloud * 0.15f) * p.overheadHaxRatingFactor * ParkingTransitionFactor;
+            lumScore *= 1f - (thisFrame.RatioDarkPixels + thisFrame.RatioLowPixels * 0.75f + thisFrame.RatioMidLowPixels * 0.5f) * (1f - rawCloud * 0.15f) * (p.OverheadHaxRatingFactor * p.OverheadHaxRatingFactor) * ParkingTransitionFactor;
             lumScore *= 1 + hightLightedPixelFactor;
             lumScore = Mathf.Clamp(lumScore, 0.1f, 2); // When there is no sun/moon light the player model is pitch black
             return lumScore;
