@@ -86,6 +86,24 @@ namespace ThatsLit.Components
         internal float bunkerTimeClamped;
         internal float lastInBunkerTime, lastOutBunkerTime;
         internal Vector3 lastInBunderPos;
+
+        public static bool CanLoad ()
+        {
+            var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+            if (session == null) throw new Exception("No session!");
+            var raidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
+
+            switch (raidSettings?.LocationId)
+            {
+                case "factory4_night":
+                case "factory4_day":
+                case "laboratory":
+                case null:
+                    return true;
+                default:
+                    return CameraClass.Instance.OpticCameraManager.Camera != null;
+            }
+        }
         // float benchMark1, benchMark2;
         public void Awake()
         {

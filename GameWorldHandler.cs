@@ -22,6 +22,6 @@ namespace ThatsLit
         }
 
         public static ThatsLitGameworldComponent ThatsLitGameWorld { get; private set; }
-        public static ThatsLitMainPlayerComponent ThatsLitMainPlayer => ThatsLitGameWorld?.SAINMainPlayer;
+        public static ThatsLitMainPlayerComponent ThatsLitMainPlayer => ThatsLitGameWorld?.ThatsLitMainPlayer;
     }
 }

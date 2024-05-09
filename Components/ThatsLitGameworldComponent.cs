@@ -18,14 +18,15 @@ namespace ThatsLit.Components
 
         private void Update()
         {
-            if (Singleton<GameWorld>.Instantiated && SAINMainPlayer == null) SAINMainPlayer = ComponentHelpers.AddOrDestroyComponent(SAINMainPlayer, GameWorld?.MainPlayer);
+            if (Singleton<GameWorld>.Instantiated && ThatsLitMainPlayer == null && ThatsLitMainPlayerComponent.CanLoad())
+                ThatsLitMainPlayer = ComponentHelpers.AddOrDestroyComponent(ThatsLitMainPlayer, GameWorld?.MainPlayer);
         }
 
         private void OnDestroy()
         {
             try
             {
-                ComponentHelpers.DestroyComponent(SAINMainPlayer);
+                ComponentHelpers.DestroyComponent(ThatsLitMainPlayer);
             }
             catch
             {
@@ -34,7 +35,7 @@ namespace ThatsLit.Components
         }
 
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
-        public ThatsLitMainPlayerComponent SAINMainPlayer { get; private set; }
+        public ThatsLitMainPlayerComponent ThatsLitMainPlayer { get; private set; }
     }
 
 }
