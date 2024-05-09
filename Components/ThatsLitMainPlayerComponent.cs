@@ -93,15 +93,33 @@ namespace ThatsLit.Components
             if (session == null) throw new Exception("No session!");
             var raidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
 
+            bool result = CameraClass.Instance.OpticCameraManager.Camera != null;
             switch (raidSettings?.LocationId)
             {
-                case "factory4_night":
                 case "factory4_day":
                 case "laboratory":
                 case null:
                     return true;
+                case "Lighthouse":
+                    return ThatsLitPlugin.EnableLighthouse.Value & result;
+                case "Woods":
+                    return ThatsLitPlugin.EnableWoods.Value & result;
+                case "factory4_night":
+                    return ThatsLitPlugin.EnableFactoryNight.Value & result;
+                case "bigmap": // Customs
+                    return ThatsLitPlugin.EnableCustoms.Value & result;
+                case "RezervBase": // Reserve
+                    return ThatsLitPlugin.EnableReserve.Value & result;
+                case "Interchange":
+                    return ThatsLitPlugin.EnableInterchange.Value & result;
+                case "TarkovStreets":
+                    return ThatsLitPlugin.EnableStreets.Value & result;
+                case "Sandbox": // GZ
+                    return ThatsLitPlugin.EnableGroundZero.Value & result;
+                case "Shoreline":
+                    return ThatsLitPlugin.EnableShoreline.Value & result;
                 default:
-                    return CameraClass.Instance.OpticCameraManager.Camera != null;
+                    return result;
             }
         }
         // float benchMark1, benchMark2;
@@ -156,7 +174,7 @@ namespace ThatsLit.Components
                     if (ThatsLitPlugin.EnableWoods.Value) scoreCalculator = new WoodsScoreCalculator();
                     break;
                 case "factory4_night":
-                    if (ThatsLitPlugin.EnableFactoryNight.Value) scoreCalculator = GetInGameDayTime() > 12 ? null : new NightFactoryScoreCalculator();
+                    if (ThatsLitPlugin.EnableFactoryNight.Value) scoreCalculator = new NightFactoryScoreCalculator();
                     break;
                 case "factory4_day":
                     scoreCalculator = null;
