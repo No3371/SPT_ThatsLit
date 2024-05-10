@@ -641,8 +641,95 @@ namespace ThatsLit
             // "_name": "scope_all_torrey_pines_logic_t12_w_30hz",
         }
 
-        internal static void GUILayoutDrawAsymetricMeter(int level)
+        internal static void GUILayoutDrawAsymetricMeter(int level, bool alternative = false)
         {
+            if (alternative)
+            {
+                if (level < -10)
+                {
+                    GUILayout.Label("  ##########|          ");
+                    return;
+                }
+                if (level > 10)
+                {
+                    GUILayout.Label("            |##########");
+                    return;
+                }
+                switch (level)
+                {
+                    case -11:
+                        GUILayout.Label("  ##########|          ");
+                        break;
+                    case -10:
+                        GUILayout.Label("  ##########|          ");
+                        break;
+                    case -9:
+                        GUILayout.Label("   #########|          ");
+                        break;
+                    case -8:
+                        GUILayout.Label("    ########|          ");
+                        break;
+                    case -7:
+                        GUILayout.Label("     #######|          ");
+                        break;
+                    case -6:
+                        GUILayout.Label("      ######|          ");
+                        break;
+                    case -5:
+                        GUILayout.Label("       #####|          ");
+                        break;
+                    case -4:
+                        GUILayout.Label("        ####|          ");
+                        break;
+                    case -3:
+                        GUILayout.Label("         ###|          ");
+                        break;
+                    case -2:
+                        GUILayout.Label("          ##|          ");
+                        break;
+                    case -1:
+                        GUILayout.Label("           #|          ");
+                        break;
+                    case 0:
+                        GUILayout.Label("            |          ");
+                        break;
+                    case 1:
+                        GUILayout.Label("            |#         ");
+                        break;
+                    case 2:
+                        GUILayout.Label("            |##        ");
+                        break;
+                    case 3:
+                        GUILayout.Label("            |###       ");
+                        break;
+                    case 4:
+                        GUILayout.Label("            |####      ");
+                        break;
+                    case 5:
+                        GUILayout.Label("            |#####     ");
+                        break;
+                    case 6:
+                        GUILayout.Label("            |######    ");
+                        break;
+                    case 7:
+                        GUILayout.Label("            |#######   ");
+                        break;
+                    case 8:
+                        GUILayout.Label("            |########  ");
+                        break;
+                    case 9:
+                        GUILayout.Label("            |######### ");
+                        break;
+                    case 10:
+                        GUILayout.Label("            |##########");
+                        break;
+                    case 11:
+                        GUILayout.Label("            |##########");
+                        break;
+                }
+                return;
+            }
+
             if (level < -10)
             {
                 GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
@@ -736,8 +823,52 @@ namespace ThatsLit
             }
         }
 
-        internal static void GUILayoutFoliageMeter(int level)
+        internal static void GUILayoutFoliageMeter(int level, bool alternative = false)
         {
+            if (alternative)
+            {
+                if (level <= 0)
+                {
+                    GUILayout.Label("  FOLIAGE            |");
+                    return;
+                }
+                if (level >= 10)
+                {
+                    GUILayout.Label("  FOLIAGE  ##########|");
+                    return;
+                }
+                switch (level)
+                {
+                    case 1:
+                        GUILayout.Label("  FOLIAGE  #         |");
+                        break;
+                    case 2:
+                        GUILayout.Label("  FOLIAGE  ##        |");
+                        break;
+                    case 3:
+                        GUILayout.Label("  FOLIAGE  ###       |");
+                        break;
+                    case 4:
+                        GUILayout.Label("  FOLIAGE  ####      |");
+                        break;
+                    case 5:
+                        GUILayout.Label("  FOLIAGE  #####     |");
+                        break;
+                    case 6:
+                        GUILayout.Label("  FOLIAGE  ######    |");
+                        break;
+                    case 7:
+                        GUILayout.Label("  FOLIAGE  #######   |");
+                        break;
+                    case 8:
+                        GUILayout.Label("  FOLIAGE  ########  |");
+                        break;
+                    case 9:
+                        GUILayout.Label("  FOLIAGE  ######### |");
+                        break;
+                }
+            }
+
             if (level <= 0)
             {
                 GUILayout.Label("  FOLIAGE  ▱▱▱▱▱▱▱▱▱▱");
@@ -780,8 +911,52 @@ namespace ThatsLit
             }
         }
 
-        internal static void GUILayoutTerrainMeter(int level)
+        internal static void GUILayoutTerrainMeter(int level, bool alternative = false)
         {
+            if (alternative)
+            {
+                if (level <= 0)
+                {
+                    GUILayout.Label("  TERRAIN            |");
+                    return;
+                }
+                if (level >= 10)
+                {
+                    GUILayout.Label("  TERRAIN  ##########|");
+                    return;
+                }
+                switch (level)
+                {
+                    case 1:
+                        GUILayout.Label("  TERRAIN  #         |");
+                        break;
+                    case 2:
+                        GUILayout.Label("  TERRAIN  ##        |");
+                        break;
+                    case 3:
+                        GUILayout.Label("  TERRAIN  ###       |");
+                        break;
+                    case 4:
+                        GUILayout.Label("  TERRAIN  ####      |");
+                        break;
+                    case 5:
+                        GUILayout.Label("  TERRAIN  #####     |");
+                        break;
+                    case 6:
+                        GUILayout.Label("  TERRAIN  ######    |");
+                        break;
+                    case 7:
+                        GUILayout.Label("  TERRAIN  #######   |");
+                        break;
+                    case 8:
+                        GUILayout.Label("  TERRAIN  ########  |");
+                        break;
+                    case 9:
+                        GUILayout.Label("  TERRAIN  ######### |");
+                        break;
+                }
+            }
+
             if (level <= 0)
             {
                 GUILayout.Label("  TERRAIN  ▱▱▱▱▱▱▱▱▱▱");

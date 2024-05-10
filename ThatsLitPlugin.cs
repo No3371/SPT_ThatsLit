@@ -135,6 +135,8 @@ namespace ThatsLit
             FoliageInfo                  = Config.Bind(category, "Foliage Info", true, "Gives a hint about surrounding foliage.");
             TerrainInfo                  = Config.Bind(category, "Terrain Info", true, "Gives a hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.");
             HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, "Hide the reminder about disabled lit detection.");
+            AlternativeMeterUnicde                  = Config.Bind(category, "Alternative Meter", false, "If somehow the GUI meters unicodes are not rendered on your system, try this options.");
+
 
             category                   = "7. Performance";
             LessFoliageCheck           = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
@@ -199,6 +201,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> ShadowlessGroundZero { get; private set; }
         public static ConfigEntry<bool> ShadowlessStreets { get; private set; }
         public static ConfigEntry<bool> EnableBenchmark { get; private set; }
+        public static ConfigEntry<bool> AlternativeMeterUnicde { get; private set; }
         public static ConfigEntry<int> ResLevel { get; private set; }
         public static ConfigEntry<int> FoliageSamples { get; private set; }
         // public static ConfigEntry<bool> DevMode { get; private set; }
