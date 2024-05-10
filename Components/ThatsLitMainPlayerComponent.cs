@@ -870,12 +870,12 @@ namespace ThatsLit.Components
             {
                 if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
                 {
-                    if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(MultiFrameLitScore / 0.0999f), ThatsLitPlugin.AlternativeMeterUnicde.Value);
-                    if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f), ThatsLitPlugin.AlternativeMeterUnicde.Value);
+                    if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(MultiFrameLitScore / 0.0999f));
+                    if (!disabledLit) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(MultiFrameLitScore, POWER) / 0.0999f));
                     if (foliageScore > 0 && ThatsLitPlugin.FoliageInfo.Value)
-                        Utility.GUILayoutFoliageMeter((int)(foliageScore / 0.0999f), ThatsLitPlugin.AlternativeMeterUnicde.Value);
+                        Utility.GUILayoutFoliageMeter((int)(foliageScore / 0.0999f));
                     if (!skipDetailCheck && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
-                        if (MainPlayer.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f), ThatsLitPlugin.AlternativeMeterUnicde.Value);
+                        if (MainPlayer.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
                         else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
                     if (Time.time < awakeAt + 10)
                         GUILayout.Label("  [That's Lit HUD] Can be disabled in plugin settings.");
