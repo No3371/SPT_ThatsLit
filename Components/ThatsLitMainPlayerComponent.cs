@@ -251,7 +251,7 @@ namespace ThatsLit.Components
                 cam.fieldOfView = 44;
 
                 cam.targetTexture = rt;
-                cam.enabled = true;
+                cam.gameObject.SetActive(true);
             }
             else cam.enabled = true;
 
