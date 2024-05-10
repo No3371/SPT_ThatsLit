@@ -226,11 +226,12 @@ namespace ThatsLit.Components
 
             if (cam == null)
             {
+                CameraClass.Instance.OpticCameraManager.Camera.gameObject.SetActive(false);
                 cam = GameObject.Instantiate<Camera>(CameraClass.Instance.OpticCameraManager.Camera);
+                CameraClass.Instance.OpticCameraManager.Camera.gameObject.SetActive(true);
                 cam.gameObject.name = "That's Lit Camera";
                 foreach (var c in cam.gameObject.GetComponents<MonoBehaviour>())
                 switch (c) {
-                    case VolumetricLightRenderer volumetricLightRenderer:
                     case AreaLightManager areaLightManager:
                         break;
                     default:
@@ -250,6 +251,7 @@ namespace ThatsLit.Components
                 cam.fieldOfView = 44;
 
                 cam.targetTexture = rt;
+                cam.enabled = true;
             }
             else cam.enabled = true;
 
