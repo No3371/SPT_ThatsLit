@@ -75,6 +75,8 @@ namespace ThatsLit
                 }
             }
 
+            float fogFactor = EFT.Weather.WeatherController.Instance?.WeatherCurve?.Fog?? 0f;
+            fogFactor = Mathf.InverseLerp(0, 0.35f, fogFactor);
             ScoreCalculator scoreCalculator = mainPlayer.scoreCalculator;
             if (thermalActive)
             {
@@ -90,20 +92,20 @@ namespace ThatsLit
                 scale = Mathf.Lerp(1, scale, Mathf.Clamp01(scoreCalculator.frame0.ambienceScore / -1f)); // The darker the ambience, the more effective the NVG is
 
                 float extra = __instance.Owner.LookSensor.VisibleDist * scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
-                extra *= 1f - (EFT.Weather.WeatherController.Instance?.WeatherCurve?.Fog?? 0f);
+                extra *= 1f - fogFactor;
                 addVisibility += UnityEngine.Random.Range(0.25f, 1f) * Mathf.Min(100, extra); // 0.25x~1x of extra capped at 100m
             }
             else if (!nvgActive && scoreCalculator.frame0.ambienceScore > 0)
             {
                 float extra = __instance.Owner.LookSensor.VisibleDist * (1f + scoreCalculator.frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
-                extra *= 1f - (EFT.Weather.WeatherController.Instance?.WeatherCurve?.Fog?? 0f);
+                extra *= 1f - fogFactor;
                 addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(50, extra); // Up to 20% bonus capped at 50m from unobstructed strong sun/moon light
             } 
             else if (!nvgActive && __instance.Owner.LookSensor.VisibleDist < 50) // 
             {
                 float litDiff = scoreCalculator.frame0.multiFrameLitScore - scoreCalculator.frame0.baseAmbienceScore; // The visibility provided by sun/moon + lightings
                 litDiff = Mathf.Clamp(litDiff, 0, 2f) / 2f;
-                litDiff *= 1f - (EFT.Weather.WeatherController.Instance?.WeatherCurve?.Fog?? 0f);
+                litDiff *= 1f - fogFactor;
 
                 float extra = (50 - __instance.Owner.LookSensor.VisibleDist) * litDiff;
                 addVisibility += UnityEngine.Random.Range(0.5f, 1f) * extra; // 0.5x ~ 1x of compensation to 50m
