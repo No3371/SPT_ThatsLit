@@ -25,7 +25,7 @@ namespace ThatsLit
         public const int TarkovVersion = 29197;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.380.26";
+        public const string ModVersion = "1.380.28";
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.8.0";
         private static long modVersionComparable;
