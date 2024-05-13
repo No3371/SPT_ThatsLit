@@ -80,7 +80,7 @@ namespace ThatsLit.Patches.Vision
                 __state = new State()
                 {
                     triggered = true,
-                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance || Time.time - __instance.TimeLastSeen > 30f + srand * 10f,
+                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance && Time.time - __instance.TimeLastSeen > 25f + srand * 10f, // Bots can start search without visual so last seen time solely alone is unreliable
                     botSprinting = __instance.Owner?.Mover?.Sprinting ?? false,
                     visionDeviation = visionDeviation
                 };
@@ -117,11 +117,12 @@ namespace ThatsLit.Patches.Vision
                 _benchmarkSW = null;
 #endregion
 
+            float rand = UnityEngine.Random.Range(0f, 1f);
             if (__state.botSprinting)
             {
                 // Force a ~0.45s delay
                 __instance.Owner.AimingData.SetNextAimingDelay(
-                    UnityEngine.Random.Range(0f, 0.45f)
+                    rand * 0.45f
                     * (__state.unexpected? 1f : 0.5f)
                     * Mathf.Clamp01(__state.visionDeviation/15f));
 
@@ -132,7 +133,7 @@ namespace ThatsLit.Patches.Vision
             else if (__state.unexpected)
             {
                 // Force a ~0.15s delay
-                __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.15f) * Mathf.Clamp01(__state.visionDeviation/15f));
+                __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.15f * (rand)) * Mathf.Clamp01(__state.visionDeviation/15f));
             }
 
 #region BENCHMARK
