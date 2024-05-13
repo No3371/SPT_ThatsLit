@@ -103,7 +103,7 @@ namespace ThatsLit
 
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
-            var visionAngleDelta90Clamped = visionAngleDelta / 90f;
+            var visionAngleDelta90Clamped = Mathf.Clamp01(visionAngleDelta / 90f);
             // negative if looking down (from higher pos), 0 when looking straight...
             var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody) * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
 
@@ -707,7 +707,7 @@ namespace ThatsLit
             if (__result > original) // That's Lit delaying the bot
             {
                 // In ~0.2s after being seen, stealth is nullfied (fading between 0.1~0.2)
-                // To prevent interrupt fighting
+                // To prevent interruption of ongoing fight
                 float nullification = 1f - sinceSeen / 0.2f; // 0.1s => 50%, 0.2s => 0%
                 nullification *= rand5;
                 nullification -= deNullification; // Allow features to interrupt the nullification
