@@ -89,11 +89,11 @@ namespace ThatsLit
             System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = mainPlayer.MainPlayer.MainParts;
             Vector3 eyeToPlayerBody = playerParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
 
-            var poseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
+            var pPoseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
             bool isInPronePose = __instance.Person.AIData.Player.IsInPronePose;
-            if (isInPronePose) poseFactor -= 0.4f; // prone: 0
-            poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f (Prevent devide by zero)
-            poseFactor = Mathf.Clamp01(poseFactor);
+            if (isInPronePose) pPoseFactor -= 0.4f; // prone: 0
+            pPoseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f (Prevent devide by zero)
+            pPoseFactor = Mathf.Clamp01(pPoseFactor);
 
             float rand1 = UnityEngine.Random.Range(0f, 1f);
             float rand2 = UnityEngine.Random.Range(0f, 1f);
@@ -190,7 +190,7 @@ namespace ThatsLit
                 var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
                 // (unscaled) 30deg -> 8%, 45deg->20%, 60deg -> 41%, 75deg->69%, 80deg->80%, 85deg->92%
                 // Overlook close enemies at higher attitude and in low pose
-                var overheadChance = Mathf.Clamp01(weight) * (1.025f - poseFactor / 2f); // prone: 1.0x, crouch: 0.8x, stand: 0.5x
+                var overheadChance = Mathf.Clamp01(weight) * (1.025f - pPoseFactor / 2f); // prone: 1.0x, crouch: 0.8x, stand: 0.5x
                 overheadChance *= Mathf.Clamp01(lastSeenPosDelta / 15f); // Seen nearby
                 overheadChance *= 1f - pSpeedFactor * 0.2f;
                 overheadChance = Mathf.Clamp01(overheadChance + (rand3 - 0.5f) * 2f * 0.1f);
@@ -233,7 +233,7 @@ namespace ThatsLit
             // ======
             // Global random overlooking
             // ======
-            float globalOverlookChance = 0.01f / poseFactor; // Not scaled by disFactor because this is intended to mess with bot aiming and tracking for a bit.
+            float globalOverlookChance = 0.01f / pPoseFactor; // Not scaled by disFactor because this is intended to mess with bot aiming and tracking for a bit.
             if (canSeeLight) globalOverlookChance /= 2f - disFactor;
             if (rand5 < globalOverlookChance * (0.5f + notSeenRecentAndNear))
             {
@@ -274,7 +274,7 @@ namespace ThatsLit
 
                 factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
 
-                if (factor < 0) factor *= 1 + disFactor * Mathf.Clamp01(1.2f - poseFactor) * (canSeeLight ? 0.2f : 1f) * (canSeeLaser ? 0.9f : 1f); // Darkness will be far more effective from afar
+                if (factor < 0) factor *= 1 + disFactor * Mathf.Clamp01(1.2f - pPoseFactor) * (canSeeLight ? 0.2f : 1f) * (canSeeLaser ? 0.9f : 1f); // Darkness will be far more effective from afar
                 else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
             }
 
@@ -311,7 +311,7 @@ namespace ThatsLit
                                             disFactor // Mainly works for far away enemies
                                             * foliageImpact
                                             * ThatsLitPlugin.FoliageImpactScale.Value
-                                            * Mathf.Clamp01(1.35f - poseFactor)); // Lower chance for higher poses
+                                            * Mathf.Clamp01(1.35f - pPoseFactor)); // Lower chance for higher poses
             if (UnityEngine.Random.Range(0f, 1.05f) < foliageBlindChance) // Among bushes, from afar, always at least 5% to be uneffective
             {
                 __result *= 1 + rand4 * (10f - caution * 0.5f);
@@ -371,11 +371,11 @@ namespace ThatsLit
                     }
                     else
                     {
-                        detailScore = terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, poseFactor));
+                        detailScore = terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor));
                         detailScore *= (1f - cqb10mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVertical); // nerf when high pose or < 10m or  looking down
                     }
 
-                    detailScore = Mathf.Min(detailScore, 2.5f - poseFactor); // Cap extreme grasses for high poses
+                    detailScore = Mathf.Min(detailScore, 2.5f - pPoseFactor); // Cap extreme grasses for high poses
 
                     detailScoreRaw = detailScore;
                     detailScore *= 1f + disFactor / 2f; // At 110m+, 1.5x effective
@@ -451,115 +451,115 @@ namespace ThatsLit
                         angleFactor = 1; // works even if looking right at
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.8f) / 0.7f);
                         enemyDisFactor = Mathf.Clamp01(dis / 2.5f); // 100% at 2.5m+
-                        poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.55f); // 100% at crouch
+                        poseScale = 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.55f); // 100% at crouch
                         yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVertical / 60f); // +60deg => 1, 0deg => 1, -30deg => 0.5f, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                         break;
                     case "filbert_big02":
                         angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 20f);
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.1f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis / 10f);
-                        poseScale = poseFactor == 0.05f ? 0.7f : 1f; // 
+                        poseScale = pPoseFactor == 0.05f ? 0.7f : 1f; // 
                         break;
                     case "filbert_big03":
                         angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 30f);
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.25f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis / 15f);
-                        poseScale = poseFactor == 0.05f ? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                        poseScale = pPoseFactor == 0.05f ? 0 : 0.1f + (pPoseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
                         break;
                     case "filbert_01":
                         angleFactor = 1;
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.35f) / 0.25f);
                         enemyDisFactor = Mathf.Clamp01(dis / 12f); // 100% at 2.5m+
-                        poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.3f);
+                        poseScale = 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.3f);
                         break;
                     case "filbert_small01":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 35f);
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.15f) / 0.15f);
                         enemyDisFactor = Mathf.Clamp01(dis / 10f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0;
+                        poseScale = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_small02":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 25f);
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.15f) / 0.15f);
                         enemyDisFactor = Mathf.Clamp01(dis / 8f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0;
+                        poseScale = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_small03":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 40f);
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.1f) / 0.15f);
                         enemyDisFactor = Mathf.Clamp01(dis / 10f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0;
+                        poseScale = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_dry03":
                         angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 30f);
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.3f);
                         enemyDisFactor = Mathf.Clamp01(dis / 30f);
-                        poseScale = poseFactor == 0.05f ? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f;
+                        poseScale = pPoseFactor == 0.05f ? 0 : 0.1f + (pPoseFactor - 0.45f) / 0.55f * 0.9f;
                         break;
                     case "fibert_hedge01":
                         angleFactor = Mathf.Clamp01(visionAngleDelta / 40f);
                         foliageDisFactor = (1f - Mathf.Clamp01((nearestFoliage.dis - 0.1f) / 0.1f)) * (1f - Mathf.Clamp01(nearestFoliage.dis / 0.2f));
                         enemyDisFactor = Mathf.Clamp01(dis / 30f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0; // Too narrow for proning
+                        poseScale = pPoseFactor == 0.45f ? 1f : 0; // Too narrow for proning
                         break;
                     case "fibert_hedge02":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 40f);
                         foliageDisFactor = (1f - Mathf.Clamp01((nearestFoliage.dis - 0.1f) / 0.2f)) * (1f - Mathf.Clamp01(nearestFoliage.dis / 0.3f));
                         enemyDisFactor = Mathf.Clamp01(dis / 20f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0; // Too narrow for proning
+                        poseScale = pPoseFactor == 0.45f ? 1f : 0; // Too narrow for proning
                         break;
                     case "privet_hedge":
                     case "privet_hedge_2":
                         angleFactor = Mathf.Clamp01((visionAngleDelta - 30f) / 60f);
                         foliageDisFactor = (1f - Mathf.Clamp01(nearestFoliage.dis / 1f)) * (1f - Mathf.Clamp01(nearestFoliage.dis / 0.3f));
                         enemyDisFactor = Mathf.Clamp01(dis / 50f);
-                        poseScale = poseFactor < 0.45f ? 1f : 0; // Prone only
+                        poseScale = pPoseFactor < 0.45f ? 1f : 0; // Prone only
                         break;
                     case "bush_dry01":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 35f);
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.15f) / 0.15f);
                         enemyDisFactor = Mathf.Clamp01(dis / 25f);
-                        poseScale = poseFactor == 0.45f ? 1f : 0;
+                        poseScale = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "bush_dry02":
                         angleFactor = 1;
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 1f) / 0.4f);
                         enemyDisFactor = Mathf.Clamp01(dis / 15f);
-                        poseScale = 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.1f);
+                        poseScale = 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.1f);
                         yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVertical / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                         break;
                     case "bush_dry03":
                         angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 20f);
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.3f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis / 20f);
-                        poseScale = poseFactor == 0.05f ? 0.6f : 1 - Mathf.Clamp01((poseFactor - 0.45f) / 0.55f); // 100% at crouch
+                        poseScale = pPoseFactor == 0.05f ? 0.6f : 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.55f); // 100% at crouch
                         break;
                     case "tree02":
                         yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVertical - 10) / 40f); // bonus against bots up high
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 45f); // 0deg -> 0, 75 deg -> 1
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis * yDeltaFactor / 20f);
-                        poseScale = poseFactor == 0.05f ? 0 : 0.1f + (poseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                        poseScale = pPoseFactor == 0.05f ? 0 : 0.1f + (pPoseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
                         break;
                     case "pine01":
                         yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVertical - 10) / 40f); // bonus against bots up high
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 30f); // 0deg -> 0, 75 deg -> 1
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.35f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis * yDeltaFactor / 25f);
-                        poseScale = poseFactor == 0.05f ? 0 : 0.5f + (poseFactor - 0.45f) / 0.55f * 0.5f; // standing is better with this tall one
+                        poseScale = pPoseFactor == 0.05f ? 0 : 0.5f + (pPoseFactor - 0.45f) / 0.55f * 0.5f; // standing is better with this tall one
                         break;
                     case "pine05":
                         angleFactor = 1; // 0deg -> 0, 75 deg -> 1
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.45f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis / 20f);
-                        poseScale = poseFactor == 0.05f ? 0 : 0.5f + (poseFactor - 0.45f) / 0.55f * 0.5f; // standing is better with this tall one
+                        poseScale = pPoseFactor == 0.05f ? 0 : 0.5f + (pPoseFactor - 0.45f) / 0.55f * 0.5f; // standing is better with this tall one
                         yDeltaFactor = Mathf.Clamp01((-visionAngleDeltaVertical - 15) / 45f); // only against bots up high
                         break;
                     case "fern01":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 25f); // 0deg -> 0, 75 deg -> 1
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.1f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis / 30f);
-                        poseScale = poseFactor == 0.05f ? 1f : (1f - poseFactor) / 5f; // very low
+                        poseScale = pPoseFactor == 0.05f ? 1f : (1f - pPoseFactor) / 5f; // very low
                         break;
                     default:
                         bushRat = false;
@@ -627,7 +627,7 @@ namespace ThatsLit
                 // Absoulute offset
                 // f-0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (10m)
                 var secondsOffset = -1f * Mathf.Pow(factor, 2) * Mathf.Sign(factor) * (UnityEngine.Random.Range(0.5f, 1f) - 0.5f * cqb10mSquared); // Base
-                secondsOffset += (original * (10f + rand1 * 20f) * (0.1f + 0.9f * sinceSeenFactorSqr * seenPosDeltaFactorSqr) * extremeDarkFactor) / poseFactor; // Makes night factory makes sense (filtered by extremeDarkFactor)
+                secondsOffset += (original * (10f + rand1 * 20f) * (0.1f + 0.9f * sinceSeenFactorSqr * seenPosDeltaFactorSqr) * extremeDarkFactor) / pPoseFactor; // Makes night factory makes sense (filtered by extremeDarkFactor)
                 secondsOffset *= botImpactType == BotImpactType.DEFAULT? 1f : 0.5f;
                 secondsOffset *= secondsOffset > 0 ? ThatsLitPlugin.BrightnessImpactScale.Value : ThatsLitPlugin.DarknessImpactScale.Value;
                 __result += secondsOffset;
@@ -643,7 +643,7 @@ namespace ThatsLit
                     var cqbCancelChance = Mathf.Clamp01((visionAngleDelta - 15f) / 85f); // 0~15deg (in front) => 0%, 45deg() => 40%, 90deg => 88%
                                                                                          // If the AI is facing 15+ deg away, there's a chance cqb check is bypassed
 
-                    float combinedCqb10 = cqb10mSquared * (0.7f + 0.3f * rand2 * poseFactor) + cqb5m; // at 5m => 0.25 + 0, at 3m => 0.49+0.4, at 1m => 0.81+0.8, at 0m => 1+1
+                    float combinedCqb10 = cqb10mSquared * (0.7f + 0.3f * rand2 * pPoseFactor) + cqb5m; // at 5m => 0.25 + 0, at 3m => 0.49+0.4, at 1m => 0.81+0.8, at 0m => 1+1
                     combinedCqb10 *= 0.9f + 0.4f * pSpeedFactor;
 
                     float cancel = UnityEngine.Random.Range(0f, 1f);
@@ -695,7 +695,7 @@ namespace ThatsLit
 
                 if (pSpeedFactor > 0.01f)
                 {
-                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * (1f - extremeDarkFactor) * Mathf.Clamp01(poseFactor); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed (when not proning);
+                    float delta = __result * (rand2 / (5f + caution * 0.1f)) * pSpeedFactor * (1f - extremeDarkFactor) * Mathf.Clamp01(pPoseFactor); // When the score is -0.7+, bots takes up to 20% shorter to spot the player according to player movement speed (when not proning);
                     __result -= delta;
                 }
             }
