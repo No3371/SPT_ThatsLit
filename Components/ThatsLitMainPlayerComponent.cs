@@ -29,6 +29,9 @@ namespace ThatsLit.Components
     // un-cull N for all Lights
     // Cull N for FPS cam
     // Un-Cull N for TL cam
+    //
+    // # Reduce stealth when near stationary weapons not in extreame darkness
+    // # Cast for EFT.Interactive.StationaryWeapon/AGSMachinery/Utes on layer Interactive
     public class ThatsLitMainPlayerComponent : MonoBehaviour
     {
         public static bool IsDebugSampleFrame { get; set; }
