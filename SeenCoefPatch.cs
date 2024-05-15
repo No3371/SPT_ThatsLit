@@ -715,6 +715,12 @@ namespace ThatsLit
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
+            // When the bot is looking straight to the player, give it a chance to react fast
+            var reflex = Mathf.InverseLerp(10f - 0.25f * caution, pPoseFactor * 3f, visionAngleDelta); //  10~3, 
+            reflex *= reflex;
+            reflex *= rand1;
+            __result -= reflex;
+
             // Up to 50% penalty
             if (__result < 0.5f * original)
             {
