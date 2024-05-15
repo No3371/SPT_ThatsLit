@@ -619,7 +619,7 @@ namespace ThatsLit
                 {
                     var emptiness = 1f - mainPlayer.foliageScore * detailScoreRaw;
                     emptiness *= 1f - insideTime;
-                    disFactor *= 0.65f + 0.35f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
+                    disFactor *= 0.7f + 0.3f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
                 }
 
                 factor = Mathf.Clamp(factor, -0.975f, 0.975f);

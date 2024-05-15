@@ -104,6 +104,7 @@ namespace ThatsLit.Components
             float outside1s = Mathf.Clamp01(1f - insideTime);
 
             float ambienceShadowFactor = player.AmbienceShadowFactor;
+            if (player.isWinterCache) ambienceShadowFactor *= 1f - 0.3f * outside1s;
 
             var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
 
