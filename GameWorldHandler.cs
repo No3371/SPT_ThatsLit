@@ -17,11 +17,11 @@ namespace ThatsLit
             }
             else if (gameWorld != null && ThatsLitGameWorld == null)
             {
-                ThatsLitGameWorld = gameWorld.GetOrAddComponent<ThatsLitGameworldComponent>();
+                ThatsLitGameWorld = gameWorld.GetOrAddComponent<ThatsLitGameworld>();
             }
         }
 
-        public static ThatsLitGameworldComponent ThatsLitGameWorld { get; private set; }
+        public static ThatsLitGameworld ThatsLitGameWorld { get; private set; }
         public static ThatsLitMainPlayerComponent ThatsLitMainPlayer => ThatsLitGameWorld?.ThatsLitMainPlayer;
     }
 }
