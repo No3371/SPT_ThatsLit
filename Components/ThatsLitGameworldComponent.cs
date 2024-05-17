@@ -247,6 +247,246 @@ namespace ThatsLit
 
         internal int MaxDetailTypes { get; set; }
 
+
+        /// <summary>
+        /// Calculate new or retrieve cached score for the specified enemy dir, dis, vertical vision angle
+        /// </summary>
+        public TerrainDetailScore CalculateDetailScore(PlayerTerrainDetailsProfile player, Vector3 enemyDirection, float dis, float verticalAxisAngle)
+        {
+            int dir = 5;
+            IEnumerable<int> it = null;
+            TerrainDetailScore cache = default;
+            float scaling = 1f;
+
+            if (player?.Details5x5 == null) return cache; // Could be resizing? 
+
+            if (enemyDirection == Vector3.zero) // This should never happens for actual enemies
+            {
+                if (TryGetCache(dir = 5, out cache)) return cache;
+                it = IterateDetailIndex3x3;
+            }
+            else if (verticalAxisAngle < -20f) // Looking down and ignore distance and direction
+            {
+                if (dis >= 10)
+                {
+                    if (TryGetCache(dir = 5, out cache)) return cache;
+                    it = IterateDetailIndex3x3;
+                }
+                else
+                {
+                    if (TryGetCache(dir = 15, out cache)) return cache; // scaled down mid 3x3
+                    it = IterateDetailIndex3x3;
+                    scaling = 4f/9f;
+                }
+            }
+            else if (dis < 10f && verticalAxisAngle < -10f) // Very close and not looking down
+            {
+                var dirFlat = new Vector2(enemyDirection.x, enemyDirection.z).normalized;
+                var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
+                if (angle >= -22.5f && angle <= 22.5f)
+                {
+                    if (TryGetCache(dir = 10 + 8, out cache))  return cache;
+                    it = IterateDetailIndex2x3InversedTN;
+                }
+                else if (angle >= 22.5f && angle <= 67.5f)
+                {
+                    if (TryGetCache(dir = 10 + 9, out cache))  return cache;
+                    it = IterateDetailIndex2x2NE;
+                }
+                else if (angle >= 67.5f && angle <= 112.5f)
+                {
+                    if (TryGetCache(dir = 10 + 6, out cache))  return cache;
+                    it = IterateDetailIndex2x3InversedTE;
+                }
+                else if (angle >= 112.5f && angle <= 157.5f)
+                {
+                    if (TryGetCache(dir = 10 + 3, out cache))  return cache;
+                    it = IterateDetailIndex2x2SE;
+                }
+                else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
+                {
+                    if (TryGetCache(dir = 10 + 2, out cache))  return cache;
+                    it = IterateDetailIndex2x3InversedTS;
+                }
+                else if (angle >= -157.5f && angle <= -112.5f)
+                {
+                    if (TryGetCache(dir = 10 + 1, out cache))  return cache;
+                    it = IterateDetailIndex2x2SW;
+                }
+                else if (angle >= -112.5f && angle <= -67.5f)
+                {
+                    if (TryGetCache(dir = 10 + 4, out cache))  return cache;
+                    it = IterateDetailIndex2x3InversedTW;
+                }
+                else if (angle >= -67.5f && angle <= -22.5f)
+                {
+                    if (TryGetCache(dir = 10 + 7, out cache))  return cache;
+                    it = IterateDetailIndex2x2NW;
+                }
+
+                scaling = 9f/4f;
+            }
+            else
+            {
+                var dirFlat = new Vector2(enemyDirection.x, enemyDirection.z).normalized;
+                var angle = Vector2.SignedAngle(Vector2.up, dirFlat);
+                if (angle >= -22.5f && angle <= 22.5f)
+                {
+                    if (TryGetCache(dir = 8, out cache))  return cache;
+                    it = IterateDetailIndex3x3N;
+                }
+                else if (angle >= 22.5f && angle <= 67.5f)
+                {
+                    if (TryGetCache(dir = 9, out cache))  return cache;
+                    it = IterateDetailIndex3x3NE;
+                }
+                else if (angle >= 67.5f && angle <= 112.5f)
+                {
+                    if (TryGetCache(dir = 6, out cache))  return cache;
+                    it = IterateDetailIndex3x3E;
+                }
+                else if (angle >= 112.5f && angle <= 157.5f)
+                {
+                    if (TryGetCache(dir = 3, out cache))  return cache;
+                    it = IterateDetailIndex3x3SE;
+                }
+                else if (angle >= 157.5f && angle <= 180f || angle >= -180f && angle <= -157.5f)
+                {
+                    if (TryGetCache(dir = 2, out cache))  return cache;
+                    it = IterateDetailIndex3x3S;
+                }
+                else if (angle >= -157.5f && angle <= -112.5f)
+                {
+                    if (TryGetCache(dir = 1, out cache))  return cache;
+                    it = IterateDetailIndex3x3SW;
+                }
+                else if (angle >= -112.5f && angle <= -67.5f)
+                {
+                    if (TryGetCache(dir = 4, out cache))  return cache;
+                    it = IterateDetailIndex3x3W;
+                }
+                else if (angle >= -67.5f && angle <= -22.5f)
+                {
+                    if (TryGetCache(dir = 7, out cache))  return cache;
+                    it = IterateDetailIndex3x3NW;
+                }
+                else throw new Exception($"[That's Lit] Invalid angle to enemy: {angle}");
+            }
+
+            foreach (var pos in it)
+            {
+                for (int i = 0; i < MaxDetailTypes; i++)
+                {
+                    var info = player.Details5x5[pos * MaxDetailTypes + i];
+                    if (!info.casted) continue;
+                    Utility.CalculateDetailScore(info.name, info.count, out var s1, out var s2);
+                    s1 *= scaling;
+                    s2 *= scaling;
+                    cache.prone += s1;
+                    cache.regular += s2;
+                }
+            }
+
+            cache.cached = true;
+            player.detailScoreCache[dir] = cache;
+            return cache;
+
+            bool TryGetCache(int index, out TerrainDetailScore cache)
+            {
+                cache = player.detailScoreCache[index];
+                return cache.cached;
+            }
+        }
+
+        public TerrainDetailScore CalculateCenterDetailScore(PlayerTerrainDetailsProfile player, bool unscaled = false)
+        {
+            TerrainDetailScore cache = default;
+            float scaling = unscaled? 1f : 9f;
+            if (TryGetCache(0, out cache))  return cache;
+
+            if (player?.Details5x5 == null) return cache; // Could be resizing?
+
+            for (int i = 0; i < MaxDetailTypes; i++)
+            {
+                var info = player.Details5x5[(2*5+2) * MaxDetailTypes + i];
+                if (!info.casted) continue;
+                Utility.CalculateDetailScore(info.name, info.count, out var s1, out var s2);
+                s1 *= scaling;
+                s2 *= scaling;
+                cache.prone += s1;
+                cache.regular += s2;
+            }
+
+            cache.cached = true;
+            player.detailScoreCache[0] = cache;
+            return cache;
+
+            bool TryGetCache(int index, out TerrainDetailScore cache)
+            {
+                cache = player.detailScoreCache[index];
+                return cache.cached;
+            }
+        }
+        IEnumerable<int> IterateDetailIndex3x3N => IterateIndex3x3In5x5(0, 1);
+        IEnumerable<int> IterateDetailIndex3x3E => IterateIndex3x3In5x5(1, 0);
+        IEnumerable<int> IterateDetailIndex3x3W => IterateIndex3x3In5x5(-1, 0);
+        IEnumerable<int> IterateDetailIndex3x3S => IterateIndex3x3In5x5(0, -1);
+        IEnumerable<int> IterateDetailIndex3x3NE => IterateIndex3x3In5x5(1, 1);
+        IEnumerable<int> IterateDetailIndex3x3NW => IterateIndex3x3In5x5(-1, 1);
+        IEnumerable<int> IterateDetailIndex3x3SE => IterateIndex3x3In5x5(1, -1);
+        IEnumerable<int> IterateDetailIndex3x3SW => IterateIndex3x3In5x5(-1, -1);
+        IEnumerable<int> IterateDetailIndex2x3InversedTN => IterateIndexCrossShape3x3In5x5Center(horizontal: true, N: true);
+        IEnumerable<int> IterateDetailIndex2x3InversedTE => IterateIndexCrossShape3x3In5x5Center(vertical: true, W: true);
+        IEnumerable<int> IterateDetailIndex2x3InversedTW => IterateIndexCrossShape3x3In5x5Center(vertical: true, W: true);
+        IEnumerable<int> IterateDetailIndex2x3InversedTS => IterateIndexCrossShape3x3In5x5Center(horizontal: true, S: true);
+        IEnumerable<int> IterateDetailIndex2x2NE => IterateIndex2x2In5x5(2, 1);
+        IEnumerable<int> IterateDetailIndex2x2NW => IterateIndex2x2In5x5(1, 1);
+        IEnumerable<int> IterateDetailIndex2x2SE => IterateIndex2x2In5x5(2, 2);
+        IEnumerable<int> IterateDetailIndex2x2SW => IterateIndex2x2In5x5(1, 2);
+        IEnumerable<int> IterateDetailIndex3x3 => IterateIndex3x3In5x5(0, 0);
+
+        /// xOffset and yOffset decides the center of the 3x3
+        IEnumerable<int> IterateIndex3x3In5x5(int xOffset, int yOffset)
+        {
+            yield return 5 * (1 + yOffset) + 1 + xOffset;
+            yield return 5 * (1 + yOffset) + 2 + xOffset;
+            yield return 5 * (1 + yOffset) + 3 + xOffset;
+
+            yield return 5 * (2 + yOffset) + 1 + xOffset;
+            yield return 5 * (2 + yOffset) + 2 + xOffset;
+            yield return 5 * (2 + yOffset) + 3 + xOffset;
+
+            yield return 5 * (3 + yOffset) + 1 + xOffset;
+            yield return 5 * (3 + yOffset) + 2 + xOffset;
+            yield return 5 * (3 + yOffset) + 3 + xOffset;
+        }
+
+        /// xOffset and yOffset decides the LT corner of the 2x2
+        IEnumerable<int> IterateIndex2x2In5x5(int xOffset, int yOffset)
+        {
+            if (xOffset > 3 || yOffset > 3) throw new Exception("[That's Lit] Terrain detail grid access out of Bound");
+            yield return 5 * yOffset + xOffset;
+            yield return 5 * yOffset + xOffset + 1;
+
+            yield return 5 * (yOffset + 1) + xOffset;
+            yield return 5 * (yOffset + 1) + xOffset + 1;
+        }
+
+        IEnumerable<int> IterateIndexCrossShape3x3In5x5Center(bool horizontal = false, bool vertical = false, bool N = false, bool E = false, bool S = false, bool W = false)
+        {
+            // yield return 5 * 1 + 1;
+            if (vertical || N) yield return 5 * 1 + 2;
+            // yield return 5 * 1 + 3;
+
+            if (horizontal || W) yield return 5 * 2 + 1;
+            if (horizontal || vertical) yield return 5 * 2 + 2;
+            if (horizontal || E) yield return 5 * 2 + 3;
+
+            // yield return 5 * 3 + 1;
+            if (vertical || S) yield return 5 * 3 + 2;
+            // yield return 5 * 3 + 3;
+        }
+
         internal bool CheckTerrainDetails(Vector3 position, PlayerTerrainDetailsProfile player)
         {
             if (GPUInstancerDetailManager.activeManagerList?.Count == 0)

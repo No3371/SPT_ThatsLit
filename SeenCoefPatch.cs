@@ -335,7 +335,7 @@ namespace ThatsLit
             var detailScoreRaw = 0f;
             if (!inThermalView && !player.skipDetailCheck)
             {
-                var terrainScore = player.CalculateDetailScore(-eyeToPlayerBody, dis, visionAngleDeltaVertical);
+                var terrainScore = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.TerrainDetails, -eyeToPlayerBody, dis, visionAngleDeltaVertical);
                 if (terrainScore.prone > 0.1f || terrainScore.regular > 0.1f)
                 {
                     if (isInPronePose) // Handles cases where the player is laying on slopes and being very visible even with grasses

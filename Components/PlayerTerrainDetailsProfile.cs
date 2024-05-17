@@ -6,6 +6,7 @@ namespace ThatsLit
     public class PlayerTerrainDetailsProfile
     {
         public CastedDetailInfo[] Details5x5 { get; internal set; }
+        public TerrainDetailScore[] detailScoreCache = new TerrainDetailScore[20];
         public int RecentDetailCount3x3 { get; internal set; }
         public float LastCheckedTime { get; internal set; }
         public Vector3 LastCheckedPos { get; internal set; }

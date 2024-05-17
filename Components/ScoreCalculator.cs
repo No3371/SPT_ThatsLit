@@ -124,7 +124,9 @@ namespace ThatsLit
             // =====
             if (player.Player.TerrainDetails != null)
             {
-                var detailScaling = (player.Player.CalculateDetailScore(Vector3.zero, 0, 0).prone * 0.667f + player.Player.CalculateCenterDetailScore().prone) * 0.333f;
+                float surroundingTerrainScoreProne = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.Player.TerrainDetails, Vector3.zero, 0, 0).prone;
+                float footTerrainScoreProne = Singleton<ThatsLitGameworld>.Instance.CalculateCenterDetailScore(player.Player.TerrainDetails).prone;
+                var detailScaling = surroundingTerrainScoreProne * 0.667f + footTerrainScoreProne * 0.333f;
                 detailScaling = Mathf.Clamp01(detailScaling);
                 detailScaling *= Mathf.Clamp01(player.Player.TerrainDetails.RecentDetailCount3x3/ 75f);
                 detailScaling *= detailScaling;
