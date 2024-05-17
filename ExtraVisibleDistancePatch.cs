@@ -39,7 +39,7 @@ namespace ThatsLit
             ThatsLitPlugin.swExtraVisDis.MaybeResumme();
 
             bool thermalActive = false, nvgActive = false, scope = false;
-            float scopeDis = 0;
+            float thermalRange = 0;
 
             var botNVG = __instance.Owner?.NightVision;
             if (botNVG?.UsingNow == true) // goggles
@@ -54,9 +54,13 @@ namespace ThatsLit
                 if (sightMod != null)
                 {
                     scope = true;
-                    if (Utility.IsThermalScope(sightMod.Item.TemplateId, out scopeDis))
+                    var compat = ThatsLitCompat.GetScopeTemplate(sightMod.Item.TemplateId);
+                    if (compat?.thermal != null)
+                    {
                         thermalActive = true;
-                    else if (Utility.IsNightVisionScope(sightMod.Item.TemplateId))
+                        thermalRange = compat.thermal.effectiveDistance;
+                    }
+                    else if (compat?.nightVision != null)
                         nvgActive = true;
                 }
             }
@@ -67,7 +71,7 @@ namespace ThatsLit
             FrameStats frame0 = player.PlayerLitScoreProfile?.frame0 ?? default;
             if (thermalActive)
             {
-                float compensation = (scope? scopeDis : 200) - __instance.Owner.LookSensor.VisibleDist;
+                float compensation = (scope? thermalRange : 200) - __instance.Owner.LookSensor.VisibleDist;
                 if (compensation > 0) addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation * ThatsLitPlugin.LitVisionDistanceScale.Value;
             }
             else if (nvgActive && frame0.ambienceScore < 0) // Base + Sun/Moon < 0

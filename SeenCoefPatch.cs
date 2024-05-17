@@ -104,6 +104,10 @@ namespace ThatsLit
             bool usingNVG = nightVision?.UsingNow ?? false;
             if (usingNVG) // Goggles
             {
+                switch (nightVision.NightVisionItem.Item.TemplateId)
+                {
+
+                }
                 if (nightVision.NightVisionItem?.Template?.Mask == NightVisionComponent.EMask.Thermal) inThermalView = true;
                 else if (nightVision.NightVisionItem?.Template?.Mask != null) inNVGView = true;
             }
@@ -119,9 +123,12 @@ namespace ThatsLit
                     if (visionAngleDelta <= 60f / currentZoom) // Scoped?  (btw AIs using NVGs does not get the scope buff (Realism style)
                     {
                         disFactor = Mathf.Clamp01((dis / currentZoom - 10) / 100f);
-                        if (Utility.IsThermalScope(sightMod.Item?.TemplateId, out float effDis) && dis <= effDis)
+                        var compat = ThatsLitCompat.GetScopeTemplate(sightMod.Item.TemplateId);
+                        if (compat?.thermal != null  && dis <= compat.thermal.effectiveDistance)
+                        {
                             inThermalView = true;
-                        else if (Utility.IsNightVisionScope(sightMod.Item?.TemplateId))
+                        }
+                        else if (compat?.nightVision != null)
                             inNVGView = true;
                     }
                     else if (dis > 10) // Regular

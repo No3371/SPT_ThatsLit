@@ -1,0 +1,98 @@
+{
+    "priority": 1,
+    "scopeTemplates": [
+        {
+            "name": "_example_nv_scope_template",
+            "nightVision": {
+                "visibilityBonusScale": 1.0
+            },
+            "thermal": null,
+            "_comment": null
+        },
+        {
+            "name": "_example_thermal_scope_template",
+            "nightVision": null,
+            "thermal": {
+                "effectiveDistance": 230
+            },
+            "_comment": null
+        }
+    ],
+    "scopes": [
+        {
+            "id": "_example_scope",
+            "_comment": "_example_scope",
+            "template": "_example_nv_scope"
+        }
+    ],
+    "goggleTemplates": [
+        {
+            "name": "_example_nv_goggles",
+            "nightVision": {
+                "horizontalFOV": 70,
+                "verticalFOV": 70,
+                "nullification": 0.8,
+                "nullificationDarker": 0.4,
+                "nullificationExtremeDark": 0.25
+            },
+            "thermal": null,
+            "_comment": null
+        },
+        {
+            "name": "_example_thermal_t7",
+            "nightVision": null,
+            "thermal": {
+                "effectiveDistance": 250,
+                "horizontalFOV": 60,
+                "verticalFOV": 90
+            },
+            "_comment": null
+        }
+    ],
+    "goggles": [
+        {
+            "id": "_example_thermal_goggles",
+            "template": "_example_thermal_t7",
+            "_comment": "_example_thermal_goggles"
+        }
+    ],
+    "deviceTemplates": [
+        {
+            "name": "_example_device_template",
+            "modes": [
+                {
+                    "light": 0.0,
+                    "laser": 1.0,
+                    "irLight": 0.0,
+                    "irLaser": 0.0
+                },
+                {
+                    "light": 0.0,
+                    "laser": 0.0,
+                    "irLight": 0.0,
+                    "irLaser": 1.0
+                },
+                {
+                    "light": 0.0,
+                    "laser": 0.0,
+                    "irLight": 1.0,
+                    "irLaser": 0.0
+                },
+                {
+                    "light": 0.0,
+                    "laser": 0.0,
+                    "irLight": 1.0,
+                    "irLaser": 1.0
+                }
+            ],
+            "_comment": null
+        }
+    ],
+    "devices": [
+        {
+            "id": "_example_device",
+            "_comment": "_example_device",
+            "template": "_example_device_template"
+        }
+    ]
+}

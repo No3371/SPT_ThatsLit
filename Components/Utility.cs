@@ -254,12 +254,12 @@ namespace ThatsLit
                 //     Logger.LogWarning($"{ light.Item.Id } { light.Item.Name } ({ light.Item.TemplateId }) { light.IsActive }");
                 // }
                 if (light == null || !light.IsActive) continue;
-                MapComponentsModes(light.Item.TemplateId, light.SelectedMode, out bool thisLight, out bool thisLaser, out bool thisLightIsIR, out bool thisLaserIsIR);
+                var mode = GetDeviceMode(light.Item.TemplateId, light.SelectedMode);
 
-                vLight |= thisLight && !thisLightIsIR;
-                irLight |= thisLight && thisLightIsIR;
-                vLaser |= thisLaser && !thisLaserIsIR;
-                irLaser |= thisLaser && thisLaserIsIR;
+                vLight |= mode.light > 0f;
+                irLight |= mode.irLight > 0f;
+                vLaser |= mode.laser > 0f;
+                irLaser |= mode.irLaser > 0f;
             }
         }
 
@@ -364,182 +364,20 @@ namespace ThatsLit
 
             // "_id": "5bffcf7a0db83400232fea79", "_name": "pistolgrip_tt_pm_laser_tt_206", always on
         }
-        static void MapComponentsModes(string templateId, int selectedMode, out bool light, out bool laser, out bool lightIsIR, out bool laserIsIR)
+        static ThatsLitCompat.DeviceMode GetDeviceMode(string templateId, int selectedMode)
         {
-            light = laser = laserIsIR = lightIsIR = false;
-
-            switch (templateId)
+            var compat = ThatsLitCompat.GetDeviceTemplate(templateId);
+            if (compat?.modes == null || compat.modes.Length <= selectedMode)
             {
-                case "544909bb4bdc2d6f028b4577": // tactical_all_insight_anpeq15
-                case "57fd23e32459772d0805bcf1": // tactical_all_holosun_ls321
-                case "5c06595c0db834001a66af6c": // tactical_all_insight_la5
-                case "5c5952732e2216398b5abda2": // tactical_all_zenit_perst_3
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            laser = true;
-                            break;
-                        case 1:
-                            laser = laserIsIR = true;
-                            break;
-                        case 2:
-                            light = lightIsIR = true;
-                            break;
-                        case 3:
-                            laser = laserIsIR = light = lightIsIR = true;
-                            break;
-                    }
-                    break;
-                case "61605d88ffa6e502ac5e7eeb": // tactical_all_wilcox_raptar_es
-                    switch (selectedMode)
-                    {
-                        case 1:
-                            laser = true;
-                            break;
-                        case 2:
-                            laser = laserIsIR = true;
-                            break;
-                        case 3:
-                            light = lightIsIR = true;
-                            break;
-                        case 4:
-                            laser = laserIsIR = light = lightIsIR = true;
-                            break;
-                    }
-                    break;
-                case "560d657b4bdc2da74d8b4572": // tactical_all_zenit_2p_kleh_vis_laser
-                case "56def37dd2720bec348b456a": // tactical_all_surefire_x400_vis_laser
-                case "5a800961159bd4315e3a1657": // tactical_all_glock_gl_21_vis_lam
-                case "6272379924e29f06af4d5ecb": // tactical_all_olight_baldr_pro_tan
-                case "6272370ee4013c5d7e31f418": // tactical_all_olight_baldr_pro
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = true;
-                            break;
-                        case 1:
-                            laser = light = true;
-                            break;
-                        case 2:
-                            laser = true;
-                            break;
-                    }
-                    break;
-                case "55818b164bdc2ddc698b456c": // tactical_all_zenit_2irs_kleh_lam
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = lightIsIR = true;
-                            break;
-                        case 1:
-                            laser = laserIsIR = light = lightIsIR = true;
-                            break;
-                        case 2:
-                            laser = laserIsIR = true;
-                            break;
-                    }
-                    break;
-                case "5a7b483fe899ef0016170d15": // tactical_all_surefire_xc1
-                case "5b3a337e5acfc4704b4a19a0": // tactical_all_zenit_2u_kleh
-                case "59d790f486f77403cb06aec6": // flashlight_armytek_predator_pro_v3_xhp35_hi
-                case "57d17c5e2459775a5c57d17d": // flashlight_ultrafire_WF
-                    light = true;
-                    break;
-                case "5b07dd285acfc4001754240d": // tactical_all_steiner_las_tac_2
-                case "5c079ed60db834001a66b372": // tactical_tt_dlp_tactical_precision_laser_sight
-                case "5cc9c20cd7f00c001336c65d": // tactical_all_ncstar_tactical_blue_laser
-                case "5bffcf7a0db83400232fea79": // pistolgrip_tt_pm_laser_tt_206  !always on
-                case "5b30b0dc5acfc400153b7124": // scope_all_holosun_hs401g5
-                case "6284bd5f95250a29bc628a30": // scope_all_milkor_m2a1_reflex_sight
-                    laser = true;
-                    break;
-                case "5d10b49bd7ad1a1a560708b0": // tactical_all_insight_anpeq2
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            laser = laserIsIR = true;
-                            break;
-                        case 1:
-                            laser = laserIsIR = light = lightIsIR = true;
-                            break;
-                        case 2:
-                            break;
-                    }
-                    break;
-                case "5d2369418abbc306c62e0c80": // tactical_all_steiner_9021_dbal_pl
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = true;
-                            break;
-                        case 1:
-                            laser = true;
-                            break;
-                        case 2:
-                            laser = light = true;
-                            break;
-                        case 3:
-                            light = lightIsIR = true;
-                            break;
-                        case 4:
-                            laser = laserIsIR = true;
-                            break;
-                        case 5:
-                            light = lightIsIR = laser = laserIsIR = true;
-                            break;
-                    }
-                    break;
-                case "626becf9582c3e319310b837": // tactical_all_insight_wmx200
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = true;
-                            break;
-                        case 1:
-                            light = lightIsIR = true;
-                            break;
-                    }
-                    break;
-                case "644a3df63b0b6f03e101e065": // MAWL-C1+
-                    switch (selectedMode)
-                    {
-                        case 0:
-                            light = true;
-                            break;
-                        case 1:
-                            light = true;
-                            break;
-                        case 2:
-                            lightIsIR = true;
-                            break;
-                        case 3:
-                            lightIsIR = true;
-                            break;
-                        case 4:
-                            laserIsIR = true;
-                            break;
-                        case 5:
-                            laserIsIR = true;
-                            break;
-                    }
-                    break;
-                default:
-                    if (CustomLightAndLaser != null
-                    &&  CustomLightAndLaser.TryGetValue((templateId, selectedMode), out var setup))
-                    {
-                        light = setup.light;
-                        lightIsIR = setup.lightIsIR;
-                        laser = setup.laser;
-                        laserIsIR = setup.laserIsIR;
-                    }
-                    else if (ThatsLitMainPlayerComponent.IsDebugSampleFrame)
-                    {
-                        string message = $"[That's Lit] Unknown device: {templateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(templateId)?.Name}";
-                        NotificationManagerClass.DisplayWarningNotification(message);
-                        Logger.LogWarning(message);
-                    }
-                    break;
+                if (ThatsLitMainPlayerComponent.IsDebugSampleFrame)
+                {
+                    string message = $"[That's Lit] Unknown device: {templateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(templateId)?.Name}";
+                    NotificationManagerClass.DisplayWarningNotification(message);
+                    Logger.LogWarning(message);
+                }
+                return default;
             }
+            return compat.modes[selectedMode];
         }
 
         static Dictionary<(string, int), (bool light, bool lightIsIR, bool laser, bool laserIsIR)> CustomLightAndLaser { get; set; }
@@ -559,76 +397,6 @@ namespace ThatsLit
         {
             if (CustomThermalScopes == null) CustomThermalScopes = new Dictionary<string, float>();
             CustomThermalScopes.Add(templateId, effDis);
-        }
-// void RegisterExample ()
-// {
-//     Type type = Type.GetType("ThatsLit.Utility, ThatsLit");
-//     if (type == null)
-//         return;
-//     var m = type.GetMethod("RegisterCustomLightAndLaser"); // or RegisterCustomNightVisionScopes, RegisterCustomThermalScopes
-//     if (m == null)
-//     {
-//         LogWarning("ThatsLit endpoint not found.");
-//         return;
-//     }
-//     m.Invoke(null, new object[] { templateId, mode, light, lightIsIR, laser, laserIsIR });
-// }
-
-        internal static bool IsNightVisionScope (string templateId)
-        {
-            return templateId switch
-            {
-                "5b3b6e495acfc4330140bd88" => true,
-                "5a7c74b3e899ef0014332c29" => true,
-                _ => CustomNightVisionScopes == null? false : CustomNightVisionScopes.Contains(templateId)
-            };
-    // "_id": "5b3b6e495acfc4330140bd88",
-    // "_name": "scope_base_armasight_vulcan_gen3_bravo_mg_3,5x",
-    
-    // "_id": "5a7c74b3e899ef0014332c29",
-    // "_name": "scope_dovetail_npz_nspum_3,5x",
-        }
-        internal static bool IsThermalScope (string templateId, out float effDis)
-        {
-            effDis = 200;
-            switch (templateId)
-            {
-                case "6478641c19d732620e045e17":
-                    return true;
-                case "63fc44e2429a8a166c7f61e6":
-                    return true;
-                case "5a1eaa87fcdbcb001865f75e":
-                    return true;
-                case "5d1b5e94d7ad1a2b865a96b0":
-                    return true;
-                case "606f2696f2cb2e02a42aceb1":
-                    effDis = 5;
-                    return true;
-                case "609bab8b455afd752b2e6138":
-                    return true;
-                default:
-                    return CustomThermalScopes == null? false : CustomThermalScopes.TryGetValue(templateId, out effDis);
-
-            }
-            // THERMAL
-
-            // "_id": "6478641c19d732620e045e17",
-            // "_name": "scope_all_sig_sauer_echo1_thermal_reflex_sight_1_2x_30hz",
-
-            // "_id": "63fc44e2429a8a166c7f61e6",
-            // "_name": "scope_base_armasight_zeus_pro_640_2_16x50_30hz",
-            
-            // "_id": "5a1eaa87fcdbcb001865f75e",
-            // "_name": "scope_base_trijicon_reap-ir",
-            
-            // "_id": "5d1b5e94d7ad1a2b865a96b0",
-            // "_name": "scope_all_flir_rs32_225_9x_35_60hz",
-
-            // "_id": "606f2696f2cb2e02a42aceb1",
-            // "_name": "tactical_mp155_kalashnikov_ultima_camera",
-
-            // "_id": "609bab8b455afd752b2e6138",
-            // "_name": "scope_all_torrey_pines_logic_t12_w_30hz",
         }
 
         internal static void GUILayoutDrawAsymetricMeter(int level, bool alternative = false)

@@ -70,6 +70,7 @@ namespace ThatsLit
 
             BindConfigs();
             Patches();
+            ThatsLitCompat.LoadCompatFiles();
         }
 
         private void BindConfigs()
