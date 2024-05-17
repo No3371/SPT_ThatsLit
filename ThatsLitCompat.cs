@@ -17,7 +17,6 @@ namespace ThatsLit
             Goggles = new Dictionary<string, Goggle>();
             DeviceTemplates = new Dictionary<string, DeviceTemplate>();
             Devices = new Dictionary<string, Device>();
-            Loaded = new List<CompatFile>();
         }
 
          public static Dictionary<string, ScopeTemplate> ScopeTemplates { get; private set; }
@@ -26,12 +25,12 @@ namespace ThatsLit
          public static Dictionary<string, Goggle> Goggles { get; private set; }
          public static Dictionary<string, DeviceTemplate> DeviceTemplates { get; private set; }
          public static Dictionary<string, Device> Devices { get; private set; }
-         static List<CompatFile> Loaded;
 
 
         public static Task LoadCompatFiles ()
         {
             return Task.Run(() => {
+                List<CompatFile> loaded = new List<CompatFile>();
                 IEnumerable<string> paths = Directory.EnumerateFiles(BepInEx.Paths.PluginPath, "**thatslitcompat.json", SearchOption.AllDirectories);
                 foreach (var path in paths)
                 {
@@ -44,12 +43,11 @@ namespace ThatsLit
                         continue;
                     }
                     file.FilePath = path;
-                    Loaded.Add(file);
+                    loaded.Add(file);
                 }
-                Loaded.Sort();
-                foreach (var f in Loaded)
+                loaded.Sort();
+                foreach (var f in loaded)
                 {
-                    Logger.LogWarning(f.FilePath);
                     foreach (var c in f.scopeTemplates)
                     {
                         ScopeTemplates[c.name] = c;
@@ -104,7 +102,6 @@ namespace ThatsLit
         public class Device
         {
             public string id { get; set; }
-            public string _comment { get; set; }
             public string template { get; set; }
         }
 
@@ -113,7 +110,6 @@ namespace ThatsLit
         {
             public string name { get; set; }
             public DeviceMode[] modes { get; set; }
-            public string _comment { get; set; }
         }
 
         [System.Serializable]
@@ -121,7 +117,6 @@ namespace ThatsLit
         {
             public string id { get; set; }
             public string template { get; set; }
-            public string _comment { get; set; }
         }
 
         [System.Serializable]
@@ -130,7 +125,6 @@ namespace ThatsLit
             public string name { get; set; }
             public NightVision nightVision { get; set; }
             public Thermal thermal { get; set; }
-            public string _comment { get; set; }
         }
 
         [System.Serializable]
@@ -175,7 +169,6 @@ namespace ThatsLit
         public class Scope
         {
             public string id { get; set; }
-            public string _comment { get; set; }
             public string template { get; set; }
         }
 
@@ -185,7 +178,6 @@ namespace ThatsLit
             public string name { get; set; }
             public NightVision nightVision { get; set; }
             public Thermal thermal { get; set; }
-            public string _comment { get; set; }
         }
 
         [System.Serializable]
