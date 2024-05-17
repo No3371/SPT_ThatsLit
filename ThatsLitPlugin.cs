@@ -124,8 +124,9 @@ namespace ThatsLit
                                                      0.6f,
                                                      new ConfigDescription("The chance to cancel a bot's visual confirmation on you and instead only tell it it's spotted from roughly your direction, when the system say you are visible to it but it's not even facing your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
 
-            category                   = "4. Grasses";
-            EnabledGrasses             = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
+            category                   = "4. Grasses & Foliage";
+            EnabledGrasses             = Config.Bind(category, "Enable Grasses", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
+            EnabledFoliage             = Config.Bind(category, "Enable Foliage", true, new ConfigDescription("Enable the module. This enable foliage to distract distant bots.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
 
             category                   = "5. Tweaks";
             FoliageImpactScale         = Config.Bind(category,
@@ -182,6 +183,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnabledMod { get; private set; }
         public static ConfigEntry<bool> EnabledLighting { get; private set; }
         public static ConfigEntry<bool> EnabledEncountering { get; private set; }
+        public static ConfigEntry<bool> EnabledFoliage { get; private set; }
         public static ConfigEntry<bool> EnabledGrasses { get; private set; }
         public static ConfigEntry<bool> EnableMovementImpact { get; private set; }
         public static ConfigEntry<bool> EnableEquipmentCheck { get; private set; }

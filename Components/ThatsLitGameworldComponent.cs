@@ -63,7 +63,7 @@ namespace ThatsLit
         public ScoreCalculator ScoreCalculator { get; internal set; }
         public RaidSettings activeRaidSettings;
         public bool IsWinter { get; private set; }
-        internal bool skipFoliageCheck, skipDetailCheck;
+        internal bool foliageUnavailable, terrainDetailsUnavailable;
 
         void Awake ()
         {
@@ -80,12 +80,12 @@ namespace ThatsLit
                 case "factory4_day":
                 case "laboratory":
                 case null:
-                    skipFoliageCheck = true;
-                    skipDetailCheck = true;
+                    foliageUnavailable = true;
+                    terrainDetailsUnavailable = true;
                     break;
                 default:
-                    skipFoliageCheck = false;
-                    skipDetailCheck = !ThatsLitPlugin.EnabledGrasses.Value;
+                    foliageUnavailable = false;
+                    terrainDetailsUnavailable = false;
                     break;
             }
 
@@ -165,7 +165,7 @@ namespace ThatsLit
             Array.Clear(player.Foliage, 0, player.Foliage.Length);
             Array.Clear(player.CastedFoliageColliders, 0, player.CastedFoliageColliders.Length);
 
-            if (skipFoliageCheck) return;
+            if (foliageUnavailable) return;
 
             int castedCount = Physics.OverlapSphereNonAlloc(bodyPos, 4f, player.CastedFoliageColliders, foliageLayerMask);
             int validCount = 0;
@@ -253,12 +253,12 @@ namespace ThatsLit
         {
             if (GPUInstancerDetailManager.activeManagerList?.Count == 0)
             {
-                skipDetailCheck = true;
+                terrainDetailsUnavailable = true;
                 Logger.LogInfo($"Active detail managers not found, disabling detail check...");
                 return false;
             }
 
-            if (player == null || skipDetailCheck) return false;
+            if (player == null || terrainDetailsUnavailable) return false;
             if (player.Details5x5 != null) Array.Clear(player.Details5x5, 0, player.Details5x5.Length);
             player.RecentDetailCount3x3 = 0;
 
@@ -453,7 +453,7 @@ namespace ThatsLit
                 }
                 else terrainDetailMaps[terrain] = null;
             }
-            if (allDisabled) skipDetailCheck = true;
+            if (allDisabled) terrainDetailsUnavailable = true;
             Logger.LogInfo($"[{ activeRaidSettings.LocationId }] Finished building terrain detail maps at { Time.time }... (AllDisabled: {allDisabled})");
         }
         IEnumerator BuildTerrainDetailMapCoroutine(Terrain terrain, List<int[,]> detailMapData)

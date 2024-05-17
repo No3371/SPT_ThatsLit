@@ -145,19 +145,6 @@ namespace ThatsLit
             awakeAt = Time.time;
             if (Player.IsYourPlayer) DebugInfo = new PlayerDebugInfo();
 
-            switch (ActiveRaidSettings?.LocationId)
-            {
-                case "factory4_night":
-                case "factory4_day":
-                case "laboratory":
-                case null:
-                    break;
-                default:
-                    Foliage = new PlayerFoliageProfile(new FoliageInfo[16], new Collider[16]);
-                    if (!ThatsLitPlugin.EnabledGrasses.Value) TerrainDetails = new PlayerTerrainDetailsProfile();
-                    break;
-            }
-
             MaybeEnableBrightness();
         }
 
@@ -256,23 +243,39 @@ namespace ThatsLit
 
             bunkerTimeClamped = Mathf.Clamp(bunkerTimeClamped, 0, 10);
 
-            if (TerrainDetails != null
-             && Time.time > TerrainDetails.LastCheckedTime + 0.41f)
+            using (new ManagedStopWatch.RunningScope(ThatsLitPlugin.swTerrain))
             {
-                Singleton<ThatsLitGameworld>.Instance.CheckTerrainDetails(bodyPos, TerrainDetails);
-                if (ThatsLitPlugin.TerrainInfo.Value)
+                if (ThatsLitPlugin.EnabledGrasses.Value
+                 && !Singleton<ThatsLitGameworld>.Instance.terrainDetailsUnavailable
+                 && TerrainDetails == null)
                 {
-                    var score = CalculateDetailScore(Vector3.zero, 0, 0);
-                    terrainScoreHintProne = score.prone;
-                    terrainScoreHintRegular = score.regular;
+                    TerrainDetails = new PlayerTerrainDetailsProfile();
+                }
 
-                    var pf = (Player.PoseLevel / Player.AIData.Player.Physical.MaxPoseLevel) * 0.6f + 0.4f;
-                    terrainScoreHintRegular /= (pf + 0.1f + 0.25f * Mathf.InverseLerp(0.45f, 0.55f, pf));
+                if (TerrainDetails != null
+                && Time.time > TerrainDetails.LastCheckedTime + 0.41f)
+                {
+                    Singleton<ThatsLitGameworld>.Instance.CheckTerrainDetails(bodyPos, TerrainDetails);
+                    if (ThatsLitPlugin.TerrainInfo.Value)
+                    {
+                        var score = CalculateDetailScore(Vector3.zero, 0, 0);
+                        terrainScoreHintProne = score.prone;
+                        terrainScoreHintRegular = score.regular;
+
+                        var pf = (Player.PoseLevel / Player.AIData.Player.Physical.MaxPoseLevel) * 0.6f + 0.4f;
+                        terrainScoreHintRegular /= (pf + 0.1f + 0.25f * Mathf.InverseLerp(0.45f, 0.55f, pf));
+                    }
                 }
             }
 
             using (new ManagedStopWatch.RunningScope(ThatsLitPlugin.swFoliage))
             {
+                if (ThatsLitPlugin.EnabledFoliage.Value
+                 && !Singleton<ThatsLitGameworld>.Instance.foliageUnavailable
+                 && Foliage == null)
+                {
+                    Foliage = new PlayerFoliageProfile(new FoliageInfo[16], new Collider[16]);
+                }
                 if (Foliage != null)
                 {
                     if (!Foliage.IsFoliageSorted) Foliage.IsFoliageSorted = SlicedBubbleSort(Foliage.Foliage, Foliage.FoliageCount * 3 / 2, Foliage.FoliageCount);
