@@ -718,7 +718,8 @@ namespace ThatsLit
             // When the bot is looking straight to the player, give it a chance to react fast
             var reflex = Mathf.InverseLerp(10f - 0.25f * caution, pPoseFactor * 3f, visionAngleDelta); //  10~3, 
             reflex *= reflex;
-            reflex *= rand1;
+            reflex *= Mathf.Clamp01(rand1 - extremeDarkFactor);
+            reflex *= (1f - disFactor);
             __result -= reflex;
 
             // Up to 50% penalty
