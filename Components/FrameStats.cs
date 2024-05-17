@@ -1,4 +1,4 @@
-﻿namespace ThatsLit.Components
+﻿namespace ThatsLit
 {
     public struct FrameStats
     {

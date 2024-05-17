@@ -50,6 +50,17 @@ namespace ThatsLit
     public class ThatsLitPlugin : BaseUnityPlugin
     {
 
+        internal static ManagedStopWatch swUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis;
+        static ThatsLitPlugin ()
+        {
+            swUpdate = new ManagedStopWatch("Update");
+            swGUI = new ManagedStopWatch("GUI");
+            swFoliage = new ManagedStopWatch("Foliage");
+            swTerrain = new ManagedStopWatch("Terrain");
+            swSeenCoef = new ManagedStopWatch("SeenCoef");
+            swEncountering = new ManagedStopWatch("Encountering");
+            swExtraVisDis = new ManagedStopWatch("ExtraVisDis");
+        }
         private void Awake()
         {
             if (!VersionChecker.CheckEftVersion(Logger, base.Info, Config))
@@ -151,6 +162,7 @@ namespace ThatsLit
             DebugTexture               = Config.Bind(category, "Debug Texture", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
             EnableHideout              = Config.Bind(category, "Hideout", false, "Enable darkness/brightness on the map.");
             EnableBenchmark              = Config.Bind(category, "Benchmark", false, "");
+            DebugTerrain               = Config.Bind(category, "Debug Terrain", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
 
             category                   = "9. Balance";
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss. Makes bosses EASY.");
@@ -166,6 +178,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<bool> HideMapTip { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
+        public static ConfigEntry<bool> DebugTerrain { get; private set; }
         public static ConfigEntry<bool> EnabledMod { get; private set; }
         public static ConfigEntry<bool> EnabledLighting { get; private set; }
         public static ConfigEntry<bool> EnabledEncountering { get; private set; }

@@ -1,7 +1,6 @@
 #define DEBUG_DETAILS
 using Aki.Reflection.Patching;
 using HarmonyLib;
-using ThatsLit.Components;
 using System.Reflection;
 using UnityEngine;
 using Comfort.Common;
@@ -26,31 +25,18 @@ namespace ThatsLit
         public static bool PatchPrefix(EnemyInfo __instance, KeyValuePair<EnemyPart, EnemyPartData> part, ref float addVisibility)
         {
             if (__instance?.Owner == null
-             || (part.Key?.Owner?.IsYourPlayer ?? false) == false
+             || (part.Key?.Owner?.IsAI ?? true) == true
              || !ThatsLitPlugin.EnabledMod.Value
              || ThatsLitPlugin.LitVisionDistanceScale.Value == 0
-             || !ThatsLitPlugin.EnabledLighting.Value
-             || Time.frameCount % ((__instance.Owner.Id & 7) + 1) != 0) // Transform bot id to 1~7 and reduce and spread the workload to 1/7
+             || !ThatsLitPlugin.EnabledLighting.Value)
                 return true;
 
-            ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
-            if (mainPlayer?.scoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
+            ThatsLitMainPlayerComponent player = null;
+            Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
+            if (player == null) return true;
+            if (Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
 
-#region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
-            {
-                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
-                if (_benchmarkSW.IsRunning)
-                {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (Extra Vis Dis)";
-                    NotificationManagerClass.DisplayWarningNotification(message);
-                    Logger.LogWarning(message);
-                }
-                _benchmarkSW.Start();
-            }
-            else if (_benchmarkSW != null)
-                _benchmarkSW = null;
-#endregion
+            ThatsLitPlugin.swExtraVisDis.MaybeResumme();
 
             bool thermalActive = false, nvgActive = false, scope = false;
             float scopeDis = 0;
@@ -77,33 +63,34 @@ namespace ThatsLit
 
             float fogFactor = EFT.Weather.WeatherController.Instance?.WeatherCurve?.Fog?? 0f;
             fogFactor = Mathf.InverseLerp(0, 0.35f, fogFactor);
-            ScoreCalculator scoreCalculator = mainPlayer.scoreCalculator;
+            ScoreCalculator scoreCalculator = Singleton<ThatsLitGameworld>.Instance.ScoreCalculator;
+            FrameStats frame0 = player.PlayerLitScoreProfile?.frame0 ?? default;
             if (thermalActive)
             {
                 float compensation = (scope? scopeDis : 200) - __instance.Owner.LookSensor.VisibleDist;
                 if (compensation > 0) addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation * ThatsLitPlugin.LitVisionDistanceScale.Value;
             }
-            else if (nvgActive && scoreCalculator.frame0.ambienceScore < 0) // Base + Sun/Moon < 0
+            else if (nvgActive && frame0.ambienceScore < 0) // Base + Sun/Moon < 0
             {
                 float scale;
-                if (scoreCalculator.irLight) scale = 4f;
-                else if (scoreCalculator.irLaser) scale = 3.5f;
+                if (player.LightAndLaserState.IRLight) scale = 4f;
+                else if (player.LightAndLaserState.IRLaser) scale = 3.5f;
                 else scale = 3f;
-                scale = Mathf.Lerp(1, scale, Mathf.Clamp01(scoreCalculator.frame0.ambienceScore / -1f)); // The darker the ambience, the more effective the NVG is
+                scale = Mathf.Lerp(1, scale, Mathf.Clamp01(frame0.ambienceScore / -1f)); // The darker the ambience, the more effective the NVG is
 
-                float extra = __instance.Owner.LookSensor.VisibleDist * scoreCalculator.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
+                float extra = __instance.Owner.LookSensor.VisibleDist * player.PlayerLitScoreProfile.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
                 extra *= 1f - fogFactor;
                 addVisibility += UnityEngine.Random.Range(0.25f, 1f) * Mathf.Min(100, extra); // 0.25x~1x of extra capped at 100m
             }
-            else if (!nvgActive && scoreCalculator.frame0.ambienceScore > 0)
+            else if (!nvgActive && frame0.ambienceScore > 0)
             {
-                float extra = __instance.Owner.LookSensor.VisibleDist * (1f + scoreCalculator.frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
+                float extra = __instance.Owner.LookSensor.VisibleDist * (1f + frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
                 extra *= 1f - fogFactor;
                 addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(50, extra); // Up to 20% bonus capped at 50m from unobstructed strong sun/moon light
             } 
-            else if (!nvgActive && __instance.Owner.LookSensor.VisibleDist < 50) // 
+            else if (!nvgActive && __instance.Owner.LookSensor.VisibleDist < 50) 
             {
-                float litDiff = scoreCalculator.frame0.multiFrameLitScore - scoreCalculator.frame0.baseAmbienceScore; // The visibility provided by sun/moon + lightings
+                float litDiff = frame0.multiFrameLitScore - frame0.baseAmbienceScore; // The visibility provided by sun/moon + lightings
                 litDiff = Mathf.Clamp(litDiff, 0, 2f) / 2f;
                 litDiff *= 1f - fogFactor;
 
@@ -111,9 +98,7 @@ namespace ThatsLit
                 addVisibility += UnityEngine.Random.Range(0.5f, 1f) * extra; // 0.5x ~ 1x of compensation to 50m
             }
 
-#region BENCHMARK
-            _benchmarkSW?.Stop();
-#endregion
+            ThatsLitPlugin.swExtraVisDis.Stop();
 
             return true;
         }

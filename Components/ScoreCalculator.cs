@@ -14,17 +14,11 @@ using UnityEngine;
 // CLOUDINESS 0 -> SCORE 0~0.4f (SUN) -0.6~-0.3 (MOON)
 // ===================
 
-namespace ThatsLit.Components
+namespace ThatsLit
 {
     public class ScoreCalculator
     {
         readonly int RESOLUTION = 32 * ThatsLitPlugin.ResLevel.Value;
-        internal float lum3s, lum1s, lum10s;
-        public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
-        public bool vLight, vLaser, irLight, irLaser, vLightSub, vLaserSub, irLightSub, irLaserSub;
-        float scoreRawBase, scoreRaw0, scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4;
-        internal float detailBonusSmooth;
-        internal static System.Diagnostics.Stopwatch _benchmarkSW;
         public ScoreCalculator()
         {
             // ThatsLitPlugin.DevMode.Value = false;
@@ -55,72 +49,59 @@ namespace ThatsLit.Components
             //     }
             // };
         }
+        protected internal virtual void OnGUI (bool layout = false) {}
+
         public void PreCalculate (Unity.Collections.NativeArray<Color32> tex, float time)
         {
             GetThresholds(time, out float thS, out float thH, out float thHM, out float thM, out float thML, out float thL);
             StartCountPixels(tex, thS, thH, thHM, thM, thML, thL);
         }
         
-        public virtual float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
+        public virtual float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitGameworld gameWorld, PlayerLitScoreProfile player, float time, string locationId)
         {
-#region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
-            {
-                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
-                if (_benchmarkSW.IsRunning)
-                {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (ScoreCalc)";
-                    NotificationManagerClass.DisplayWarningNotification(message);
-                    Logger.LogWarning(message);
-                }
-                _benchmarkSW.Start();
-            }
-            else if (_benchmarkSW != null)
-                _benchmarkSW = null;
-#endregion
             // if (ThatsLitPlugin.DevMode.Value)
             //     minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
-            float maxAmbienceLum = MaxAmbienceLum;
             // if (ThatsLitPlugin.DevMode.Value)
             //     maxAmbienceLum = ThatsLitPlugin.OverrideMaxAmbienceLum.Value;
             // if (ThatsLitPlugin.DevMode.Value)
             //     lumScoreScale = ThatsLitPlugin.OverridePixelLumScoreScale.Value;
-
-            frame5 = frame4;
-            frame4 = frame3;
-            frame3 = frame2;
-            frame2 = frame1;
-            frame1 = frame0;
+            
+            player.frame5 = player.frame4;
+            player.frame4 = player.frame3;
+            player.frame3 = player.frame2;
+            player.frame2 = player.frame1;
+            player.frame1 = player.frame0;
             FrameStats thisFrame = default;
             CompleteCountPixels(out thisFrame.pxS, out thisFrame.pxH, out thisFrame.pxHM, out thisFrame.pxM, out thisFrame.pxML, out thisFrame.pxL, out thisFrame.pxD, out thisFrame.lum, out float lumNonDark, out thisFrame.pixels);
             if (thisFrame.pixels == 0) thisFrame.pixels = RESOLUTION * RESOLUTION;
             thisFrame.avgLum = thisFrame.lum / (float)thisFrame.pixels;
             thisFrame.avgLumNonDark = thisFrame.lum / (float) (thisFrame.pixels - thisFrame.pxD);
-            thisFrame.avgLumMultiFrames = (thisFrame.avgLum + frame1.avgLum + frame2.avgLum + frame3.avgLum + frame4.avgLum + frame5.avgLum) / 6f;
-            UpdateLumTrackers(thisFrame.avgLumMultiFrames);
+            thisFrame.avgLumMultiFrames = (thisFrame.avgLum + player.frame1.avgLum + player.frame2.avgLum + player.frame3.avgLum + player.frame4.avgLum + player.frame5.avgLum) / 6f;
+            player.UpdateLumTrackers(thisFrame.avgLumMultiFrames);
             
-            float insideTime = Time.time - player.lastOutside;
+            float insideTime = Time.time - player.Player.lastOutside;
             if (insideTime < 0) insideTime = 0;
             float outside1s = Mathf.Clamp01(1f - insideTime);
 
-            float ambienceShadowFactor = player.AmbienceShadowFactor;
-            if (player.isWinterCache) ambienceShadowFactor *= 1f - 0.3f * outside1s;
+            float ambienceShadowFactor = player.Player.AmbienceShadowFactor;
+            if (gameWorld.IsWinter) ambienceShadowFactor *= 1f - 0.3f * outside1s;
 
-            var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time);
+            var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time, player);
 
-            baseAmbienceScore += (MinBaseAmbienceScore - baseAmbienceScore) * player.OverheadHaxRatingFactor * 0.15f;
+            baseAmbienceScore += (MinBaseAmbienceScore - baseAmbienceScore) * player.Player.OverheadHaxRatingFactor * 0.15f;
 
 
             // =====
             // Handle bunker environment
             // =====
-            float bunkerTimeFactor = Mathf.Pow(player.bunkerTimeClamped / 10f, 2);
+            float bunkerTimeFactor = Mathf.Pow(player.Player.bunkerTimeClamped / 10f, 2);
             // var bunkerOffset = (baseAmbienceScore - MinBaseAmbienceScore) * (0.5f * bunkerTimeFactor + 0.15f * Mathf.Clamp01((insideTime - 2f) / 3f)); 
             // baseAmbienceScore -= bunkerOffset;
 
             // Bunker: Bunker is overall moderately lit
             baseAmbienceScore = Mathf.Lerp(baseAmbienceScore, BunkerBaseAmbienceTarget, bunkerTimeFactor * Mathf.Clamp01(insideTime / 10) * 0.65f);
-            if (Time.frameCount % 47 == 0) scoreRawBase = baseAmbienceScore;
+            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+                player.Player.DebugInfo.scoreRawBase = baseAmbienceScore;
 
             var ambienceScore = baseAmbienceScore;
             float insideCoef2to9s = Mathf.Clamp01((insideTime - 2) / 7f); // 0 ~ 2 sec => 0%, 9 sec => 100%
@@ -133,7 +114,7 @@ namespace ThatsLit.Components
             // =====
             // Scale up ambience score in winter raidsm given any light (regardless ambience shadow)
             // =====
-            if (player.isWinterCache && insideTime < 2f) // Debuff from winter environment when outside
+            if (gameWorld.IsWinter && insideTime < 2f) // Debuff from winter environment when outside
             {
                 ambienceScore *= 1 + 0.2f * Mathf.Clamp01((sunLightScore + moonLightScore) / 0.5f);
             }
@@ -141,36 +122,41 @@ namespace ThatsLit.Components
             // =====
             // Ambience score reduction from dense grasses in nights
             // =====
-            var detailScaling = (player.CalculateDetailScore(Vector3.zero, 0, 0).prone * 0.667f + player.CalculateCenterDetailScore().prone) * 0.333f;
-            detailScaling = Mathf.Clamp01(detailScaling);
-            detailScaling *= Mathf.Clamp01(player.recentDetailCount3x3/ 75f);
-            detailScaling *= detailScaling;
-            detailScaling *= Mathf.InverseLerp(-0.1f, MinBaseAmbienceScore, ambienceScore);
-            detailScaling *= NightTerrainImpactScale; // max 0.2
-            if (detailScaling > detailBonusSmooth) detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, detailScaling, Time.fixedDeltaTime * 2.5f);
-            else if (detailScaling < detailBonusSmooth) detailBonusSmooth = Mathf.Lerp(detailBonusSmooth, detailScaling, Time.fixedDeltaTime * 6f);
-
-            if (player.isWinterCache)
+            if (player.Player.TerrainDetails != null)
             {
-                detailBonusSmooth *= 0.5f; // Debuff from winter environment
-            }
+                var detailScaling = (player.Player.CalculateDetailScore(Vector3.zero, 0, 0).prone * 0.667f + player.Player.CalculateCenterDetailScore().prone) * 0.333f;
+                detailScaling = Mathf.Clamp01(detailScaling);
+                detailScaling *= Mathf.Clamp01(player.Player.TerrainDetails.RecentDetailCount3x3/ 75f);
+                detailScaling *= detailScaling;
+                detailScaling *= Mathf.InverseLerp(-0.1f, MinBaseAmbienceScore, ambienceScore);
+                detailScaling *= NightTerrainImpactScale; // max 0.2
+                if (detailScaling > player.detailBonusSmooth) player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, detailScaling, Time.fixedDeltaTime * 2.5f);
+                else if (detailScaling < player.detailBonusSmooth) player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, detailScaling, Time.fixedDeltaTime * 6f);
 
-            ambienceScore -= detailBonusSmooth * outside1s;
-            ambienceScore = Mathf.Clamp(ambienceScore, -0.95f, 1f);
-            if (Time.frameCount % 47 == 0) scoreRaw0 = ambienceScore;
+                if (gameWorld.IsWinter)
+                {
+                    player.detailBonusSmooth *= 0.5f; // Debuff from winter environment
+                }
+
+                ambienceScore -= player.detailBonusSmooth * outside1s;
+                ambienceScore = Mathf.Clamp(ambienceScore, -0.95f, 1f);
+            }
+            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+                player.Player.DebugInfo.scoreRaw0 = ambienceScore;
 
 
             //float score = CalculateTotalPixelScore(time, thisFrame.pxS, thisFrame.pxH, thisFrame.pxHM, thisFrame.pxM, thisFrame.pxML, thisFrame.pxL, thisFrame.pxD);
             //score /= (float)thisFrame.pixels;
             float lowAmbienceScoreFactor = Mathf.Max(0.5f - ambienceScore, 0) / 1.5f;
             float hightLightedPixelFactor = 0.9f * thisFrame.RatioShinePixels + 0.75f * thisFrame.RatioHighPixels + 0.4f * thisFrame.RatioHighMidPixels + 0.15f * thisFrame.RatioMidPixels;
-            float lumScore = CalculateRawLumScore(thisFrame, lowAmbienceScoreFactor, hightLightedPixelFactor);
-            if (Time.frameCount % 47 == 0) scoreRaw1 = lumScore + ambienceScore;
+            float lumScore = CalculateRawLumScore(thisFrame, lowAmbienceScoreFactor, hightLightedPixelFactor, player);
+            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+                player.Player.DebugInfo.scoreRaw1 = lumScore + ambienceScore;
 
             //var topScoreMultiFrames = FindHighestScoreRecentFrame(true, score);
             //var bottomScoreMultiFrames = FindLowestScoreRecentFrame(true, score);
-            var topAvgLumMultiFrames = FindHighestAvgLumRecentFrame(true, thisFrame.avgLum);
-            var bottomAvgLumMultiFrames = FindLowestAvgLumRecentFrame(true, thisFrame.avgLum);
+            var topAvgLumMultiFrames = player.FindHighestAvgLumRecentFrame(true, thisFrame.avgLum);
+            var bottomAvgLumMultiFrames = player.FindLowestAvgLumRecentFrame(true, thisFrame.avgLum);
             //var contrastMultiFrames = topScoreMultiFrames - bottomScoreMultiFrames; // a.k.a all sides contrast
 
             //if (contrastMultiFrames < 0.3f) // Low contrast, enhance darkness
@@ -190,8 +176,9 @@ namespace ThatsLit.Components
             //}
 
 
-            lumScore += CalculateChangingLumModifier(thisFrame.avgLumMultiFrames, lum1s, lum3s, ambienceScore);
-            if (Time.frameCount % 47 == 0) scoreRaw2 = lumScore + ambienceScore;
+            lumScore += CalculateChangingLumModifier(thisFrame.avgLumMultiFrames, player.lum1s, player.lum3s, ambienceScore);
+            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+                player.Player.DebugInfo.scoreRaw2 = lumScore + ambienceScore;
 
             // Extra score for multi frames(sides) contrast in darkness
             // For exmaple, lighting rods on the floor contributes not much to the score but should make one much more visible
@@ -203,7 +190,8 @@ namespace ThatsLit.Components
             var expectedFinalScore = lumScore + ambienceScore;
             var compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2); // contrast:0.1 -> final toward 0.1, contrast:0.5 -> final toward 0.25
             lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor * MultiFrameContrastImpactScale; // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
-            if (Time.frameCount % 47 == 0) scoreRaw3 = lumScore + ambienceScore;
+            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+                player.Player.DebugInfo.scoreRaw3 = lumScore + ambienceScore;
 
             //The average score of other frames(sides)
             //var avgScorePrevFrames = (frame1.score + frame2.score + frame3.score + frame4.score + frame5.score) / 5f;
@@ -218,22 +206,24 @@ namespace ThatsLit.Components
             //    score = Mathf.Lerp(score, topScoreMultiFrames, Mathf.Clamp(avgContrastFactor, 0, 1));
             //}
 
-            if (vLight || vLaser || vLightSub || vLaserSub)
+            if (player.Player.LightAndLaserState.AnyVisible)
             {
                 expectedFinalScore = lumScore + ambienceScore;
-                if (vLight) compensationTarget = 0.4f;
-                else if (vLaser) compensationTarget = 0.2f;
-                else if (vLightSub) compensationTarget = 0f;
-                else if (vLaserSub) compensationTarget = 0f;
+                if (player.Player.LightAndLaserState.VisibleLight)          compensationTarget = 0.4f;
+                else if (player.Player.LightAndLaserState.VisibleLaser)     compensationTarget = 0.2f;
+                else if (player.Player.LightAndLaserState.VisibleLightSub)  compensationTarget = 0f;
+                else if (player.Player.LightAndLaserState.VisibleLaserSub)  compensationTarget = 0f;
                 compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2);
                 lumScore += compensation * (lowAmbienceScoreFactor + 0.1f);
             }
-            if (Time.frameCount % 47 == 0) scoreRaw4 = lumScore + ambienceScore;
+
+            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+                                player.Player.DebugInfo.scoreRaw4 = lumScore + ambienceScore;
 
 
-            litScoreFactor = Mathf.Pow(Mathf.Clamp(lumScore, 0, 2f) / 2f, 2); // positive
-            litScoreFactor /= 1 + Mathf.Max(ambienceScore, 0);
-            litScoreFactor = Mathf.Max(litScoreFactor, 0);
+            player.litScoreFactor = Mathf.Pow(Mathf.Clamp(lumScore, 0, 2f) / 2f, 2); // positive
+            player.litScoreFactor /= 1 + Mathf.Max(ambienceScore, 0);
+            player.litScoreFactor = Mathf.Max(player.litScoreFactor, 0);
             lumScore -= lumScore * 0.25f * Mathf.Clamp01(ambienceScore + 0.05f); // When ambience is already above -0.05, reduce lumScore contribution
             lumScore += ambienceScore;
             lumScore = Mathf.Clamp(lumScore, -1, 1);
@@ -242,22 +232,19 @@ namespace ThatsLit.Components
             thisFrame.ambienceScore = ambienceScore;
             thisFrame.baseAmbienceScore = baseAmbienceScore;
 
-            var topScoreMultiFrames = FindHighestScoreRecentFrame(true, lumScore);
-            var bottomScoreMultiFrames = FindLowestScoreRecentFrame(true, lumScore);
+            var topScoreMultiFrames = player.FindHighestScoreRecentFrame(true, lumScore);
+            var bottomScoreMultiFrames = player.FindLowestScoreRecentFrame(true, lumScore);
             thisFrame.multiFrameLitScore = (topScoreMultiFrames * 2f
                                 + thisFrame.score
-                                + frame1.score
-                                + frame2.score
-                                + frame3.score
-                                + frame4.score
-                                + frame5.score
+                                + player.frame1.score
+                                + player.frame2.score
+                                + player.frame3.score
+                                + player.frame4.score
+                                + player.frame5.score
                                 - bottomScoreMultiFrames * 2) / 6f;
 
-            frame0 = thisFrame;
+            player.frame0 = thisFrame;
 
-#region BENCHMARK
-            _benchmarkSW?.Stop();
-#endregion
             return thisFrame.multiFrameLitScore;
 
         }
@@ -265,35 +252,8 @@ namespace ThatsLit.Components
         /// <summary>
         /// The percentage of score provided by observed brightness (from 3d lightings)
         /// </summary>
-        internal float litScoreFactor;
-        float shinePixelsRatioSample, highLightPixelsRatioSample, highMidLightPixelsRatioSample, midLightPixelsRatioSample, midLowLightPixelsRatioSample, lowLightPixelsRatioSample, darkPixelsRatioSample;
-        float sunLightScore, moonLightScore;
+        internal float sunLightScore, moonLightScore;
         string infoCache;
-
-        internal virtual void CalledOnGUI (bool layout = false)
-        {
-            // Utility.GUILayoutDrawAsymetricMeter((int)(baseAmbienceScore / 0.0999f));
-            // Utility.GUILayoutDrawAsymetricMeter((int)(ambienceScore / 0.0999f));
-            // Utility.GUILayoutDrawAsymetricMeter((int)(frame0.multiFrameLitScore / 0.0999f));
-            if (Time.frameCount % 41 == 0)
-            {
-                shinePixelsRatioSample = (frame0.RatioShinePixels + frame1.RatioShinePixels + frame2.RatioShinePixels + frame3.RatioShinePixels + frame4.RatioShinePixels + frame5.RatioShinePixels) / 6f;
-                highLightPixelsRatioSample = (frame0.RatioHighPixels + frame1.RatioHighPixels + frame2.RatioHighPixels + frame3.RatioHighPixels + frame4.RatioHighPixels + frame5.RatioHighPixels) / 6f;
-                highMidLightPixelsRatioSample = (frame0.RatioHighMidPixels + frame1.RatioHighMidPixels + frame2.RatioHighMidPixels + frame3.RatioHighMidPixels + frame4.RatioHighMidPixels + frame5.RatioHighMidPixels) / 6f;
-                midLightPixelsRatioSample = (frame0.RatioMidPixels + frame1.RatioMidPixels + frame2.RatioMidPixels + frame3.RatioMidPixels + frame4.RatioMidPixels + frame5.RatioMidPixels) / 6f;
-                midLowLightPixelsRatioSample = (frame0.RatioMidLowPixels + frame1.RatioMidLowPixels + frame2.RatioMidLowPixels + frame3.RatioMidLowPixels + frame4.RatioMidLowPixels + frame5.RatioMidLowPixels) / 6f;
-                lowLightPixelsRatioSample = (frame0.RatioLowPixels + frame1.RatioLowPixels + frame2.RatioLowPixels + frame3.RatioLowPixels + frame4.RatioLowPixels + frame5.RatioLowPixels) / 6f;
-                darkPixelsRatioSample = (frame0.RatioDarkPixels + frame1.RatioDarkPixels + frame2.RatioDarkPixels + frame3.RatioDarkPixels + frame4.RatioDarkPixels + frame5.RatioDarkPixels) / 6f;
-            }
-            if (layout) infoCache = $"  PIXELS: {shinePixelsRatioSample * 100:000}% - {highLightPixelsRatioSample * 100:000}% - {highMidLightPixelsRatioSample * 100:000}% - { midLightPixelsRatioSample * 100:000}% - {midLowLightPixelsRatioSample * 100:000}% - {lowLightPixelsRatioSample * 100:000}% | {darkPixelsRatioSample * 100:000}% (AVG Sample)\n  AvgLumMF: {frame0.avgLumMultiFrames:0.000} / {GetMinAmbianceLum():0.000} ~ {GetMaxAmbianceLum():0.000} ({GetAmbianceLumRange():0.000})\n   Sun: {sunLightScore:0.000}/{GetMaxSunlightScore():0.000}, Moon: {moonLightScore:0.000}/{GetMaxMoonlightScore():0.000}\n  SCORE : {scoreRawBase:＋0.00;－0.00;+0.00} -> {scoreRaw0:＋0.00;－0.00;+0.00} -> {scoreRaw1:＋0.00;－0.00;+0.00} -> {scoreRaw2:＋0.00;－0.00;+0.00} -> {scoreRaw3:＋0.00;－0.00;+0.00} -> {scoreRaw4:＋0.00;－0.00;+0.00} (SAMPLE)";            
-            GUILayout.Label(infoCache);
-            // GUILayout.Label(string.Format("  PIXELS: {0:000}% - {1:000}% - {2:000}% - {3:000}% - {4:000}% - {5:000}% | {6:000}% (AVG Sample)", shinePixelsRatioSample * 100, highLightPixelsRatioSample * 100, highMidLightPixelsRatioSample * 100, midLightPixelsRatioSample * 100, midLowLightPixelsRatioSample * 100, lowLightPixelsRatioSample * 100, darkPixelsRatioSample * 100));
-            // GUILayout.Label(string.Format("  AvgLumMF: {0:0.000} / {1:0.000} ~ {2:0.000} ({3:0.000})", frame0.avgLumMultiFrames, GetMinAmbianceLum(), GetMaxAmbianceLum(), GetAmbianceLumRange()));
-            // GUILayout.Label(string.Format("  Sun: {0:0.000}/{1:0.000}, Moon: {2:0.000}/{3:0.000}", sunLightScore, GetMaxSunlightScore(), moonLightScore, GetMaxMoonlightScore()));
-            // GUILayout.Label(string.Format("  SCORE : {0:＋0.00;－0.00;+0.00} -> {1:＋0.00;－0.00;+0.00} -> {2:＋0.00;－0.00;+0.00} -> {3:＋0.00;－0.00;+0.00} (SAMPLE)", scoreRaw1, scoreRaw2, scoreRaw3, scoreRaw4));
-            
-            Utility.GUILayoutDrawAsymetricMeter((int)(frame0.score / 0.0999f));
-        }
 
         protected virtual float FinalTransformScore (float score)
         {
@@ -307,90 +267,18 @@ namespace ThatsLit.Components
             return recentChange;
         }
 
-        protected virtual float CalculateStaticLumModifier(float score, float avgLumMultiFrames, float envLum, float envLumSlow)
+        protected virtual float CalculateStaticLumModifier(float score, float avgLumMultiFrames, float envLum, float envLumSlow, PlayerLitScoreProfile player)
         {
-            var recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - lum3s) / 0.2f); // (avgLumMultiFrames - envLumEstiSlow) is always approaching zero when the environment lighting is stable
+            var recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - player.lum3s) / 0.2f); // (avgLumMultiFrames - envLumEstiSlow) is always approaching zero when the environment lighting is stable
             if (score > 0f) score /= 1 + 0.3f * (1 - recentChangeFactor); // The bigger the difference, the more it should be suppressed
             else if (score < 0f) score *= 1 + 0.1f * (1 - recentChangeFactor);
 
-            recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - lum3s) / 0.2f); // (avgLumMultiFrames - envLumEstiSlow) is always approaching zero when the environment lighting is stable
+            recentChangeFactor = Mathf.Clamp01(Mathf.Abs(avgLumMultiFrames - player.lum3s) / 0.2f); // (avgLumMultiFrames - envLumEstiSlow) is always approaching zero when the environment lighting is stable
             if (score > 0f) score /= 1 + 0.1f * (1 - recentChangeFactor); // The bigger the difference, the more it should be suppressed
             else if (score < 0f) score *= 1 + 0.1f * (1 - recentChangeFactor);
             return score;
         }
 
-        float FindHighestAvgLumRecentFrame(bool includeThis, float thisframe)
-        {
-            float avgLum = includeThis ? thisframe : frame1.avgLum;
-            if (frame1.avgLum > avgLum) avgLum = frame1.avgLum;
-            if (frame2.avgLum > avgLum) avgLum = frame2.avgLum;
-            if (frame3.avgLum > avgLum) avgLum = frame3.avgLum;
-            if (frame4.avgLum > avgLum) avgLum = frame4.avgLum;
-            if (frame5.avgLum > avgLum) avgLum = frame5.avgLum;
-            return avgLum;
-        }
-
-        float FindLowestAvgLumRecentFrame(bool includeThis, float calculating)
-        {
-            float avgLum = includeThis ? calculating : frame1.avgLum;
-            if (frame1.avgLum < avgLum) avgLum = frame1.avgLum;
-            if (frame2.avgLum < avgLum) avgLum = frame2.avgLum;
-            if (frame3.avgLum < avgLum) avgLum = frame3.avgLum;
-            if (frame4.avgLum < avgLum) avgLum = frame4.avgLum;
-            if (frame5.avgLum < avgLum) avgLum = frame5.avgLum;
-            return avgLum;
-        }
-
-        float FindHighestMFAvgLumRecentFrame(bool includeThis, float thisframe)
-        {
-            float mfAvgLum = includeThis ? thisframe : frame1.avgLumMultiFrames;
-            if (frame1.avgLumMultiFrames > mfAvgLum) mfAvgLum = frame1.avgLumMultiFrames;
-            if (frame2.avgLumMultiFrames > mfAvgLum) mfAvgLum = frame2.avgLumMultiFrames;
-            if (frame3.avgLumMultiFrames > mfAvgLum) mfAvgLum = frame3.avgLumMultiFrames;
-            if (frame4.avgLumMultiFrames > mfAvgLum) mfAvgLum = frame4.avgLumMultiFrames;
-            if (frame5.avgLumMultiFrames > mfAvgLum) mfAvgLum = frame5.avgLumMultiFrames;
-            return mfAvgLum;
-        }
-
-        float FindLowestMFAvgLumRecentFrame(bool includeThis, float calculating)
-        {
-            float mfAvgLum = includeThis ? calculating : frame1.avgLumMultiFrames;
-            if (frame1.avgLumMultiFrames < mfAvgLum) mfAvgLum = frame1.avgLumMultiFrames;
-            if (frame2.avgLumMultiFrames < mfAvgLum) mfAvgLum = frame2.avgLumMultiFrames;
-            if (frame3.avgLumMultiFrames < mfAvgLum) mfAvgLum = frame3.avgLumMultiFrames;
-            if (frame4.avgLumMultiFrames < mfAvgLum) mfAvgLum = frame4.avgLumMultiFrames;
-            if (frame5.avgLumMultiFrames < mfAvgLum) mfAvgLum = frame5.avgLumMultiFrames;
-            return mfAvgLum;
-        }
-
-        float FindHighestScoreRecentFrame (bool includeThis, float calculating)
-        {
-            float score = includeThis ? calculating : frame1.score;
-            if (frame1.score > score) score = frame1.score;
-            if (frame2.score > score) score = frame2.score;
-            if (frame3.score > score) score = frame3.score;
-            if (frame4.score > score) score = frame4.score;
-            if (frame5.score > score) score = frame5.score;
-            return score;
-        }
-
-        float FindLowestScoreRecentFrame(bool includeThis, float calculating)
-        {
-            float score = includeThis ? calculating : frame1.score;
-            if (frame1.score < score) score = frame1.score;
-            if (frame2.score < score) score = frame2.score;
-            if (frame3.score < score) score = frame3.score;
-            if (frame4.score < score) score = frame4.score;
-            if (frame5.score < score) score = frame5.score;
-            return score;
-        }
-
-        protected virtual void UpdateLumTrackers (float avgLumMultiFrames)
-        {
-            lum1s = Mathf.Lerp(lum1s, avgLumMultiFrames, Time.deltaTime);
-            lum3s = Mathf.Lerp(lum3s, avgLumMultiFrames, Time.deltaTime / 3f);
-            lum10s = Mathf.Lerp(lum10s, avgLumMultiFrames, Time.deltaTime / 10f);
-        }
         protected virtual void GetThresholds(float tlf, out float thresholdShine, out float thresholdHigh, out float thresholdHighMid, out float thresholdMid, out float thresholdMidLow, out float thresholdLow)
         {
             // if (ThatsLitPlugin.DevMode.Value)
@@ -411,7 +299,7 @@ namespace ThatsLit.Components
             thresholdLow = 0.02f;
         }
 
-        protected virtual float CalculateRawLumScore (FrameStats thisFrame, float lowAmbienceScoreFactor, float hightLightedPixelFactor)
+        protected virtual float CalculateRawLumScore (FrameStats thisFrame, float lowAmbienceScoreFactor, float hightLightedPixelFactor, PlayerLitScoreProfile player)
         {
             float lumScore = (thisFrame.avgLum - MinAmbienceLum) * PixelLumScoreScale * (1+2f*lowAmbienceScoreFactor* lowAmbienceScoreFactor) * (0.1f + lowAmbienceScoreFactor);
             lumScore *= 1 + hightLightedPixelFactor;
@@ -555,7 +443,7 @@ namespace ThatsLit.Components
 
         }
 
-        protected virtual float CalculateBaseAmbienceScore(string locationId, float time)
+        protected virtual float CalculateBaseAmbienceScore(string locationId, float time, PlayerLitScoreProfile player)
         {
             return Mathf.Lerp(GetMinBaseAmbienceLitScore(locationId, time), GetMaxBaseAmbienceLitScore(locationId, time), GetMapAmbienceCoef(locationId, time));
         }
@@ -648,32 +536,32 @@ namespace ThatsLit.Components
         {
             return Mathf.Clamp01((now - from) / (to - from));
         }
-        protected virtual float GetMinAmbianceLum()
+        protected internal virtual float GetMinAmbianceLum()
         {
             float minAmbienceLum = MinAmbienceLum;
             // if (ThatsLitPlugin.DevMode.Value)
             //     minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
             return minAmbienceLum;
         }
-        protected virtual float GetMaxAmbianceLum()
+        protected internal virtual float GetMaxAmbianceLum()
         {
             float maxAmbienceLum = MaxAmbienceLum;
             // if (ThatsLitPlugin.DevMode.Value)
             //     maxAmbienceLum = ThatsLitPlugin.OverrideMaxAmbienceLum.Value;
             return maxAmbienceLum;
         }
-        protected virtual float GetAmbianceLumRange()
+        protected internal virtual float GetAmbianceLumRange()
         {
             return GetMaxAmbianceLum() + 0.001f - GetMinAmbianceLum();
         }
-        protected virtual float GetMaxSunlightScore()
+        protected internal virtual float GetMaxSunlightScore()
         {
             float maxSunlightScore = MaxSunlightScore;
             // if (ThatsLitPlugin.DevMode.Value)
             //     maxSunlightScore = ThatsLitPlugin.OverrideMaxSunLightScore.Value;
             return maxSunlightScore;
         }
-        protected virtual float GetMaxMoonlightScore()
+        protected internal virtual float GetMaxMoonlightScore()
         {
             float maxMoonlightScore = MaxMoonlightScore;
             // if (ThatsLitPlugin.DevMode.Value)
@@ -712,6 +600,7 @@ namespace ThatsLit.Components
     }
     public class HideoutScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.65f;
         protected override float MaxBaseAmbienceScore { get => -0.65f; }
         protected override float MaxMoonlightScore => 0;
@@ -721,6 +610,7 @@ namespace ThatsLit.Components
     }
     public class ReserveScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.88f;
         protected override float MaxBaseAmbienceScore => -0.05f;
         protected override float MinAmbienceLum => 0.011f;
@@ -736,6 +626,7 @@ namespace ThatsLit.Components
 
     public class WoodsScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.75f;
         protected override float MinAmbienceLum => 0.015f;
         protected override float MaxAmbienceLum => 0.017f;
@@ -772,6 +663,7 @@ namespace ThatsLit.Components
 
     public class LighthouseScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.88f;
         protected override float NonCloudinessBaseAmbienceScoreImpact => 0.05f;
         protected override float PixelLumScoreScale { get => 2.5f; }
@@ -793,6 +685,7 @@ namespace ThatsLit.Components
     }
     public class CustomsScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.7f;
         protected override float NonCloudinessBaseAmbienceScoreImpact { get => 0.15f; }
         protected override float MaxMoonlightScore => 0.2f;
@@ -825,6 +718,8 @@ namespace ThatsLit.Components
         float TimeEnterOrLeaveParking { get; set; }
         float ParkingTransitionFactor => Mathf.Clamp01((Time.time - TimeEnterOrLeaveParking) / 5f);
         float rawCloud;
+
+        
         protected override float MultiFrameContrastImpactScale
         {
             get
@@ -835,12 +730,6 @@ namespace ThatsLit.Components
         }
 
         bool IsOverhead { get; set; }
-
-        internal override void CalledOnGUI(bool layout = false)
-        {
-            base.CalledOnGUI(layout);
-            if (isPlayerInParking) GUILayout.Label($"// PARKING: {ParkingTransitionFactor}");
-        }
 
         protected override float CalculateMoonLight(string locationId, float time, float cloudiness)
         {
@@ -854,47 +743,44 @@ namespace ThatsLit.Components
             return base.CalculateSunLight(locationId, time, cloudiness);
         }
 
-        public override float CalculateMultiFrameScore(NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitMainPlayerComponent player, float time, string locationId)
+        public override float CalculateMultiFrameScore(NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitGameworld gameWorld, PlayerLitScoreProfile player, float time, string locationId)
         {
             rawCloud = cloud;
 
-            ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
             bool isParking = false;
             IsOverhead = false;
 
-            if (Physics.Raycast(new Ray(p.MainPlayer.MainParts[BodyPartType.head].Position, Vector3.up), out var hit, 5, LayerMaskClass.LowPolyColliderLayerMask))
+            if (Physics.Raycast(new Ray(player.Player.Player.MainParts[BodyPartType.head].Position, Vector3.up), out var hit, 5, LayerMaskClass.LowPolyColliderLayerMask))
             {
                 IsOverhead = true;
-                if (hit.transform.gameObject.scene.name == "Shopping_Mall_parking_work" && p.transform.position.y < 23.5f) isParking = true;
+                if (hit.transform.gameObject.scene.name == "Shopping_Mall_parking_work" && player.Player.transform.position.y < 23.5f) isParking = true;
             }
 
             if (IsPlayerInParking != isParking) isPlayerInParking = isParking;
-            return base.CalculateMultiFrameScore(tex, cloud, fog, rain, player, time, locationId);
+            return base.CalculateMultiFrameScore(tex, cloud, fog, rain, gameWorld, player, time, locationId);
         }
 
         // Characters in the basement floor gets lit up by ambience lighting
-        protected override float CalculateBaseAmbienceScore(string locationId, float time)
+        protected override float CalculateBaseAmbienceScore(string locationId, float time, PlayerLitScoreProfile player)
         {
-            ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
             if (IsPlayerInParking)
-                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time), -0.65f + 0.15f * rawCloud , (p.OverheadHaxRatingFactor * p.OverheadHaxRatingFactor) * 0.9f * ParkingTransitionFactor);
+                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -0.65f + 0.15f * rawCloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * 0.9f * ParkingTransitionFactor);
             else if (IsOverhead)
             {
-                float fading = Mathf.Clamp01((p.transform.position.y - 22f) / 2.5f);
-                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time), -0.35f + 0.2f * rawCloud , (p.OverheadHaxRatingFactor * p.OverheadHaxRatingFactor) * 0.9f * fading);
+                float fading = Mathf.Clamp01((player.Player.transform.position.y - 22f) / 2.5f);
+                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -0.35f + 0.2f * rawCloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * 0.9f * fading);
             }
 
-            return base.CalculateBaseAmbienceScore(locationId, time);
+            return base.CalculateBaseAmbienceScore(locationId, time, player);
         }
 
-        protected override float CalculateRawLumScore (FrameStats thisFrame, float lowAmbienceScoreFactor, float hightLightedPixelFactor)
+        protected override float CalculateRawLumScore (FrameStats thisFrame, float lowAmbienceScoreFactor, float hightLightedPixelFactor, PlayerLitScoreProfile player)
         {
             if (!IsPlayerInParking)
-                return base.CalculateRawLumScore(thisFrame, lowAmbienceScoreFactor, hightLightedPixelFactor);
+                return base.CalculateRawLumScore(thisFrame, lowAmbienceScoreFactor, hightLightedPixelFactor, player);
 
-            ThatsLitMainPlayerComponent p = Singleton<ThatsLitMainPlayerComponent>.Instance;
             float lumScore = (thisFrame.avgLum - MinAmbienceLum) * (PixelLumScoreScale*1.2f) * (1+2f*lowAmbienceScoreFactor* lowAmbienceScoreFactor) * (0.1f + lowAmbienceScoreFactor);
-            lumScore *= 1f - (thisFrame.RatioDarkPixels + thisFrame.RatioLowPixels * 0.75f + thisFrame.RatioMidLowPixels * 0.5f) * (1f - rawCloud * 0.15f) * (p.OverheadHaxRatingFactor * p.OverheadHaxRatingFactor) * ParkingTransitionFactor;
+            lumScore *= 1f - (thisFrame.RatioDarkPixels + thisFrame.RatioLowPixels * 0.75f + thisFrame.RatioMidLowPixels * 0.5f) * (1f - rawCloud * 0.15f) * (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * ParkingTransitionFactor;
             lumScore *= 1 + hightLightedPixelFactor;
             lumScore = Mathf.Clamp(lumScore, 0.1f, 2); // When there is no sun/moon light the player model is pitch black
             return lumScore;
@@ -917,6 +803,7 @@ namespace ThatsLit.Components
     }
     public class ShorelineScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.9f;
         protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.5f;
         protected override float MinAmbienceLum => 0.008f;
@@ -947,6 +834,7 @@ namespace ThatsLit.Components
 
     public class StreetsScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.75f;
         protected override float MaxSunlightScore { get => 0.05f; }
         protected override float MaxMoonlightScore { get => 0.1f; }
@@ -989,6 +877,7 @@ namespace ThatsLit.Components
 
     public class GroundZeroScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.75f;
         protected override float MaxBaseAmbienceScore => -0.1f;
         protected override float MaxSunlightScore { get => 0.25f; }
@@ -1031,16 +920,17 @@ namespace ThatsLit.Components
 
         // Characters in the basement floor in Ground Zero gets lit up by ambience lighting, so fucked up
         // Try to cheat here
-        protected override float CalculateBaseAmbienceScore(string locationId, float time)
+        protected override float CalculateBaseAmbienceScore(string locationId, float time, PlayerLitScoreProfile player)
         {
-            float playerY = Singleton<ThatsLitMainPlayerComponent>.Instance.MainPlayer.Transform.Original.position.y;
+            float playerY = Singleton<ThatsLitMainPlayerComponent>.Instance.Player.Transform.Original.position.y;
             var reduction = Mathf.Clamp01((14.7f - playerY) / 1.5f) * 0.6f;
-            return Mathf.Max(base.CalculateBaseAmbienceScore(locationId, time) - reduction, MinBaseAmbienceScore);
+            return Mathf.Max(base.CalculateBaseAmbienceScore(locationId, time, player) - reduction, MinBaseAmbienceScore);
         }
     }
 
     public class NightFactoryScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -1;
         protected override float MaxMoonlightScore { get => 0; }
         protected override float MaxSunlightScore { get => 0; }
@@ -1072,6 +962,7 @@ namespace ThatsLit.Components
 
     public class LabScoreCalculator : ScoreCalculator
     {
+        
         protected override float MinBaseAmbienceScore => -0.1f;
         protected override float MaxMoonlightScore => 0;
         protected override float MaxSunlightScore => 0;

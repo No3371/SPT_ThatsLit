@@ -2,9 +2,9 @@
 using System;
 using UnityEngine;
 
-namespace ThatsLit.Components
+namespace ThatsLit
 {
-    internal struct FoliageInfo : IComparable<FoliageInfo>
+    public struct FoliageInfo : IComparable<FoliageInfo>
     {
         public string name;
         public Vector2 dir;

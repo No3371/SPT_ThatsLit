@@ -1,8 +1,7 @@
-﻿// #define DEBUG_DETAILS
+﻿#define DEBUG_DETAILS
 using Aki.Reflection.Patching;
 using EFT;
 using HarmonyLib;
-using ThatsLit.Components;
 using System;
 using System.Reflection;
 using UnityEngine;
@@ -16,7 +15,6 @@ namespace ThatsLit
     public class SeenCoefPatch : ModulePatch
     {
         private static PropertyInfo _enemyRel;
-        internal static Stopwatch _benchmarkSW;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -32,42 +30,29 @@ namespace ThatsLit
             // Also they could search without having visual?
 
             if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value || ThatsLitPlugin.FinalImpactScale.Value == 0) return;
+
             WildSpawnType spawnType = __instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault;
             BotImpactType botImpactType = Utility.GetBotImpactType(spawnType);
             if ((!ThatsLitPlugin.IncludeBosses.Value && botImpactType == BotImpactType.BOSS)
              || Utility.IsBossNerfExcluded(spawnType)) return;
 
-
-            ThatsLitMainPlayerComponent mainPlayer = Singleton<ThatsLitMainPlayerComponent>.Instance;
-            if (!mainPlayer) return;
+            ThatsLitMainPlayerComponent player = null;
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player) != true
+             || player == null
+             || player.Player == null)
+                return;
 
             var original = __result;
 
-            if (Time.frameCount % 47 == 0)
+            if (player.DebugInfo != null && ThatsLitMainPlayerComponent.IsDebugSampleFrame)
             {
-                mainPlayer.calcedLastFrame = 0;
-                mainPlayer.foliageCloaking = false;
+                player.DebugInfo.calcedLastFrame = 0;
+                player.DebugInfo.IsBushRatting = false;
             }
 
-            if (!__instance.Person.IsYourPlayer) return;
+            ThatsLitPlugin.swSeenCoef.MaybeResumme();
 
-#region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
-            {
-                if (_benchmarkSW == null) _benchmarkSW = new Stopwatch();
-                if (_benchmarkSW.IsRunning)
-                {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (SeenCoef)";
-                    NotificationManagerClass.DisplayWarningNotification(message);
-                    Logger.LogWarning(message);
-                }
-                _benchmarkSW.Start();
-            }
-            else if (_benchmarkSW != null)
-                _benchmarkSW = null;
-#endregion
-
-            float pSpeedFactor = Mathf.Clamp01((mainPlayer.MainPlayer.Velocity.magnitude - 1f) / 4f);
+            float pSpeedFactor = Mathf.Clamp01((player.Player.Velocity.magnitude - 1f) / 4f);
 
             nearestRecent += 0.5f;
             var caution = __instance.Owner.Id % 10; // 0 -> HIGH, 1 -> HIGH-MID, 2,3,4 -> MID, 5,6,7,8,9 -> LOW
@@ -82,11 +67,11 @@ namespace ThatsLit
             sinceSeenFactorSqrSlow = sinceSeenFactorSqrSlow * sinceSeenFactorSqrSlow;
             seenPosDeltaFactorSqr = seenPosDeltaFactorSqr * seenPosDeltaFactorSqr;
 
-            float notSeenRecentAndNear = (Mathf.Clamp01(seenPosDeltaFactorSqr + sinceSeenFactorSqrSlow) + sinceSeenFactorSqr / 3f);
+            float notSeenRecentAndNear = Mathf.Clamp01(seenPosDeltaFactorSqr + sinceSeenFactorSqrSlow) + sinceSeenFactorSqr / 3f;
 
             float deNullification = 0;
 
-            System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = mainPlayer.MainPlayer.MainParts;
+            System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = player.Player.MainParts;
             Vector3 eyeToPlayerBody = playerParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
 
             var pPoseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
@@ -112,7 +97,7 @@ namespace ThatsLit
             float disFactorSmooth = 0;
             bool inThermalView = false;
             bool inNVGView = false;
-            float insideTime = Mathf.Max(0, Time.time - mainPlayer.lastOutside);
+            float insideTime = Mathf.Max(0, Time.time - player.lastOutside);
 
 
             BotNightVisionData nightVision = __instance.Owner.NightVision;
@@ -169,14 +154,14 @@ namespace ThatsLit
                 disFactorSmooth = Mathf.Lerp(0, disFactorSmooth, t);
             }
 
-            var canSeeLight = mainPlayer.scoreCalculator?.vLight ?? false;
-            if (!canSeeLight && inNVGView && (mainPlayer.scoreCalculator?.irLight ?? false)) canSeeLight = true;
-            var canSeeLightSub = mainPlayer.scoreCalculator?.vLightSub ?? false;
-            if (!canSeeLightSub && inNVGView && (mainPlayer.scoreCalculator?.irLightSub ?? false)) canSeeLightSub = true;
-            var canSeeLaser = mainPlayer.scoreCalculator?.vLaser ?? false;
-            if (!canSeeLaser && inNVGView && (mainPlayer.scoreCalculator?.irLaser ?? false)) canSeeLaser = true;
-            var canSeeLaserSub = mainPlayer.scoreCalculator?.vLaserSub ?? false;
-            if (!canSeeLaserSub && inNVGView && (mainPlayer.scoreCalculator?.irLaserSub ?? false)) canSeeLaserSub = true;
+            var canSeeLight = player.LightAndLaserState.VisibleLight;
+            if (!canSeeLight && inNVGView && player.LightAndLaserState.IRLight) canSeeLight = true;
+            var canSeeLightSub = player.LightAndLaserState.VisibleLightSub;
+            if (!canSeeLightSub && inNVGView && player.LightAndLaserState.IRLightSub) canSeeLightSub = true;
+            var canSeeLaser = player.LightAndLaserState.VisibleLaser;
+            if (!canSeeLaser && inNVGView && player.LightAndLaserState.IRLaser) canSeeLaser = true;
+            var canSeeLaserSub = player.LightAndLaserState.VisibleLaserSub;
+            if (!canSeeLaserSub && inNVGView && player.LightAndLaserState.IRLaserSub) canSeeLaserSub = true;
             if (visionAngleDelta > 110) canSeeLight = false;
             if (visionAngleDelta > 85) canSeeLaser = false;
             if (visionAngleDelta > 110) canSeeLightSub = false;
@@ -222,7 +207,7 @@ namespace ThatsLit
                 }
 
                 bool botIsInside = __instance.Owner.AIData.IsInside;
-                bool playerIsInside = mainPlayer.MainPlayer.AIData.IsInside;
+                bool playerIsInside = player.Player.AIData.IsInside;
                 if (!botIsInside && playerIsInside && insideTime >= 1)
                 {
                     var insideImpact = dis * Mathf.Clamp01(visionAngleDeltaVertical / 40f) * Mathf.Clamp01(visionAngleDelta / 60f) * (0.3f * seenPosDeltaFactorSqr + 0.7f * sinceSeenFactorSqr); // 50m -> 2.5/25 (BEST ANGLE), 10m -> 0.5/5
@@ -242,7 +227,7 @@ namespace ThatsLit
 
             float score, factor;
 
-            if (mainPlayer.disabledLit)
+            if (player.PlayerLitScoreProfile == null)
             {
                 score = factor = 0;
             }
@@ -250,7 +235,7 @@ namespace ThatsLit
                 score = factor = 0.7f;
             else
             {
-                score = mainPlayer.MultiFrameLitScore; // -1 ~ 1
+                score = player.PlayerLitScoreProfile.frame0.multiFrameLitScore; // -1 ~ 1
 
                 if (score < 0 && inNVGView)
                 {
@@ -265,10 +250,10 @@ namespace ThatsLit
                 if (score < 0 && inNVGView) // IR lights are not accounted in the score, process the score for each bot here
                 {
                     float compensationTarget = score;
-                    if (mainPlayer.scoreCalculator.irLight) compensationTarget = 0.4f;
-                    else if (mainPlayer.scoreCalculator.irLaser) compensationTarget = 0f;
-                    else if (mainPlayer.scoreCalculator.irLightSub) compensationTarget = 0f;
-                    else if (mainPlayer.scoreCalculator.irLaserSub) compensationTarget = 0f;
+                    if (player.LightAndLaserState.IRLight) compensationTarget = 0.4f;
+                    else if (player.LightAndLaserState.IRLaser) compensationTarget = 0f;
+                    else if (player.LightAndLaserState.IRLightSub) compensationTarget = 0f;
+                    else if (player.LightAndLaserState.IRLaserSub) compensationTarget = 0f;
                     score += Mathf.Clamp(compensationTarget - score, 0, 1) * (score / -1f);
                 }
 
@@ -279,43 +264,46 @@ namespace ThatsLit
             }
 
             bool nearestAI = false;
-            if (dis <= nearestRecent)
+            if (player.DebugInfo != null && dis <= nearestRecent)
             {
                 nearestRecent = dis;
                 nearestAI = true;
-                mainPlayer.lastNearest = nearestRecent;
-                if (Time.frameCount % 47 == 46)
+                player.DebugInfo.lastNearest = nearestRecent;
+                if (Time.frameCount % ThatsLitMainPlayerComponent.DEBUG_INTERVAL == ThatsLitMainPlayerComponent.DEBUG_INTERVAL - 1)
                 {
-                    mainPlayer.lastCalcFrom = original;
-                    mainPlayer.lastScore = score;
-                    mainPlayer.lastFactor1 = factor;
+                    player.DebugInfo.lastCalcFrom = original;
+                    player.DebugInfo.lastScore = score;
+                    player.DebugInfo.lastFactor1 = factor;
                 }
             }
 
-            var foliageImpact = mainPlayer.foliageScore * (1f - factor);
-            Vector2 bestMatchFoliageDir = Vector2.zero;
-            float bestMatchDeg = 360f;
-            for (int i = 0; i < Math.Min(ThatsLitPlugin.FoliageSamples.Value, mainPlayer.foliageCount); i++) {
-                var f = mainPlayer.foliage[i];
-                if (f == default) break;
-                var fDeg = Vector2.Angle(new Vector2(-eyeToPlayerBody.x, -eyeToPlayerBody.z), f.dir);
-                if (fDeg < bestMatchDeg)
-                {
-                    bestMatchDeg = fDeg;
-                    bestMatchFoliageDir = f.dir;
-                }
-            }
-            if (bestMatchFoliageDir != Vector2.zero) foliageImpact *= 1 - Mathf.Clamp01(bestMatchDeg / 90f); // 0deg -> 1, 90+deg -> 0
-                                                                                                             // Maybe randomly lose vision for foliages
-            float foliageBlindChance = Mathf.Clamp01(
-                                            disFactor // Mainly works for far away enemies
-                                            * foliageImpact
-                                            * ThatsLitPlugin.FoliageImpactScale.Value
-                                            * Mathf.Clamp01(1.35f - pPoseFactor)); // Lower chance for higher poses
-            if (UnityEngine.Random.Range(0f, 1.05f) < foliageBlindChance) // Among bushes, from afar, always at least 5% to be uneffective
+            if (player.Foliage != null)
             {
-                __result *= 1 + rand4 * (10f - caution * 0.5f);
-                __result += rand2 + rand3 * 2f * disFactor;
+                var foliageImpact = player.Foliage.FoliageScore * (1f - factor);
+                Vector2 bestMatchFoliageDir = Vector2.zero;
+                float bestMatchDeg = 360f;
+                for (int i = 0; i < Math.Min(ThatsLitPlugin.FoliageSamples.Value, player.Foliage.FoliageCount); i++) {
+                    var f = player.Foliage.Foliage[i];
+                    if (f == default) break;
+                    var fDeg = Vector2.Angle(new Vector2(-eyeToPlayerBody.x, -eyeToPlayerBody.z), f.dir);
+                    if (fDeg < bestMatchDeg)
+                    {
+                        bestMatchDeg = fDeg;
+                        bestMatchFoliageDir = f.dir;
+                    }
+                }
+                if (bestMatchFoliageDir != Vector2.zero) foliageImpact *= 1 - Mathf.Clamp01(bestMatchDeg / 90f); // 0deg -> 1, 90+deg -> 0
+                                                                                                                // Maybe randomly lose vision for foliages
+                float foliageBlindChance = Mathf.Clamp01(
+                                                disFactor // Mainly works for far away enemies
+                                                * foliageImpact
+                                                * ThatsLitPlugin.FoliageImpactScale.Value
+                                                * Mathf.Clamp01(1.35f - pPoseFactor)); // Lower chance for higher poses
+                if (UnityEngine.Random.Range(0f, 1.05f) < foliageBlindChance) // Among bushes, from afar, always at least 5% to be uneffective
+                {
+                    __result *= 1 + rand4 * (10f - caution * 0.5f);
+                    __result += rand2 + rand3 * 2f * disFactor;
+                }
             }
 
             var cqb5m = Mathf.InverseLerp(5f, 0f, dis - 1f); // 6+ -> 0, 1f -> 1
@@ -333,9 +321,9 @@ namespace ThatsLit
             var layingVerticaltInVisionFactor = 0f;
             var detailScore = 0f;
             var detailScoreRaw = 0f;
-            if (!inThermalView && !mainPlayer.skipDetailCheck)
+            if (!inThermalView && !player.skipDetailCheck)
             {
-                var terrainScore = mainPlayer.CalculateDetailScore(-eyeToPlayerBody, dis, visionAngleDeltaVertical);
+                var terrainScore = player.CalculateDetailScore(-eyeToPlayerBody, dis, visionAngleDeltaVertical);
                 if (terrainScore.prone > 0.1f || terrainScore.regular > 0.1f)
                 {
                     if (isInPronePose) // Handles cases where the player is laying on slopes and being very visible even with grasses
@@ -349,7 +337,7 @@ namespace ThatsLit
                         if (facingAngleDelta >= 90) xyFacingFactor = (180f - facingAngleDelta) / 90f;
                         else if (facingAngleDelta <= 90) xyFacingFactor = (facingAngleDelta) / 90f;
 #if DEBUG_DETAILS
-                        if (nearestAI) mainPlayer.lastRotateAngle = facingAngleDelta;
+                        if (player.DebugInfo != null && nearestAI) player.DebugInfo.lastRotateAngle = facingAngleDelta;
 #endif
                         xyFacingFactor = 1f - xyFacingFactor; // 0 ~ 1
 
@@ -358,9 +346,11 @@ namespace ThatsLit
                         var playerLegToHeadAlongVision = Vector3.ProjectOnPlane(playerLegToHead, normal);
                         layingVerticaltInVisionFactor = Vector3.SignedAngle(playerLegToBotEye, playerLegToHeadAlongVision, normal); // When the angle is 90, it means the player looks straight up in the vision, vice versa for -90.
 #if DEBUG_DETAILS
-                        if (nearestAI)
-                            if (layingVerticaltInVisionFactor >= 90f) mainPlayer.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
-                            else if (layingVerticaltInVisionFactor <= 0)  mainPlayer.lastTiltAngle = layingVerticaltInVisionFactor;
+                        if (player.DebugInfo != null && nearestAI)
+                        {
+                            if (layingVerticaltInVisionFactor >= 90f) player.DebugInfo.lastTiltAngle = (180f - layingVerticaltInVisionFactor);
+                            else if (layingVerticaltInVisionFactor <= 0)  player.DebugInfo.lastTiltAngle = layingVerticaltInVisionFactor;
+                        }
 #endif
 
                         if (layingVerticaltInVisionFactor >= 90f) layingVerticaltInVisionFactor = (180f - layingVerticaltInVisionFactor) / 15f; // the player is laying head up feet down in the vision...   "-> /"
@@ -423,28 +413,28 @@ namespace ThatsLit
                         }
                         __result *= 1 + detailImpact;
 
-                        if (nearestAI)
+                        if (player.DebugInfo != null && nearestAI)
                         {
-                            mainPlayer.lastTriggeredDetailCoverDirNearest = -eyeToPlayerBody;
+                            player.DebugInfo.lastTriggeredDetailCoverDirNearest = -eyeToPlayerBody;
                         }
                     }
                 }
-                if (nearestAI)
+                if (player.DebugInfo != null && nearestAI)
                 {
-                    mainPlayer.lastFinalDetailScoreNearest = detailScore;
-                    mainPlayer.lastDisFactorNearest = disFactor;
+                    player.DebugInfo.lastFinalDetailScoreNearest = detailScore;
+                    player.DebugInfo.lastDisFactorNearest = disFactor;
                 }
             }
 
             // BUSH RAT ----------------------------------------------------------------------------------------------------------------
             /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-            if (!inThermalView && mainPlayer.foliage != null && botImpactType != BotImpactType.BOSS
+            if (!inThermalView && player.Foliage != null && botImpactType != BotImpactType.BOSS
              && (!__instance.HaveSeen || lastSeenPosDelta > 30f + rand1 * 20f || sinceSeen > 150f + 150f*rand3 && lastSeenPosDelta > 10f + 10f*rand2))
             {
                 float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
                 bool bushRat = true;
 
-                FoliageInfo nearestFoliage = mainPlayer.foliage[0];
+                FoliageInfo nearestFoliage = player.Foliage.Foliage[0];
                 switch (nearestFoliage.name)
                 {
                     case "filbert_big01":
@@ -569,7 +559,7 @@ namespace ThatsLit
                 if (botImpactType == BotImpactType.FOLLOWER || canSeeLight || (canSeeLaser && rand3 < 0.2f)) bushRatFactor /= 2f;
                 if (bushRat && bushRatFactor > 0.01f)
                 {
-                    if (nearestAI) mainPlayer.foliageCloaking = bushRat;
+                    if (player.DebugInfo != null && nearestAI) player.DebugInfo.IsBushRatting = bushRat;
                     __result = Mathf.Max(__result, dis);
                     switch (caution)
                     {
@@ -606,18 +596,18 @@ namespace ThatsLit
             var notSoExtremeDarkFactor = Mathf.Clamp01((score - -0.5f) / -0.5f);
             notSoExtremeDarkFactor *= notSoExtremeDarkFactor;
 
-            if (mainPlayer.disabledLit && ThatsLitPlugin.AlternativeReactionFluctuation.Value)
+            if (player.PlayerLitScoreProfile == null && ThatsLitPlugin.AlternativeReactionFluctuation.Value)
             {
                 // https://www.desmos.com/calculator/jbghqfxwha
                 float cautionFactor = (caution / 9f - 0.5f) * (0.05f + 0.5f * rand4 * rand4); // -0.5(faster)~0.5(slower) squared curve distribution
                 __result += cautionFactor;
                 __result *= 1f + cautionFactor / 2f; // Factor in bot class
             }
-            else if (!mainPlayer.disabledLit && Mathf.Abs(score) >= 0.05f) // Skip works
+            else if (player.PlayerLitScoreProfile != null && Mathf.Abs(score) >= 0.05f) // Skip works
             {
-                if (mainPlayer.isWinterCache)
+                if (Singleton<ThatsLitGameworld>.Instance.IsWinter && player.Foliage != null)
                 {
-                    var emptiness = 1f - mainPlayer.foliageScore * detailScoreRaw;
+                    var emptiness = 1f - player.Foliage.FoliageScore * detailScoreRaw;
                     emptiness *= 1f - insideTime;
                     disFactor *= 0.7f + 0.3f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
                 }
@@ -731,18 +721,20 @@ namespace ThatsLit
             __result += ThatsLitPlugin.FinalOffset.Value;
             if (__result < 0.005f) __result = 0.005f;
 
-            if (Time.frameCount % 47 == 46 && nearestAI)
+            if (player.DebugInfo != null)
             {
-                mainPlayer.lastCalcTo = __result;
-                mainPlayer.lastFactor2 = factor;
-                mainPlayer.rawTerrainScoreSample = detailScoreRaw;
+                if (Time.frameCount % ThatsLitMainPlayerComponent.DEBUG_INTERVAL == ThatsLitMainPlayerComponent.DEBUG_INTERVAL - 1 && nearestAI)
+                {
+                    player.DebugInfo.lastCalcTo = __result;
+                    player.DebugInfo.lastFactor2 = factor;
+                    player.DebugInfo.rawTerrainScoreSample = detailScoreRaw;
+                }
+                player.DebugInfo.calced++;
+                player.DebugInfo.calcedLastFrame++;
             }
-            mainPlayer.calced++;
-            mainPlayer.calcedLastFrame++;
+            
 
-#region BENCHMARK
-            _benchmarkSW?.Stop();
-#endregion
+            ThatsLitPlugin.swSeenCoef.Stop();
         }
     }
 }

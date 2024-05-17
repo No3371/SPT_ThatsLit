@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using ThatsLit.Components;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,6 +21,5 @@ namespace ThatsLit
         }
 
         public static ThatsLitGameworld ThatsLitGameWorld { get; private set; }
-        public static ThatsLitMainPlayerComponent ThatsLitMainPlayer => ThatsLitGameWorld?.ThatsLitMainPlayer;
     }
 }

@@ -1,6 +1,5 @@
 using Aki.Reflection.Patching;
 using HarmonyLib;
-using ThatsLit.Components;
 using System.Reflection;
 using UnityEngine;
 using Comfort.Common;
@@ -29,26 +28,16 @@ namespace ThatsLit.Patches.Vision
         public static bool PatchPrefix(EnemyInfo __instance, bool value, ref State __state)
         {
             __state = default;
-            if (!__instance.Person.IsYourPlayer) return true; // SKIP non-player.
+    
+            ThatsLitMainPlayerComponent player = null;
+            Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
+            if (player == null) return true;
+
             if (!value) return true; // SKIP. Only works when the player is set to be visible to the bot.
             if (__instance.IsVisible) return true; // SKIP. Only works when the bot hasn't see the player. IsVisible means the player is already seen.
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
 
-#region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
-            {
-                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
-                if (_benchmarkSW.IsRunning)
-                {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped!";
-                    NotificationManagerClass.DisplayWarningNotification(message);
-                    Logger.LogWarning(message);
-                }
-                _benchmarkSW.Start();
-            }
-            else if (_benchmarkSW != null)
-                _benchmarkSW = null;
-#endregion
+            ThatsLitPlugin.swEncountering.MaybeResumme();
 
             Vector3 botLookDir = __instance.Owner.GetPlayer.LookDirection;
             Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
@@ -76,7 +65,7 @@ namespace ThatsLit.Patches.Vision
 
             if (Time.time - __instance.PersonalSeenTime >= 7f + rand3 * 5f && (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 36f + rand3 * 28f)
             {
-                if (Singleton<ThatsLitMainPlayerComponent>.Instance) Singleton<ThatsLitMainPlayerComponent>.Instance.encounter++;
+                if (player.DebugInfo != null) player.DebugInfo.encounter++;
                 __state = new State()
                 {
                     triggered = true,
@@ -86,9 +75,7 @@ namespace ThatsLit.Patches.Vision
                 };
             }
 
-#region BENCHMARK
-            _benchmarkSW?.Stop();
-#endregion
+            ThatsLitPlugin.swEncountering.Stop();
 
             return true;
         }
@@ -101,21 +88,7 @@ namespace ThatsLit.Patches.Vision
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;
 
-#region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
-            {
-                if (_benchmarkSW == null) _benchmarkSW = new System.Diagnostics.Stopwatch();
-                if (_benchmarkSW.IsRunning)
-                {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (Encountering)";
-                    NotificationManagerClass.DisplayWarningNotification(message);
-                    Logger.LogWarning(message);
-                }
-                _benchmarkSW.Start();
-            }
-            else if (_benchmarkSW != null)
-                _benchmarkSW = null;
-#endregion
+            ThatsLitPlugin.swEncountering.MaybeResumme();
 
             float rand = UnityEngine.Random.Range(0f, 1f);
             if (__state.botSprinting)
@@ -136,9 +109,7 @@ namespace ThatsLit.Patches.Vision
                 __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.15f * (rand)) * Mathf.Clamp01(__state.visionDeviation/15f));
             }
 
-#region BENCHMARK
-            _benchmarkSW?.Stop();
-#endregion
+            ThatsLitPlugin.swEncountering.Stop();
         }
     }
 }
