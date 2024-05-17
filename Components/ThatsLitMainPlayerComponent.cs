@@ -68,6 +68,7 @@ namespace ThatsLit
         static readonly LayerMask ambienceRaycastMask = (1 << LayerMask.NameToLayer("Terrain")) | (1 << LayerMask.NameToLayer("HighPolyCollider")) | (1 << LayerMask.NameToLayer("Grass")) | (1 << LayerMask.NameToLayer("Foliage"));
 
 
+        int MAX_DETAIL_TYPES = 20;
         public static bool CanLoad ()
         {
             bool result = CameraClass.Instance.OpticCameraManager.Camera != null;
@@ -787,6 +788,10 @@ namespace ThatsLit
                     if (!ThatsLitPlugin.DebugInfo.Value) return;
                 }
 
+                var poseFactor = Player.PoseLevel / Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
+                if (Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
+                poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
+
                 if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
                     OnGUIInfo();
 
@@ -809,9 +814,6 @@ namespace ThatsLit
 
                 // GUILayout.Label(string.Format(" FOLIAGE: {0:0.000} ({1}) (H{2:0.00} Y{3:0.00} to {4})", foliageScore, foliageCount, foliageDisH, foliageDisV, foliage));
 
-                var poseFactor = Player.PoseLevel / Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
-                if (Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
-                poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
                                     // GUILayout.Label(string.Format(" POSE: {0:0.000} LOOK: {1} ({2})", poseFactor, MainPlayer.LookDirection, DetermineDir(MainPlayer.LookDirection)));
                                     // GUILayout.Label(string.Format(" {0} {1} {2}", collidersCache[0]?.gameObject.name, collidersCache[1]?.gameObject?.name, collidersCache[2]?.gameObject?.name));
                 float fog = WeatherController.Instance?.WeatherCurve?.Fog ?? 0;
@@ -1416,8 +1418,6 @@ namespace ThatsLit
             if (vertical || S) yield return 5 * 3 + 2;
             // yield return 5 * 3 + 3;
         }
-
-        int MAX_DETAIL_TYPES = 20;
     }
 
     public struct TerrainDetailScore

@@ -55,8 +55,6 @@ namespace ThatsLit
                 Logger.LogError("Dispose Component Error");
             }
         }
-
-        internal static System.Diagnostics.Stopwatch _benchmarkSWTerrainCheck;
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
         public ThatsLitMainPlayerComponent MainThatsLitPlayer { get; private set; }
         public Dictionary<IPlayer, ThatsLitMainPlayerComponent> AllThatsLitPlayers { get; private set; }
@@ -275,22 +273,6 @@ namespace ThatsLit
                 return false;
             }
 
-#region BENCHMARK
-            if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
-            {
-                if (_benchmarkSWTerrainCheck == null) _benchmarkSWTerrainCheck = new System.Diagnostics.Stopwatch();
-                if (_benchmarkSWTerrainCheck.IsRunning)
-                {
-                    string message = $"[That's Lit] Benchmark stopwatch is not stopped! (TerrainDetails)";
-                    NotificationManagerClass.DisplayWarningNotification(message);
-                    Logger.LogWarning(message);
-                }
-                _benchmarkSWTerrainCheck.Start();
-            }
-            else if (_benchmarkSWTerrainCheck != null)
-                _benchmarkSWTerrainCheck = null;
-#endregion
-
             Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
             var currentLocationOnTerrainmap = new Vector2(hitRelativePos.x / terrain.terrainData.size.x, hitRelativePos.z / terrain.terrainData.size.z);
 
@@ -412,9 +394,6 @@ namespace ThatsLit
                         if (x >= 1 && x <= 3 && y >= 1 && y <= 3) player.RecentDetailCount3x3 += count;
                     }
             }
-            #region BENCHMARK
-            _benchmarkSWTerrainCheck?.Stop();
-            #endregion
             return true;
 
         }
