@@ -241,9 +241,9 @@ namespace ThatsLit
             // }
             
         }
-        static void CheckLightsOnItem(Item item, out bool vLight, out bool vLaser, out bool irLight, out bool irLaser, out bool vLightSub, out bool vLaserSub, out bool irLightSub, out bool irLaserSub)
+        static void CheckLightsOnItem(Item item, out bool vLight, out bool vLaser, out bool irLight, out bool irLaser)
         {
-            vLight = vLaser = irLight = irLaser = vLightSub = vLaserSub = irLightSub = irLaserSub = false;
+            vLight = vLaser = irLight = irLaser = false;
             if (item == null) return;
 
             Weapon weapon = item as Weapon;
@@ -277,74 +277,66 @@ namespace ThatsLit
             irLaserSub = false;
 
             Weapon activeWeapon = player?.ActiveSlot?.ContainedItem as Weapon;
-            CheckLightsOnItem(activeWeapon, out var it_vLight, out var it_vLaser, out var it_irLight, out var it_irLaser, out var it_vLightSub, out var it_vLaserSub, out var it_irLightSub, out var it_irLaserSub);
-            if (it_vLight)
-            {
-                vLight = true;
-                return; // Early return because visible light is determining
-            }
+            CheckLightsOnItem(activeWeapon, out var it_vLight, out var it_vLaser, out var it_irLight, out var it_irLaser);
+
 
             vLight |= it_vLight;
             vLaser |= it_vLaser;
             irLight |= it_irLight;
             irLaser |= it_irLaser;
-            vLightSub |= it_vLightSub;
-            vLaserSub |= it_vLaserSub;
-            irLightSub |= it_irLightSub;
-            irLaserSub |= it_irLaserSub;
+            if (vLight)
+            {
+                return; // Early return because visible light is determining
+            }
 
             var inv = player?.ActiveSlot?.ContainedItem?.Owner as InventoryControllerClass;
             EquipmentClass equipment = inv?.Inventory?.Equipment;
             if (equipment == null) return;
 
-            CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.Headwear)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser, out it_vLightSub, out it_vLaserSub, out it_irLightSub, out it_irLaserSub);
-            if (it_vLight)
+            CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.Headwear)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser);
+
+            
+            vLight |= it_vLight;
+            vLaser |= it_vLaser;
+            irLight |= it_irLight;
+            irLaser |= it_irLaser;
+            if (vLight)
             {
-                vLight = true;
                 return; // Early return because visible light is determining
             }
-            
-            vLight |= it_vLight;
-            vLaser |= it_vLaser;
-            irLight |= it_irLight;
-            irLaser |= it_irLaser;
-            vLightSub |= it_vLightSub;
-            vLaserSub |= it_vLaserSub;
-            irLightSub |= it_irLightSub;
-            irLaserSub |= it_irLaserSub;
 
-            CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser, out it_vLightSub, out it_vLaserSub, out it_irLightSub, out it_irLaserSub);
-            
-            vLight |= it_vLight;
-            vLaser |= it_vLaser;
-            irLight |= it_irLight;
-            irLaser |= it_irLaser;
-            vLightSub |= it_vLightSub;
-            vLaserSub |= it_vLaserSub;
-            irLightSub |= it_irLightSub;
-            irLaserSub |= it_irLaserSub;
+            if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon))
+            {
+                CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser);
+                
+                vLightSub |= it_vLight;
+                vLaserSub |= it_vLaser;
+                irLightSub |= it_irLight;
+                irLaserSub |= it_irLaser;
+            }
 
-            CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.Holster)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser, out it_vLightSub, out it_vLaserSub, out it_irLightSub, out it_irLaserSub);
-            
-            vLight |= it_vLight;
-            vLaser |= it_vLaser;
-            irLight |= it_irLight;
-            irLaser |= it_irLaser;
-            vLightSub |= it_vLightSub;
-            vLaserSub |= it_vLaserSub;
-            irLightSub |= it_irLightSub;
-            irLaserSub |= it_irLaserSub;
 
-            CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser, out it_vLightSub, out it_vLaserSub, out it_irLightSub, out it_irLaserSub);
-            
-            vLight |= it_vLight;
-            vLaser |= it_vLaser;
-            irLight |= it_irLight;
-            irLaser |= it_irLaser;
-            vLightSub |= it_vLightSub;
-            vLaserSub |= it_vLaserSub;
-            irLightSub |= it_irLightSub;
-            irLaserSub |= it_irLaserSub;
+
+            if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon))
+            {
+                CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser);
+                
+                vLightSub |= it_vLight;
+                vLaserSub |= it_vLaser;
+                irLightSub |= it_irLight;
+                irLaserSub |= it_irLaser;
+            }
+
+
+            if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.Holster))
+            {
+                CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.Holster)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser);
+                
+                vLightSub |= it_vLight;
+                vLaserSub |= it_vLaser;
+                irLightSub |= it_irLight;
+                irLaserSub |= it_irLaser;
+            }
 
             // GClass2550 544909bb4bdc2d6f028b4577 x item tactical_all_insight_anpeq15 2457 / V + IR + IRL / MODES: 4  V -> IR -> IRL -> IR+IRL
             // 560d657b4bdc2da74d8b4572 tactical_all_zenit_2p_kleh_vis_laser MODES: 3, F -> F+V -> V
