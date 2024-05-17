@@ -84,6 +84,7 @@
     </Reference>
     <Reference Include="ItemComponent.Types" />
     <Reference Include="UnityEngine.UI" />
+    <Reference Include="UnityEngine.JSONSerializeModule" />
     <Reference Include="UnityEngine.IMGUIModule" />
     <Reference Include="UnityEngine.PhysicsModule.dll">
       <HintPath>$(ManagedAssembliesPath)\UnityEngine.PhysicsModule.dll</HintPath>
