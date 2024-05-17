@@ -66,8 +66,20 @@ namespace ThatsLit
         internal PlayerFoliageProfile Foliage;
         internal PlayerLitScoreProfile PlayerLitScoreProfile { get; set;}
         static readonly LayerMask ambienceRaycastMask = (1 << LayerMask.NameToLayer("Terrain")) | (1 << LayerMask.NameToLayer("HighPolyCollider")) | (1 << LayerMask.NameToLayer("Grass")) | (1 << LayerMask.NameToLayer("Foliage"));
-
-
+        internal delegate bool CheckStimEffectProxy (EFT.HealthSystem.EStimulatorBuffType buff);
+        internal CheckStimEffectProxy CheckEffectDelegate
+        {
+            get
+            {
+                if (checkEffectDelegate == null)
+                {
+                    var methodInfo = ReflectionHelper.FindMethodByArgTypes(Player.ActiveHealthController.GetType(), new Type[] { typeof(EFT.HealthSystem.EStimulatorBuffType) }, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                    checkEffectDelegate = (CheckStimEffectProxy) methodInfo.CreateDelegate(typeof(CheckStimEffectProxy));
+                }
+                return checkEffectDelegate;
+            }
+        }
+        private CheckStimEffectProxy checkEffectDelegate;
         int MAX_DETAIL_TYPES = 20;
         public static bool CanLoad ()
         {

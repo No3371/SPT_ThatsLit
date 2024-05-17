@@ -8,6 +8,7 @@ using UnityEngine;
 using Comfort.Common;
 using EFT.InventoryLogic;
 using System.Diagnostics;
+using EFT.HealthSystem;
 
 
 namespace ThatsLit
@@ -239,7 +240,11 @@ namespace ThatsLit
                 score = factor = 0;
             }
             else if (inThermalView)
+            {
                 score = factor = 0.7f;
+                if (player.CheckEffectDelegate(EStimulatorBuffType.BodyTemperature))
+                    score = -0.6f; // Harder to tell 
+            }
             else
             {
                 score = player.PlayerLitScoreProfile.frame0.multiFrameLitScore; // -1 ~ 1
