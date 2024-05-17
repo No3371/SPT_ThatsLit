@@ -2,7 +2,6 @@
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using DrakiaXYZ.VersionChecker;
-using ThatsLit.Components;
 using ThatsLit.Helpers;
 using System;
 using UnityEngine;
