@@ -42,6 +42,10 @@
       <HintPath>$(ManagedAssembliesPath)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="DissonanceVoip">
+      <HintPath>$(ManagedAssembliesPath)\DissonanceVoip.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Comfort">
       <Private>False</Private>
       <HintPath>$(ManagedAssembliesPath)\Comfort.dll</HintPath>
