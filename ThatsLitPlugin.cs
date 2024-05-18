@@ -151,7 +151,6 @@ namespace ThatsLit
 
 
             category                   = "7. Performance";
-            LessFoliageCheck           = Config.Bind(category, "Less Foliage Check", false, "Check surrounding foliage a bit less frequent. May or may not help with CPU usage but slower to update surrounding foliages.");
             LessEquipmentCheck         = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
             ResLevel                 = Config.Bind(category, "Resolustion Level", 2,
                                                    new ConfigDescription("Resolution of the observed image by the observer camera, higher level means somewhat higher accuracy. Has an impact on CPU time. Level1 -> 32x32, Level2 -> 64x64... This config is used on raid start.", new AcceptableValueRange<int>(1, 4)));
@@ -201,7 +200,6 @@ namespace ThatsLit
         public static ConfigEntry<float> VagueHintChance { get; private set; }
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
         public static ConfigEntry<bool> IncludeBosses { get; private set; }
-        public static ConfigEntry<bool> LessFoliageCheck { get; private set; }
         public static ConfigEntry<bool> LessEquipmentCheck { get; private set; }
         public static ConfigEntry<bool> EnableLighthouse { get; private set; }
         public static ConfigEntry<bool> EnableFactoryNight { get; private set; }

@@ -153,7 +153,7 @@ namespace ThatsLit
             player.LastCheckedTime = Time.time;
             player.FoliageScore = 0;
 
-            if (Time.time < player.LastCheckedTime + (ThatsLitPlugin.LessFoliageCheck.Value ? 0.7f : 0.35f)) return;
+            if (Time.time < player.LastCheckedTime + 0.45f) return;
             // Skip if basically standing still
             if ((bodyPos - player.LastCheckedPos).magnitude < 0.05f)
             {
