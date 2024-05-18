@@ -90,61 +90,75 @@ namespace ThatsLit
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
             var visionAngleDelta90Clamped = Mathf.Clamp01(visionAngleDelta / 90f);
+            var visionAngleDeltaHorizontal = Vector3.Angle(new Vector3(botVisionDir.x, 0, botVisionDir.z), new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z));
             // negative if looking down (from higher pos), 0 when looking straight...
-            var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody) * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
+            var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody); 
+            var visionAngleDeltaVerticalSigned = visionAngleDeltaVertical * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
 
             var dis = eyeToPlayerBody.magnitude;
-            float disFactor = 0;
+            float disFactor = Mathf.Clamp01((dis - 10) / 100f);
             float disFactorSmooth = 0;
             bool inThermalView = false;
             bool inNVGView = false;
+            bool gearBlocking = false; // Not blokcing for now, because AIs don't look around (nvg/thermal still ineffective when out of FOV)
             float insideTime = Mathf.Max(0, Time.time - player.lastOutside);
 
-
+            ThatsLitCompat.ScopeTemplate activeScope = null;
             BotNightVisionData nightVision = __instance.Owner.NightVision;
-            bool usingNVG = nightVision?.UsingNow ?? false;
-            if (usingNVG) // Goggles
+            ThatsLitCompat.GoggleTemplate activeGoggle = null;
+            if (nightVision?.UsingNow == true) 
+                activeGoggle = ThatsLitCompat.GetGoggleTemplate(nightVision.NightVisionItem.Item.TemplateId);
+            if (activeGoggle != null) 
             {
-                switch (nightVision.NightVisionItem.Item.TemplateId)
+                if (nightVision.NightVisionItem?.Template?.Mask == NightVisionComponent.EMask.Thermal
+                 && activeGoggle.thermal != null
+                 && activeGoggle.thermal.effectiveDistance > dis)
+                 {
+                    if (activeGoggle.thermal.verticalFOV > visionAngleDeltaVertical
+                     && activeGoggle.thermal.horizontalFOV > visionAngleDeltaHorizontal)
+                    {
+                        inThermalView = true;
+                    }
+                    else
+                    {
+                        gearBlocking = true;
+                    }
+                 }
+                else if (nightVision.NightVisionItem?.Template?.Mask != NightVisionComponent.EMask.Thermal
+                      && activeGoggle.nightVision != null)
                 {
-
+                    if (activeGoggle.nightVision.verticalFOV > visionAngleDeltaVertical
+                     && activeGoggle.nightVision.horizontalFOV > visionAngleDeltaHorizontal)
+                    {
+                        inNVGView = true;
+                    }
+                    else
+                    {
+                        gearBlocking = true;
+                    }
                 }
-                if (nightVision.NightVisionItem?.Template?.Mask == NightVisionComponent.EMask.Thermal) inThermalView = true;
-                else if (nightVision.NightVisionItem?.Template?.Mask != null) inNVGView = true;
             }
             else if (UnityEngine.Random.Range((__instance.Owner.Mover?.IsMoving ?? false) ? -4f : -1f, 1f) > Mathf.Clamp01(visionAngleDelta / 15f)) // ADS
             {
                 EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
                 if (sightMod != null)
-                {
+                    activeScope = ThatsLitCompat.GetScopeTemplate(sightMod.Item.TemplateId);
+                if (activeScope != null) {
                     if (rand1 < 0.1f) sightMod.SetScopeMode(UnityEngine.Random.Range(0, sightMod.ScopesCount), UnityEngine.Random.Range(0, 2));
                     float currentZoom = sightMod.GetCurrentOpticZoom();
                     if (currentZoom == 0) currentZoom = 1;
 
-                    if (visionAngleDelta <= 60f / currentZoom) // Scoped?  (btw AIs using NVGs does not get the scope buff (Realism style)
+                    if (visionAngleDelta <= 60f / currentZoom) // In scope fov
                     {
                         disFactor = Mathf.Clamp01((dis / currentZoom - 10) / 100f);
-                        var compat = ThatsLitCompat.GetScopeTemplate(sightMod.Item.TemplateId);
-                        if (compat?.thermal != null  && dis <= compat.thermal.effectiveDistance)
+                        if (activeScope?.thermal != null  && dis <= activeScope.thermal.effectiveDistance)
                         {
                             inThermalView = true;
                         }
-                        else if (compat?.nightVision != null)
+                        else if (activeScope?.nightVision != null)
                             inNVGView = true;
                     }
-                    else if (dis > 10) // Regular
-                    {
-                        disFactor = Mathf.Clamp01((dis - 10) / 100f);
-                    }
                 }
-                else if (dis > 10) // Regular
-                {
-                    disFactor = Mathf.Clamp01((dis - 10) / 100f);
-                }
-            }
-            else if (dis > 10) // Regular
-            {
-                disFactor = Mathf.Clamp01((dis - 10) / 100f);
             }
 
             if (disFactor > 0)
@@ -180,7 +194,7 @@ namespace ThatsLit
             // ======
             if (sinceSeen > 15f && !canSeeLight)
             {
-                var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVertical - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVertical - 15) / 180f);
+                var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVerticalSigned - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVerticalSigned - 15) / 180f);
                 // (unscaled) 30deg -> 8%, 45deg->20%, 60deg -> 41%, 75deg->69%, 80deg->80%, 85deg->92%
                 // Overlook close enemies at higher attitude and in low pose
                 var overheadChance = Mathf.Clamp01(weight) * (1.025f - pPoseFactor / 2f); // prone: 1.0x, crouch: 0.8x, stand: 0.5x
@@ -218,7 +232,7 @@ namespace ThatsLit
                 bool playerIsInside = player.Player.AIData.IsInside;
                 if (!botIsInside && playerIsInside && insideTime >= 1)
                 {
-                    var insideImpact = dis * Mathf.Clamp01(visionAngleDeltaVertical / 40f) * Mathf.Clamp01(visionAngleDelta / 60f) * (0.3f * seenPosDeltaFactorSqr + 0.7f * sinceSeenFactorSqr); // 50m -> 2.5/25 (BEST ANGLE), 10m -> 0.5/5
+                    var insideImpact = dis * Mathf.Clamp01(visionAngleDeltaVerticalSigned / 40f) * Mathf.Clamp01(visionAngleDelta / 60f) * (0.3f * seenPosDeltaFactorSqr + 0.7f * sinceSeenFactorSqr); // 50m -> 2.5/25 (BEST ANGLE), 10m -> 0.5/5
                     __result *= 1 + insideImpact * (0.75f + rand3 * 0.05f * caution);
                 }
             }
@@ -251,12 +265,27 @@ namespace ThatsLit
 
                 if (score < 0 && inNVGView)
                 {
-                    if (score < -0.85f)
-                        score *= UnityEngine.Random.Range(0.6f, 0.8f); // It's really dark, slightly scale down
-                    else if (score < -0.65f)
-                        score *= UnityEngine.Random.Range(0.5f, 0.7f); // It's quite dark, scale down
-                    else if (score < 0)
-                        score *= 0.35f; // It's not really that dark, scale down massively
+                    float fluctuation = 1f + (rand2 - 0.5f) * 0.2f;
+                    if (activeGoggle?.nightVision != null)
+                    {
+                        if (score < -0.85f)
+                        {
+                            score *= 1f - Mathf.Clamp01(activeGoggle.nightVision.nullificationExtremeDark * fluctuation); // It's really dark, slightly scale down
+                        }
+                        else if (score < -0.65f)
+                            score *= 1f - Mathf.Clamp01(activeGoggle.nightVision.nullificationDarker * fluctuation); // It's quite dark, scale down
+                        else if (score < 0)
+                            score *= 1f - Mathf.Clamp01(activeGoggle.nightVision.nullification); // It's not really that dark, scale down massively
+                    }
+                    else if (activeScope?.nightVision != null)
+                    {
+                        if (score < -0.85f)
+                            score *= Mathf.Clamp01(0.8f * fluctuation); // It's really dark, slightly scale down
+                        else if (score < -0.65f)
+                            score *= Mathf.Clamp01(0.6f * fluctuation); // It's quite dark, scale down
+                        else if (score < 0)
+                            score *= 0.25f; // It's not really that dark, scale down massively
+                    }
                 }
 
                 if (score < 0 && inNVGView) // IR lights are not accounted in the score, process the score for each bot here
@@ -335,7 +364,7 @@ namespace ThatsLit
             var detailScoreRaw = 0f;
             if (!inThermalView && player.TerrainDetails != null)
             {
-                var terrainScore = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.TerrainDetails, -eyeToPlayerBody, dis, visionAngleDeltaVertical);
+                var terrainScore = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.TerrainDetails, -eyeToPlayerBody, dis, visionAngleDeltaVerticalSigned);
                 if (terrainScore.prone > 0.1f || terrainScore.regular > 0.1f)
                 {
                     if (isInPronePose) // Handles cases where the player is laying on slopes and being very visible even with grasses
@@ -374,7 +403,7 @@ namespace ThatsLit
                     else
                     {
                         detailScore = terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor));
-                        detailScore *= (1f - cqb10mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVertical); // nerf when high pose or < 10m or  looking down
+                        detailScore *= (1f - cqb10mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVerticalSigned); // nerf when high pose or < 10m or  looking down
                     }
 
                     detailScore = Mathf.Min(detailScore, 2.5f - pPoseFactor); // Cap extreme grasses for high poses
@@ -388,16 +417,16 @@ namespace ThatsLit
                     {
                         case 0:
                             detailScore /= 1.5f;
-                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 30f); // nerf starting from looking 5deg up to down (scaled by down to -25deg) and scaled by dis 15 ~ 0
+                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 30f); // nerf starting from looking 5deg up to down (scaled by down to -25deg) and scaled by dis 15 ~ 0
                             break;
                         case 1:
                             detailScore /= 1.25f;
-                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 40f); // nerf starting from looking 5deg up (scaled by down to -40deg) and scaled by dis 15 ~ 0
+                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 40f); // nerf starting from looking 5deg up (scaled by down to -40deg) and scaled by dis 15 ~ 0
                             break;
                         case 2:
                         case 3:
                         case 4:
-                            detailScore *= 1f - cqb10mSquared * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 40f);
+                            detailScore *= 1f - cqb10mSquared * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 40f);
                             break;
                         case 5:
                         case 6:
@@ -405,7 +434,7 @@ namespace ThatsLit
                         case 8:
                         case 9:
                             detailScore *= 1.2f;
-                            detailScore *= 1f - cqb5m * Mathf.Clamp01((5f - visionAngleDeltaVertical) / 50f); // nerf starting from looking 5deg up (scaled by down to -50deg) and scaled by dis 5 ~ 0
+                            detailScore *= 1f - cqb5m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 50f); // nerf starting from looking 5deg up (scaled by down to -50deg) and scaled by dis 5 ~ 0
                             break;
                     }
 
@@ -454,7 +483,7 @@ namespace ThatsLit
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.8f) / 0.7f);
                         enemyDisFactor = Mathf.Clamp01(dis / 2.5f); // 100% at 2.5m+
                         poseScale = 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.55f); // 100% at crouch
-                        yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVertical / 60f); // +60deg => 1, 0deg => 1, -30deg => 0.5f, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
+                        yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVerticalSigned / 60f); // +60deg => 1, 0deg => 1, -30deg => 0.5f, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                         break;
                     case "filbert_big02":
                         angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 20f);
@@ -528,7 +557,7 @@ namespace ThatsLit
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 1f) / 0.4f);
                         enemyDisFactor = Mathf.Clamp01(dis / 15f);
                         poseScale = 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.1f);
-                        yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVertical / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
+                        yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVerticalSigned / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                         break;
                     case "bush_dry03":
                         angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 20f);
@@ -537,14 +566,14 @@ namespace ThatsLit
                         poseScale = pPoseFactor == 0.05f ? 0.6f : 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.55f); // 100% at crouch
                         break;
                     case "tree02":
-                        yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVertical - 10) / 40f); // bonus against bots up high
+                        yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVerticalSigned - 10) / 40f); // bonus against bots up high
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 45f); // 0deg -> 0, 75 deg -> 1
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis * yDeltaFactor / 20f);
                         poseScale = pPoseFactor == 0.05f ? 0 : 0.1f + (pPoseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
                         break;
                     case "pine01":
-                        yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVertical - 10) / 40f); // bonus against bots up high
+                        yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVerticalSigned - 10) / 40f); // bonus against bots up high
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 30f); // 0deg -> 0, 75 deg -> 1
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.35f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis * yDeltaFactor / 25f);
@@ -555,7 +584,7 @@ namespace ThatsLit
                         foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.45f); // 0.3 -> 100%, 0.55 -> 0%
                         enemyDisFactor = Mathf.Clamp01(dis / 20f);
                         poseScale = pPoseFactor == 0.05f ? 0 : 0.5f + (pPoseFactor - 0.45f) / 0.55f * 0.5f; // standing is better with this tall one
-                        yDeltaFactor = Mathf.Clamp01((-visionAngleDeltaVertical - 15) / 45f); // only against bots up high
+                        yDeltaFactor = Mathf.Clamp01((-visionAngleDeltaVerticalSigned - 15) / 45f); // only against bots up high
                         break;
                     case "fern01":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 25f); // 0deg -> 0, 75 deg -> 1
