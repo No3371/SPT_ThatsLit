@@ -487,30 +487,34 @@ namespace ThatsLit
             // yield return 5 * 3 + 3;
         }
 
-        internal bool CheckTerrainDetails(Vector3 position, PlayerTerrainDetailsProfile player)
+        internal void CheckTerrainDetails(Vector3 position, PlayerTerrainDetailsProfile player)
         {
             if (GPUInstancerDetailManager.activeManagerList?.Count == 0)
             {
                 terrainDetailsUnavailable = true;
                 Logger.LogInfo($"Active detail managers not found, disabling detail check...");
-                return false;
+                return;
             }
 
-            if (player == null || terrainDetailsUnavailable) return false;
+            if ((position - player.LastCheckedPos).magnitude < 0.1f) return ;
+
+            if (player == null || terrainDetailsUnavailable) return ;
             if (player.Details5x5 != null) Array.Clear(player.Details5x5, 0, player.Details5x5.Length);
             player.RecentDetailCount3x3 = 0;
+            player.LastCheckedTime = Time.time;
+            player.LastCheckedPos = position;
 
             var ray = new Ray(position, Vector3.down);
-            if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return false;
+            if (!Physics.Raycast(ray, out var hit, 100, LayerMaskClass.TerrainMask)) return ;
 
             var terrain = hit.transform?.GetComponent<Terrain>();
             GPUInstancerDetailManager manager = terrain?.GetComponent<GPUInstancerTerrainProxy>()?.detailManager;
 
-            if (!terrain || !manager || !manager.isInitialized) return false;
+            if (!terrain || !manager || !manager.isInitialized) return ;
             if (!terrainDetailMaps.TryGetValue(terrain, out var detailMap))
             {
                 if (gatheringDetailMap == null) gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(terrain));
-                return false;
+                return;
             }
 
             Vector3 hitRelativePos = hit.point - (terrain.transform.position + terrain.terrainData.bounds.min);
@@ -634,7 +638,7 @@ namespace ThatsLit
                         if (x >= 1 && x <= 3 && y >= 1 && y <= 3) player.RecentDetailCount3x3 += count;
                     }
             }
-            return true;
+            return;
 
         }
         Dictionary<Terrain, SpatialPartitionClass> terrainSpatialPartitions = new Dictionary<Terrain, SpatialPartitionClass>();

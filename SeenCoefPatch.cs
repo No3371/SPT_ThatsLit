@@ -333,7 +333,7 @@ namespace ThatsLit
             var layingVerticaltInVisionFactor = 0f;
             var detailScore = 0f;
             var detailScoreRaw = 0f;
-            if (!inThermalView && !player.skipDetailCheck)
+            if (!inThermalView && player.TerrainDetails != null)
             {
                 var terrainScore = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.TerrainDetails, -eyeToPlayerBody, dis, visionAngleDeltaVertical);
                 if (terrainScore.prone > 0.1f || terrainScore.regular > 0.1f)

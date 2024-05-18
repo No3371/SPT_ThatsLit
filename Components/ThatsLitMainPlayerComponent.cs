@@ -49,9 +49,7 @@ namespace ThatsLit
         float lastCheckedLights;
         public static RaidSettings ActiveRaidSettings => Singleton<ThatsLitGameworld>.Instance.activeRaidSettings;
         public Player Player { get; internal set; }
-        internal bool skipFoliageCheck, skipDetailCheck;
         public float fog, rain, cloud;
-        internal int recentDetailCount3x3;
         AsyncGPUReadbackRequest gquReq;
         internal float lastOutside;
         /// <summary>
@@ -763,7 +761,7 @@ namespace ThatsLit
             if (PlayerLitScoreProfile != null) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(PlayerLitScoreProfile.frame0.multiFrameLitScore, POWER) / 0.0999f));
             if (Foliage != null && Foliage.FoliageScore > 0 && ThatsLitPlugin.FoliageInfo.Value)
                 Utility.GUILayoutFoliageMeter((int)(Foliage.FoliageScore / 0.0999f));
-            if (!skipDetailCheck && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
+            if (TerrainDetails != null && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
                 if (Player.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
                 else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
             if (Time.time < awakeAt + 10)
@@ -832,7 +830,7 @@ namespace ThatsLit
                 float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
                 
                 if (guiFrame < Time.frameCount)
-                    infoCache1 = $"  IMPACT: {DebugInfo.lastCalcFrom:0.000} -> {DebugInfo.lastCalcTo:0.000} ({DebugInfo.lastFactor2:0.000} <- {DebugInfo.lastFactor1:0.000} <- {DebugInfo.lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {DebugInfo.calced} (+{DebugInfo.calcedLastFrame}) / ENCOUNTER: {DebugInfo.encounter}\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000} 3x3:( { recentDetailCount3x3 } ) (score-{ PlayerLitScoreProfile.detailBonusSmooth:0.00})  FOLIAGE: {Foliage?.FoliageScore:0.000} ({Foliage?.FoliageCount}) (H{Foliage?.Foliage?[0].dis:0.00} to {Foliage?.Foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {Utility.GetInGameDayTime():0.000} / WINTER: {Singleton<ThatsLitGameworld>.Instance.IsWinter}\n  POSE: {poseFactor} SPEED: { Player.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
+                    infoCache1 = $"  IMPACT: {DebugInfo.lastCalcFrom:0.000} -> {DebugInfo.lastCalcTo:0.000} ({DebugInfo.lastFactor2:0.000} <- {DebugInfo.lastFactor1:0.000} <- {DebugInfo.lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {DebugInfo.calced} (+{DebugInfo.calcedLastFrame}) / ENCOUNTER: {DebugInfo.encounter}\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000} 3x3:( { TerrainDetails.RecentDetailCount3x3 } ) (score-{ PlayerLitScoreProfile.detailBonusSmooth:0.00})  FOLIAGE: {Foliage?.FoliageScore:0.000} ({Foliage?.FoliageCount}) (H{Foliage?.Foliage?[0].dis:0.00} to {Foliage?.Foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {Utility.GetInGameDayTime():0.000} / WINTER: {Singleton<ThatsLitGameworld>.Instance.IsWinter}\n  POSE: {poseFactor} SPEED: { Player.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
                 GUILayout.Label(infoCache1);
                 // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
                 
