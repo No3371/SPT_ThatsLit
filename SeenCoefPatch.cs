@@ -263,7 +263,7 @@ namespace ThatsLit
             {
                 score = factor = 0.7f;
                 if (player.CheckEffectDelegate(EStimulatorBuffType.BodyTemperature))
-                    score = -0.6f; // Harder to tell 
+                    score = factor = 0.7f;
             }
             else
             {
