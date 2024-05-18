@@ -4,7 +4,9 @@
         {
             "name": "vanilla_general_nv_scopes",
             "nightVision": {
-                "visibilityBonusScale": 1.0
+                "nullification": 0.8,
+                "nullificationDarker": 0.4,
+                "nullificationExtremeDark": 0.3
             },
             "thermal": null,
             "_comment": null

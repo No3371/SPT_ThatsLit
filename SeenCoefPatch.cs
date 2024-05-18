@@ -286,11 +286,11 @@ namespace ThatsLit
                     else if (activeScope?.nightVision != null)
                     {
                         if (score < -0.85f)
-                            score *= Mathf.Clamp01(0.8f * fluctuation); // It's really dark, slightly scale down
+                            score *= 1f - Mathf.Clamp01(activeScope.nightVision.nullificationExtremeDark * fluctuation); // It's really dark, slightly scale down
                         else if (score < -0.65f)
-                            score *= Mathf.Clamp01(0.6f * fluctuation); // It's quite dark, scale down
+                            score *= 1f - Mathf.Clamp01(activeScope.nightVision.nullificationDarker * fluctuation); // It's quite dark, scale down
                         else if (score < 0)
-                            score *= 0.25f; // It's not really that dark, scale down massively
+                            score *= 1f - Mathf.Clamp01(activeScope.nightVision.nullification); // It's not really that dark, scale down massively
                     }
                 }
 

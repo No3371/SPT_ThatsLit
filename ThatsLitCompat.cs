@@ -147,7 +147,6 @@ namespace ThatsLit
         [System.Serializable]
         public class NightVision
         {
-            public float visibilityBonusScale { get; set; }
             public int horizontalFOV { get; set; }
             public int verticalFOV { get; set; }
             public float nullification { get; set; }
