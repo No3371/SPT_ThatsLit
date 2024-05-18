@@ -89,7 +89,7 @@ namespace ThatsLit
 
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
-            var visionAngleDelta90Clamped = Mathf.Clamp01(visionAngleDelta / 90f);
+            var visionAngleDelta90Clamped = Mathf.InverseLerp(0, 90, visionAngleDelta);
             var visionAngleDeltaHorizontal = Vector3.Angle(new Vector3(botVisionDir.x, 0, botVisionDir.z), new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z));
             // negative if looking down (from higher pos), 0 when looking straight...
             var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody); 
@@ -353,16 +353,19 @@ namespace ThatsLit
                 }
             }
 
-            var cqb5m = Mathf.InverseLerp(5f, 0f, dis - 1f); // 6+ -> 0, 1f -> 1
-            var cqb15m = Mathf.InverseLerp(15f, 0f, dis - 1f); // 6+ -> 0, 1f -> 1                                                               // Fix for blind bots who are already touching us
+            // CBQ Factors =====
+            // The closer it is, the higher the factors
+            var cqb6mTo1m = Mathf.InverseLerp(5f, 0f, dis - 1f); // 6+ -> 0, 1f -> 1
+            var cqb16mTo1m = Mathf.InverseLerp(15f, 0f, dis - 1f); // 16+ -> 0, 1f -> 1                                                               // Fix for blind bots who are already touching us
 
-            var cqb10mSquared = 1 - Mathf.Clamp01((dis - 1) / 10f); // 11+ -> 0, 1 -> 1, 6 ->0.5
-            cqb10mSquared *= cqb10mSquared; // 6m -> 25%, 1m -> 100%
+            var cqb11mTo1mSquared = Mathf.InverseLerp(10f, 0, dis - 1f); // 11+ -> 0, 1 -> 1, 6 ->0.5
+            cqb11mTo1mSquared *= cqb11mTo1mSquared; // 6m -> 25%, 1m -> 100%
 
             // Scale down cqb factors for AIs facing away
-            cqb5m *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
-            cqb15m *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
-            cqb10mSquared *=  Mathf.Clamp01((90f - visionAngleDelta) / 90f);
+            // not scaled down when ~15deg
+            cqb6mTo1m *= Mathf.InverseLerp(100f, 15f, visionAngleDelta);
+            cqb16mTo1m *= Mathf.InverseLerp(100f, 15f, visionAngleDelta);
+            cqb11mTo1mSquared *= Mathf.InverseLerp(100f, 15f, visionAngleDelta);
 
             var xyFacingFactor = 0f;
             var layingVerticaltInVisionFactor = 0f;
@@ -409,7 +412,7 @@ namespace ThatsLit
                     else
                     {
                         detailScore = terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor));
-                        detailScore *= (1f - cqb10mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVerticalSigned); // nerf when high pose or < 10m or  looking down
+                        detailScore *= (1f - cqb11mTo1mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVerticalSigned); // nerf when high pose or < 10m or  looking down
                     }
 
                     detailScore = Mathf.Min(detailScore, 2.5f - pPoseFactor); // Cap extreme grasses for high poses
@@ -423,16 +426,16 @@ namespace ThatsLit
                     {
                         case 0:
                             detailScore /= 1.5f;
-                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 30f); // nerf starting from looking 5deg up to down (scaled by down to -25deg) and scaled by dis 15 ~ 0
+                            detailScore *= 1f - cqb16mTo1m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 30f); // nerf starting from looking 5deg up to down (scaled by down to -25deg) and scaled by dis 15 ~ 0
                             break;
                         case 1:
                             detailScore /= 1.25f;
-                            detailScore *= 1f - cqb15m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 40f); // nerf starting from looking 5deg up (scaled by down to -40deg) and scaled by dis 15 ~ 0
+                            detailScore *= 1f - cqb16mTo1m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 40f); // nerf starting from looking 5deg up (scaled by down to -40deg) and scaled by dis 15 ~ 0
                             break;
                         case 2:
                         case 3:
                         case 4:
-                            detailScore *= 1f - cqb10mSquared * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 40f);
+                            detailScore *= 1f - cqb11mTo1mSquared * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 40f);
                             break;
                         case 5:
                         case 6:
@@ -440,7 +443,7 @@ namespace ThatsLit
                         case 8:
                         case 9:
                             detailScore *= 1.2f;
-                            detailScore *= 1f - cqb5m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 50f); // nerf starting from looking 5deg up (scaled by down to -50deg) and scaled by dis 5 ~ 0
+                            detailScore *= 1f - cqb6mTo1m * Mathf.Clamp01((5f - visionAngleDeltaVerticalSigned) / 50f); // nerf starting from looking 5deg up (scaled by down to -50deg) and scaled by dis 5 ~ 0
                             break;
                     }
 
@@ -613,15 +616,15 @@ namespace ThatsLit
                         case 0:
                         case 1:
                             if (rand2 > 0.01f) __result *= 1 + 4 * bushRatFactor * UnityEngine.Random.Range(0.2f, 0.4f);
-                            cqb5m *= 1f - bushRatFactor * 0.5f;
-                            cqb10mSquared *= 1f - bushRatFactor * 0.5f;
+                            cqb6mTo1m *= 1f - bushRatFactor * 0.5f;
+                            cqb11mTo1mSquared *= 1f - bushRatFactor * 0.5f;
                             break;
                         case 2:
                         case 3:
                         case 4:
                             if (rand3 > 0.005f) __result *= 1 + 8 * bushRatFactor * UnityEngine.Random.Range(0.3f, 0.65f);
-                            cqb5m *= 1f - bushRatFactor * 0.8f;
-                            cqb10mSquared *= 1f - bushRatFactor * 0.8f;
+                            cqb6mTo1m *= 1f - bushRatFactor * 0.8f;
+                            cqb11mTo1mSquared *= 1f - bushRatFactor * 0.8f;
                             break;
                         case 5:
                         case 6:
@@ -629,8 +632,8 @@ namespace ThatsLit
                         case 8:
                         case 9:
                             if (rand1 > 0.001f) __result *= 1 + 6 * bushRatFactor * UnityEngine.Random.Range(0.5f, 1.0f);
-                            cqb5m *= 1f - bushRatFactor;
-                            cqb10mSquared *= 1f - bushRatFactor;
+                            cqb6mTo1m *= 1f - bushRatFactor;
+                            cqb11mTo1mSquared *= 1f - bushRatFactor;
                             break;
                     }
                 }
@@ -638,6 +641,7 @@ namespace ThatsLit
             // BUSH RAT ----------------------------------------------------------------------------------------------------------------
 
 
+            /// -0.7 -> 0, -0.8 -> 0.33, -0.9 -> 0.66, -1 -> 1
             var extremeDarkFactor = Mathf.Clamp01((score - -0.7f) / -0.3f);
             extremeDarkFactor *= extremeDarkFactor;
             var notSoExtremeDarkFactor = Mathf.Clamp01((score - -0.5f) / -0.5f);
@@ -663,7 +667,7 @@ namespace ThatsLit
 
                 // Absoulute offset
                 // f-0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (10m)
-                var secondsOffset = -1f * Mathf.Pow(factor, 2) * Mathf.Sign(factor) * (UnityEngine.Random.Range(0.5f, 1f) - 0.5f * cqb10mSquared); // Base
+                var secondsOffset = -1f * Mathf.Pow(factor, 2) * Mathf.Sign(factor) * (UnityEngine.Random.Range(0.5f, 1f) - 0.5f * cqb11mTo1mSquared); // Base
                 secondsOffset += (original * (10f + rand1 * 20f) * (0.1f + 0.9f * sinceSeenFactorSqr * seenPosDeltaFactorSqr) * extremeDarkFactor) / pPoseFactor; // Makes night factory makes sense (filtered by extremeDarkFactor)
                 secondsOffset *= botImpactType == BotImpactType.DEFAULT? 1f : 0.5f;
                 secondsOffset *= secondsOffset > 0 ? ThatsLitPlugin.BrightnessImpactScale.Value : ThatsLitPlugin.DarknessImpactScale.Value;
@@ -676,34 +680,44 @@ namespace ThatsLit
                 // Absolute offset alone won't work for different vision angles
                 if (factor < 0)
                 {
-                    // At cqb range, nullify the forced stealth belowa accoring to vision angle
-                    var cqbCancelChance = Mathf.Clamp01((visionAngleDelta - 15f) / 85f); // 0~15deg (in front) => 0%, 45deg() => 40%, 90deg => 88%
-                                                                                         // If the AI is facing 15+ deg away, there's a chance cqb check is bypassed
+                    float combinedCqb10x5To1 = 0.5f * cqb11mTo1mSquared * (0.7f + 0.3f * rand2 * pPoseFactor);
+                    combinedCqb10x5To1 += 0.5f * cqb6mTo1m;
+                    combinedCqb10x5To1 *= 0.9f + 0.4f * pSpeedFactor; // Buff bot CQB reaction when the player is moving fast
+                    combinedCqb10x5To1 = Mathf.Clamp01(combinedCqb10x5To1);
 
-                    float combinedCqb10 = cqb10mSquared * (0.7f + 0.3f * rand2 * pPoseFactor) + cqb5m; // at 5m => 0.25 + 0, at 3m => 0.49+0.4, at 1m => 0.81+0.8, at 0m => 1+1
-                    combinedCqb10 *= 0.9f + 0.4f * pSpeedFactor;
+                    // cqb factors are already scaled down by vision angle
 
-                    float cancel = UnityEngine.Random.Range(0f, 1f);
-                    cancel /= 1f + 0.5f * Mathf.Clamp01(-0.8f - factor) / 0.15f; // -0.8 ~ -0.95f -> At most reduce 33% chance to cancel cqb stealth nullification
-                    // 45deg at f-0.95 => 40% -> 26%, 90deg at f-0.95 => 58%
-                    var cqbCancel = cancel < cqbCancelChance;
-
-                    var attentionCancel = Mathf.InverseLerp(-0.9f, -1f, score);
+                    var attentionCancelChanceScaleByExDark = 0.2f * rand5 * Mathf.InverseLerp(-0.8f, -1f, score);
 
                     // === Roll a forced stealth boost ===
-                    if (UnityEngine.Random.Range(-1f, 0f) > factor * Mathf.Clamp01(1f - combinedCqb10 * (cqbCancel ? 0.1f : 1f)) * (0.4f + 0.6f * Mathf.Clamp01(notSeenRecentAndNear + rand5 * 0.1f * attentionCancel))) // At 3m, the chance of force stealth is 0.11 or 0.911 (cqb nullification cancelled)
+                    // negative because factor is negative
+                    float forceStealthChance = factor * Mathf.Clamp01(1f - combinedCqb10x5To1);
+                    // 60% nullified by bot attention (if not cancelled by extreme darkness)
+                    forceStealthChance *= 0.4f + 0.6f * Mathf.Clamp01(notSeenRecentAndNear + attentionCancelChanceScaleByExDark);
+                    if (UnityEngine.Random.Range(-1f, 0f) > forceStealthChance)
                     {
-                        __result *= 100;
+                        __result *= 100 * ThatsLitPlugin.DarknessImpactScale.Value;
                     }
-                    else if (factor < -0.85f)  __result *= 1f - (factor * (2f - combinedCqb10) * 1.5f * ThatsLitPlugin.DarknessImpactScale.Value) * (0.7f + 0.3f * notSeenRecentAndNear); // -0.9f, ccqb:0 => 3.7x / -0.85f, ccqb:0 => 3.04x / -1f, ccqb:0 => 4
-                    else if (factor < -0.6f)   __result *= 1f - (factor * (2f - combinedCqb10) * ThatsLitPlugin.DarknessImpactScale.Value) * (0.7f + 0.3f * notSeenRecentAndNear); // -0.6f, ccqb:0 => 2.2x / -0.85f, ccqb:0 => 2.7x
-                    else if (factor < -0.4f)   __result *= 1f - (factor * (2f - combinedCqb10) * 0.6f * ThatsLitPlugin.DarknessImpactScale.Value * (0.7f + 0.3f * notSeenRecentAndNear)); // -0.4f, ccqb:0 => 1.48x / -0.6f => 1.72f
-                    else if (factor < -0.2f)   __result *= 1f - (factor * (2 - combinedCqb10) * 0.5f * ThatsLitPlugin.DarknessImpactScale.Value * (0.7f + 0.3f * notSeenRecentAndNear)); // -0.2f, cqb5:0 => 1.2x / -0.4f, cqb5:0 => 1.4x
-                    else if (factor < 0f)      __result *= 1f - (factor / 1.5f) * ThatsLitPlugin.DarknessImpactScale.Value * (0.7f + 0.3f * notSeenRecentAndNear); // -0.2f => 1.13x
+                    else
+                    {
+                        var scale = factor * factor * 0.5f + 0.5f* Mathf.Abs(factor * factor * factor);
+                        scale *= 3f;
+                        scale *= ThatsLitPlugin.DarknessImpactScale.Value;
+                        scale *= 1f - combinedCqb10x5To1;
+                        // -1 => 3
+                        // -0.5 => 0.5625
+                        // -0.2 => 0.072
+
+                        scale *= 0.7f + 0.3f * notSeenRecentAndNear;
+                        __result *= 1f+scale;
+                    }
 
                 }
-                else if (factor > 0 && UnityEngine.Random.Range(0, 1) < factor * 0.9f) __result *= (1f - factor * 0.34f * ThatsLitPlugin.BrightnessImpactScale.Value); // At 100% brightness, 90% 0.66x the reaction time regardles angle half of the time
-                else if (factor > 0f) __result /= 1f + Mathf.Clamp01((factor / 5f) * ThatsLitPlugin.BrightnessImpactScale.Value);
+                else if (factor > 0)
+                {
+                    if (rand5 < factor * factor) __result *= 1f - 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value;
+                    else __result /= 1f + factor / 5f * ThatsLitPlugin.BrightnessImpactScale.Value;
+                }
             }
 
             // Vanilla is multiplying the final SeenCoef with 1E-05
