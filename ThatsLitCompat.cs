@@ -159,7 +159,7 @@ namespace ThatsLit
         public class CompatFile: IComparable<CompatFile>
         {
             public string FilePath { get; internal set; }
-            public int priority { get; set; }
+            public int priority { get; set; } = 999;
             public ScopeTemplate[] scopeTemplates { get; set; }
             public Scope[] scopes { get; set; }
             public GoggleTemplate[] goggleTemplates { get; set; }
