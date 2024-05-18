@@ -499,6 +499,7 @@ namespace ThatsLit
             if ((position - player.LastCheckedPos).magnitude < 0.1f) return ;
 
             if (player == null || terrainDetailsUnavailable) return ;
+            Array.Clear(player.detailScoreCache, 0, player.detailScoreCache.Length);
             if (player.Details5x5 != null) Array.Clear(player.Details5x5, 0, player.Details5x5.Length);
             player.RecentDetailCount3x3 = 0;
             player.LastCheckedTime = Time.time;
