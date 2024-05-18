@@ -197,6 +197,7 @@ namespace ThatsLit
                     display.RectTransform().sizeDelta = new Vector2(160, 160);
                     display.texture = slowRT;
                     display.RectTransform().anchoredPosition = new Vector2(-720, -360);
+                    ThatsLitPlugin.DebugTexture.SettingChanged += HandleDebugTextureSettingChanged;
                 }
                 else display.enabled = true;
             }
@@ -207,6 +208,7 @@ namespace ThatsLit
             if (cam) cam.enabled = false;
             if (display) display.enabled = false;
             PlayerLitScoreProfile = null;
+            ThatsLitPlugin.DebugTexture.SettingChanged -= HandleDebugTextureSettingChanged;
         }
 
         private void Update()
@@ -743,6 +745,7 @@ namespace ThatsLit
 
         private void OnDestroy()
         {
+            DisableBrightness();
             if (display) GameObject.Destroy(display);
             if (cam) GameObject.Destroy(cam);
             if (rt) rt.Release();
