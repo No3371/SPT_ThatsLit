@@ -578,7 +578,7 @@ namespace ThatsLit
         /// <value></value>
         protected virtual float NonCloudinessBaseAmbienceScoreImpact { get => 0.1f; }
         protected virtual float BunkerBaseAmbienceTarget { get => -0.3f; }
-        protected virtual float MaxMoonlightScore { get => 0.3f; }
+        protected virtual float MaxMoonlightScore { get => 0.25f; }
         protected virtual float MaxSunlightScore { get => 0.25f; }
         protected virtual float IndoorAmbienceScale { get => 0.5f; }
         protected virtual float MinAmbienceLum { get => 0.01f; }
