@@ -41,7 +41,6 @@ namespace ThatsLit
         Texture slowRT;
         public Camera cam, envCam;
         Unity.Collections.NativeArray<Color32> observed;
-        public int lockPos = -1;
         public RawImage display;
         public PlayerDebugInfo DebugInfo { get; internal set; }
         public LightAndLaserState LightAndLaserState { get; internal set; }
@@ -323,9 +322,7 @@ namespace ThatsLit
                 }
             });
 
-            var camPos = 0;
-            if (lockPos != -1) camPos = lockPos;
-            else camPos = Time.frameCount % 6;
+            var camPos = Time.frameCount % 6;
             var camHeight = Player.IsInPronePose ? 0.45f : 2.2f * (0.6f + 0.4f * Player.PoseLevel);
             var targetHeight = Player.IsInPronePose ? 0.2f : 0.7f;
             var horizontalScale = Player.IsInPronePose ? 1.2f : 0.8f;
