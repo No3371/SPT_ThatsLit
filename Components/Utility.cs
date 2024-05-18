@@ -133,10 +133,10 @@ namespace ThatsLit
                 prone = 0.02f * num;
                 crouch = 0.02f * num;
             }
-            else if (name.EndsWith("f83e15"))
+            else if (name.EndsWith("f83e15")) // tall white grass
             {
                 prone = 0.04f * num;
-                crouch = 0.03f * num;
+                crouch = 0.018f * num;
             }
             else if (name.EndsWith("ead4fa"))
             {
