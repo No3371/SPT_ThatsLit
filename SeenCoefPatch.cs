@@ -294,14 +294,14 @@ namespace ThatsLit
                     }
                 }
 
-                if (score < 0 && inNVGView) // IR lights are not accounted in the score, process the score for each bot here
+                if (inNVGView) // IR lights are not accounted in the score, process the score for each bot here
                 {
-                    float compensationTarget = score;
-                    if (player.LightAndLaserState.IRLight) compensationTarget = 0.4f;
-                    else if (player.LightAndLaserState.IRLaser) compensationTarget = 0f;
-                    else if (player.LightAndLaserState.IRLightSub) compensationTarget = 0f;
-                    else if (player.LightAndLaserState.IRLaserSub) compensationTarget = 0f;
-                    score += Mathf.Clamp(compensationTarget - score, 0, 1) * (score / -1f);
+                    float compensation = 0;
+                    if (player.LightAndLaserState.IRLight)          compensation = Mathf.Clamp(0.4f - score, 0, 2) * player.LightAndLaserState.deviceStateCache.irLight;
+                    else if (player.LightAndLaserState.IRLaser)     compensation = Mathf.Clamp(0.2f - score, 0, 2) * player.LightAndLaserState.deviceStateCache.irLaser;
+                    else if (player.LightAndLaserState.IRLightSub)  compensation = Mathf.Clamp(0f - score, 0, 2) * player.LightAndLaserState.deviceStateCacheSub.irLight;
+                    else if (player.LightAndLaserState.IRLaserSub)  compensation = Mathf.Clamp(0f - score, 0, 2) * player.LightAndLaserState.deviceStateCacheSub.irLaser;
+                    score += compensation * Mathf.InverseLerp(0f, -1f, score);
                 }
 
                 factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3

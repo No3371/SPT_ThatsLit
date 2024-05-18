@@ -134,6 +134,14 @@ namespace ThatsLit
             public float laser { get; set; }
             public float irLight { get; set; }
             public float irLaser { get; set; }
+            public static DeviceMode MergeMax (DeviceMode a, DeviceMode b)
+            {
+                a.light = a.light > b.light ? a.light : b.light;
+                a.laser = a.laser > b.laser ? a.laser : b.laser;
+                a.irLight = a.irLight > b.irLight ? a.irLight : b.irLight;
+                a.irLaser = a.irLaser > b.irLaser ? a.irLaser : b.irLaser;
+                return a;
+            }
         }
 
         [System.Serializable]

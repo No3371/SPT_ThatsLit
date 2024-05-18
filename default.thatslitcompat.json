@@ -378,7 +378,7 @@
                     "irLaser": 0.0
                 },
                 {
-                    "light": 0.5,
+                    "light": 0.8,
                     "laser": 0.0,
                     "irLight": 0.0,
                     "irLaser": 0.0
@@ -392,7 +392,7 @@
                 {
                     "light": 0.0,
                     "laser": 0.0,
-                    "irLight": 0.5,
+                    "irLight": 0.8,
                     "irLaser": 0.0
                 },
                 {
@@ -405,7 +405,7 @@
                     "light": 0.0,
                     "laser": 0.0,
                     "irLight": 0.0,
-                    "irLaser": 0.5
+                    "irLaser": 0.8
                 }
             ],
             "_comment": "MAWL-C1+"

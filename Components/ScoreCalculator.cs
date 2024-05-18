@@ -211,11 +211,11 @@ namespace ThatsLit
             if (player.Player.LightAndLaserState.AnyVisible)
             {
                 expectedFinalScore = lumScore + ambienceScore;
-                if (player.Player.LightAndLaserState.VisibleLight)          compensationTarget = 0.4f;
-                else if (player.Player.LightAndLaserState.VisibleLaser)     compensationTarget = 0.2f;
-                else if (player.Player.LightAndLaserState.VisibleLightSub)  compensationTarget = 0f;
-                else if (player.Player.LightAndLaserState.VisibleLaserSub)  compensationTarget = 0f;
-                compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2);
+                if (player.Player.LightAndLaserState.VisibleLight)          compensation = Mathf.Clamp(0.4f - expectedFinalScore, 0, 2) * player.Player.LightAndLaserState.deviceStateCache.light;
+                else if (player.Player.LightAndLaserState.VisibleLaser)     compensation = Mathf.Clamp(0.2f - expectedFinalScore, 0, 2) * player.Player.LightAndLaserState.deviceStateCache.laser;
+                else if (player.Player.LightAndLaserState.VisibleLightSub)  compensation = Mathf.Clamp(0f - expectedFinalScore, 0, 2) * player.Player.LightAndLaserState.deviceStateCacheSub.light;
+                else if (player.Player.LightAndLaserState.VisibleLaserSub)  compensation = Mathf.Clamp(0f - expectedFinalScore, 0, 2) * player.Player.LightAndLaserState.deviceStateCacheSub.laser;
+                else compensation = 0;
                 lumScore += compensation * (lowAmbienceScoreFactor + 0.1f);
             }
 

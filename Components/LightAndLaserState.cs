@@ -84,5 +84,7 @@ namespace ThatsLit
             cache.Add(storage, str);
             return str;
         }
+
+        public ThatsLitCompat.DeviceMode deviceStateCache, deviceStateCacheSub;
     }
 }

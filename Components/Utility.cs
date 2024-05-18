@@ -239,13 +239,12 @@ namespace ThatsLit
             // }
             
         }
-        static void CheckLightsOnItem(Item item, out bool vLight, out bool vLaser, out bool irLight, out bool irLaser)
+        static ThatsLitCompat.DeviceMode CheckDevicesOnItem(Item item)
         {
-            vLight = vLaser = irLight = irLaser = false;
-            if (item == null) return;
-
+            ThatsLitCompat.DeviceMode result = default;
             Weapon weapon = item as Weapon;
-            if (weapon == null) return;
+            if (weapon == null)
+                return result;
 
             foreach (var light in FindComponents<LightComponent>(weapon))
             {
@@ -255,85 +254,39 @@ namespace ThatsLit
                 // }
                 if (light == null || !light.IsActive) continue;
                 var mode = GetDeviceMode(light.Item.TemplateId, light.SelectedMode);
-
-                vLight |= mode.light > 0f;
-                irLight |= mode.irLight > 0f;
-                vLaser |= mode.laser > 0f;
-                irLaser |= mode.irLaser > 0f;
+                result = ThatsLitCompat.DeviceMode.MergeMax(result, mode);
             }
+            
+            return result;
         }
 
-        internal static void DetermineShiningEquipments(Player player, out bool vLight, out bool vLaser, out bool irLight, out bool irLaser, out bool vLightSub, out bool vLaserSub, out bool irLightSub, out bool irLaserSub)
+        internal static void DetermineShiningEquipments(Player player, out ThatsLitCompat.DeviceMode mode, out ThatsLitCompat.DeviceMode modeSub)
         {
-            vLight = false;
-            vLaser = false;
-            irLight = false;
-            irLaser = false;
-            vLightSub = false;
-            vLaserSub = false;
-            irLightSub = false;
-            irLaserSub = false;
-
             Weapon activeWeapon = player?.ActiveSlot?.ContainedItem as Weapon;
-            CheckLightsOnItem(activeWeapon, out var it_vLight, out var it_vLaser, out var it_irLight, out var it_irLaser);
-
-
-            vLight |= it_vLight;
-            vLaser |= it_vLaser;
-            irLight |= it_irLight;
-            irLaser |= it_irLaser;
-            if (vLight)
-            {
-                return; // Early return because visible light is determining
-            }
-
+            mode = CheckDevicesOnItem(activeWeapon);
+            modeSub = default;
+         
             var inv = player?.ActiveSlot?.ContainedItem?.Owner as InventoryControllerClass;
             EquipmentClass equipment = inv?.Inventory?.Equipment;
             if (equipment == null) return;
 
-            CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.Headwear)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser);
-
-            
-            vLight |= it_vLight;
-            vLaser |= it_vLaser;
-            irLight |= it_irLight;
-            irLaser |= it_irLaser;
-            if (vLight)
-            {
-                return; // Early return because visible light is determining
-            }
+            mode = ThatsLitCompat.DeviceMode.MergeMax(mode, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.Headwear)?.ContainedItem));
 
             if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon))
             {
-                CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser);
-                
-                vLightSub |= it_vLight;
-                vLaserSub |= it_vLaser;
-                irLightSub |= it_irLight;
-                irLaserSub |= it_irLaser;
+                modeSub = mode = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon)?.ContainedItem));
             }
-
 
 
             if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon))
             {
-                CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser);
-                
-                vLightSub |= it_vLight;
-                vLaserSub |= it_vLaser;
-                irLightSub |= it_irLight;
-                irLaserSub |= it_irLaser;
+                modeSub = mode = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon)?.ContainedItem));
             }
 
 
             if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.Holster))
             {
-                CheckLightsOnItem(equipment.GetSlot(EquipmentSlot.Holster)?.ContainedItem, out it_vLight, out it_vLaser, out it_irLight, out it_irLaser);
-                
-                vLightSub |= it_vLight;
-                vLaserSub |= it_vLaser;
-                irLightSub |= it_irLight;
-                irLaserSub |= it_irLaser;
+                modeSub = mode = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.Holster)?.ContainedItem));
             }
 
             // GClass2550 544909bb4bdc2d6f028b4577 x item tactical_all_insight_anpeq15 2457 / V + IR + IRL / MODES: 4  V -> IR -> IRL -> IR+IRL

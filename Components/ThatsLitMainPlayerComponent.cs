@@ -426,16 +426,16 @@ namespace ThatsLit
             if (ThatsLitPlugin.EnableEquipmentCheck.Value && Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.61f : 0.33f))
             {
                 lastCheckedLights = Time.time;
-                Utility.DetermineShiningEquipments(Player, out var vLight, out var vLaser, out var irLight, out var irLaser, out var vLightSub, out var vLaserSub, out var irLightSub, out var irLaserSub);
                 var state = LightAndLaserState;
-                state.VisibleLight = vLight;
-                state.VisibleLaser = vLaser;
-                state.IRLight = irLight;
-                state.IRLaser = irLaser;
-                state.VisibleLightSub = vLightSub;
-                state.VisibleLaserSub = vLaserSub;
-                state.IRLightSub = irLightSub;
-                state.IRLaserSub = irLaserSub;
+                Utility.DetermineShiningEquipments(Player, out state.deviceStateCache, out state.deviceStateCacheSub);
+                state.VisibleLight = state.deviceStateCache.light > 0;
+                state.VisibleLaser = state.deviceStateCache.laser > 0;
+                state.IRLight = state.deviceStateCache.irLight > 0;
+                state.IRLaser = state.deviceStateCache.irLaser > 0;
+                state.VisibleLightSub = state.deviceStateCacheSub.light > 0;
+                state.VisibleLaserSub = state.deviceStateCacheSub.laser > 0;
+                state.IRLightSub = state.deviceStateCacheSub.irLight > 0;
+                state.IRLaserSub = state.deviceStateCacheSub.irLaser > 0;
                 LightAndLaserState = state;
             }
 
