@@ -192,23 +192,23 @@ namespace ThatsLit
             // ======
             // Overhead overlooking
             // ======
-            if (sinceSeen > 15f && !canSeeLight)
+            // Overlook close enemies at higher attitude and in low pose
+            if (!canSeeLight)
             {
-                var weight = Mathf.Pow((Mathf.Clamp01((visionAngleDeltaVerticalSigned - 30f) / 75f)), 2) + Mathf.Clamp01((visionAngleDeltaVerticalSigned - 15) / 180f);
-                // (unscaled) 30deg -> 8%, 45deg->20%, 60deg -> 41%, 75deg->69%, 80deg->80%, 85deg->92%
-                // Overlook close enemies at higher attitude and in low pose
-                var overheadChance = Mathf.Clamp01(weight) * (1.025f - pPoseFactor / 2f); // prone: 1.0x, crouch: 0.8x, stand: 0.5x
-                overheadChance *= Mathf.Clamp01(lastSeenPosDelta / 15f); // Seen nearby
-                overheadChance *= 1f - pSpeedFactor * 0.2f;
-                overheadChance = Mathf.Clamp01(overheadChance + (rand3 - 0.5f) * 2f * 0.1f);
+                var overheadChance = Mathf.InverseLerp(15f, 90f, visionAngleDeltaVerticalSigned);
+                overheadChance *= overheadChance;
+                overheadChance = overheadChance / Mathf.Clamp(pPoseFactor, 0.2f, 1f);
+                overheadChance *= notSeenRecentAndNear;
+                overheadChance *= Mathf.Clamp01(1f - pSpeedFactor * 2f);
+                overheadChance *= 1 + disFactor;
 
                 switch (caution)
                 {
                     case 0:
-                        overheadChance /= 2f;
+                        overheadChance /= 1.5f;
                         break;
                     case 1:
-                        overheadChance /= 1.5f;
+                        overheadChance /= 1.2f;
                         break;
                     case 2:
                     case 3:
@@ -223,11 +223,17 @@ namespace ThatsLit
                         break;
                 }
 
-                if (rand1 < overheadChance)
+                if (rand1 < Mathf.Clamp(overheadChance, 0, 0.995f))
                 {
+                    __result += rand5 * 0.1f;
                     __result *= 10 + rand2 * 100;
                 }
-
+            }
+            // ======
+            // Inside overlooking
+            // ======
+            if (!canSeeLight)
+            {
                 bool botIsInside = __instance.Owner.AIData.IsInside;
                 bool playerIsInside = player.Player.AIData.IsInside;
                 if (!botIsInside && playerIsInside && insideTime >= 1)
