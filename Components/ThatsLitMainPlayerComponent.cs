@@ -783,15 +783,14 @@ namespace ThatsLit
         private void OnGUI()
         {
             if (Player?.IsYourPlayer != true) return;
+            bool layoutCall = guiFrame < Time.frameCount;
 
             using (new ManagedStopWatch.RunningScope(ThatsLitPlugin.swGUI))
             {
                 if (PlayerLitScoreProfile == null)
                 {
                     if (Time.time - awakeAt < 30f && !ThatsLitPlugin.HideMapTip.Value)
-                        GUILayout.Label("  [That's Lit] Brightness module is not supported on this map or disabled in configs.");
-
-                    if (!ThatsLitPlugin.DebugInfo.Value) return;
+                        GUILayout.Label("  [That's Lit] Brightness module is disabled in configs or not supported on this map.");
                 }
 
                 var poseFactor = Player.PoseLevel / Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
@@ -807,12 +806,12 @@ namespace ThatsLit
                 {
                     litFactorSample = PlayerLitScoreProfile?.litScoreFactor ?? 0;
                     ambScoreSample = PlayerLitScoreProfile?.frame0.ambienceScore ?? 0;
-                    if (ThatsLitPlugin.EnableBenchmark.Value && guiFrame < Time.frameCount) // The trap here is OnGUI is called multiple times per frame, make sure to reset the stopwatches only once
+                    if (ThatsLitPlugin.EnableBenchmark.Value && layoutCall) // The trap here is OnGUI is called multiple times per frame, make sure to reset the stopwatches only once
                     {
                         ConcludeBenchmarks();
                     }
                 }
-                Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.OnGUI(guiFrame < Time.frameCount);
+                Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.OnGUI(layoutCall);
                 // GUILayout.Label(string.Format(" IMPACT: {0:0.000} -> {1:0.000} ({2:0.000} <- {3:0.000} <- {4:0.000}) AMB: {5:0.00} LIT: {6:0.00} (SAMPLE)", lastCalcFrom, lastCalcTo, lastFactor2, lastFactor1, lastScore, ambScoreSample, litFactorSample));
                 //GUILayout.Label(text: "PIXELS:");
                 //GUILayout.Label(lastValidPixels.ToString());
@@ -826,8 +825,8 @@ namespace ThatsLit
                 float rain = WeatherController.Instance?.WeatherCurve?.Rain ?? 0;
                 float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
                 
-                if (guiFrame < Time.frameCount)
                     infoCache1 = $"  IMPACT: {DebugInfo.lastCalcFrom:0.000} -> {DebugInfo.lastCalcTo:0.000} ({DebugInfo.lastFactor2:0.000} <- {DebugInfo.lastFactor1:0.000} <- {DebugInfo.lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {DebugInfo.calced} (+{DebugInfo.calcedLastFrame}) / ENCOUNTER: {DebugInfo.encounter}\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000} 3x3:( { TerrainDetails.RecentDetailCount3x3 } ) (score-{ PlayerLitScoreProfile.detailBonusSmooth:0.00})  FOLIAGE: {Foliage?.FoliageScore:0.000} ({Foliage?.FoliageCount}) (H{Foliage?.Foliage?[0].dis:0.00} to {Foliage?.Foliage?[0].name})\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {Utility.GetInGameDayTime():0.000} / WINTER: {Singleton<ThatsLitGameworld>.Instance.IsWinter}\n  POSE: {poseFactor} SPEED: { Player.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}";
+                if (layoutCall)
                 GUILayout.Label(infoCache1);
                 // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
                 
@@ -836,11 +835,11 @@ namespace ThatsLit
 
                 if (ThatsLitPlugin.EnableBenchmark.Value)
                 {
-                    if (guiFrame < Time.frameCount)
+                    if (layoutCall)
                         infoCacheBenchmark = $"  Update: {benchmarkSampleUpdate,8:0.000}\n    Foliage: {benchmarkSampleFoliageCheck,8:0.000}\n    Terrain: {benchmarkSampleTerrainCheck,8:0.000}\n  SeenCoef: {benchmarkSampleSeenCoef,8:0.000}\n  Encountering: {benchmarkSampleEncountering,8:0.000}\n  ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.000}\n  ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.000}\n  Info(+Debug): {benchmarkSampleGUI,8:0.000} ms";
                     GUILayout.Label(infoCacheBenchmark);
                     if (Time.frameCount % 6000 == 0)
-                        if (guiFrame < Time.frameCount) EFT.UI.ConsoleScreen.Log(infoCacheBenchmark);
+                        if (layoutCall) EFT.UI.ConsoleScreen.Log(infoCacheBenchmark);
                 }
 
                 if (ThatsLitPlugin.DebugTerrain.Value && TerrainDetails?.Details5x5 != null)
@@ -865,8 +864,8 @@ namespace ThatsLit
                     // GUILayout.Label($"  W  DETAIL_LOW: { scoreCache[12] } DETAIL_MID: {scoreCache[13]}");
                     // GUILayout.Label($" NW  DETAIL_LOW: { scoreCache[14] } DETAIL_MID: {scoreCache[15]}");
 
-                guiFrame = Time.frameCount;
             }
+            guiFrame = Time.frameCount;
             
         }
         string infoCache;
