@@ -19,5 +19,13 @@ namespace ThatsLit
         public float LastCheckedTime { get; internal set; }
         public Vector3 LastCheckedPos { get; internal set; }
         public bool IsFoliageSorted { get; internal set; }
+        public FoliageInfo? Nearest
+        {
+            get
+            {
+                if (Foliage != null && Foliage.Length > 0) return Foliage[0];
+                return null;
+            }
+        }
     }
 }
