@@ -156,7 +156,13 @@
 
     <Copy
       SourceFiles="$(TargetDir)$(AssemblyName).dll"
-      DestinationFolder="$(ProjectDir)\..\..\BepInEx\plugins" />
+      DestinationFolder="$(ProjectDir)\..\..\BepInEx\plugins\ThatsLit" />
+    <Copy
+      SourceFiles="$(ProjectDir)\default.thatslitcompat.json"
+      DestinationFolder="$(ProjectDir)\..\..\BepInEx\plugins\ThatsLit" />
+    <Copy
+      SourceFiles="$(ProjectDir)\empty.thatslitcompat.json"
+      DestinationFolder="$(ProjectDir)\..\..\BepInEx\plugins\ThatsLit" />
 
     <Message Text="Copied build files" Importance="High" />
   </Target>
