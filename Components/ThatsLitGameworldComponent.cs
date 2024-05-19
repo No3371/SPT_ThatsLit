@@ -150,13 +150,14 @@ namespace ThatsLit
         internal void UpdateFoliageScore(Vector3 bodyPos, PlayerFoliageProfile player)
         {
             if (player == null) return;
-            player.FoliageScore = 0;
 
-            if (Time.time < player.LastCheckedTime + 0.45f) return;
+            if (Time.time < player.LastCheckedTime + 0.45f)
+                return;
             // Skip if basically standing still
             if ((bodyPos - player.LastCheckedPos).magnitude < 0.05f)
                 return;
 
+            player.FoliageScore = 0;
             player.LastCheckedTime = Time.time;
             player.LastCheckedPos = bodyPos;
 
