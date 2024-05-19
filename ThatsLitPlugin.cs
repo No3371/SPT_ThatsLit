@@ -24,7 +24,7 @@ namespace ThatsLit
         public const int TarkovVersion = 29197;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.383.02";
+        public const string ModVersion = "1.383.03";
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.8.3";
         private static long modVersionComparable;
@@ -153,7 +153,7 @@ namespace ThatsLit
 
             category                   = "7. Performance";
             LessEquipmentCheck         = Config.Bind(category, "Less Equipment Check", false, "Check equipment lights a bit less frequent. May or may not help with CPU usage but slower to update impact from turning on/off lights/lasers.");
-            ResLevel                 = Config.Bind(category, "Resolustion Level", 2,
+            ResLevel                 = Config.Bind(category, "Resolution Level", 2,
                                                    new ConfigDescription("Resolution of the observed image by the observer camera, higher level means somewhat higher accuracy. Has an impact on CPU time. Level1 -> 32x32, Level2 -> 64x64... This config is used on raid start.", new AcceptableValueRange<int>(1, 4)));
             FoliageSamples                 = Config.Bind(category, "Foliage Samples", 1,
                                                    new ConfigDescription("How many foliage to check if it's inbetween you and bots, increasing this allows foliage affects multiple bots from different directions. Could slightly an impact on CPU time. This config is used on raid start.", new AcceptableValueRange<int>(1, 5)));
