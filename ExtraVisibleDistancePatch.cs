@@ -70,9 +70,10 @@ namespace ThatsLit
             fogFactor = Mathf.InverseLerp(0, 0.35f, fogFactor);
             ScoreCalculator scoreCalculator = Singleton<ThatsLitGameworld>.Instance.ScoreCalculator;
             FrameStats frame0 = player.PlayerLitScoreProfile?.frame0 ?? default;
+            var originalDist = __instance.Owner.LookSensor.VisibleDist;
             if (thermalActive)
             {
-                float compensation = (scope? thermalRange : 200) - __instance.Owner.LookSensor.VisibleDist;
+                float compensation = thermalRange - originalDist;
                 if (compensation > 0) addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation * ThatsLitPlugin.LitVisionDistanceScale.Value;
             }
             else if (nvgActive && frame0.ambienceScore < 0) // Base + Sun/Moon < 0
@@ -83,24 +84,35 @@ namespace ThatsLit
                 else scale = 3f;
                 scale = Mathf.Lerp(1, scale, Mathf.Clamp01(frame0.ambienceScore / -1f)); // The darker the ambience, the more effective the NVG is
 
-                float extra = __instance.Owner.LookSensor.VisibleDist * player.PlayerLitScoreProfile.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
-                extra *= 1f - fogFactor;
-                addVisibility += UnityEngine.Random.Range(0.25f, 1f) * Mathf.Min(100, extra); // 0.25x~1x of extra capped at 100m
+                float compensation = __instance.Owner.Settings.FileSettings.Look.FAR_DISTANCE - originalDist;
+                if (compensation > 0)
+                {
+                    compensation *= 1f - fogFactor;
+                    compensation *= player.PlayerLitScoreProfile.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
+                    addVisibility += compensation * UnityEngine.Random.Range(0.25f, 1f); // 0.25x~1x of extra capped at 100m
+                }
             }
-            else if (!nvgActive && frame0.ambienceScore > 0)
+            else if (!nvgActive && frame0.ambienceScore > 0) // Base + Sun/Moon > 0
             {
-                float extra = __instance.Owner.LookSensor.VisibleDist * (1f + frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
-                extra *= 1f - fogFactor;
-                addVisibility += UnityEngine.Random.Range(0.2f, 1f) * Mathf.Min(50, extra); // Up to 20% bonus capped at 50m from unobstructed strong sun/moon light
+                float compensation = __instance.Owner.Settings.FileSettings.Look.FAR_DISTANCE - originalDist;
+                if (compensation > 0)
+                {
+                    compensation *= 1f - fogFactor;
+                    compensation *= (1f + frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
+                    addVisibility += compensation * UnityEngine.Random.Range(0.2f, 1f);
+                }
             } 
-            else if (!nvgActive && __instance.Owner.LookSensor.VisibleDist < 50) 
+            else if (!nvgActive) // 
             {
                 float litDiff = frame0.multiFrameLitScore - frame0.baseAmbienceScore; // The visibility provided by sun/moon + lightings
-                litDiff = Mathf.Clamp(litDiff, 0, 2f) / 2f;
+                litDiff = Mathf.InverseLerp(0, 2, litDiff);
                 litDiff *= 1f - fogFactor;
 
-                float extra = (50 - __instance.Owner.LookSensor.VisibleDist) * litDiff;
-                addVisibility += UnityEngine.Random.Range(0.5f, 1f) * extra; // 0.5x ~ 1x of compensation to 50m
+                float compensation = __instance.Owner.Settings.FileSettings.Look.MIDDLE_DIST - originalDist;
+                if (compensation > 0)
+                {
+                    addVisibility += litDiff * UnityEngine.Random.Range(0.5f, 1f);
+                }
             }
 
             ThatsLitPlugin.swExtraVisDis.Stop();
