@@ -384,7 +384,8 @@ namespace ThatsLit
                     }
             }
 
-            if (ThatsLitPlugin.DebugTexture.Value && Time.frameCount % 61 == 0 && display?.enabled == true) Graphics.CopyTexture(rt, slowRT);
+            if (ThatsLitPlugin.DebugTexture.Value && Time.frameCount % 61 == 0 && display?.enabled == true)
+                Graphics.CopyTexture(rt, slowRT);
 
             // Ambient shadow
             UpdateAmbienceShadowRating();

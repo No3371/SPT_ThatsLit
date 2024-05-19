@@ -31,10 +31,11 @@ namespace ThatsLit
              || !ThatsLitPlugin.EnabledLighting.Value)
                 return true;
 
+            if (Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
+
             ThatsLitMainPlayerComponent player = null;
             Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
             if (player == null) return true;
-            if (Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
 
             ThatsLitPlugin.swExtraVisDis.MaybeResume();
 

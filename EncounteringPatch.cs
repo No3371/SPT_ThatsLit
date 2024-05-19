@@ -28,14 +28,14 @@ namespace ThatsLit.Patches.Vision
         public static bool PatchPrefix(EnemyInfo __instance, bool value, ref State __state)
         {
             __state = default;
-    
-            ThatsLitMainPlayerComponent player = null;
-            Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
-            if (player == null) return true;
 
             if (!value) return true; // SKIP. Only works when the player is set to be visible to the bot.
             if (__instance.IsVisible) return true; // SKIP. Only works when the bot hasn't see the player. IsVisible means the player is already seen.
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
+    
+            ThatsLitMainPlayerComponent player = null;
+            Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
+            if (player == null) return true;
 
             ThatsLitPlugin.swEncountering.MaybeResume();
 
