@@ -668,8 +668,6 @@ namespace ThatsLit
             if (TerrainDetails != null && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
                 if (Player.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
                 else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
-            if (Time.time < awakeAt + 10)
-                GUILayout.Label("  [That's Lit HUD] Can be disabled in plugin settings.");
 
             if (PlayerLitScoreProfile != null)
             {
@@ -690,6 +688,10 @@ namespace ThatsLit
         private void OnGUI()
         {
             if (Player?.IsYourPlayer != true) return;
+
+            if (Time.time < awakeAt + 10)
+                GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
+
             bool layoutCall = guiFrame < Time.frameCount;
             ThatsLitPlugin.swGUI.MaybeResume();
             if (PlayerLitScoreProfile == null)
