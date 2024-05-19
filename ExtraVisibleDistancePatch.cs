@@ -55,13 +55,13 @@ namespace ThatsLit
                 if (sightMod != null)
                 {
                     scope = true;
-                    var compat = ThatsLitCompat.GetScopeTemplate(sightMod.Item.TemplateId);
-                    if (compat?.thermal != null)
+                    ThatsLitCompat.Scopes.TryGetValue(sightMod.Item.TemplateId, out var scopeCompat);
+                    if (scopeCompat?.TemplateInstance?.thermal != null)
                     {
                         thermalActive = true;
-                        thermalRange = compat.thermal.effectiveDistance;
+                        thermalRange = scopeCompat.TemplateInstance.thermal.effectiveDistance;
                     }
-                    else if (compat?.nightVision != null)
+                    else if (scopeCompat?.TemplateInstance?.nightVision != null)
                         nvgActive = true;
                 }
             }

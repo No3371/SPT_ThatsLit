@@ -107,7 +107,8 @@ namespace ThatsLit
             BotNightVisionData nightVision = __instance.Owner.NightVision;
             ThatsLitCompat.GoggleTemplate activeGoggle = null;
             if (nightVision?.UsingNow == true) 
-                activeGoggle = ThatsLitCompat.GetGoggleTemplate(nightVision.NightVisionItem.Item.TemplateId);
+                if (ThatsLitCompat.Goggles.TryGetValue(nightVision.NightVisionItem.Item.TemplateId, out var goggle))
+                    activeGoggle = goggle?.TemplateInstance;
             if (activeGoggle != null) 
             {
                 if (nightVision.NightVisionItem?.Template?.Mask == NightVisionComponent.EMask.Thermal
@@ -142,7 +143,8 @@ namespace ThatsLit
             {
                 EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
                 if (sightMod != null)
-                    activeScope = ThatsLitCompat.GetScopeTemplate(sightMod.Item.TemplateId);
+                    if (ThatsLitCompat.Scopes.TryGetValue(sightMod.Item.TemplateId, out var scope))
+                        activeScope = scope?.TemplateInstance;
                 if (activeScope != null) {
                     if (rand1 < 0.1f) sightMod.SetScopeMode(UnityEngine.Random.Range(0, sightMod.ScopesCount), UnityEngine.Random.Range(0, 2));
                     float currentZoom = sightMod.GetCurrentOpticZoom();

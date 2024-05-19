@@ -75,16 +75,6 @@ namespace ThatsLit
             return GameDateTime.Hour + minutes;
         }
 
-        internal static IEnumerable<T> FindComponents<T> (Item topLevelItem) where T: class, IItemComponent
-        {
-            foreach (var it in topLevelItem.GetAllItems())
-            {
-                T t = it.GetItemComponent<T>();
-                if (t == null) continue;
-                yield return t;
-            }
-        }
-
         static string lastLogged;
         internal static void CalculateDetailScore (string name, int num, out float prone, out float crouch)
         {
@@ -246,17 +236,23 @@ namespace ThatsLit
             if (weapon == null)
                 return result;
 
-            foreach (var light in FindComponents<LightComponent>(weapon))
+            foreach (var it in item.GetAllItems())
             {
-                // if (Time.frameCount % 191 == 0)
-                // {
-                //     Logger.LogWarning($"{ light.Item.Id } { light.Item.Name } ({ light.Item.TemplateId }) { light.IsActive }");
-                // }
+                if (string.IsNullOrWhiteSpace(it?.TemplateId)) continue;
+                ThatsLitCompat.ExtraDevices.TryGetValue(it.TemplateId, out var extraDevice);
+                Logger.LogWarning($"{it?.TemplateId} {extraDevice?.TemplateInstance?.name}");
+                if (extraDevice != null && extraDevice.alwaysOn)
+                {
+                    result = ThatsLitCompat.DeviceMode.MergeMax(result, extraDevice.TemplateInstance?.SafeGetMode(0) ?? default);
+                    continue;
+                }
+
+                LightComponent light = it.GetItemComponent<LightComponent>();
                 if (light == null || !light.IsActive) continue;
-                var mode = GetDeviceMode(light.Item.TemplateId, light.SelectedMode);
+                var mode = GetDeviceMode(it.TemplateId, light.SelectedMode);
                 result = ThatsLitCompat.DeviceMode.MergeMax(result, mode);
             }
-            
+
             return result;
         }
 
@@ -317,20 +313,22 @@ namespace ThatsLit
 
             // "_id": "5bffcf7a0db83400232fea79", "_name": "pistolgrip_tt_pm_laser_tt_206", always on
         }
-        static ThatsLitCompat.DeviceMode GetDeviceMode(string templateId, int selectedMode)
+        static ThatsLitCompat.DeviceMode GetDeviceMode(string itemTemplateId, int selectedMode)
         {
-            var compat = ThatsLitCompat.GetDeviceTemplate(templateId);
-            if (compat?.modes == null || compat.modes.Length <= selectedMode)
+            ThatsLitCompat.Devices.TryGetValue(itemTemplateId, out var compat);
+            if (compat == null) return default;
+
+            if (compat.TemplateInstance?.modes == null || compat.TemplateInstance.modes.Length <= selectedMode)
             {
                 if (ThatsLitMainPlayerComponent.IsDebugSampleFrame)
                 {
-                    string message = $"[That's Lit] Unknown device: {templateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(templateId)?.Name}";
+                    string message = $"[That's Lit] Unknown device or mode: {itemTemplateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(itemTemplateId)?.Name} mode {selectedMode}";
                     NotificationManagerClass.DisplayWarningNotification(message);
                     Logger.LogWarning(message);
                 }
                 return default;
             }
-            return compat.modes[selectedMode];
+            return compat.TemplateInstance.modes[selectedMode];
         }
 
         static Dictionary<(string, int), (bool light, bool lightIsIR, bool laser, bool laserIsIR)> CustomLightAndLaser { get; set; }
