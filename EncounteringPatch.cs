@@ -41,8 +41,12 @@ namespace ThatsLit.Patches.Vision
 
             Vector3 botLookDir = __instance.Owner.GetPlayer.LookDirection;
             Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
+            float distance = botEyeToPlayerBody.magnitude;
             var visionDeviation = Vector3.Angle(botLookDir, botEyeToPlayerBody);
 
+
+            float sinceLastSeen = Time.time - __instance.PersonalSeenTime;
+            Vector3 knownPosDelta = __instance.Person.Position - __instance.EnemyLastPosition;
             
             float srand = UnityEngine.Random.Range(-1f, 1f);
             float srand2 = UnityEngine.Random.Range(-1f, 1f);
@@ -53,28 +57,27 @@ namespace ThatsLit.Patches.Vision
             BotImpactType botImpactType = Utility.GetBotImpactType(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault);
             if (botImpactType != BotImpactType.BOSS)
             {
-                float angleRating = Mathf.Clamp01((visionDeviation - 65f) / 55f); // 0-1 from 70 to 115+deg
-                if (rand3 < angleRating * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value)) // EX: At 115deg 60% chance to replace with vague hint
+                float vagueHintAngleFactor = Mathf.InverseLerp(65f, 120f, visionDeviation); // When facing away, replace with vague hint
+                if (rand3 < vagueHintAngleFactor * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value)
+                 || rand3 < Mathf.InverseLerp(120f, 240f, sinceLastSeen) * Mathf.InverseLerp(0, 110f, distance)) // Assuming surprise attack by the player, even not facing away
                 {
                     var vagueSource = __instance.Owner.Position + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
-                    vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * botEyeToPlayerBody.magnitude /3f;
-                    vagueSource += Vector3.up * rand3 * botEyeToPlayerBody.magnitude /3f;
-                    __instance.Owner.Memory.Spotted(false, vagueSource);
+                    vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * distance / 3f;
+                    vagueSource += Vector3.up * rand3 * distance / 3f;
+                    __instance.Owner.Memory.Spotted(true, vagueSource);
                     return false; // Cancel visibllity (SetVisible does not only get called for the witness... ex: for group members )
                 }
             }
 
             if (player.DebugInfo != null) player.DebugInfo.encounter++;
 
-            float sinceSeen = Time.time - __instance.PersonalSeenTime;
-            Vector3 posDelta = __instance.Person.Position - __instance.EnemyLastPosition;
-
-            if (rand4 - 0.35f * Mathf.InverseLerp(0, 5, player.Player.Velocity.magnitude) < 0.5f * Mathf.InverseLerp(0, 10f + srand2 * 5f, sinceSeen) + 0.5f * Mathf.InverseLerp(0, 10f, posDelta.magnitude))
+            float delayAimChance = 0.5f * Mathf.InverseLerp(0, 10f + srand2 * 5f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(0, 10f, knownPosDelta.magnitude);
+            if (rand4 - 0.35f * Mathf.InverseLerp(0, 5, player.Player.Velocity.magnitude) < delayAimChance)
             {
                 __state = new State()
                 {
                     triggered = true,
-                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance && sinceSeen > rand3 * 10f, // Bots can start search without visual so last seen time solely alone is unreliable
+                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance && sinceLastSeen > rand3 * 10f, // Bots can start search without visual so last seen time solely alone is unreliable
                     botSprinting = __instance.Owner?.Mover?.Sprinting ?? false,
                     visionDeviation = visionDeviation
                 };
