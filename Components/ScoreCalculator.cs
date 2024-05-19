@@ -924,7 +924,7 @@ namespace ThatsLit
         // Try to cheat here
         protected override float CalculateBaseAmbienceScore(string locationId, float time, PlayerLitScoreProfile player)
         {
-            float playerY = Singleton<ThatsLitMainPlayerComponent>.Instance.Player.Transform.Original.position.y;
+            float playerY = player.Player.Player.Transform.Original.position.y;
             var reduction = Mathf.Clamp01((14.7f - playerY) / 1.5f) * 0.6f;
             return Mathf.Max(base.CalculateBaseAmbienceScore(locationId, time, player) - reduction, MinBaseAmbienceScore);
         }
