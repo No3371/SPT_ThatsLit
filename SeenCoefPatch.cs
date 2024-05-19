@@ -37,7 +37,7 @@ namespace ThatsLit
             if ((!ThatsLitPlugin.IncludeBosses.Value && botImpactType == BotImpactType.BOSS)
              || Utility.IsBossNerfExcluded(spawnType)) return;
 
-            ThatsLitMainPlayerComponent player = null;
+            ThatsLitPlayer player = null;
             if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player) != true
              || player == null
              || player.Player == null)
@@ -45,7 +45,7 @@ namespace ThatsLit
 
             var original = __result;
 
-            if (player.DebugInfo != null && ThatsLitMainPlayerComponent.IsDebugSampleFrame)
+            if (player.DebugInfo != null && ThatsLitPlayer.IsDebugSampleFrame)
             {
                 player.DebugInfo.calcedLastFrame = 0;
                 player.DebugInfo.IsBushRatting = false;
@@ -306,7 +306,7 @@ namespace ThatsLit
                     score += compensation * Mathf.InverseLerp(0f, -1f, score);
                 }
 
-                factor = Mathf.Pow(score, ThatsLitMainPlayerComponent.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
+                factor = Mathf.Pow(score, ThatsLitPlayer.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
 
                 if (factor < 0) factor *= 1 + disFactor * Mathf.Clamp01(1.2f - pPoseFactor) * (canSeeLight ? 0.2f : 1f) * (canSeeLaser ? 0.9f : 1f); // Darkness will be far more effective from afar
                 else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
@@ -318,7 +318,7 @@ namespace ThatsLit
                 nearestRecent = dis;
                 nearestAI = true;
                 player.DebugInfo.lastNearest = nearestRecent;
-                if (Time.frameCount % ThatsLitMainPlayerComponent.DEBUG_INTERVAL == ThatsLitMainPlayerComponent.DEBUG_INTERVAL - 1)
+                if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1)
                 {
                     player.DebugInfo.lastCalcFrom = original;
                     player.DebugInfo.lastScore = score;
@@ -779,7 +779,7 @@ namespace ThatsLit
 
             if (player.DebugInfo != null)
             {
-                if (Time.frameCount % ThatsLitMainPlayerComponent.DEBUG_INTERVAL == ThatsLitMainPlayerComponent.DEBUG_INTERVAL - 1 && nearestAI)
+                if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1 && nearestAI)
                 {
                     player.DebugInfo.lastCalcTo = __result;
                     player.DebugInfo.lastFactor2 = factor;

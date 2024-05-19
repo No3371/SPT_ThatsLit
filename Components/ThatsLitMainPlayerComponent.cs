@@ -31,7 +31,7 @@ namespace ThatsLit
     //
     // # Reduce stealth when near stationary weapons not in extreame darkness
     // # Cast for EFT.Interactive.StationaryWeapon/AGSMachinery/Utes on layer Interactive
-    public class ThatsLitMainPlayerComponent : MonoBehaviour
+    public class ThatsLitPlayer : MonoBehaviour
     {
         public const int DEBUG_INTERVAL = 61;
         public static bool IsDebugSampleFrame { get => ThatsLitPlugin.DebugInfo.Value && Time.frameCount % DEBUG_INTERVAL == 0; }

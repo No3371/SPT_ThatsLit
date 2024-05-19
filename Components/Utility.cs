@@ -320,7 +320,7 @@ namespace ThatsLit
 
             if (compat.TemplateInstance?.modes == null || compat.TemplateInstance.modes.Length <= selectedMode)
             {
-                if (ThatsLitMainPlayerComponent.IsDebugSampleFrame)
+                if (ThatsLitPlayer.IsDebugSampleFrame)
                 {
                     string message = $"[That's Lit] Unknown device or mode: {itemTemplateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(itemTemplateId)?.Name} mode {selectedMode}";
                     NotificationManagerClass.DisplayWarningNotification(message);

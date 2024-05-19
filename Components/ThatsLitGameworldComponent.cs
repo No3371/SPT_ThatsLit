@@ -26,14 +26,14 @@ namespace ThatsLit
         private void Update()
         {
             if (!Singleton<GameWorld>.Instantiated) return;
-            if (!ThatsLitMainPlayerComponent.CanLoad()) return;
+            if (!ThatsLitPlayer.CanLoad()) return;
             for (int i = 0; i < GameWorld.AllAlivePlayersList.Count; i++)
             {
                 Player player = GameWorld.AllAlivePlayersList[i];
                 if (player.IsAI) continue;
                 if (!AllThatsLitPlayers.ContainsKey(player))
                 {
-                    var tlp = player.gameObject.AddComponent<ThatsLitMainPlayerComponent>();
+                    var tlp = player.gameObject.AddComponent<ThatsLitPlayer>();
                     AllThatsLitPlayers.Add(player, tlp);
                     tlp.Setup(player);
                     if (player == GameWorld.MainPlayer) MainThatsLitPlayer = tlp;
@@ -56,8 +56,8 @@ namespace ThatsLit
             }
         }
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
-        public ThatsLitMainPlayerComponent MainThatsLitPlayer { get; private set; }
-        public Dictionary<IPlayer, ThatsLitMainPlayerComponent> AllThatsLitPlayers { get; private set; }
+        public ThatsLitPlayer MainThatsLitPlayer { get; private set; }
+        public Dictionary<IPlayer, ThatsLitPlayer> AllThatsLitPlayers { get; private set; }
         public ScoreCalculator ScoreCalculator { get; internal set; }
         public RaidSettings activeRaidSettings;
         public bool IsWinter { get; private set; }
@@ -87,7 +87,7 @@ namespace ThatsLit
                     break;
             }
 
-            AllThatsLitPlayers = new Dictionary<IPlayer, ThatsLitMainPlayerComponent>();
+            AllThatsLitPlayers = new Dictionary<IPlayer, ThatsLitPlayer>();
 
             switch (activeRaidSettings?.LocationId)
             {

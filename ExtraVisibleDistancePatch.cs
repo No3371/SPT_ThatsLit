@@ -33,7 +33,7 @@ namespace ThatsLit
 
             if (Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
 
-            ThatsLitMainPlayerComponent player = null;
+            ThatsLitPlayer player = null;
             Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
             if (player == null) return true;
 

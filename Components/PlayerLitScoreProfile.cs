@@ -9,9 +9,9 @@ namespace ThatsLit
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         internal float detailBonusSmooth;
         internal float litScoreFactor;
-        public ThatsLitMainPlayerComponent Player { get; }
+        public ThatsLitPlayer Player { get; }
 
-        public PlayerLitScoreProfile(ThatsLitMainPlayerComponent player)
+        public PlayerLitScoreProfile(ThatsLitPlayer player)
         {
             Player = player;
         }

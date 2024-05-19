@@ -100,7 +100,7 @@ namespace ThatsLit
 
             // Bunker: Bunker is overall moderately lit
             baseAmbienceScore = Mathf.Lerp(baseAmbienceScore, BunkerBaseAmbienceTarget, bunkerTimeFactor * Mathf.Clamp01(insideTime / 10) * 0.65f);
-            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+            if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                 player.Player.DebugInfo.scoreRawBase = baseAmbienceScore;
 
             var ambienceScore = baseAmbienceScore;
@@ -143,7 +143,7 @@ namespace ThatsLit
                 ambienceScore -= player.detailBonusSmooth * outside1s;
                 ambienceScore = Mathf.Clamp(ambienceScore, -0.95f, 1f);
             }
-            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+            if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                 player.Player.DebugInfo.scoreRaw0 = ambienceScore;
 
 
@@ -152,7 +152,7 @@ namespace ThatsLit
             float lowAmbienceScoreFactor = Mathf.Max(0.5f - ambienceScore, 0) / 1.5f;
             float hightLightedPixelFactor = 0.9f * thisFrame.RatioShinePixels + 0.75f * thisFrame.RatioHighPixels + 0.4f * thisFrame.RatioHighMidPixels + 0.15f * thisFrame.RatioMidPixels;
             float lumScore = CalculateRawLumScore(thisFrame, lowAmbienceScoreFactor, hightLightedPixelFactor, player);
-            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+            if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                 player.Player.DebugInfo.scoreRaw1 = lumScore + ambienceScore;
 
             //var topScoreMultiFrames = FindHighestScoreRecentFrame(true, score);
@@ -179,7 +179,7 @@ namespace ThatsLit
 
 
             lumScore += CalculateChangingLumModifier(thisFrame.avgLumMultiFrames, player.lum1s, player.lum3s, ambienceScore);
-            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+            if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                 player.Player.DebugInfo.scoreRaw2 = lumScore + ambienceScore;
 
             // Extra score for multi frames(sides) contrast in darkness
@@ -192,7 +192,7 @@ namespace ThatsLit
             var expectedFinalScore = lumScore + ambienceScore;
             var compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2); // contrast:0.1 -> final toward 0.1, contrast:0.5 -> final toward 0.25
             lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor * MultiFrameContrastImpactScale; // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
-            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+            if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                 player.Player.DebugInfo.scoreRaw3 = lumScore + ambienceScore;
 
             //The average score of other frames(sides)
@@ -219,7 +219,7 @@ namespace ThatsLit
                 lumScore += compensation * (lowAmbienceScoreFactor + 0.1f);
             }
 
-            if (ThatsLitMainPlayerComponent.IsDebugSampleFrame && player.Player.DebugInfo != null)
+            if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                                 player.Player.DebugInfo.scoreRaw4 = lumScore + ambienceScore;
 
 
