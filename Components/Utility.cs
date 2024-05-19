@@ -240,7 +240,7 @@ namespace ThatsLit
             {
                 if (string.IsNullOrWhiteSpace(it?.TemplateId)) continue;
                 ThatsLitCompat.ExtraDevices.TryGetValue(it.TemplateId, out var extraDevice);
-                Logger.LogWarning($"{it?.TemplateId} {extraDevice?.TemplateInstance?.name}");
+                // Logger.LogWarning($"{it?.TemplateId} {extraDevice?.TemplateInstance?.name}");
                 if (extraDevice != null && extraDevice.alwaysOn)
                 {
                     result = ThatsLitCompat.DeviceMode.MergeMax(result, extraDevice.TemplateInstance?.SafeGetMode(0) ?? default);
