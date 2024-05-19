@@ -664,6 +664,7 @@ namespace ThatsLit
         {
             if (PlayerLitScoreProfile != null) Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.multiFrameLitScore / 0.0999f));
             if (PlayerLitScoreProfile != null) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(PlayerLitScoreProfile.frame0.multiFrameLitScore, POWER) / 0.0999f));
+            if (ThatsLitPlugin.EquipmentInfo.Value && PlayerLitScoreProfile != null && LightAndLaserState.storage != 0) GUILayout.Label(LightAndLaserState.Format());
             if (Foliage != null && Foliage.FoliageScore > 0 && ThatsLitPlugin.FoliageInfo.Value)
                 Utility.GUILayoutFoliageMeter((int)(Foliage.FoliageScore / 0.0999f));
             if (TerrainDetails != null && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
