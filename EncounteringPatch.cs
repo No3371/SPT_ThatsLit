@@ -43,9 +43,11 @@ namespace ThatsLit.Patches.Vision
             Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
             var visionDeviation = Vector3.Angle(botLookDir, botEyeToPlayerBody);
 
+            
             float srand = UnityEngine.Random.Range(-1f, 1f);
             float srand2 = UnityEngine.Random.Range(-1f, 1f);
             float rand3 = UnityEngine.Random.Range(0, 1f); // Don't go underground
+            float rand4 = UnityEngine.Random.Range(0, 1f);
 
             // Vague hint instead, if the bot is facing away
             BotImpactType botImpactType = Utility.GetBotImpactType(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault);
@@ -62,14 +64,17 @@ namespace ThatsLit.Patches.Vision
                 }
             }
 
+            if (player.DebugInfo != null) player.DebugInfo.encounter++;
 
-            if (Time.time - __instance.PersonalSeenTime >= 7f + rand3 * 5f && (__instance.Person.Position - __instance.EnemyLastPosition).sqrMagnitude >= 36f + rand3 * 28f)
+            float sinceSeen = Time.time - __instance.PersonalSeenTime;
+            Vector3 posDelta = __instance.Person.Position - __instance.EnemyLastPosition;
+
+            if (rand4 - 0.35f * Mathf.InverseLerp(0, 5, player.Player.Velocity.magnitude) < 0.5f * Mathf.InverseLerp(0, 10f + srand2 * 5f, sinceSeen) + 0.5f * Mathf.InverseLerp(0, 10f, posDelta.magnitude))
             {
-                if (player.DebugInfo != null) player.DebugInfo.encounter++;
                 __state = new State()
                 {
                     triggered = true,
-                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance && Time.time - __instance.TimeLastSeen > 25f + srand * 10f, // Bots can start search without visual so last seen time solely alone is unreliable
+                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance && sinceSeen > rand3 * 10f, // Bots can start search without visual so last seen time solely alone is unreliable
                     botSprinting = __instance.Owner?.Mover?.Sprinting ?? false,
                     visionDeviation = visionDeviation
                 };
@@ -91,22 +96,27 @@ namespace ThatsLit.Patches.Vision
             ThatsLitPlugin.swEncountering.MaybeResumme();
 
             float rand = UnityEngine.Random.Range(0f, 1f);
+            float rand2 = UnityEngine.Random.Range(0f, 1f);
             if (__state.botSprinting)
             {
                 // Force a ~0.45s delay
                 __instance.Owner.AimingData.SetNextAimingDelay(
                     rand * 0.45f
                     * (__state.unexpected? 1f : 0.5f)
-                    * Mathf.Clamp01(__state.visionDeviation/15f));
+                    * (0.05f + Mathf.InverseLerp(0, 15, __state.visionDeviation)));
 
-                // ~20% chance to force a miss
-                if (UnityEngine.Random.Range(0f, 1f) < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.Clamp01(__state.visionDeviation/30f))
+                // ~30% chance to force a miss
+                if (rand2 < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.InverseLerp(0, 30, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person.Velocity.magnitude))
                     aim.NextShotMiss();
             }
             else if (__state.unexpected)
             {
                 // Force a ~0.15s delay
-                __instance.Owner.AimingData.SetNextAimingDelay(UnityEngine.Random.Range(0f, 0.15f * (rand)) * Mathf.Clamp01(__state.visionDeviation/15f));
+                __instance.Owner.AimingData.SetNextAimingDelay(rand * 0.15f * Mathf.InverseLerp(0, 15, __state.visionDeviation));
+
+                // ~40% chance to force a miss
+                if (rand2 < 0.2f * Mathf.InverseLerp(0, 35, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person.Velocity.magnitude))
+                    aim.NextShotMiss();
             }
 
             ThatsLitPlugin.swEncountering.Stop();
