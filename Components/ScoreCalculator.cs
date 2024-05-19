@@ -88,7 +88,7 @@ namespace ThatsLit
 
             var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time, player);
 
-            baseAmbienceScore += (MinBaseAmbienceScore - baseAmbienceScore) * player.Player.OverheadHaxRatingFactor * 0.15f;
+            baseAmbienceScore += (MinBaseAmbienceScore - baseAmbienceScore) * player.Player.OverheadHaxRatingFactor * 0.2f * GetMapAmbienceCoef(locationId, time);
 
 
             // =====
@@ -956,7 +956,7 @@ namespace ThatsLit
             scoreLow = 0.1f;
             scoreDark = 0;
         }
-        protected override float GetMapAmbienceCoef(string locationId, float time) => 0;
+        protected override float GetMapAmbienceCoef(string locationId, float time) => 0.1f;
         protected override float CalculateMoonLight(string locationId, float time, float cloudiness) => 0;
         protected override float CalculateMoonLightTimeFactor(string locationId, float time) => 0;
         internal override float CalculateSunLightTimeFactor(string locationId, float time) => 0;

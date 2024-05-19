@@ -506,11 +506,11 @@ namespace ThatsLit
         {
             if (OverheadHaxCast(bodyPos, out var haxHit))
             {
-                currentRating += Time.timeScale * Mathf.Clamp01(10f - haxHit.distance);
+                currentRating += Time.timeScale * (Mathf.InverseLerp(10f, 1f, haxHit.distance) - 0.01f);
             }
             else
             {
-                currentRating -= Time.timeScale * 2f;
+                currentRating -= Time.timeScale * 1.75f;
             }
             return Mathf.Clamp(currentRating, 0f, 10f);
         }
