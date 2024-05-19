@@ -64,7 +64,7 @@ namespace ThatsLit.Patches.Vision
                     var vagueSource = __instance.Owner.Position + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
                     vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * distance / 3f;
                     vagueSource += Vector3.up * rand3 * distance / 3f;
-                    __instance.Owner.Memory.Spotted(true, vagueSource);
+                    __instance?.Owner?.Memory.Spotted(true, vagueSource);
                     return false; // Cancel visibllity (SetVisible does not only get called for the witness... ex: for group members )
                 }
             }
@@ -87,6 +87,7 @@ namespace ThatsLit.Patches.Vision
 
             return true;
         }
+        // CalcGoalForBot could change the goalEnemy to the palyer in SetVisible()
         [PatchPostfix]
         public static void PatchPostfix(EnemyInfo __instance, State __state)
         {
