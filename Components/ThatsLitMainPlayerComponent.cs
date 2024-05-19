@@ -736,7 +736,7 @@ namespace ThatsLit
             if (ThatsLitPlugin.EnableBenchmark.Value)
             {
                 if (layoutCall)
-                    infoCacheBenchmark = $"  Update: {benchmarkSampleUpdate,8:0.0000000}\n    Foliage: {benchmarkSampleFoliageCheck,8:0.0000000}\n    Terrain: {benchmarkSampleTerrainCheck,8:0.0000000}\n  SeenCoef: {benchmarkSampleSeenCoef,8:0.0000000}\n  Encountering: {benchmarkSampleEncountering,8:0.0000000}\n  ExtraVisDis: {benchmarkSampleExtraVisDis,8:0.0000000}\n  ScoreCalculator: {benchmarkSampleScoreCalculator,8:0.0000000}\n  Info(+Debug): {benchmarkSampleGUI,8:0.0000000} ms";
+                    infoCacheBenchmark = $"  Update:         {benchmarkSampleUpdate,8:0.0000}\n  Foliage:        {benchmarkSampleFoliageCheck,8:0.0000}\n  Terrain:        {benchmarkSampleTerrainCheck,8:0.0000}\n  SeenCoef:       {benchmarkSampleSeenCoef,8:0.0000}\n  Encountering:   {benchmarkSampleEncountering,8:0.0000}\n  ExtraVisDis:    {benchmarkSampleExtraVisDis,8:0.0000}\n  ScoreCalculator:{benchmarkSampleScoreCalculator,8:0.0000}\n  Info(+Debug):    {benchmarkSampleGUI,8:0.0000} ms";
                 GUILayout.Label(infoCacheBenchmark);
                 if (Time.frameCount % 6000 == 0)
                     if (layoutCall) EFT.UI.ConsoleScreen.Log(infoCacheBenchmark);
