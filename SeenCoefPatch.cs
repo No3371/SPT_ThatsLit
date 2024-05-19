@@ -414,7 +414,7 @@ namespace ThatsLit
                     else
                     {
                         detailScore = terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor));
-                        detailScore *= (1f - cqb11mTo1mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVerticalSigned); // nerf when high pose or < 10m or  looking down
+                        detailScore *= (1f - cqb11mTo1mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVerticalSigned); // nerf when high pose or < 10m or looking down
                     }
 
                     detailScore = Mathf.Min(detailScore, 2.5f - pPoseFactor); // Cap extreme grasses for high poses
