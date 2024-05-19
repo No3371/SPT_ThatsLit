@@ -80,7 +80,7 @@ namespace ThatsLit
         {
             if (cache.TryGetValue(storage, out var str)) return str;
 
-            str = $"  { (VisibleLight? "◆" : "◇") }{ (VisibleLaser? "◆" : "◇") } { (IRLight? "◆" : "◇") }{ (IRLaser? "◆" : "◇") } { (VisibleLightSub? "◆" : "◇") }{ (VisibleLaserSub? "◆" : "◇") } { (IRLightSub? "◆" : "◇") }{ (IRLaserSub? "◆" : "◇") } " ;
+            str = $"  V { (VisibleLight? "◆" : "◇") }{ (VisibleLaser? "◆" : "◇") } IR { (IRLight? "◆" : "◇") }{ (IRLaser? "◆" : "◇") } / V { (VisibleLightSub? "◆" : "◇") }{ (VisibleLaserSub? "◆" : "◇") } IR { (IRLightSub? "◆" : "◇") }{ (IRLaserSub? "◆" : "◇") } " ;
             cache.Add(storage, str);
             return str;
         }
