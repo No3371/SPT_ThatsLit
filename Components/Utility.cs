@@ -270,19 +270,19 @@ namespace ThatsLit
 
             if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon))
             {
-                modeSub = mode = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon)?.ContainedItem));
+                modeSub = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon)?.ContainedItem));
             }
 
 
             if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon))
             {
-                modeSub = mode = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon)?.ContainedItem));
+                modeSub = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon)?.ContainedItem));
             }
 
 
             if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.Holster))
             {
-                modeSub = mode = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.Holster)?.ContainedItem));
+                modeSub = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.Holster)?.ContainedItem));
             }
 
             // GClass2550 544909bb4bdc2d6f028b4577 x item tactical_all_insight_anpeq15 2457 / V + IR + IRL / MODES: 4  V -> IR -> IRL -> IR+IRL
