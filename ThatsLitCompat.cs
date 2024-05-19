@@ -8,6 +8,7 @@ namespace ThatsLit
 {
     public static class ThatsLitCompat
     {
+        public const int MIN_COMPATIBLE_PROTOCOL = 1;
 
         static ThatsLitCompat()
         {
@@ -52,6 +53,13 @@ namespace ThatsLit
                         NotificationManagerClass.DisplayWarningNotification(message);
                         Logger.LogError(message);
 
+                        continue;
+                    }
+                    if (file.protocol < MIN_COMPATIBLE_PROTOCOL)
+                    {
+                        var message = $"[That's Lit] Incompatible outdated thatslitcompat file: { file }, minimum compatible protocol: { MIN_COMPATIBLE_PROTOCOL }";
+                        NotificationManagerClass.DisplayWarningNotification(message);
+                        Logger.LogError(message);
                         continue;
                     }
                     file.FilePath = path;
@@ -216,6 +224,7 @@ namespace ThatsLit
         [System.Serializable]
         public class CompatFile: IComparable<CompatFile>
         {
+            public int protocol { get; set; }
             public string FilePath { get; internal set; }
             public int priority { get; set; } = 999;
             public ScopeTemplate[] scopeTemplates { get; set; }
