@@ -106,7 +106,7 @@ namespace ThatsLit.Patches.Vision
                     * (0.05f + Mathf.InverseLerp(0, 15, __state.visionDeviation)));
 
                 // ~30% chance to force a miss
-                if (rand2 < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.InverseLerp(0, 30, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person.Velocity.magnitude))
+                if (rand2 < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.InverseLerp(0, 30, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
                     aim.NextShotMiss();
             }
             else if (__state.unexpected)
@@ -115,7 +115,7 @@ namespace ThatsLit.Patches.Vision
                 __instance.Owner.AimingData.SetNextAimingDelay(rand * 0.15f * Mathf.InverseLerp(0, 15, __state.visionDeviation));
 
                 // ~40% chance to force a miss
-                if (rand2 < 0.2f * Mathf.InverseLerp(0, 35, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person.Velocity.magnitude))
+                if (rand2 < 0.2f * Mathf.InverseLerp(0, 35, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
                     aim.NextShotMiss();
             }
 
