@@ -14,7 +14,7 @@ namespace ThatsLit
             this.id = id;
         }
 
-        public void MaybeResumme ()
+        public void MaybeResume ()
         {
             if (ThatsLitPlugin.EnableBenchmark.Value && ThatsLitPlugin.DebugInfo.Value)
             {
@@ -44,20 +44,21 @@ namespace ThatsLit
             return ms;
         }
 
-        public struct RunningScope : IDisposable
-        {
-            public RunningScope(ManagedStopWatch host)
-            {
-                Host = host;
-                Host.MaybeResumme();
-            }
+        // !! THIS SOMEHOW DOES NOT WORK
+        // It's disposed immediately despite IL does not looks like so
+        // public struct RunningScope : IDisposable
+        // {
+        //     public ManagedStopWatch Host { get; }
+        //     public RunningScope(ManagedStopWatch host)
+        //     {
+        //         Host = host;
+        //         Host.MaybeResume();
+        //     }
 
-            public ManagedStopWatch Host { get; }
-
-            public void Dispose()
-            {
-                Host.Stop();
-            }
-        }
+        //     public void Dispose()
+        //     {
+        //         Host.Stop();
+        //     }
+        // }
     }
 }

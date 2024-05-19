@@ -37,7 +37,7 @@ namespace ThatsLit.Patches.Vision
             if (__instance.IsVisible) return true; // SKIP. Only works when the bot hasn't see the player. IsVisible means the player is already seen.
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
 
-            ThatsLitPlugin.swEncountering.MaybeResumme();
+            ThatsLitPlugin.swEncountering.MaybeResume();
 
             Vector3 botLookDir = __instance.Owner.GetPlayer.LookDirection;
             Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
@@ -93,7 +93,7 @@ namespace ThatsLit.Patches.Vision
             var aim = __instance.Owner.AimingData;
             if (aim == null) return;
 
-            ThatsLitPlugin.swEncountering.MaybeResumme();
+            ThatsLitPlugin.swEncountering.MaybeResume();
 
             float rand = UnityEngine.Random.Range(0f, 1f);
             float rand2 = UnityEngine.Random.Range(0f, 1f);

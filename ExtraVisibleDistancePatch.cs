@@ -36,7 +36,7 @@ namespace ThatsLit
             if (player == null) return true;
             if (Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
 
-            ThatsLitPlugin.swExtraVisDis.MaybeResumme();
+            ThatsLitPlugin.swExtraVisDis.MaybeResume();
 
             bool thermalActive = false, nvgActive = false, scope = false;
             float thermalRange = 0;

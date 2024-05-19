@@ -51,7 +51,7 @@ namespace ThatsLit
                 player.DebugInfo.IsBushRatting = false;
             }
 
-            ThatsLitPlugin.swSeenCoef.MaybeResumme();
+            ThatsLitPlugin.swSeenCoef.MaybeResume();
 
             float pSpeedFactor = Mathf.Clamp01((player.Player.Velocity.magnitude - 1f) / 4f);
 
