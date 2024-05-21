@@ -7,7 +7,7 @@ namespace ThatsLit
     {
         public bool IsBushRatting { get; set;} 
         public float lastCalcFrom, lastCalcTo, lastScore, lastFactor1, lastFactor2, rawTerrainScoreSample;
-        public int calced = 0, calcedLastFrame = 0, encounter;
+        public int calced = 0, calcedLastFrame = 0, encounter, vagueHint;
         public Vector3 lastTriggeredDetailCoverDirNearest;
         public float lastTiltAngle, lastRotateAngle, lastDisFactorNearest;
         public float lastNearest;

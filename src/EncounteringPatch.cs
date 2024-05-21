@@ -62,6 +62,7 @@ namespace ThatsLit.Patches.Vision
                 if (rand3 < vagueHintAngleFactor * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value)
                  || rand3 < Mathf.InverseLerp(120f, 240f, sinceLastSeen) * Mathf.InverseLerp(0, 110f, distance)) // Assuming surprise attack by the player, even not facing away
                 {
+                    if (player.DebugInfo != null) player.DebugInfo.vagueHint++;
                     var vagueSource = botPos + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
                     vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * distance / 3f;
                     vagueSource += Vector3.up * rand3 * distance / 3f;
