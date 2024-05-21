@@ -39,6 +39,7 @@ namespace ThatsLit.Patches.Vision
 
             ThatsLitPlugin.swEncountering.MaybeResume();
 
+            Vector3 botPos = __instance.Owner.Position;
             Vector3 botLookDir = __instance.Owner.GetPlayer.LookDirection;
             Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
             float distance = botEyeToPlayerBody.magnitude;
@@ -61,10 +62,10 @@ namespace ThatsLit.Patches.Vision
                 if (rand3 < vagueHintAngleFactor * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value)
                  || rand3 < Mathf.InverseLerp(120f, 240f, sinceLastSeen) * Mathf.InverseLerp(0, 110f, distance)) // Assuming surprise attack by the player, even not facing away
                 {
-                    var vagueSource = __instance.Owner.Position + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
+                    var vagueSource = botPos + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
                     vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * distance / 3f;
                     vagueSource += Vector3.up * rand3 * distance / 3f;
-                    __instance?.Owner?.Memory.Spotted(true, vagueSource);
+                    if (__instance.Owner.DangerPointsData != null && __instance.Owner.LookSensor != null) __instance?.Owner?.Memory.Spotted(true, vagueSource);
                     return false; // Cancel visibllity (SetVisible does not only get called for the witness... ex: for group members )
                 }
             }
@@ -72,7 +73,7 @@ namespace ThatsLit.Patches.Vision
             if (player.DebugInfo != null) player.DebugInfo.encounter++;
 
             float delayAimChance = 0.5f * Mathf.InverseLerp(0, 10f + srand2 * 5f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(0, 10f, knownPosDelta.magnitude);
-            if (rand4 - 0.35f * Mathf.InverseLerp(0, 5, player.Player.Velocity.magnitude) < delayAimChance)
+            if (rand4 - 0.35f * Mathf.InverseLerp(0, 5, player.Player.Velocity.magnitude) < delayAimChance) // Busting into sight / out of cover
             {
                 __state = new State()
                 {
