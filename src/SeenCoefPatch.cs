@@ -329,7 +329,6 @@ namespace ThatsLit
 
             if (player.Foliage != null)
             {
-                var foliageImpact = player.Foliage.FoliageScore * (1f - factor);
                 Vector2 bestMatchFoliageDir = Vector2.zero;
                 float bestMatchDeg = 360f;
                 for (int i = 0; i < Math.Min(ThatsLitPlugin.FoliageSamples.Value, player.Foliage.FoliageCount); i++) {
@@ -342,16 +341,20 @@ namespace ThatsLit
                         bestMatchFoliageDir = f.dir;
                     }
                 }
-                if (bestMatchFoliageDir != Vector2.zero) foliageImpact *= 1 - Mathf.Clamp01(bestMatchDeg / 90f); // 0deg -> 1, 90+deg -> 0
+                var foliageImpact = player.Foliage.FoliageScore;
+                foliageImpact *= 1 + Mathf.InverseLerp(0f, -1f, factor);
+                if (bestMatchFoliageDir != Vector2.zero) foliageImpact *= Mathf.InverseLerp(90f, 0f, bestMatchDeg);
                                                                                                                 // Maybe randomly lose vision for foliages
                 float foliageBlindChance = Mathf.Clamp01(
                                                 disFactor // Mainly works for far away enemies
                                                 * foliageImpact
                                                 * ThatsLitPlugin.FoliageImpactScale.Value
-                                                * Mathf.Clamp01(1.5f - pPoseFactor)); // Lower chance for higher poses
+                                                * Mathf.Clamp01(2f - pPoseFactor)); // Lower chance for higher poses
+                // 60m, standing, fs0.5 => 0.125 / 110m => 0.5
+                foliageBlindChance *= 0.5f + 0.5f * visionAngleDelta90Clamped; // 50% effective when looking straight at the player
                 if (UnityEngine.Random.Range(0f, 1.01f) < foliageBlindChance) // Among bushes, from afar, always at least 5% to be uneffective
                 {
-                    __result += rand2 + rand3 * 2f * disFactor;
+                    __result += rand2;
                     __result *= 1 + disFactor + rand4 * (5f + caution);
                 }
             }
