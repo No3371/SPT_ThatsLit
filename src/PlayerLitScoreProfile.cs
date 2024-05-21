@@ -1,4 +1,6 @@
 #define DEBUG_DETAILS
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace ThatsLit
@@ -10,6 +12,8 @@ namespace ThatsLit
         internal float detailBonusSmooth;
         internal float litScoreFactor;
         public ThatsLitPlayer Player { get; }
+        public CountPixelsJob PixelCountingJob { get; set; }
+        public JobHandle CountingJobHandle { get; set; }
 
         public PlayerLitScoreProfile(ThatsLitPlayer player)
         {
@@ -89,5 +93,46 @@ namespace ThatsLit
             return score;
         }
         
+
+        public struct CountPixelsJob : IJobParallelFor
+        {
+            [Unity.Collections.LowLevel.Unsafe.NativeSetThreadIndex]
+            public int threadIndex;
+            [ReadOnly]
+            public NativeArray<Color32> tex;
+            [WriteOnly]
+            [Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestriction]
+            public NativeArray<int> counted; // pxS, pxH, pxHM, pxM, pxML, pxL, pxD, valid
+            [WriteOnly]
+            [Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestriction]
+            public NativeArray<float> lum; // lum, lumNonDark
+            [ReadOnly]
+            public NativeArray<float> thresholds; // thresholdShine, thresholdHigh, thresholdHighMid, thresholdMid, thresholdMidLow, thresholdLow
+
+            public void Execute(int index)
+            {
+                Color32 c = tex[index];
+                if (c == Color.white || c.a <= 0.5f)
+                    return;
+
+                var pxLum = (c.r + c.g + c.b) / 765f;
+
+                int threadIndexOffset = threadIndex * 8;
+                lum[threadIndexOffset + 0] += pxLum;
+                if (pxLum < thresholds[5])
+                {
+                    counted[threadIndexOffset + 6] += 1;
+                    lum[threadIndexOffset + 1] += pxLum;
+                }
+                else if (pxLum >= thresholds[0]) counted[threadIndexOffset + 0] += 1;
+                else if (pxLum >= thresholds[1]) counted[threadIndexOffset + 1] += 1;
+                else if (pxLum >= thresholds[2]) counted[threadIndexOffset + 2] += 1;
+                else if (pxLum >= thresholds[3]) counted[threadIndexOffset + 3] += 1;
+                else if (pxLum >= thresholds[4]) counted[threadIndexOffset + 4] += 1;
+                else if (pxLum >= thresholds[5]) counted[threadIndexOffset + 5] += 1;
+
+                counted[threadIndexOffset + 7] += 1;
+            }
+        }
     }
 }
