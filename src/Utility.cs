@@ -128,7 +128,7 @@ namespace ThatsLit
                 prone = 0.04f * num;
                 crouch = 0.018f * num;
             }
-            else if (name.EndsWith("ead4fa"))
+            else if (name.EndsWith("ead4fa")) // with little white flowers
             {
                 prone = 0.06f * num;
                 crouch = 0.008f * num;
@@ -138,9 +138,12 @@ namespace ThatsLit
                 prone = 0.007f * num;
                 crouch = 0.009f * num;
             }
-            else if (name.EndsWith("4ad690")
-                || name.EndsWith("bf0a23")
-            )
+            else if (name.EndsWith("4ad690")) // tall and somewhat thick
+            {
+                prone = 0.007f * num;
+                crouch = 0.013f * num;
+            }
+            else if (name.EndsWith("bf0a23"))
             {
                 prone = 0.007f * num;
                 crouch = 0.007f * num;
@@ -155,7 +158,11 @@ namespace ThatsLit
                 prone = 0.007f * num;
                 crouch = 0.006f * num;
             }
-
+            else if (name.EndsWith("d17f80"))  // sharp gray short grass
+            {
+                prone = 0.008f * Mathf.Min(num, 25);
+                crouch = 0;
+            }
             else if (name.EndsWith("d17180")) {} // Flat grass paste (found in Custom)
             else if (name.EndsWith("e84f39")) {} // super tiny little grass
             else if (name.EndsWith("e9cd39")) {} // rock
