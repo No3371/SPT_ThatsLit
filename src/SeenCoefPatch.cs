@@ -348,11 +348,11 @@ namespace ThatsLit
                                                 disFactor // Mainly works for far away enemies
                                                 * foliageImpact
                                                 * ThatsLitPlugin.FoliageImpactScale.Value
-                                                * Mathf.Clamp01(1.35f - pPoseFactor)); // Lower chance for higher poses
-                if (UnityEngine.Random.Range(0f, 1.05f) < foliageBlindChance) // Among bushes, from afar, always at least 5% to be uneffective
+                                                * Mathf.Clamp01(1.5f - pPoseFactor)); // Lower chance for higher poses
+                if (UnityEngine.Random.Range(0f, 1.01f) < foliageBlindChance) // Among bushes, from afar, always at least 5% to be uneffective
                 {
-                    __result *= 1 + rand4 * (10f - caution * 0.5f);
                     __result += rand2 + rand3 * 2f * disFactor;
+                    __result *= 1 + disFactor + rand4 * (5f + caution);
                 }
             }
 
