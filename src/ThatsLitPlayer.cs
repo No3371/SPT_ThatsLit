@@ -689,9 +689,6 @@ namespace ThatsLit
         {
             if (Player?.IsYourPlayer != true) return;
 
-            if (Time.time < awakeAt + 10)
-                GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
-
             bool layoutCall = guiFrame < Time.frameCount;
             ThatsLitPlugin.swGUI.MaybeResume();
             if (PlayerLitScoreProfile == null)
@@ -705,7 +702,12 @@ namespace ThatsLit
             poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
 
             if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
+            {
                 OnGUIInfo();
+
+                if (Time.time < awakeAt + 10)
+                    GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
+            }
 
             if (!ThatsLitPlugin.DebugInfo.Value || DebugInfo == null) return;
 
