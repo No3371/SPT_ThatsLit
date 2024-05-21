@@ -310,7 +310,7 @@ namespace ThatsLit
                 factor = Mathf.Pow(score, ThatsLitPlayer.POWER); // -1 ~ 1, the graph is basically flat when the score is between ~0.3 and 0.3
 
                 if (factor < 0) factor *= 1 + disFactor * Mathf.Clamp01(1.2f - pPoseFactor) * (canSeeLight ? 0.2f : 1f) * (canSeeLaser ? 0.9f : 1f); // Darkness will be far more effective from afar
-                else if (factor > 0) factor /= 1 + disFactor; // Highlight will be less effective from afar
+                else if (factor > 0) factor /= 1 + Mathf.InverseLerp(100f, 10f, dis); // Highlight will be less effective from afar
             }
 
             bool nearestAI = false;
