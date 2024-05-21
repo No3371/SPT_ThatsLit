@@ -250,8 +250,8 @@ namespace ThatsLit
             // ======
             float globalOverlookChance = 0.01f / pPoseFactor;
             globalOverlookChance *= 1 + 4f * Mathf.InverseLerp(10f, 110f, dis) * notSeenRecentAndNear; // linear
-            if (canSeeLight) globalOverlookChance /= 2f - disFactor;
-            if (rand5 < globalOverlookChance * (0.5f + notSeenRecentAndNear))
+            if (canSeeLight) globalOverlookChance /= 2f - Mathf.InverseLerp(10f, 110f, dis);
+            if (rand5 < globalOverlookChance)
             {
                 __result *= 10 + rand1 * 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
             }
