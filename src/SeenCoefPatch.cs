@@ -89,7 +89,7 @@ namespace ThatsLit
 
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
-            var visionAngleDelta90Clamped = Mathf.InverseLerp(0, 90, visionAngleDelta);
+            var visionAngleDelta90Clamped = Mathf.InverseLerp(0, 90f, visionAngleDelta);
             var visionAngleDeltaHorizontal = Vector3.Angle(new Vector3(botVisionDir.x, 0, botVisionDir.z), new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z));
             // negative if looking down (from higher pos), 0 when looking straight...
             var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody); 
@@ -491,41 +491,41 @@ namespace ThatsLit
                 switch (nearestFoliage.name)
                 {
                     case "filbert_big01":
-                        angleFactor = 1; // works even if looking right at
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.8f) / 0.7f);
-                        enemyDisFactor = Mathf.Clamp01(dis / 2.5f); // 100% at 2.5m+
-                        poseScale = 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.55f); // 100% at crouch
-                        yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVerticalSigned / 60f); // +60deg => 1, 0deg => 1, -30deg => 0.5f, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
+                        angleFactor             = 1; // works even if looking right at
+                        foliageDisFactor        = Mathf.InverseLerp(1.5f, 0.8f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(2.5f, 0f, dis);
+                        poseScale               = Mathf.InverseLerp(1f, 0.45f, pPoseFactor);
+                        yDeltaFactor            = Mathf.InverseLerp(-60f, 0f, visionAngleDeltaVerticalSigned);
                         break;
                     case "filbert_big02":
-                        angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 20f);
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.1f); // 0.3 -> 100%, 0.55 -> 0%
-                        enemyDisFactor = Mathf.Clamp01(dis / 10f);
-                        poseScale = pPoseFactor == 0.05f ? 0.7f : 1f; // 
+                        angleFactor             = 0.4f + 0.6f * Mathf.InverseLerp(0, 20, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(0.1f, 0.6f, nearestFoliage.dis); // 0.3 -> 100%, 0.55 -> 0%
+                        enemyDisFactor          = Mathf.InverseLerp(0, 10f, dis);
+                        poseScale               = pPoseFactor == 0.05f ? 0.7f : 1f; //
                         break;
                     case "filbert_big03":
-                        angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 30f);
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.25f) / 0.2f); // 0.3 -> 100%, 0.55 -> 0%
-                        enemyDisFactor = Mathf.Clamp01(dis / 15f);
-                        poseScale = pPoseFactor == 0.05f ? 0 : 0.1f + (pPoseFactor - 0.45f) / 0.55f * 0.9f; // standing is better with this tall one
+                        angleFactor             = 0.4f + 0.6f * Mathf.InverseLerp(0, 30, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(0.45f, 0.2f, nearestFoliage.dis); // 0.3 -> 100%, 0.55 -> 0%
+                        enemyDisFactor          = Mathf.InverseLerp(0, 15f, dis);
+                        poseScale               = pPoseFactor == 0.05f ? 0 : 0.1f + 0.9f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor); // standing is better with this tall one
                         break;
                     case "filbert_01":
-                        angleFactor = 1;
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.35f) / 0.25f);
-                        enemyDisFactor = Mathf.Clamp01(dis / 12f); // 100% at 2.5m+
-                        poseScale = 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.3f);
+                        angleFactor             = 1;
+                        foliageDisFactor        = Mathf.InverseLerp(0.6f, 0.25f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 12f, dis); Mathf.Clamp01(dis / 12f); // 100% at 2.5m+
+                        poseScale               = Mathf.InverseLerp(0.75f, 0.3f, pPoseFactor);
                         break;
                     case "filbert_small01":
-                        angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 35f);
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.15f) / 0.15f);
-                        enemyDisFactor = Mathf.Clamp01(dis / 10f);
-                        poseScale = pPoseFactor == 0.45f ? 1f : 0;
+                        angleFactor             = 0.2f + 0.8f * Mathf.InverseLerp(0f, 35f, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(0.3f, 0.15f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 10f, dis);
+                        poseScale               = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_small02":
-                        angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 25f);
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.15f) / 0.15f);
-                        enemyDisFactor = Mathf.Clamp01(dis / 8f);
-                        poseScale = pPoseFactor == 0.45f ? 1f : 0;
+                        angleFactor             = 0.2f + 0.8f * Mathf.InverseLerp(0f, 25f, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(0.3f, 0.15f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 8f, dis);
+                        poseScale               = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_small03":
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 40f);

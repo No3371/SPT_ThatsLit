@@ -66,8 +66,8 @@ namespace ThatsLit.Patches.Vision
                     var vagueSource = botPos + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
                     vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * distance / 3f;
                     vagueSource += Vector3.up * rand3 * distance / 3f;
-                    if (__instance.Owner.DangerPointsData != null && __instance.Owner.LookSensor != null) __instance?.Owner?.Memory.Spotted(true, vagueSource);
-                    return false; // Cancel visibllity (SetVisible does not only get called for the witness... ex: for group members )
+                    if (__instance?.Owner?.DangerPointsData != null && __instance?.Owner?.LookSensor != null) __instance?.Owner?.Memory.Spotted(true, vagueSource);
+                    return false; // Cancel visibllity (SetVisible does not only get called for direct vision... ex: for group members )
                 }
             }
 
@@ -79,7 +79,7 @@ namespace ThatsLit.Patches.Vision
                 __state = new State()
                 {
                     triggered = true,
-                    unexpected = __instance.Owner.Memory.GoalEnemy != __instance && sinceLastSeen > rand3 * 10f, // Bots can start search without visual so last seen time solely alone is unreliable
+                    unexpected = __instance.Owner?.Memory.GoalEnemy != __instance && sinceLastSeen > rand3 * 10f, // Bots can start search without visual so last seen time solely alone is unreliable
                     botSprinting = __instance.Owner?.Mover?.Sprinting ?? false,
                     visionDeviation = visionDeviation
                 };
@@ -106,7 +106,7 @@ namespace ThatsLit.Patches.Vision
             if (__state.botSprinting)
             {
                 // Force a ~0.45s delay
-                __instance.Owner.AimingData.SetNextAimingDelay(
+                aim.SetNextAimingDelay(
                     rand * 0.45f
                     * (__state.unexpected? 1f : 0.5f)
                     * (0.05f + Mathf.InverseLerp(0, 15, __state.visionDeviation)));
@@ -118,7 +118,7 @@ namespace ThatsLit.Patches.Vision
             else if (__state.unexpected)
             {
                 // Force a ~0.15s delay
-                __instance.Owner.AimingData.SetNextAimingDelay(rand * 0.15f * Mathf.InverseLerp(0, 15, __state.visionDeviation));
+                aim.SetNextAimingDelay(rand * 0.15f * Mathf.InverseLerp(0, 15, __state.visionDeviation));
 
                 // ~40% chance to force a miss
                 if (rand2 < 0.2f * Mathf.InverseLerp(0, 35, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
