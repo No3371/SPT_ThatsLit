@@ -96,7 +96,7 @@ namespace ThatsLit
             var visionAngleDeltaVerticalSigned = visionAngleDeltaVertical * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
 
             var dis = eyeToPlayerBody.magnitude;
-            float disFactor = Mathf.Clamp01((dis - 10) / 100f);
+            float disFactor = Mathf.InverseLerp(10f, 110f, dis);
             float disFactorSmooth = 0;
             bool inThermalView = false;
             bool inNVGView = false;
@@ -152,7 +152,7 @@ namespace ThatsLit
 
                     if (visionAngleDelta <= 60f / currentZoom) // In scope fov
                     {
-                        disFactor = Mathf.Clamp01((dis / currentZoom - 10) / 100f);
+                        disFactor = Mathf.InverseLerp(10, 110f, dis / currentZoom);
                         if (activeScope?.thermal != null  && dis <= activeScope.thermal.effectiveDistance)
                         {
                             inThermalView = true;
@@ -248,7 +248,8 @@ namespace ThatsLit
             // ======
             // Global random overlooking
             // ======
-            float globalOverlookChance = 0.01f / pPoseFactor; // Not scaled by disFactor because this is intended to mess with bot aiming and tracking for a bit.
+            float globalOverlookChance = 0.01f / pPoseFactor;
+            globalOverlookChance *= 1 + 4f * Mathf.InverseLerp(10f, 110f, dis) * notSeenRecentAndNear; // linear
             if (canSeeLight) globalOverlookChance /= 2f - disFactor;
             if (rand5 < globalOverlookChance * (0.5f + notSeenRecentAndNear))
             {
