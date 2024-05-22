@@ -255,7 +255,6 @@ namespace ThatsLit
         /// The percentage of score provided by observed brightness (from 3d lightings)
         /// </summary>
         internal float sunLightScore, moonLightScore;
-        string infoCache;
 
         protected virtual float FinalTransformScore (float score)
         {
