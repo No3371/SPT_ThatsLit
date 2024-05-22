@@ -96,6 +96,7 @@ namespace ThatsLit
             var visionAngleDeltaVerticalSigned = visionAngleDeltaVertical * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
 
             var dis = eyeToPlayerBody.magnitude;
+            float zoomedDisFactor = Mathf.InverseLerp(10f, 110f, dis);
             float disFactor = Mathf.InverseLerp(10f, 110f, dis);
             float disFactorSmooth = 0;
             bool inThermalView = false;
@@ -153,6 +154,7 @@ namespace ThatsLit
                     if (visionAngleDelta <= 60f / currentZoom) // In scope fov
                     {
                         disFactor = Mathf.InverseLerp(10, 110f, dis / currentZoom);
+                        zoomedDisFactor /= currentZoom;
                         if (activeScope?.thermal != null  && dis <= activeScope.thermal.effectiveDistance)
                         {
                             inThermalView = true;
@@ -249,8 +251,13 @@ namespace ThatsLit
             // Global random overlooking
             // ======
             float globalOverlookChance = 0.01f / pPoseFactor;
-            globalOverlookChance *= 1 + 4f * Mathf.InverseLerp(10f, 110f, dis) * notSeenRecentAndNear; // linear
+            globalOverlookChance *= 1 + 9f * Mathf.InverseLerp(10f, 110f, zoomedDisFactor) * notSeenRecentAndNear; // linear
             if (canSeeLight) globalOverlookChance /= 2f - Mathf.InverseLerp(10f, 110f, dis);
+            // 110m unseen => 200% (Prone), 22% (Crouch), 10% (Stand) !1 CHECK
+            // 40m unseen => 74% (Prone), 8.14% (Crouch)
+
+            globalOverlookChance *= 0.4f + 0.6f * Mathf.InverseLerp(5f, 90f, visionAngleDelta);
+            globalOverlookChance *= botImpactType != BotImpactType.DEFAULT? 0.5f : 1f;
             if (rand5 < globalOverlookChance)
             {
                 __result *= 10 + rand1 * 10; // Instead of set it to flat 8888, so if the player has been in the vision for quite some time, this don't block
