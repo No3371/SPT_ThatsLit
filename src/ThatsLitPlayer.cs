@@ -63,6 +63,8 @@ namespace ThatsLit
         float terrainScoreHintProne, terrainScoreHintRegular;
         internal PlayerFoliageProfile Foliage;
         internal PlayerLitScoreProfile PlayerLitScoreProfile { get; set;}
+        internal Vector3 lastShotVector;
+        internal float lastShotTime;
         static readonly LayerMask ambienceRaycastMask = (1 << LayerMask.NameToLayer("Terrain")) | (1 << LayerMask.NameToLayer("HighPolyCollider")) | (1 << LayerMask.NameToLayer("Grass")) | (1 << LayerMask.NameToLayer("Foliage"));
         internal delegate bool CheckStimEffectProxy (EFT.HealthSystem.EStimulatorBuffType buffType);
         internal CheckStimEffectProxy CheckEffectDelegate

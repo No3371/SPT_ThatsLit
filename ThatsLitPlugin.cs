@@ -250,7 +250,7 @@ namespace ThatsLit
             new SeenCoefPatch().Enable();
             new EncounteringPatch().Enable();
             new ExtraVisibleDistancePatch().Enable();
-            // new ShadowMaskExtractorPatch().Enable();
+            new InitiateShotMonitor().Enable();
             // new DebugCountId().Enable();
         }
 
