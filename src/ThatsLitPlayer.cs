@@ -82,45 +82,7 @@ namespace ThatsLit
         private CheckStimEffectProxy checkEffectDelegate;
         public static bool CanLoad ()
         {
-            bool result = CameraClass.Instance.OpticCameraManager.Camera != null;
-            switch (ActiveRaidSettings?.LocationId)
-            {
-                case "factory4_day":
-                case "laboratory":
-                case null:
-                    result = true;
-                    break;
-                case "Lighthouse":
-                    result = ThatsLitPlugin.EnableLighthouse.Value & result;
-                    break;
-                case "Woods":
-                    result = ThatsLitPlugin.EnableWoods.Value & result;
-                    break;
-                case "factory4_night":
-                    result = ThatsLitPlugin.EnableFactoryNight.Value & result;
-                    break;
-                case "bigmap": // Customs
-                    result = ThatsLitPlugin.EnableCustoms.Value & result;
-                    break;
-                case "RezervBase": // Reserve
-                    result = ThatsLitPlugin.EnableReserve.Value & result;
-                    break;
-                case "Interchange":
-                    result = ThatsLitPlugin.EnableInterchange.Value & result;
-                    break;
-                case "TarkovStreets":
-                    result = ThatsLitPlugin.EnableStreets.Value & result;
-                    break;
-                case "Sandbox": // GZ
-                    result = ThatsLitPlugin.EnableGroundZero.Value & result;
-                    break;
-                case "Shoreline":
-                    result = ThatsLitPlugin.EnableShoreline.Value & result;
-                    break;
-                default:
-                    break;
-            }
-            
+            bool result = false;
             if (CameraClass.Instance.OpticCameraManager.Camera != null
              && prefab == null)
             {
