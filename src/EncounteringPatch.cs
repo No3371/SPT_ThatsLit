@@ -32,6 +32,7 @@ namespace ThatsLit.Patches.Vision
             if (!value) return true; // SKIP. Only works when the player is set to be visible to the bot.
             if (__instance.IsVisible) return true; // SKIP. Only works when the bot hasn't see the player. IsVisible means the player is already seen.
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
+            if (__instance.Owner == null) return true;
     
             ThatsLitPlayer player = null;
             Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
@@ -45,36 +46,71 @@ namespace ThatsLit.Patches.Vision
             float distance = botEyeToPlayerBody.magnitude;
             var visionDeviation = Vector3.Angle(botLookDir, botEyeToPlayerBody);
 
-
-            float sinceLastSeen = Time.time - __instance.PersonalSeenTime;
-            Vector3 knownPosDelta = __instance.Person.Position - __instance.EnemyLastPosition;
-            
             float srand = UnityEngine.Random.Range(-1f, 1f);
             float srand2 = UnityEngine.Random.Range(-1f, 1f);
             float rand3 = UnityEngine.Random.Range(0, 1f); // Don't go underground
             float rand4 = UnityEngine.Random.Range(0, 1f);
 
+            float sinceLastSeen = Time.time - __instance.PersonalSeenTime;
+            float knownPosDelta = (__instance.Person.Position - __instance.EnemyLastPosition).magnitude;
+
+            float GetSurpriseChanceInFront ()
+            {
+                // Handle situations where the player is shooting from afar
+                // Prevent bots constantly get vague hints even if its facing the shooting player
+                
+                float cutoff = 0;
+                if (player.lastShotVector != Vector3.zero && Time.time - player.lastShotTime < 0.5f)
+                {
+                    float shotAngleDelta = Vector3.Angle(-botEyeToPlayerBody, player.lastShotVector);
+                    if (player.DebugInfo != null)
+                        player.DebugInfo.lastEncounterShotAngleDelta = shotAngleDelta;
+                    
+                    cutoff = Mathf.InverseLerp(0.5f, 0f, Time.time - player.lastShotTime);
+                    cutoff *= Mathf.InverseLerp(15f, 0f, shotAngleDelta);
+                    if (player.DebugInfo != null) player.DebugInfo.lastEncounteringShotCutoff = cutoff;
+                }
+                 // Assuming surprise attack by the player, even not facing away
+                return Mathf.Clamp(ThatsLitPlugin.VagueHintChance.Value * 2f, 0f, 0.95f)
+                     * (0.5f * Mathf.InverseLerp(30f + 30f * rand3, 100f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(2.5f, 20f, knownPosDelta))
+                     * Mathf.InverseLerp(10, 110f, distance)
+                     * Mathf.InverseLerp(0f, 15f, visionDeviation)
+                     * (1f - cutoff * (0.5f + 0.5f * rand4));
+            }
+
             // Vague hint instead, if the bot is facing away
             BotImpactType botImpactType = Utility.GetBotImpactType(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault);
             if (botImpactType != BotImpactType.BOSS)
             {
-                float vagueHintAngleFactor = Mathf.InverseLerp(65f, 120f, visionDeviation); // When facing away, replace with vague hint
-                if (rand3 < vagueHintAngleFactor * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value)
-                 || rand3 < Mathf.InverseLerp(120f, 240f, sinceLastSeen) * Mathf.InverseLerp(0, 110f, distance)) // Assuming surprise attack by the player, even not facing away
+                float vagueHintAngleFactor = Mathf.InverseLerp(0f, 5f, distance) * Mathf.InverseLerp(70f, 110f, visionDeviation); // When facing away, replace with vague hint
+                if ((rand3 < vagueHintAngleFactor * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value))
+                 || rand3 < GetSurpriseChanceInFront())
                 {
                     if (player.DebugInfo != null) player.DebugInfo.vagueHint++;
                     var vagueSource = botPos + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
                     vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * distance / 3f;
                     vagueSource += Vector3.up * rand3 * distance / 3f;
-                    if (__instance?.Owner?.DangerPointsData != null && __instance?.Owner?.LookSensor != null) __instance?.Owner?.Memory.Spotted(true, vagueSource);
-                    return false; // Cancel visibllity (SetVisible does not only get called for direct vision... ex: for group members )
+                    if (__instance.Owner?.Memory != null
+                     && __instance.Owner?.Covers != null)
+                    {
+                        if (player.DebugInfo != null) player.DebugInfo.signalDanger++;
+                        __instance.Owner?.DangerPointsData?.AddPointOfDanger(new PlaceForCheck(vagueSource, PlaceForCheckType.simple), true);
+                    }
+                    if (__instance.Owner?.BotsGroup?.CoverPointMaster != null
+                     && __instance.Owner?.Memory.BotCurrentCoverInfo != null)
+                    {
+                        __instance?.Owner?.Memory.Spotted(false, vagueSource);
+                        return false; // Cancel visibllity (SetVisible does not only get called for direct vision... ex: for group members )
+                    }
+                    else
+                        if (player.DebugInfo != null) player.DebugInfo.vagueHintCancel++;
                 }
             }
 
             if (player.DebugInfo != null) player.DebugInfo.encounter++;
 
-            float delayAimChance = 0.5f * Mathf.InverseLerp(0, 10f + srand2 * 5f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(0, 10f, knownPosDelta.magnitude);
-            if (rand4 - 0.35f * Mathf.InverseLerp(0, 5, player.Player.Velocity.magnitude) < delayAimChance) // Busting into sight / out of cover
+            float delayAimChance = 0.5f * Mathf.InverseLerp(0, 10f + srand2 * 5f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(0, 10f, knownPosDelta);
+            if (rand4 - 0.2f * Mathf.InverseLerp(0, 5, player.Player.Velocity.magnitude) < delayAimChance) // Busting into sight / out of cover
             {
                 __state = new State()
                 {
@@ -94,9 +130,9 @@ namespace ThatsLit.Patches.Vision
         public static void PatchPostfix(EnemyInfo __instance, State __state)
         {
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return;
-            if (!__state.triggered || __instance.Owner.Memory.GoalEnemy != __instance) return; // Not triggering the patch OR the bot is engaging others
+            if (!__state.triggered || __instance.Owner?.Memory?.GoalEnemy != __instance) return; // Not triggering the patch OR the bot is engaging others
 
-            var aim = __instance.Owner.AimingData;
+            var aim = __instance.Owner?.AimingData;
             if (aim == null) return;
 
             ThatsLitPlugin.swEncountering.MaybeResume();
