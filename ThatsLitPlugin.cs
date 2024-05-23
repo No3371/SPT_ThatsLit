@@ -24,7 +24,7 @@ namespace ThatsLit
         public const int TarkovVersion = 29197;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.383.04";
+        public const string ModVersion = "1.383.05";
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.8.0";
         private static long modVersionComparable;
@@ -84,7 +84,7 @@ namespace ThatsLit
             Config.Bind(category,
                         "Balance",
                         true,
-                        new ConfigDescription("The mod aims to make AIs reasonable without making it easy. However, SAIN or other mods can change bots, and everyone has different configurations, so you may have different experience than mine with default That's Lit configs. Check \"Recommended Mods\" on the mod page for more info.",
+                        new ConfigDescription("The mod aims to make AIs reasonable without making it easy, but it requires some proper setup. Besides, SAIN or other mods can change bots, and everyone has different configurations, so you may have different experience than mine with default That's Lit configs. Check \"Recommended Mods\" on the mod page for more info.",
                                                          null,
                                                          new ConfigurationManagerAttributes() { ReadOnly = true }));
             Config.Bind(category,
