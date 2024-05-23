@@ -489,7 +489,7 @@ namespace ThatsLit
 
         internal void CheckTerrainDetails(Vector3 position, PlayerTerrainDetailsProfile player)
         {
-            if (GPUInstancerDetailManager.activeManagerList?.Count == 0)
+            if (!terrainDetailsUnavailable && GPUInstancerDetailManager.activeManagerList?.Count == 0)
             {
                 terrainDetailsUnavailable = true;
                 Logger.LogInfo($"Active detail managers not found, disabling detail check...");
