@@ -80,6 +80,7 @@ namespace ThatsLit
             }
         }
         private CheckStimEffectProxy checkEffectDelegate;
+        static float canLoadTime = 0;
         public static bool CanLoad ()
         {
             bool result = false;
@@ -107,7 +108,18 @@ namespace ThatsLit
                 prefab.cullingMask = LayerMaskClass.PlayerMask;
                 prefab.fieldOfView = 44;
             }
+            else if (prefab != null)
+            {
+                result = true;
+            }
 
+            if (result && canLoadTime == 0)
+            {
+                canLoadTime = Time.realtimeSinceStartup;
+                return false;
+            }
+            if (canLoadTime + 1f < Time.realtimeSinceStartup)
+                return false;
             return result;
         }
 
