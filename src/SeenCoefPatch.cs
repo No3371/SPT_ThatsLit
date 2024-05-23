@@ -598,9 +598,9 @@ namespace ThatsLit
                     case "pine01":
                         yDeltaFactor = 0.7f + 0.5f * Mathf.Clamp01((-visionAngleDeltaVerticalSigned - 10) / 40f); // bonus against bots up high
                         angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 30f); // 0deg -> 0, 75 deg -> 1
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.35f); // 0.3 -> 100%, 0.55 -> 0%
-                        enemyDisFactor = Mathf.Clamp01(dis * yDeltaFactor / 25f);
-                        poseScale = pPoseFactor == 0.05f ? 0 : 0.5f + (pPoseFactor - 0.45f) / 0.55f * 0.5f; // standing is better with this tall one
+                        foliageDisFactor = Mathf.InverseLerp(1.0f, 0.35f, nearestFoliage.dis);
+                        enemyDisFactor = Mathf.InverseLerp(5f, 25f, dis * yDeltaFactor);
+                        poseScale = pPoseFactor == 0.05f ? 0 : 0.5f + 0.5f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor) * 0.5f; // standing is better with this tall one
                         break;
                     case "pine05":
                         angleFactor = 1; // 0deg -> 0, 75 deg -> 1

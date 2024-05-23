@@ -121,19 +121,22 @@ namespace ThatsLit
 
             // =====
             // Ambience score reduction from dense grasses in nights
+            // (Plants and grasses look extra dark in nights)
             // =====
             if (player.Player.TerrainDetails != null)
             {
                 float surroundingTerrainScoreProne = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.Player.TerrainDetails, Vector3.zero, 0, 0).prone;
                 float footTerrainScoreProne = Singleton<ThatsLitGameworld>.Instance.CalculateCenterDetailScore(player.Player.TerrainDetails).prone;
-                var detailScaling = surroundingTerrainScoreProne * 0.667f + footTerrainScoreProne * 0.333f;
-                detailScaling = Mathf.Clamp01(detailScaling);
-                detailScaling *= Mathf.Clamp01(player.Player.TerrainDetails.RecentDetailCount3x3/ 75f);
-                detailScaling *= detailScaling;
-                detailScaling *= Mathf.InverseLerp(-0.1f, MinBaseAmbienceScore, ambienceScore);
-                detailScaling *= NightTerrainImpactScale; // max 0.2
-                if (detailScaling > player.detailBonusSmooth) player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, detailScaling, Time.fixedDeltaTime * 2.5f);
-                else if (detailScaling < player.detailBonusSmooth) player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, detailScaling, Time.fixedDeltaTime * 6f);
+                var surroundingDetailsScaling = surroundingTerrainScoreProne * 0.667f + footTerrainScoreProne * 0.333f;
+                surroundingDetailsScaling = Mathf.Clamp01(surroundingDetailsScaling);
+                surroundingDetailsScaling *= Mathf.Clamp01(player.Player.TerrainDetails.RecentDetailCount3x3/ 75f);
+                surroundingDetailsScaling *= surroundingDetailsScaling;
+                surroundingDetailsScaling *= Mathf.InverseLerp(-0.1f, MinBaseAmbienceScore, ambienceScore);
+                surroundingDetailsScaling *= NightTerrainImpactScale; // max 0.2
+                if (surroundingDetailsScaling > player.detailBonusSmooth)
+                    player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, surroundingDetailsScaling, Time.fixedDeltaTime * 2.5f);
+                else if (surroundingDetailsScaling < player.detailBonusSmooth)
+                    player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, surroundingDetailsScaling, Time.fixedDeltaTime * 6f);
 
                 if (gameWorld.IsWinter)
                 {
