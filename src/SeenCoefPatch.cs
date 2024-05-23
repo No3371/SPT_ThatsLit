@@ -491,7 +491,8 @@ namespace ThatsLit
 
             // BUSH RAT ----------------------------------------------------------------------------------------------------------------
             /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
-            if (!inThermalView && player.Foliage != null && botImpactType != BotImpactType.BOSS
+            if (ThatsLitPlugin.EnabledBushRatting.Value
+             && !inThermalView && player.Foliage != null && botImpactType != BotImpactType.BOSS
              && (!__instance.HaveSeen || lastSeenPosDelta > 30f + rand1 * 20f || sinceSeen > 150f + 150f*rand3 && lastSeenPosDelta > 10f + 10f*rand2))
             {
                 float angleFactor = 0, foliageDisFactor = 0, poseScale = 0, enemyDisFactor = 0, yDeltaFactor = 1;
@@ -619,6 +620,10 @@ namespace ThatsLit
                         break;
                 }
                 var bushRatFactor = Mathf.Clamp01(angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor);
+                if (player.DebugInfo != null && nearestAI)
+                {
+                    player.DebugInfo.lastBushRat = bushRatFactor;
+                }
                 if (botImpactType == BotImpactType.FOLLOWER || canSeeLight || (canSeeLaser && rand3 < 0.2f)) bushRatFactor /= 2f;
                 if (bushRat && bushRatFactor > 0.01f)
                 {

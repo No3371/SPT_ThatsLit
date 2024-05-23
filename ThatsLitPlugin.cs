@@ -127,6 +127,7 @@ namespace ThatsLit
             category                   = "4. Grasses & Foliage";
             EnabledGrasses             = Config.Bind(category, "Enable Grasses", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
             EnabledFoliage             = Config.Bind(category, "Enable Foliage", true, new ConfigDescription("Enable the module. This enable foliage to distract distant bots.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
+            EnabledBushRatting             = Config.Bind(category, "Enable Bush Ratting", true, new ConfigDescription("Enable the module. This enable foliage to distract distant bots.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
 
             category                   = "5. Tweaks";
             FoliageImpactScale         = Config.Bind(category,
@@ -188,6 +189,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnabledEncountering { get; private set; }
         public static ConfigEntry<bool> EnabledFoliage { get; private set; }
         public static ConfigEntry<bool> EnabledGrasses { get; private set; }
+        public static ConfigEntry<bool> EnabledBushRatting { get; private set; }
         public static ConfigEntry<bool> EnableMovementImpact { get; private set; }
         public static ConfigEntry<bool> EnableEquipmentCheck { get; private set; }
         public static ConfigEntry<bool> AlternativeReactionFluctuation { get; private set; }
