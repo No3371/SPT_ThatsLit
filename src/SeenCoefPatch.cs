@@ -104,6 +104,11 @@ namespace ThatsLit
             bool gearBlocking = false; // Not blokcing for now, because AIs don't look around (nvg/thermal still ineffective when out of FOV)
             float insideTime = Mathf.Max(0, Time.time - player.lastOutside);
 
+            float shotAngleDelta = Vector3.Angle(-eyeToPlayerBody, player.lastShotVector);
+            float facingShotFactor = 0f;
+            if (player.lastShotVector != Vector3.zero && Time.time - player.lastShotTime < 0.5f)
+                facingShotFactor = Mathf.InverseLerp(15f, 0f, shotAngleDelta) * Mathf.InverseLerp(0.5f, 0f, Time.time - player.lastShotTime);
+
             ThatsLitCompat.ScopeTemplate activeScope = null;
             BotNightVisionData nightVision = __instance.Owner.NightVision;
             ThatsLitCompat.GoggleTemplate activeGoggle = null;
@@ -781,6 +786,9 @@ namespace ThatsLit
                 nullification *= rand5;
                 nullification -= deNullification; // Allow features to interrupt the nullification
                 __result = Mathf.Lerp(__result, original, Mathf.Clamp01(nullification)); // just seen (0s) => original, 0.1s => modified
+
+                // Cutoff from directly facing at shooting player
+                __result *= 1f - 0.5f * facingShotFactor * Mathf.InverseLerp(-0.45f, 0.45f, factor);
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
