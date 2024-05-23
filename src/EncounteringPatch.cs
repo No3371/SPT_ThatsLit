@@ -96,10 +96,11 @@ namespace ThatsLit.Patches.Vision
                         if (player.DebugInfo != null) player.DebugInfo.signalDanger++;
                         __instance.Owner?.DangerPointsData?.AddPointOfDanger(new PlaceForCheck(vagueSource, PlaceForCheckType.simple), true);
                     }
+
                     if (__instance.Owner?.BotsGroup?.CoverPointMaster != null
-                     && __instance.Owner?.Memory.BotCurrentCoverInfo != null)
+                     && __instance.Owner?.Memory?.BotCurrentCoverInfo != null)
                     {
-                        __instance?.Owner?.Memory.Spotted(false, vagueSource);
+                        __instance?.Owner?.Memory?.Spotted(false, vagueSource);
                         return false; // Cancel visibllity (SetVisible does not only get called for direct vision... ex: for group members )
                     }
                     else
