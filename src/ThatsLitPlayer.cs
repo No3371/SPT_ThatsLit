@@ -366,7 +366,7 @@ namespace ThatsLit
             UpdateAmbienceShadowRating();
 
             overheadHaxRating = UpdateOverheadHaxCastRating(bodyPos, overheadHaxRating);
-            surroundingRating = UpdateOverheadHaxCastRating(bodyPos, surroundingRating);
+            surroundingRating = UpdateSurroundingCastRating(bodyPos, surroundingRating);
 
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
