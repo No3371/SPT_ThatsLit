@@ -51,6 +51,7 @@ namespace ThatsLit
         public float fog, rain, cloud;
         AsyncGPUReadbackRequest gquReq;
         internal float lastOutside;
+        internal float surroundingRating;
         /// <summary>
         /// 0~10
         /// </summary>
@@ -365,6 +366,7 @@ namespace ThatsLit
             UpdateAmbienceShadowRating();
 
             overheadHaxRating = UpdateOverheadHaxCastRating(bodyPos, overheadHaxRating);
+            surroundingRating = UpdateOverheadHaxCastRating(bodyPos, surroundingRating);
 
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
@@ -489,6 +491,19 @@ namespace ThatsLit
             return Mathf.Clamp(currentRating, 0f, 10f);
         }
 
+        private float UpdateSurroundingCastRating(Vector3 bodyPos, float currentRating)
+        {
+            if (SurroundingCast(bodyPos, out var hit))
+            {
+                currentRating += Time.timeScale * (Mathf.InverseLerp(5f, 1f, hit.distance) - 0.01f);
+            }
+            else
+            {
+                currentRating -= Time.timeScale * 1.75f;
+            }
+            return Mathf.Clamp(currentRating, 0f, 10f);
+        }
+
         void LateUpdate()
         {
             if (Player == null) return;
@@ -517,6 +532,17 @@ namespace ThatsLit
             var ray = new Ray(from, cast);
             return RaycastIgnoreGlass(ray, 30, ambienceRaycastMask, out hit, out var lp);
         }
+
+        private bool SurroundingCast (Vector3 from, out RaycastHit hit)
+        {
+            Vector3 cast = new Vector3(1, 0, 0);
+            int slice = Time.frameCount % 90;
+            cast = Quaternion.Euler(0, slice * 4, 0) * cast;
+            
+            var ray = new Ray(from, cast);
+            return Physics.Raycast(ray, out hit, 5);
+        }
+
         private bool RaycastIgnoreGlass (Ray ray, float distance, LayerMask mask, out RaycastHit hit, out RaycastHit lastPenetrated, int depth = 0, int maxDepth = 10)
         {
             lastPenetrated = default;
