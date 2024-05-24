@@ -655,16 +655,26 @@ namespace ThatsLit
 
         void OnGUIInfo ()
         {
-            if (PlayerLitScoreProfile != null) Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.multiFrameLitScore / 0.0999f));
-            if (PlayerLitScoreProfile != null) Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(PlayerLitScoreProfile.frame0.multiFrameLitScore, POWER) / 0.0999f));
-            if (ThatsLitPlugin.EquipmentInfo.Value && PlayerLitScoreProfile != null && LightAndLaserState.storage != 0) GUILayout.Label(LightAndLaserState.Format());
-            if (Foliage != null && Foliage.FoliageScore > 0 && ThatsLitPlugin.FoliageInfo.Value)
+            if (ThatsLitPlugin.ScoreInfo.Value
+             && Singleton<ThatsLitGameworld>.Instance.ScoreCalculator != null
+             && Time.time < awakeAt + 10)
+                GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
+            if (ThatsLitPlugin.ScoreInfo.Value && PlayerLitScoreProfile != null)
+            {
+                Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.multiFrameLitScore / 0.0999f));
+                Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(PlayerLitScoreProfile.frame0.multiFrameLitScore, POWER) / 0.0999f));
+            }
+            if (ThatsLitPlugin.EquipmentInfo.Value && PlayerLitScoreProfile != null && LightAndLaserState.storage != 0)
+                GUILayout.Label(LightAndLaserState.Format());
+            if (ThatsLitPlugin.FoliageInfo.Value
+             && Foliage != null
+             && Foliage.FoliageScore > 0)
                 Utility.GUILayoutFoliageMeter((int)(Foliage.FoliageScore / 0.0999f));
-            if (TerrainDetails != null && terrainScoreHintProne > 0.0998f && ThatsLitPlugin.TerrainInfo.Value)
+            if (ThatsLitPlugin.TerrainInfo.Value && TerrainDetails != null && terrainScoreHintProne > 0.0998f)
                 if (Player.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
                 else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
 
-            if (PlayerLitScoreProfile != null)
+            if (ThatsLitPlugin.ScoreInfo.Value && PlayerLitScoreProfile != null)
             {
                 if (cloud <= -1.1f)
                     GUILayout.Label("  CLEAR ☀☀☀");
@@ -696,13 +706,7 @@ namespace ThatsLit
             if (Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
             poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
 
-            if (ThatsLitPlugin.DebugInfo.Value || ThatsLitPlugin.ScoreInfo.Value)
-            {
-                OnGUIInfo();
-
-                if (Time.time < awakeAt + 10)
-                    GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
-            }
+            OnGUIInfo();
 
             if (!ThatsLitPlugin.DebugInfo.Value || DebugInfo == null) return;
 
