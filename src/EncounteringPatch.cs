@@ -139,6 +139,7 @@ namespace ThatsLit.Patches.Vision
 
             ThatsLitPlugin.swEncountering.MaybeResume();
 
+            BotImpactType botImpactType = Utility.GetBotImpactType(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault);
             float rand = UnityEngine.Random.Range(0f, 1f);
             float rand2 = UnityEngine.Random.Range(0f, 1f);
             if (__state.botSprinting)
@@ -147,7 +148,8 @@ namespace ThatsLit.Patches.Vision
                 aim.SetNextAimingDelay(
                     rand * 0.45f
                     * (__state.unexpected? 1f : 0.5f)
-                    * (0.05f + Mathf.InverseLerp(0, 15, __state.visionDeviation)));
+                    * (0.05f + Mathf.InverseLerp(0, 15, __state.visionDeviation))
+                    * (botImpactType == BotImpactType.BOSS? 0.5f : 1f));
 
                 // ~30% chance to force a miss
                 if (rand2 < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.InverseLerp(0, 30, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
@@ -156,7 +158,10 @@ namespace ThatsLit.Patches.Vision
             else if (__state.unexpected)
             {
                 // Force a ~0.15s delay
-                aim.SetNextAimingDelay(rand * 0.15f * Mathf.InverseLerp(0, 15, __state.visionDeviation));
+                aim.SetNextAimingDelay(
+                    rand * 0.15f
+                    * Mathf.InverseLerp(0, 15, __state.visionDeviation)
+                    * (botImpactType == BotImpactType.BOSS? 0.5f : 1f));
 
                 // ~40% chance to force a miss
                 if (rand2 < 0.2f * Mathf.InverseLerp(0, 35, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
