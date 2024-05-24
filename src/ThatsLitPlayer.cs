@@ -84,7 +84,6 @@ namespace ThatsLit
         static float canLoadTime = 0;
         public static bool CanLoad ()
         {
-            bool result = false;
             if (CameraClass.Instance.OpticCameraManager.Camera != null
              && prefab == null)
             {
@@ -108,20 +107,14 @@ namespace ThatsLit
 
                 prefab.cullingMask = LayerMaskClass.PlayerMask;
                 prefab.fieldOfView = 44;
-            }
-            else if (prefab != null)
-            {
-                result = true;
+
+
+                canLoadTime = Time.realtimeSinceStartup;
+                Logger.LogWarning($"[That's Lit] Can load players. Time: {canLoadTime}");
+                return false; // wait for next frame
             }
 
-            if (result && canLoadTime == 0)
-            {
-                canLoadTime = Time.realtimeSinceStartup;
-                return false;
-            }
-            if (canLoadTime + 1f < Time.realtimeSinceStartup)
-                return false;
-            return result;
+            return prefab != null && canLoadTime + 10 < Time.realtimeSinceStartup;
         }
 
         static Camera prefab;
