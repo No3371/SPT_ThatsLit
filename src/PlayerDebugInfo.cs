@@ -16,6 +16,7 @@ namespace ThatsLit
         internal float shinePixelsRatioSample, highLightPixelsRatioSample, highMidLightPixelsRatioSample, midLightPixelsRatioSample, midLowLightPixelsRatioSample, lowLightPixelsRatioSample, darkPixelsRatioSample;
         internal float lastEncounterShotAngleDelta, lastEncounteringShotCutoff;
         internal float lastBushRat;
+        internal float lastVisiblePartsFactor;
         
     }
 }

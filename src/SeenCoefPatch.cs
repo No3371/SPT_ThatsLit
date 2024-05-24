@@ -775,6 +775,25 @@ namespace ThatsLit
             }
 
 
+            var visiblePartsFactor = 0f;
+            foreach (var p in __instance.AllActiveParts)
+            {
+                if (p.Value.LastVisibilityCastSucceed) visiblePartsFactor++;
+            }
+            visiblePartsFactor = Mathf.InverseLerp(6f, 1f, visiblePartsFactor);
+            visiblePartsFactor *= visiblePartsFactor;
+            float partsHidingCutoff = visiblePartsFactor * Mathf.InverseLerp(0f, 45f, visionAngleDelta) * notSeenRecentAndNear * Mathf.InverseLerp(0f, 0.2f, zoomedDisFactor);
+            if (player.DebugInfo != null)
+            {
+                if (nearestAI)
+                {
+                    player.DebugInfo.lastVisiblePartsFactor = visiblePartsFactor;
+                }
+            }
+            if (botImpactType != BotImpactType.DEFAULT) partsHidingCutoff /= 2f;
+            __result += rand2 * partsHidingCutoff;
+            __result *= 1f + (0.1f + 0.9f * rand1) * partsHidingCutoff * 9f;
+
             __result = Mathf.Lerp(original, __result, ThatsLitPlugin.FinalImpactScale.Value); // just seen (0s) => original, 0
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
 
