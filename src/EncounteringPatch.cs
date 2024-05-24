@@ -101,6 +101,7 @@ namespace ThatsLit.Patches.Vision
                      && __instance.Owner?.Memory?.BotCurrentCoverInfo != null)
                     {
                         __instance?.Owner?.Memory?.Spotted(false, vagueSource);
+                        ThatsLitPlugin.swEncountering.Stop();
                         return false; // Cancel visibllity (SetVisible does not only get called for direct vision... ex: for group members )
                     }
                     else
