@@ -109,7 +109,7 @@ namespace ThatsLit
             ambienceScore += Mathf.Clamp01((locCloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact; // Weather offset
             moonLightScore = CalculateMoonLight(locationId, time, locCloudiness);
             sunLightScore = CalculateSunLight(locationId, time, locCloudiness);
-            ambienceScore += (moonLightScore + sunLightScore) * (1f - ambienceShadowFactor);
+            ambienceScore += (moonLightScore + sunLightScore)  * (1f - ambienceShadowFactor - insideCoef2to9s * IndoorAmbienceCutoff * ambienceShadowFactor);
             
             // =====
             // Scale up ambience score in winter raidsm given any light (regardless ambience shadow)
@@ -540,7 +540,7 @@ namespace ThatsLit
         protected virtual float BunkerBaseAmbienceTarget { get => -0.3f; }
         protected virtual float MaxMoonlightScore { get => 0.25f; }
         protected virtual float MaxSunlightScore { get => 0.25f; }
-        protected virtual float IndoorAmbienceScale { get => 0.5f; }
+        protected virtual float IndoorAmbienceCutoff { get => 0f; }
         protected virtual float MinAmbienceLum { get => 0.01f; }
         protected virtual float MaxAmbienceLum { get => 0.1f; }
         protected virtual float PixelLumScoreScale => 1f;
@@ -664,7 +664,13 @@ namespace ThatsLit
         protected override float MinAmbienceLum => 0.008f;
         protected override float MaxAmbienceLum => 0.008f;
         protected override float PixelLumScoreScale { get => 2f; }
-        protected override float IndoorAmbienceScale => 0.2f;
+        protected override float IndoorAmbienceCutoff => 1.0f;
+        protected override float ThresholdShine { get => 0.5f; }
+        protected override float ThresholdHigh { get => 0.35f; }
+        protected override float ThresholdHighMid { get => 0.2f; }
+        protected override float ThresholdMid { get => 0.1f; }
+        protected override float ThresholdMidLow { get => 0.025f; }
+        protected override float ThresholdLow { get => 0.005f; }
         bool IsPlayerInParking
         {
             get => isPlayerInParking;
