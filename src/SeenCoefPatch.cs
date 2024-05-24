@@ -34,8 +34,9 @@ namespace ThatsLit
 
             WildSpawnType spawnType = __instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault;
             BotImpactType botImpactType = Utility.GetBotImpactType(spawnType);
-            if ((!ThatsLitPlugin.IncludeBosses.Value && botImpactType == BotImpactType.BOSS)
-             || Utility.IsBossNerfExcluded(spawnType)) return;
+            if ((botImpactType == BotImpactType.BOSS && !ThatsLitPlugin.IncludeBosses.Value) // Is a boss, and not including bosses
+             || Utility.IsExcludedSpawnType(spawnType)) // 
+                return;
 
             ThatsLitPlayer player = null;
             if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player) != true

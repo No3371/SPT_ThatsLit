@@ -59,7 +59,7 @@ namespace ThatsLit
             WildSpawnType.marksman => BotImpactType.FOLLOWER, // scav_sniper
             _ => BotImpactType.DEFAULT
         };
-        public static bool IsBossNerfExcluded (WildSpawnType type) => type switch {
+        public static bool IsExcludedSpawnType (WildSpawnType type) => type switch {
             // WildSpawnType.bossTagilla => true,
             // WildSpawnType.followerTagilla => true,
             _ => false
