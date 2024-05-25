@@ -787,25 +787,44 @@ namespace ThatsLit
                 }
             }
 
-
+            // ===== Visible Parts
             var visiblePartsFactor = 0f;
+            var upperVisible = 0;
             foreach (var p in __instance.AllActiveParts)
             {
-                if (p.Value.LastVisibilityCastSucceed) visiblePartsFactor++;
+                if (p.Value.LastVisibilityCastSucceed)
+                {
+                    switch (p.Key.BodyPartType)
+                    {
+                        case BodyPartType.head:
+                            visiblePartsFactor += 1.5f;
+                            upperVisible++;
+                            break;
+                        case BodyPartType.body:
+                            visiblePartsFactor += 0.5f;
+                            upperVisible++;
+                            break;
+                        case BodyPartType.leftArm:
+                        case BodyPartType.rightArm:
+                            visiblePartsFactor += 1f;
+                            upperVisible++;
+                            break;
+                        default:
+                            visiblePartsFactor += 1f;
+                            break;
+                    }
+                }
             }
             visiblePartsFactor = Mathf.InverseLerp(6f, 1f, visiblePartsFactor);
             visiblePartsFactor *= visiblePartsFactor;
-            float partsHidingCutoff = visiblePartsFactor * Mathf.InverseLerp(0f, 45f, visionAngleDelta) * notSeenRecentAndNear * Mathf.InverseLerp(0f, 0.2f, zoomedDisFactor);
-            if (player.DebugInfo != null)
+            float partsHidingCutoff = visiblePartsFactor * Mathf.InverseLerp(0f, 45f, visionAngleDelta) * notSeenRecentAndNear * Mathf.InverseLerp(0f, 10f, zoomedDis);
+            if (player.DebugInfo != null && nearestAI)
             {
-                if (nearestAI)
-                {
-                    player.DebugInfo.lastVisiblePartsFactor = visiblePartsFactor;
-                }
+                player.DebugInfo.lastVisiblePartsFactor = visiblePartsFactor;
             }
             if (botImpactType != BotImpactType.DEFAULT) partsHidingCutoff /= 2f;
-            __result += rand2 * partsHidingCutoff;
-            __result *= 1f + (0.1f + 0.9f * rand1) * partsHidingCutoff * 9f;
+            __result += (0.05F *rand2) * partsHidingCutoff;
+            __result *= 1f + (0.2f + 0.8f * rand1) * partsHidingCutoff * 9f;
 
             __result = Mathf.Lerp(original, __result, ThatsLitPlugin.FinalImpactScale.Value); // just seen (0s) => original, 0
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
@@ -823,6 +842,16 @@ namespace ThatsLit
                 __result *= 1f - 0.5f * facingShotFactor * Mathf.InverseLerp(-0.45f, 0.45f, factor);
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
+
+            if (canSeeLight && player.Player.HandsController is Player.FirearmController fc)
+            {
+                float wCoFacingAngle = Vector3.Angle(-eyeToPlayerBody, fc.WeaponDirection);
+                // If player flashlights directly shining against the bot
+                if (upperVisible >= 3) // >= 3 upper parts visible
+                {
+                    __result *= 1 - 0.5f * Mathf.InverseLerp(5f, 0f, wCoFacingAngle) * Mathf.InverseLerp(35f, 5f, zoomedDis);
+                }
+            }
 
             // Up to 50% penalty
             if (__result < 0.5f * original)
