@@ -199,6 +199,18 @@ namespace ThatsLit
             if (visionAngleDelta > 110) canSeeLightSub = false;
             if (visionAngleDelta > 85) canSeeLaserSub = false;
 
+            nearestRecent += 0.6f;
+            bool nearestAI = false;
+            if (player.DebugInfo != null && dis <= nearestRecent)
+            {
+                nearestRecent = dis;
+                nearestAI = true;
+                player.DebugInfo.lastNearest = nearestRecent;
+                if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1)
+                {
+                    player.DebugInfo.lastCalcFrom = original;
+                }
+            }
             // ======
             // Overhead overlooking
             // ======
@@ -263,6 +275,10 @@ namespace ThatsLit
             // 40m unseen => 74% (Prone), 8.14% (Crouch)
 
             globalOverlookChance *= 0.4f + 0.6f * Mathf.InverseLerp(5f, 90f, visionAngleDelta);
+            if (player.DebugInfo != null && nearestAI)
+            {
+                player.DebugInfo.lastGlobalOverlookChance = globalOverlookChance;
+            }
             globalOverlookChance *= botImpactType != BotImpactType.DEFAULT? 0.5f : 1f;
             if (rand5 < globalOverlookChance)
             {
@@ -326,15 +342,10 @@ namespace ThatsLit
                 else if (factor > 0) factor /= 1 + Mathf.InverseLerp(100f, 10f, dis); // Highlight will be less effective from afar
             }
 
-            bool nearestAI = false;
-            if (player.DebugInfo != null && dis <= nearestRecent)
+            if (player.DebugInfo != null && nearestAI)
             {
-                nearestRecent = dis;
-                nearestAI = true;
-                player.DebugInfo.lastNearest = nearestRecent;
                 if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1)
                 {
-                    player.DebugInfo.lastCalcFrom = original;
                     player.DebugInfo.lastScore = score;
                     player.DebugInfo.lastFactor1 = factor;
                 }

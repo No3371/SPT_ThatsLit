@@ -17,6 +17,7 @@ namespace ThatsLit
         internal float lastEncounterShotAngleDelta, lastEncounteringShotCutoff;
         internal float lastBushRat;
         internal float lastVisiblePartsFactor;
+        internal float lastGlobalOverlookChance;
         
     }
 }
