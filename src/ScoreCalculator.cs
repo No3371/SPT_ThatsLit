@@ -194,7 +194,7 @@ namespace ThatsLit
             compensationTarget *= 1 + hightLightedPixelFactor * lowAmbienceScoreFactor;
             var expectedFinalScore = lumScore + ambienceScore;
             var compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2); // contrast:0.1 -> final toward 0.1, contrast:0.5 -> final toward 0.25
-            lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor * MultiFrameContrastImpactScale; // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
+            lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor * MultiFrameContrastImpactScale * (1f - ContrastSuppression); // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
             if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                 player.Player.DebugInfo.scoreRaw3 = lumScore + ambienceScore;
 
@@ -223,7 +223,7 @@ namespace ThatsLit
             }
 
             if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
-                                player.Player.DebugInfo.scoreRaw4 = lumScore + ambienceScore;
+                player.Player.DebugInfo.scoreRaw4 = lumScore + ambienceScore;
 
 
             player.litScoreFactor = Mathf.Pow(Mathf.Clamp(lumScore, 0, 2f) / 2f, 2); // positive
@@ -559,6 +559,7 @@ namespace ThatsLit
         protected virtual float ScoreDark { get => 0; }
         protected virtual float MultiFrameContrastImpactScale { get => 1f; }
         protected virtual float NightTerrainImpactScale { get => 0.2f; }
+        protected virtual float ContrastSuppression { get => 0f; }
     }
     public class HideoutScoreCalculator : ScoreCalculator
     {
@@ -663,7 +664,7 @@ namespace ThatsLit
         protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.75f;
         protected override float MinAmbienceLum => 0.008f;
         protected override float MaxAmbienceLum => 0.008f;
-        protected override float PixelLumScoreScale { get => 2f; }
+        protected override float PixelLumScoreScale { get => 2.5f; }
         protected override float IndoorAmbienceCutoff => 1.0f;
         protected override float ThresholdShine { get => 0.5f; }
         protected override float ThresholdHigh { get => 0.35f; }
@@ -671,6 +672,7 @@ namespace ThatsLit
         protected override float ThresholdMid { get => 0.1f; }
         protected override float ThresholdMidLow { get => 0.025f; }
         protected override float ThresholdLow { get => 0.005f; }
+        protected override float ContrastSuppression => 0.3f;
         bool IsPlayerInParking
         {
             get => isPlayerInParking;
@@ -701,13 +703,13 @@ namespace ThatsLit
 
         protected override float CalculateMoonLight(string locationId, float time, float cloudiness)
         {
-            if (IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.2f, ParkingTransitionFactor);
+            if (IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.3f, ParkingTransitionFactor);
             return base.CalculateMoonLight(locationId, time, cloudiness);
         }
 
         protected override float CalculateSunLight(string locationId, float time, float cloudiness)
         {
-            if (IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.2f, ParkingTransitionFactor);
+            if (IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.3f, ParkingTransitionFactor);
             return base.CalculateSunLight(locationId, time, cloudiness);
         }
 
@@ -732,11 +734,20 @@ namespace ThatsLit
         protected override float CalculateBaseAmbienceScore(string locationId, float time, PlayerLitScoreProfile player)
         {
             if (IsPlayerInParking)
-                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -0.65f + 0.15f * rawCloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * 0.9f * ParkingTransitionFactor);
+                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), MinBaseAmbienceScore + 0.15f * rawCloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * ParkingTransitionFactor);
             else if (IsOverhead)
             {
-                float fading = Mathf.Clamp01((player.Player.transform.position.y - 22f) / 2.5f);
-                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -0.35f + 0.2f * rawCloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * 0.9f * fading);
+                // Enhance indoor darkness in daytime
+                if (this.CalculateSunLightTimeFactor(locationId, Utility.GetInGameDayTime()) > 0.05f)
+                {
+                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -1f, 0.6f * Mathf.InverseLerp(2f, 7f, Time.time - player.Player.lastOutside) * (player.Player.AmbienceShadowFactor));
+                }
+                else
+                {
+                    // Limiting darkness indoor in nights
+                    float fading = Mathf.Clamp01((player.Player.transform.position.y - 22f) / 2.5f);
+                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -0.35f + 0.2f * rawCloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * 0.9f * fading);
+                }
             }
 
             return base.CalculateBaseAmbienceScore(locationId, time, player);
@@ -767,6 +778,12 @@ namespace ThatsLit
             else if (time >= 4.416f && time < 5)
                 return 0.3f - GetTimeProgress(time, 4.416f, 5f);
             else return 0;
+        }
+
+        protected internal override void OnGUI(bool layout = false)
+        {
+            base.OnGUI(layout);
+            if (IsPlayerInParking) GUILayout.Label($"  Parking: { ParkingTransitionFactor }");
         }
     }
     public class ShorelineScoreCalculator : ScoreCalculator
