@@ -56,7 +56,6 @@ namespace ThatsLit
 
             float pSpeedFactor = Mathf.Clamp01((player.Player.Velocity.magnitude - 1f) / 4f);
 
-            nearestRecent += 0.5f;
             var caution = __instance.Owner.Id % 10; // 0 -> HIGH, 1 -> HIGH-MID, 2,3,4 -> MID, 5,6,7,8,9 -> LOW
             float sinceSeen = Time.time - personalLastSeenTime;
             float lastSeenPosDelta = (__instance.Person.Position - __instance.EnemyLastPosition).magnitude;
