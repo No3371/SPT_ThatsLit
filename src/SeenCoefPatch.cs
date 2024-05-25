@@ -773,7 +773,7 @@ namespace ThatsLit
             if (ThatsLitPlugin.EnableMovementImpact.Value)
             {
                 if (__instance.Owner.Mover.Sprinting)
-                    __result *= 1 + (rand2 / (4f - caution * 0.1f)) * Mathf.Clamp01((visionAngleDelta - 30f) / 60f); // When facing away (30~60deg), sprinting bots takes up to 25% longer to spot the player
+                    __result *= 1 + (rand2 / (3f - caution * 0.1f)) * Mathf.InverseLerp(30f, 75f, visionAngleDelta); // When facing away (30~75deg), sprinting bots takes up to 33% longer to spot the player
                 else if (!__instance.Owner.Mover.IsMoving)
                 {
                     float delta = __result * (rand4 / (5f + caution * 0.1f)); // When not moving, bots takes up to 20% shorter to spot the player
