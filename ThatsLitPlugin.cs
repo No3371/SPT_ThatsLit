@@ -144,11 +144,12 @@ namespace ThatsLit
             
             
             category                   = "6. Info";
-            ScoreInfo                  = Config.Bind(category, "Lighting Info", true, "Shown at the upper left corner.");
-            EquipmentInfo                  = Config.Bind(category, "Equipment Info", true, "Shown at the upper left corner.");
-            FoliageInfo                  = Config.Bind(category, "Foliage Info", true, "Gives a hint about surrounding foliage.");
-            TerrainInfo                  = Config.Bind(category, "Terrain Info", true, "Gives a hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.");
-            HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, "Hide the reminder about disabled lit detection.");
+            ScoreInfo                  = Config.Bind(category, "Lighting Info", true, "Display lighting meter.");
+            WeatherInfo                  = Config.Bind(category, "Weather Info", true, "Clear/Cloudy indicator.");
+            EquipmentInfo                  = Config.Bind(category, "Equipment Info", true, "Enabled lights/lasers indicator.");
+            FoliageInfo                  = Config.Bind(category, "Foliage Info", true, "A rough rating of surrounding foliage.");
+            TerrainInfo                  = Config.Bind(category, "Terrain Info", true, "A hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.");
+            HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, "Hide the reminder about disabled Brightness module.");
             // AlternativeMeterUnicde                  = Config.Bind(category, "Alternative Meter", false, "If somehow the GUI meters unicodes are not rendered on your system, try this options.");
 
 
@@ -176,6 +177,7 @@ namespace ThatsLit
         }
 
         public static ConfigEntry<bool> ScoreInfo { get; private set; }
+        public static ConfigEntry<bool> WeatherInfo { get; private set; }
         public static ConfigEntry<bool> EquipmentInfo { get; private set; }
         public static ConfigEntry<bool> TerrainInfo { get; private set; }
         public static ConfigEntry<bool> FoliageInfo { get; private set; }

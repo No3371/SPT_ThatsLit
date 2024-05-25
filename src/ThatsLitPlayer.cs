@@ -674,7 +674,7 @@ namespace ThatsLit
                 if (Player.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
                 else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
 
-            if (ThatsLitPlugin.ScoreInfo.Value && PlayerLitScoreProfile != null)
+            if (ThatsLitPlugin.WeatherInfo.Value && PlayerLitScoreProfile != null)
             {
                 if (cloud <= -1.1f)
                     GUILayout.Label("  CLEAR ☀☀☀");
