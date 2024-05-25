@@ -557,48 +557,48 @@ namespace ThatsLit
                         poseScale               = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_small03":
-                        angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 40f);
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.1f) / 0.15f);
-                        enemyDisFactor = Mathf.Clamp01(dis / 10f);
-                        poseScale = pPoseFactor == 0.45f ? 1f : 0;
+                        angleFactor             = 0.2f + 0.8f * Mathf.InverseLerp(0f, 40f, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(1f, 0.25f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 10f, dis);
+                        poseScale               = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "filbert_dry03":
-                        angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 30f);
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.5f) / 0.3f);
-                        enemyDisFactor = Mathf.Clamp01(dis / 30f);
-                        poseScale = pPoseFactor == 0.05f ? 0 : 0.1f + (pPoseFactor - 0.45f) / 0.55f * 0.9f;
+                        angleFactor             = 0.4f + 0.6f * Mathf.InverseLerp(0f, 30f, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(0.8f, 0.5f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 30f, dis);
+                        poseScale               = pPoseFactor == 0.05f ? 0 : 0.1f + Mathf.InverseLerp(0.45f, 1f, pPoseFactor) * 0.9f;
                         break;
                     case "fibert_hedge01":
-                        angleFactor = Mathf.Clamp01(visionAngleDelta / 40f);
-                        foliageDisFactor = (1f - Mathf.Clamp01((nearestFoliage.dis - 0.1f) / 0.1f)) * (1f - Mathf.Clamp01(nearestFoliage.dis / 0.2f));
-                        enemyDisFactor = Mathf.Clamp01(dis / 30f);
-                        poseScale = pPoseFactor == 0.45f ? 1f : 0; // Too narrow for proning
+                        angleFactor             = Mathf.InverseLerp(0f, 40f, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(0.2f, 0.1f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.Clamp01(dis / 30f);
+                        poseScale               = pPoseFactor == 0.45f ? 1f : 0; // Too narrow for proning
                         break;
                     case "fibert_hedge02":
-                        angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 40f);
-                        foliageDisFactor = (1f - Mathf.Clamp01((nearestFoliage.dis - 0.1f) / 0.2f)) * (1f - Mathf.Clamp01(nearestFoliage.dis / 0.3f));
-                        enemyDisFactor = Mathf.Clamp01(dis / 20f);
-                        poseScale = pPoseFactor == 0.45f ? 1f : 0; // Too narrow for proning
+                        angleFactor             = 0.2f + 0.8f * Mathf.InverseLerp(0f, 40f, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(0.3f, 0.1f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 20f, dis);
+                        poseScale               = pPoseFactor == 0.45f ? 1f : 0; // Too narrow for proning
                         break;
                     case "privet_hedge":
                     case "privet_hedge_2":
-                        angleFactor = Mathf.Clamp01((visionAngleDelta - 30f) / 60f);
-                        foliageDisFactor = (1f - Mathf.Clamp01(nearestFoliage.dis / 1f)) * (1f - Mathf.Clamp01(nearestFoliage.dis / 0.3f));
-                        enemyDisFactor = Mathf.Clamp01(dis / 50f);
-                        poseScale = pPoseFactor < 0.45f ? 1f : 0; // Prone only
+                        angleFactor             = Mathf.InverseLerp(30f, 90f, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(1f, 0f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 50f, dis);
+                        poseScale               = pPoseFactor < 0.45f ? 1f : 0; // Prone only
                         break;
                     case "bush_dry01":
-                        angleFactor = 0.2f + 0.8f * Mathf.Clamp01(visionAngleDelta / 35f);
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 0.15f) / 0.15f);
-                        enemyDisFactor = Mathf.Clamp01(dis / 25f);
-                        poseScale = pPoseFactor == 0.45f ? 1f : 0;
+                        angleFactor             = 0.2f + 0.8f * Mathf.InverseLerp(0f, 35f, visionAngleDelta);
+                        foliageDisFactor        = Mathf.InverseLerp(0.3f, 0.15f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 25f, dis);
+                        poseScale               = pPoseFactor == 0.45f ? 1f : 0;
                         break;
                     case "bush_dry02":
-                        angleFactor = 1;
-                        foliageDisFactor = 1f - Mathf.Clamp01((nearestFoliage.dis - 1f) / 0.4f);
-                        enemyDisFactor = Mathf.Clamp01(dis / 15f);
-                        poseScale = 1 - Mathf.Clamp01((pPoseFactor - 0.45f) / 0.1f);
-                        yDeltaFactor = 1f - Mathf.Clamp01(-visionAngleDeltaVerticalSigned / 60f); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
+                        angleFactor             = 1;
+                        foliageDisFactor        = Mathf.InverseLerp(1.5f, 1f, nearestFoliage.dis);
+                        enemyDisFactor          = Mathf.InverseLerp(0f, 15f, dis);
+                        poseScale               = Mathf.InverseLerp(0.55f, 0.45f, pPoseFactor);
+                        yDeltaFactor            = Mathf.InverseLerp(60f, 0f, -visionAngleDeltaVerticalSigned); // +60deg => 1, -60deg (looking down) => 0 (this flat bush is not effective against AIs up high)
                         break;
                     case "bush_dry03":
                         angleFactor = 0.4f + 0.6f * Mathf.Clamp01(visionAngleDelta / 20f);
