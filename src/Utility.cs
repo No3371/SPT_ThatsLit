@@ -75,6 +75,18 @@ namespace ThatsLit
             return GameDateTime.Hour + minutes;
         }
 
+        internal static float GetNightProgress()
+        {
+            var time = GetInGameDayTime();
+            if (time < 12) time += 4; // 20 => 0, 24 => 4, 0 => 4, 6 => 10 
+            return Mathf.InverseLerp(0f, 10f, time);
+        }
+        internal static float GetDayProgress()
+        {
+            var time = GetInGameDayTime();
+            return Mathf.InverseLerp(6f, 20f, time);
+        }
+
         static string lastLogged;
         internal static void CalculateDetailScore (string name, int num, out float prone, out float crouch)
         {
@@ -336,25 +348,6 @@ namespace ThatsLit
                 return default;
             }
             return compat.TemplateInstance.modes[selectedMode];
-        }
-
-        static Dictionary<(string, int), (bool light, bool lightIsIR, bool laser, bool laserIsIR)> CustomLightAndLaser { get; set; }
-        public static void RegisterCustomLightAndLaser (string templateId, int mode, bool light, bool lightIsIR, bool laser, bool laserIsIR)
-        {
-            if (CustomLightAndLaser == null) CustomLightAndLaser = new Dictionary<(string, int), (bool light, bool lightIsIR, bool laser, bool laserIsIR)>();
-            CustomLightAndLaser.Add((templateId, mode), (light, lightIsIR, laser, laserIsIR));
-        }
-        static HashSet<string> CustomNightVisionScopes { get; set; }
-        static Dictionary<string, float> CustomThermalScopes { get; set; }
-        public static void RegisterCustomNightVisionScopes (string templateId)
-        {
-            if (CustomNightVisionScopes == null) CustomNightVisionScopes = new HashSet<string>();
-            CustomNightVisionScopes.Add(templateId);
-        }
-        public static void RegisterCustomThermalScopes (string templateId, float effDis)
-        {
-            if (CustomThermalScopes == null) CustomThermalScopes = new Dictionary<string, float>();
-            CustomThermalScopes.Add(templateId, effDis);
         }
 
         internal static void GUILayoutDrawAsymetricMeter(int level, bool alternative = false)
