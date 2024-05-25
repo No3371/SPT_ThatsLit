@@ -97,7 +97,7 @@ namespace ThatsLit
             var visionAngleDeltaVerticalSigned = visionAngleDeltaVertical * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
 
             var dis = eyeToPlayerBody.magnitude;
-            float zoomedDisFactor = Mathf.InverseLerp(10f, 110f, dis);
+            float zoomedDis = dis;
             float disFactor = Mathf.InverseLerp(10f, 110f, dis);
             float disFactorSmooth = 0;
             bool inThermalView = false;
@@ -160,7 +160,7 @@ namespace ThatsLit
                     if (visionAngleDelta <= 60f / currentZoom) // In scope fov
                     {
                         disFactor = Mathf.InverseLerp(10, 110f, dis / currentZoom);
-                        zoomedDisFactor /= currentZoom;
+                        zoomedDis /= currentZoom;
                         if (activeScope?.thermal != null  && dis <= activeScope.thermal.effectiveDistance)
                         {
                             inThermalView = true;
@@ -269,10 +269,12 @@ namespace ThatsLit
             // Global random overlooking
             // ======
             float globalOverlookChance = 0.01f / pPoseFactor;
-            globalOverlookChance *= 1 + 9f * Mathf.InverseLerp(10f, 110f, zoomedDisFactor) * notSeenRecentAndNear; // linear
+            globalOverlookChance *= 1 + 9f * Mathf.InverseLerp(10f, 110f, zoomedDis) * notSeenRecentAndNear; // linear
             if (canSeeLight) globalOverlookChance /= 2f - Mathf.InverseLerp(10f, 110f, dis);
             // 110m unseen => 200% (Prone), 22% (Crouch), 10% (Stand) !1 CHECK
             // 40m unseen => 74% (Prone), 8.14% (Crouch)
+            // 20m unseen => 38% (Prone), 4.18%% (Crouch)
+            // 10m unseen => 20% (Prone), 2.2% (Crouch)
 
             globalOverlookChance *= 0.4f + 0.6f * Mathf.InverseLerp(5f, 90f, visionAngleDelta);
             if (player.DebugInfo != null && nearestAI)
