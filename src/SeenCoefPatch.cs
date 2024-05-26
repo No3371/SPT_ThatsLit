@@ -268,7 +268,7 @@ namespace ThatsLit
             // Global random overlooking
             // ======
             float globalOverlookChance = 0.01f / pPoseFactor;
-            globalOverlookChance *= 1 + 9f * Mathf.InverseLerp(10f, 110f, zoomedDis) * notSeenRecentAndNear; // linear
+            globalOverlookChance *= 1 + (7f + 0.5f * caution) * Mathf.InverseLerp(10f, 110f, zoomedDis) * notSeenRecentAndNear; // linear
             if (canSeeLight) globalOverlookChance /= 2f - Mathf.InverseLerp(10f, 110f, dis);
             // 110m unseen => 200% (Prone), 22% (Crouch), 10% (Stand) !1 CHECK
             // 40m unseen => 74% (Prone), 8.14% (Crouch)
