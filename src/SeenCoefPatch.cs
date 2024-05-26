@@ -788,7 +788,8 @@ namespace ThatsLit
             }
 
             // ===== Visible Parts
-            var visiblePartsFactor = 0f;
+            // Simulate the situation where part of a player is seen but the bot failed to recognize it due to the lack of full view
+            var visiblePartsFactor = 6f;
             var upperVisible = 0;
             foreach (var p in __instance.AllActiveParts)
             {
@@ -797,34 +798,34 @@ namespace ThatsLit
                     switch (p.Key.BodyPartType)
                     {
                         case BodyPartType.head:
-                            visiblePartsFactor += 1.5f;
+                            visiblePartsFactor -= 0.5f; // easier to recognize
                             upperVisible++;
                             break;
                         case BodyPartType.body:
-                            visiblePartsFactor += 0.5f;
+                            visiblePartsFactor -= 2.0f;
                             upperVisible++;
                             break;
                         case BodyPartType.leftArm:
                         case BodyPartType.rightArm:
-                            visiblePartsFactor += 1f;
+                            visiblePartsFactor -= 1f;
                             upperVisible++;
                             break;
                         default:
-                            visiblePartsFactor += 1f;
+                            visiblePartsFactor -= 1f;
                             break;
                     }
                 }
             }
             visiblePartsFactor = Mathf.InverseLerp(6f, 1f, visiblePartsFactor);
             visiblePartsFactor *= visiblePartsFactor;
-            float partsHidingCutoff = visiblePartsFactor * Mathf.InverseLerp(0f, 45f, visionAngleDelta) * notSeenRecentAndNear * Mathf.InverseLerp(0f, 10f, zoomedDis);
+            float partsHidingCutoff = visiblePartsFactor * Mathf.InverseLerp(0f, 45f - caution, visionAngleDelta) * notSeenRecentAndNear * Mathf.InverseLerp(0f, 10f, zoomedDis);
             if (player.DebugInfo != null && nearestAI)
             {
                 player.DebugInfo.lastVisiblePartsFactor = visiblePartsFactor;
             }
             if (botImpactType != BotImpactType.DEFAULT) partsHidingCutoff /= 2f;
-            __result += (0.05F *rand2) * partsHidingCutoff;
-            __result *= 1f + (0.2f + 0.8f * rand1) * partsHidingCutoff * 9f;
+            __result += (0.04f * rand2) * partsHidingCutoff;
+            __result *= 1f + (0.15f + 0.85f * rand1) * partsHidingCutoff * 9f;
 
             __result = Mathf.Lerp(original, __result, ThatsLitPlugin.FinalImpactScale.Value); // just seen (0s) => original, 0
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
