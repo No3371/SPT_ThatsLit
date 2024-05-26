@@ -830,6 +830,7 @@ namespace ThatsLit
             __result = Mathf.Lerp(original, __result, ThatsLitPlugin.FinalImpactScale.Value); // just seen (0s) => original, 0
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
 
+            Player.FirearmController fc = player.Player?.HandsController as Player.FirearmController;
             if (__result > original) // That's Lit delaying the bot
             {
                 // In ~0.2s after being seen, stealth is nullfied (fading between 0.1~0.2)
@@ -841,10 +842,15 @@ namespace ThatsLit
 
                 // Cutoff from directly facing at shooting player
                 __result *= 1f - 0.5f * facingShotFactor * Mathf.InverseLerp(-0.45f, 0.45f, factor);
+
+                if (fc?.IsStationaryWeapon == true)
+                {
+                    __result *= 1f - 0.3f * rand4 * Mathf.InverseLerp(30f, 5f, zoomedDis);
+                }
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
-            if (canSeeLight && player.Player.HandsController is Player.FirearmController fc)
+            if (canSeeLight && fc != null)
             {
                 float wCoFacingAngle = Vector3.Angle(-eyeToPlayerBody, fc.WeaponDirection);
                 // If player flashlights directly shining against the bot
