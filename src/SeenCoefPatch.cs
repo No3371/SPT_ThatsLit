@@ -31,7 +31,7 @@ namespace ThatsLit
             // Don't use GoalEnemy here because it only change when engaging new enemy (it'll stay forever if not engaged with new enemy)
             // Also they could search without having visual?
 
-            if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value || ThatsLitPlugin.FinalImpactScale.Value == 0) return;
+            if (__result == 8888 || !ThatsLitPlugin.EnabledMod.Value || (ThatsLitPlugin.FinalImpactScaleDelaying.Value == 0 && ThatsLitPlugin.FinalImpactScaleFastening.Value == 0)) return;
 
             WildSpawnType spawnType = __instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault;
             BotImpactType botImpactType = Utility.GetBotImpactType(spawnType);
@@ -828,7 +828,6 @@ namespace ThatsLit
             __result += (0.04f * rand2) * partsHidingCutoff;
             __result *= 1f + (0.15f + 0.85f * rand1) * partsHidingCutoff * 9f;
 
-            __result = Mathf.Lerp(original, __result, ThatsLitPlugin.FinalImpactScale.Value); // just seen (0s) => original, 0
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
 
             Player.FirearmController fc = player.Player?.HandsController as Player.FirearmController;
@@ -866,6 +865,8 @@ namespace ThatsLit
             {
                 __result = 0.5f * original;
             }
+
+            __result = Mathf.Lerp(original, __result, __result < original ? ThatsLitPlugin.FinalImpactScaleFastening.Value : ThatsLitPlugin.FinalImpactScaleDelaying.Value);
 
             __result += ThatsLitPlugin.FinalOffset.Value;
             if (__result < 0.005f) __result = 0.005f;
