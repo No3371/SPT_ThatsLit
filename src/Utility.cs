@@ -260,9 +260,14 @@ namespace ThatsLit
                 if (string.IsNullOrWhiteSpace(it?.TemplateId)) continue;
                 ThatsLitCompat.ExtraDevices.TryGetValue(it.TemplateId, out var extraDevice);
                 // Logger.LogWarning($"{it?.TemplateId} {extraDevice?.TemplateInstance?.name}");
-                if (extraDevice != null && extraDevice.alwaysOn)
+                if (extraDevice != null && extraDevice.TemplateInstance != null)
                 {
-                    result = ThatsLitCompat.DeviceMode.MergeMax(result, extraDevice.TemplateInstance?.SafeGetMode(0) ?? default);
+                    if (it is SightModClass sightMod)
+                    {
+                        result = ThatsLitCompat.DeviceMode.MergeMax(result, extraDevice.TemplateInstance.SafeGetMode(sightMod.Sight?.SelectedScopeMode ?? 0));
+                    }
+                    else
+                        result = ThatsLitCompat.DeviceMode.MergeMax(result, extraDevice.TemplateInstance.SafeGetMode(0));
                     continue;
                 }
 

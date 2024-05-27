@@ -140,7 +140,6 @@ namespace ThatsLit
         {
             public string id { get; set; }
             public string template { get; set; }
-            public bool alwaysOn { get; set; }
             private DeviceTemplate templateInstance;
             public DeviceTemplate TemplateInstance
             {
@@ -160,9 +159,12 @@ namespace ThatsLit
         {
             public string name { get; set; }
             public DeviceMode[] modes { get; set; }
-            public DeviceMode SafeGetMode (int mode)
+            public DeviceMode SafeGetMode (int mode, bool fallbackLast = true)
             {
-                if (modes == null || modes.Length <= mode) return default;
+                if (modes == null || modes.Length == 0) return default;
+                if (modes.Length <= mode)
+                    if (fallbackLast) mode = modes.Length - 1;
+                    else return default;
                 return modes[mode];
             }
         }

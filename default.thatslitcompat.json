@@ -156,7 +156,7 @@
     ],
     "deviceTemplates": [
         {
-            "name": "vanilla_LS_ILS_IL_ILSIL",
+            "name": "vanilla_LS_ILS_IL_ILILS",
             "modes": [
                 {
                     "light": 0.0,
@@ -186,7 +186,7 @@
             "_comment": null
         },
         {
-            "name": "vanilla_X_LS_ILS_IL_ILSIL",
+            "name": "vanilla_X_LS_ILS_ILILS",
             "modes": [
                 {
                     "light": 0.0,
@@ -205,12 +205,6 @@
                     "laser": 0.0,
                     "irLight": 0.0,
                     "irLaser": 1.0
-                },
-                {
-                    "light": 0.0,
-                    "laser": 0.0,
-                    "irLight": 1.0,
-                    "irLaser": 0.0
                 },
                 {
                     "light": 0.0,
@@ -292,6 +286,36 @@
                 }
             ],
             "_comment": null
+        },
+        {
+            "name": "vanilla_X_LS_ILS_ILILS",
+            "modes": [
+                {
+                    "light": 0.0,
+                    "laser": 0.0,
+                    "irLight": 0.0,
+                    "irLaser": 0.0
+                },
+                {
+                    "light": 0.0,
+                    "laser": 1.0,
+                    "irLight": 0.0,
+                    "irLaser": 0.0
+                },
+                {
+                    "light": 0.0,
+                    "laser": 0.0,
+                    "irLight": 1.0,
+                    "irLaser": 0.0
+                },
+                {
+                    "light": 0.0,
+                    "laser": 0.0,
+                    "irLight": 1.0,
+                    "irLaser": 1.0
+                }
+            ],
+            "_comment": "boss_xe (sight)"
         },
         {
             "name": "vanilla_ILS_ILILS",
@@ -418,22 +442,22 @@
         {
             "id": "544909bb4bdc2d6f028b4577",
             "_comment": "tactical_all_insight_anpeq15",
-            "template": "vanilla_LS_ILS_IL_ILSIL"
+            "template": "vanilla_LS_ILS_IL_ILILS"
         },
         {
             "id": "57fd23e32459772d0805bcf1",
             "_comment": "tactical_all_holosun_ls321",
-            "template": "vanilla_LS_ILS_IL_ILSIL"
+            "template": "vanilla_LS_ILS_IL_ILILS"
         },
         {
             "id": "5c06595c0db834001a66af6c",
             "_comment": "tactical_all_insight_la5",
-            "template": "vanilla_LS_ILS_IL_ILSIL"
+            "template": "vanilla_LS_ILS_IL_ILILS"
         },
         {
             "id": "5c5952732e2216398b5abda2",
             "_comment": "tactical_all_zenit_perst_3",
-            "template": "vanilla_LS_ILS_IL_ILSIL"
+            "template": "vanilla_LS_ILS_IL_ILILS"
         },
         {
             "id": "61605d88ffa6e502ac5e7eeb",
@@ -542,14 +566,12 @@
         {
             "id": "5bffcf7a0db83400232fea79",
             "_comment": "pistolgrip_tt_pm_laser_tt_206",
-            "template": "vanilla_LS",
-            "alwaysOn": true
+            "template": "vanilla_LS"
         },
         {
             "id": "655f13e0a246670fb0373245",
             "_comment": "scope_all_wilcox_boss_xe_hp",
-            "template": "vanilla_LS",
-            "alwaysOn": true
+            "template": "vanilla_X_LS_ILS_ILILS"
         }
     ]
 }
