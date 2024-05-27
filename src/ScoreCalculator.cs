@@ -129,7 +129,7 @@ namespace ThatsLit
                 float footTerrainScoreProne = Singleton<ThatsLitGameworld>.Instance.CalculateCenterDetailScore(player.Player.TerrainDetails).prone;
                 var surroundingDetailsScaling = surroundingTerrainScoreProne * 0.667f + footTerrainScoreProne * 0.333f;
                 surroundingDetailsScaling = Mathf.Clamp01(surroundingDetailsScaling);
-                surroundingDetailsScaling *= Mathf.Clamp01(player.Player.TerrainDetails.RecentDetailCount3x3/ 75f);
+                surroundingDetailsScaling *= Mathf.Clamp01((0.5f * player.Player.TerrainDetails.RecentDetailCount3x3 + 0.5f * player.Player.TerrainDetails.RecentDetailCount5x5)/ 60f);
                 surroundingDetailsScaling *= surroundingDetailsScaling;
                 surroundingDetailsScaling *= Mathf.InverseLerp(-0.1f, MinBaseAmbienceScore, ambienceScore);
                 surroundingDetailsScaling *= NightTerrainImpactScale; // max 0.2

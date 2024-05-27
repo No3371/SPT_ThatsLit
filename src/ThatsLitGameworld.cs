@@ -502,6 +502,7 @@ namespace ThatsLit
             Array.Clear(player.detailScoreCache, 0, player.detailScoreCache.Length);
             if (player.Details5x5 != null) Array.Clear(player.Details5x5, 0, player.Details5x5.Length);
             player.RecentDetailCount3x3 = 0;
+            player.RecentDetailCount5x5 = 0;
             player.LastCheckedTime = Time.time;
             player.LastCheckedPos = position;
 
@@ -637,6 +638,7 @@ namespace ThatsLit
                         };
 
                         if (x >= 1 && x <= 3 && y >= 1 && y <= 3) player.RecentDetailCount3x3 += count;
+                        player.RecentDetailCount5x5 += count;
                     }
             }
             return;
