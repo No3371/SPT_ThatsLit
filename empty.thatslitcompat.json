@@ -5,7 +5,9 @@
         {
             "name": "_example_nv_scope_template",
             "nightVision": {
-                "visibilityBonusScale": 1.0
+                "nullification": 0.8,
+                "nullificationDarker": 0.4,
+                "nullificationExtremeDark": 0.25
             },
             "thermal": null,
             "_comment": null
@@ -90,6 +92,13 @@
         }
     ],
     "devices": [
+        {
+            "id": "_example_device",
+            "_comment": "_example_device",
+            "template": "_example_device_template"
+        }
+    ],
+    "extraDevices": [
         {
             "id": "_example_device",
             "_comment": "_example_device",
