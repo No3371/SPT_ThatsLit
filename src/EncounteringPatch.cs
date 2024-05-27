@@ -24,6 +24,7 @@ namespace ThatsLit.Patches.Vision
             public float visionDeviation;
         }
 
+        [HarmonyAfter("me.sol.sain")]
         [PatchPrefix]
         public static bool PatchPrefix(EnemyInfo __instance, bool value, ref State __state)
         {
@@ -130,6 +131,7 @@ namespace ThatsLit.Patches.Vision
         }
         // CalcGoalForBot could change the goalEnemy to the palyer in SetVisible()
         [PatchPostfix]
+        [HarmonyAfter("me.sol.sain")]
         public static void PatchPostfix(EnemyInfo __instance, State __state)
         {
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return;

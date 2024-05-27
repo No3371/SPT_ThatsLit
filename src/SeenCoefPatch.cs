@@ -25,6 +25,7 @@ namespace ThatsLit
         private static float nearestRecent;
 
         [PatchPostfix]
+        [HarmonyAfter("me.sol.sain")]
         public static void PatchPostfix(EnemyInfo __instance, BifacialTransform BotTransform, BifacialTransform enemy, float personalLastSeenTime, Vector3 personalLastSeenPos, ref float __result)
         {
             // Don't use GoalEnemy here because it only change when engaging new enemy (it'll stay forever if not engaged with new enemy)
