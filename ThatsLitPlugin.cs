@@ -180,6 +180,8 @@ namespace ThatsLit
             EnableEquipmentCheck         = Config.Bind(category, "Equipment Check", true, "Whether the mod checks your equipments. Disabling this stops lights/lasers detection and makes stealth EASY.");
             // ExtraDarknessImpactScale        = Config.Bind(category, "Darkness Impact Scale", 0f, new ConfigDescription("Additionaly scale how AI noticing players slower due to darkness. If 100% is not enough for you.", new AcceptableValueRange<float>(0, 1.0f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
             // ExtraBrightnessImpactScale      = Config.Bind(category, "Brightness Impact Scale", 0f, new ConfigDescription("Additionaly Scale how AI noticing players faster due to brightness. If 100% is not enough for you.", new AcceptableValueRange<float>(0f, 1.0f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
+            category                   = "10. Experiments";
+            VolumetricLightRenderer              = Config.Bind(category, "Observe Volumetric Lights", true, "Let Brightness Module reacts to volumetric lights. Disable this if it cause issues.");
             
         }
 
@@ -234,6 +236,7 @@ namespace ThatsLit
         // public static ConfigEntry<bool> AlternativeMeterUnicde { get; private set; }
         public static ConfigEntry<int> ResLevel { get; private set; }
         public static ConfigEntry<int> FoliageSamples { get; private set; }
+        public static ConfigEntry<bool> VolumetricLightRenderer { get; private set; }
         // public static ConfigEntry<bool> DevMode { get; private set; }
         // public static ConfigEntry<bool> DevModeInvisible { get; private set; }
         // public static ConfigEntry<bool> NoGPUReq { get; private set; }

@@ -93,6 +93,9 @@ namespace ThatsLit
                 prefab.gameObject.name = "That's Lit Camera (Prefab)";
                 foreach (var c in prefab.gameObject.GetComponents<MonoBehaviour>())
                 switch (c) {
+                    case VolumetricLightRenderer volumetricLightRenderer:
+                        if (ThatsLitPlugin.VolumetricLightRenderer.Value) volumetricLightRenderer.IsOptic = false;
+                        break;
                     case AreaLightManager areaLightManager:
                         break;
                     default:
