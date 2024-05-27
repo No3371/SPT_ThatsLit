@@ -148,12 +148,15 @@ namespace ThatsLit
             
             
             category                   = "6. Info";
-            ScoreInfo                  = Config.Bind(category, "Lighting Info", true, "Display lighting meter.");
-            WeatherInfo                  = Config.Bind(category, "Weather Info", true, "Clear/Cloudy indicator.");
-            EquipmentInfo                  = Config.Bind(category, "Equipment Info", true, "Enabled lights/lasers indicator.");
-            FoliageInfo                  = Config.Bind(category, "Foliage Info", true, "A rough rating of surrounding foliage.");
-            TerrainInfo                  = Config.Bind(category, "Terrain Info", true, "A hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.");
-            HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, "Hide the reminder about disabled Brightness module.");
+            ScoreInfo                  = Config.Bind(category, "Lighting Info", true, new ConfigDescription("Display lighting meter.", null, new ConfigurationManagerAttributes() { Order = 0}));
+            WeatherInfo                  = Config.Bind(category, "Weather Info", true, new ConfigDescription("Clear/Cloudy indicator.", null, new ConfigurationManagerAttributes() { Order = 1}));
+            EquipmentInfo                  = Config.Bind(category, "Equipment Info", true, new ConfigDescription("Enabled lights/lasers indicator.", null, new ConfigurationManagerAttributes() { Order = 2}));
+            FoliageInfo                  = Config.Bind(category, "Foliage Info", true, new ConfigDescription("A rough rating of surrounding foliage.", null, new ConfigurationManagerAttributes() { Order = 3}));
+            TerrainInfo                  = Config.Bind(category, "Terrain Info", true
+                                                     , new ConfigDescription("A hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.", null, new ConfigurationManagerAttributes() { Order = 4}));
+            HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, new ConfigDescription("Hide the reminder about disabled Brightness module.", null, new ConfigurationManagerAttributes() { Order = 5}));
+            InfoOffset                 = Config.Bind(category, "InfoOffset", 0,
+                                                   new ConfigDescription("Vertical offset to the top.", new AcceptableValueRange<int>(0, 7), new ConfigurationManagerAttributes() { Order = 9}));
             // AlternativeMeterUnicde                  = Config.Bind(category, "Alternative Meter", false, "If somehow the GUI meters unicodes are not rendered on your system, try this options.");
 
 
@@ -186,6 +189,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> TerrainInfo { get; private set; }
         public static ConfigEntry<bool> FoliageInfo { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
+        public static ConfigEntry<int> InfoOffset { get; private set; }
         public static ConfigEntry<bool> HideMapTip { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> DebugTerrain { get; private set; }

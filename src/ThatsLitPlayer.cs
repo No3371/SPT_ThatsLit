@@ -656,6 +656,37 @@ namespace ThatsLit
         void OnGUIInfo ()
         {
             if (ThatsLitPlugin.ScoreInfo.Value
+             || ThatsLitPlugin.WeatherInfo.Value
+             || ThatsLitPlugin.EquipmentInfo.Value
+             || ThatsLitPlugin.TerrainInfo.Value
+             || ThatsLitPlugin.FoliageInfo.Value)
+            {
+                switch (ThatsLitPlugin.InfoOffset.Value)
+                {
+                    case 1:
+                        GUILayout.Label("\n\n\n\n");
+                        break;
+                    case 2:
+                        GUILayout.Label("\n\n\n\n\n\n\n\n");
+                        break;
+                    case 3:
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n");
+                        break;
+                    case 4:
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        break;
+                    case 5:
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        break;
+                    case 6:
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        break;
+                    case 7:
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        break;
+                }
+            }
+            if (ThatsLitPlugin.ScoreInfo.Value
              && Singleton<ThatsLitGameworld>.Instance.ScoreCalculator != null
              && Time.time < awakeAt + 10)
                 GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
