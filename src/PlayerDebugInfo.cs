@@ -18,6 +18,6 @@ namespace ThatsLit
         internal float lastBushRat;
         internal float lastVisiblePartsFactor;
         internal float lastGlobalOverlookChance;
-        
+        internal float lastDisCompThermal, lastDisCompNVG, lastDisCompDay, lastDisComp;
     }
 }

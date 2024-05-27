@@ -15,6 +15,7 @@ namespace ThatsLit
     public class ExtraVisibleDistancePatch : ModulePatch
     {
         internal static System.Diagnostics.Stopwatch _benchmarkSW;
+        static float nearestDis;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -22,6 +23,7 @@ namespace ThatsLit
         }
 
         [PatchPrefix]
+        [HarmonyAfter("me.sol.sain")]
         public static bool PatchPrefix(EnemyInfo __instance, KeyValuePair<EnemyPart, EnemyPartData> part, ref float addVisibility)
         {
             if (__instance?.Owner == null
@@ -37,6 +39,20 @@ namespace ThatsLit
             Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
             if (player == null) return true;
 
+            nearestDis += 0.5f;
+            bool isNearest = false;
+            if (__instance.Distance < nearestDis)
+            {
+                nearestDis = __instance.Distance;
+                isNearest = true;
+                if (player.DebugInfo != null)
+                {
+                    player.DebugInfo.lastDisComp = 0f;
+                    player.DebugInfo.lastDisCompThermal = 0f;
+                    player.DebugInfo.lastDisCompNVG = 0f;
+                    player.DebugInfo.lastDisCompDay = 0f;
+                }
+            }
             ThatsLitPlugin.swExtraVisDis.MaybeResume();
 
             bool thermalActive = false, nvgActive = false, scope = false;
@@ -75,34 +91,37 @@ namespace ThatsLit
             {
                 float compensation = thermalRange - originalDist;
                 if (compensation > 0) addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation * ThatsLitPlugin.LitVisionDistanceScale.Value;
+                if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisCompThermal = compensation;
             }
             else if (nvgActive && frame0.ambienceScore < 0) // Base + Sun/Moon < 0
             {
                 float scale;
-                if (player.LightAndLaserState.IRLight) scale = 4f;
-                else if (player.LightAndLaserState.IRLaser) scale = 3.5f;
-                else scale = 3f;
+                if (player.LightAndLaserState.IRLight) scale = 3.5f;
+                else if (player.LightAndLaserState.IRLaser) scale = 3f;
+                else scale = 2.5f;
                 scale = Mathf.Lerp(1, scale, Mathf.Clamp01(frame0.ambienceScore / -1f)); // The darker the ambience, the more effective the NVG is
 
-                float compensation = __instance.Owner.Settings.FileSettings.Look.FAR_DISTANCE - originalDist;
+                float compensation = __instance.Owner.Settings.FileSettings.Look.MIDDLE_DIST - originalDist;
                 if (compensation > 0)
                 {
                     compensation *= 1f - fogFactor;
                     compensation *= player.PlayerLitScoreProfile.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
                     addVisibility += compensation * UnityEngine.Random.Range(0.25f, 1f); // 0.25x~1x of extra capped at 100m
                 }
+                if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisCompNVG = compensation;
             }
             else if (!nvgActive && frame0.ambienceScore > 0) // Base + Sun/Moon > 0
             {
-                float compensation = __instance.Owner.Settings.FileSettings.Look.FAR_DISTANCE - originalDist;
+                float compensation = __instance.Owner.Settings.FileSettings.Look.MIDDLE_DIST - originalDist;
                 if (compensation > 0)
                 {
                     compensation *= 1f - fogFactor;
                     compensation *= (1f + frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
                     addVisibility += compensation * UnityEngine.Random.Range(0.2f, 1f);
                 }
+                if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisCompDay = compensation;
             } 
-            else if (!nvgActive) // 
+            else if (!nvgActive)
             {
                 float litDiff = frame0.multiFrameLitScore - frame0.baseAmbienceScore; // The visibility provided by sun/moon + lightings
                 litDiff = Mathf.InverseLerp(0, 2, litDiff);
@@ -113,6 +132,7 @@ namespace ThatsLit
                 {
                     addVisibility += litDiff * UnityEngine.Random.Range(0.5f, 1f);
                 }
+                if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisComp = compensation;
             }
 
             ThatsLitPlugin.swExtraVisDis.Stop();
