@@ -100,8 +100,8 @@ namespace ThatsLit
 
             category = "2. Darkness / Brightness";
             EnabledLighting            = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order                                                              = 100 }));
-            DarknessImpactScale        = Config.Bind(category, "Darkness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players slower due to darkness.", new AcceptableValueRange<float>(0, 1.0f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
-            BrightnessImpactScale      = Config.Bind(category, "Brightness Impact Scale", 1f, new ConfigDescription("Scale how AI noticing players faster due to brightness.", new AcceptableValueRange<float>(0f, 1.0f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
+            DarknessImpactScaleOffset        = Config.Bind(category, "Darkness Impact Offset", 0.5f, new ConfigDescription("Scale how AI noticing players slower due to darkness. Be careful when increasing this as it could easily breaks the combat balance.", new AcceptableValueRange<float>(0, 1.0f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
+            BrightnessImpactScaleOffset      = Config.Bind(category, "Brightness Impact Offset", 0.5f, new ConfigDescription("Scale how AI noticing players faster due to brightness. Be careful when increasing this as it could easily breaks the combat balance.", new AcceptableValueRange<float>(0f, 1.0f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
             LitVisionDistanceScale     = Config.Bind(category, "Lit Vision Distance Scale", 1f, new ConfigDescription("Scale how AI noticing players from further under some circumstances. This is designed to compensate low night vision distance from SAIN, you may want to set this to 0 if you don't run SAIN.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 93 }));
             EnableFactoryNight         = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
             EnableLighthouse           = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
@@ -203,10 +203,10 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableEquipmentCheck { get; private set; }
         public static ConfigEntry<bool> AlternativeReactionFluctuation { get; private set; }
         public static ConfigEntry<float> ScoreOffset { get; private set; }
-        public static float CombinedDarknessImpactScale { get => DarknessImpactScale.Value + ExtraDarknessImpactScale.Value;}
-        public static float CombinedBrightnessImpactScale { get => BrightnessImpactScale.Value + ExtraBrightnessImpactScale.Value;}
-        public static ConfigEntry<float> DarknessImpactScale { get; private set; }
-        public static ConfigEntry<float> BrightnessImpactScale { get; private set; }
+        public static ConfigEntry<float> DarknessImpactScaleOffset { get; private set; }
+        public static ConfigEntry<float> BrightnessImpactScaleOffset { get; private set; }
+        public static float DarknessImpactScale => DarknessImpactScaleOffset.Value * 2f;
+        public static float BrightnessImpactScale => BrightnessImpactScaleOffset.Value * 2f;
         public static ConfigEntry<float> ExtraDarknessImpactScale { get; private set; }
         public static ConfigEntry<float> ExtraBrightnessImpactScale { get; private set; }
         public static ConfigEntry<float> LitVisionDistanceScale { get; private set; }

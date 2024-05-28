@@ -707,7 +707,7 @@ namespace ThatsLit
                 var secondsOffset = -1f * Mathf.Pow(factor, 2) * Mathf.Sign(factor) * (UnityEngine.Random.Range(0.5f, 1f) - 0.5f * cqb11mTo1mSquared); // Base
                 secondsOffset += (original * (10f + rand1 * 20f) * (0.1f + 0.9f * sinceSeenFactorSqr * seenPosDeltaFactorSqr) * extremeDarkFactor) / pPoseFactor; // Makes night factory makes sense (filtered by extremeDarkFactor)
                 secondsOffset *= botImpactType == BotImpactType.DEFAULT? 1f : 0.5f;
-                secondsOffset *= secondsOffset > 0 ? ThatsLitPlugin.BrightnessImpactScale.Value : ThatsLitPlugin.DarknessImpactScale.Value;
+                secondsOffset *= secondsOffset > 0 ? ThatsLitPlugin.BrightnessImpactScale : ThatsLitPlugin.DarknessImpactScale;
                 __result += secondsOffset;
                 if (__result < 0) __result = 0;
 
@@ -733,13 +733,13 @@ namespace ThatsLit
                     forceStealthChance *= 0.4f + 0.6f * Mathf.Clamp01(notSeenRecentAndNear + attentionCancelChanceScaleByExDark);
                     if (UnityEngine.Random.Range(-1f, 0f) > forceStealthChance)
                     {
-                        __result *= 100 * ThatsLitPlugin.DarknessImpactScale.Value;
+                        __result *= 100 * ThatsLitPlugin.DarknessImpactScale;
                     }
                     else
                     {
                         var scale = factor * factor * 0.5f + 0.5f* Mathf.Abs(factor * factor * factor);
                         scale *= 3f;
-                        scale *= ThatsLitPlugin.DarknessImpactScale.Value;
+                        scale *= ThatsLitPlugin.DarknessImpactScale;
                         scale *= 1f - combinedCqb10x5To1;
                         // -1 => 3
                         // -0.5 => 0.5625
@@ -752,8 +752,8 @@ namespace ThatsLit
                 }
                 else if (factor > 0)
                 {
-                    if (rand5 < factor * factor) __result *= 1f - 0.5f * ThatsLitPlugin.BrightnessImpactScale.Value;
-                    else __result /= 1f + factor / 5f * ThatsLitPlugin.BrightnessImpactScale.Value;
+                    if (rand5 < factor * factor) __result *= 1f - 0.5f * ThatsLitPlugin.BrightnessImpactScale;
+                    else __result /= 1f + factor / 5f * ThatsLitPlugin.BrightnessImpactScale;
                 }
             }
 
