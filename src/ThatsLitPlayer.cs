@@ -106,7 +106,7 @@ namespace ThatsLit
                 prefab.backgroundColor = new Color (0, 0, 0, 0);
 
                 prefab.nearClipPlane = 0.001f;
-                prefab.farClipPlane = 5f;
+                prefab.farClipPlane = 3.5f;
 
                 prefab.cullingMask = LayerMaskClass.PlayerMask;
                 prefab.fieldOfView = 44;
