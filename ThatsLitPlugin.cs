@@ -95,7 +95,7 @@ namespace ThatsLit
                                                          new ConfigurationManagerAttributes() { ReadOnly = true }));
 
             category = "1. Main";
-            EnabledMod = Config.Bind(category, "Enable", true, "Enable the mod. Most features can't be re-enabled in raids.");
+            EnabledMod = Config.Bind(category, "Enable", true, "Enable the mod. Some features can't be re-enabled in raids.");
             //ScoreOffset = Config.Bind(category, "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
@@ -113,7 +113,8 @@ namespace ThatsLit
             EnableStreets              = Config.Bind(category, "Streets", true, "Enable darkness/brightness on the map.");
             EnableGroundZero              = Config.Bind(category, "Ground Zero", true, "Enable darkness/brightness on the map.");
             // ShadowlessGroundZero       = Config.Bind(category, "ShadowlessGroundZero", true, "The top half of some big buildings in Ground Zero does not have proper colliders and thus mess with Ambience Shadow calculation. If you really feel it's a big problem, enable this to address the issue.");
-            
+            VolumetricLightRenderer              = Config.Bind(category, "Observe Volumetric Lights", true, "Let Brightness Module reacts to volumetric lights. Disable this if it cause issues.");
+             
             category                   = "3. Encountering Patch";
             EnabledEncountering        = Config.Bind(category,
                                                      "Enable",
@@ -128,35 +129,35 @@ namespace ThatsLit
             EnabledGrasses             = Config.Bind(category, "Enable Grasses", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
             EnabledFoliage             = Config.Bind(category, "Enable Foliage", true, new ConfigDescription("Enable the module. This enable foliage to distract distant bots.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
             EnabledBushRatting             = Config.Bind(category, "Enable Bush Ratting", true, new ConfigDescription("Enable the module. This enable foliage to distract distant bots.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
-
-            category                   = "5. Tweaks";
             FoliageImpactScale         = Config.Bind(category,
                                             "Foliage Impact Scale",
                                             1f,
-                                            new ConfigDescription("Scale the strength of extra chance to be overlooked from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+                                            new ConfigDescription("Scale the strength of extra chance to be overlooked by faraway bots from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+
+            category                   = "5. Tweaks";
+            EnableMovementImpact       = Config.Bind(category, "MovementImpact", true, "Should sprinting bots spot player slower & Should moving (esp. sprinting) player get spotted slightly faster. This option is provided because SAIN is including similiar (player side only) feature (though their effectiveness is unknown yet.");
             FinalImpactScaleDelaying        = Config.Bind(category,
                                                     "Final Impact Scale (Delaying)",
                                                     1f,
-                                                    new ConfigDescription("Scale the delay of bot reaction from the mod. 0% = use the original value. Adjust this to balance your game to your liking. This is mainly provided for people whose game somehow becomes too easy with the mod.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 98}));
+                                                    new ConfigDescription("Scale the delay of bot reaction from the mod. 0% = use the original value. Adjust this to balance your game to your liking.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 98}));
             FinalImpactScaleFastening         = Config.Bind(category,
                                                      "Final Impact Scale (Fastening)",
                                                      1f,
-                                                     new ConfigDescription("Scale the fastening of bot reaction from the mod. 0% = use the original value. Adjust this to balance your game to your liking. This is mainly provided for people whose game somehow becomes too easy with the mod.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 98}));
+                                                     new ConfigDescription("Scale the fastening of bot reaction from the mod. 0% = use the original value. Adjust this to balance your game to your liking.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 97}));
             FinalOffset                = Config.Bind(category, "Final Offset", 0f, "(Not recommanded because it's easy to mess up the balance, try Final Impact Scale first) Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa. Applied after Final Impact Scale.");
-            EnableMovementImpact       = Config.Bind(category, "MovementImpact", true, "Should sprinting bots spot player slower & Should moving (esp. sprinting) player get spotted slightly faster. This option is provided because SAIN is including similiar (player side only) feature (though their effectiveness is unknown yet.");
             AlternativeReactionFluctuation       = Config.Bind(category, "Alternative Reaction Fluctuation", true, "If Brightness module is disabled, introduce a slight fluctuation to bot reaction time, so rarely you may get lucky or unlucky, may be not noticeable.");
             
             
             category                   = "6. Info";
-            ScoreInfo                  = Config.Bind(category, "Lighting Info", true, new ConfigDescription("Display lighting meter.", null, new ConfigurationManagerAttributes() { Order = 0}));
-            WeatherInfo                  = Config.Bind(category, "Weather Info", true, new ConfigDescription("Clear/Cloudy indicator.", null, new ConfigurationManagerAttributes() { Order = 1}));
-            EquipmentInfo                  = Config.Bind(category, "Equipment Info", true, new ConfigDescription("Enabled lights/lasers indicator.", null, new ConfigurationManagerAttributes() { Order = 2}));
-            FoliageInfo                  = Config.Bind(category, "Foliage Info", true, new ConfigDescription("A rough rating of surrounding foliage.", null, new ConfigurationManagerAttributes() { Order = 3}));
+            ScoreInfo                  = Config.Bind(category, "Lighting Info", true, new ConfigDescription("Display lighting meter.", null));
+            WeatherInfo                  = Config.Bind(category, "Weather Info", true, new ConfigDescription("Clear/Cloudy indicator.", null));
+            EquipmentInfo                  = Config.Bind(category, "Equipment Info", true, new ConfigDescription("Enabled lights/lasers indicator.", null));
+            FoliageInfo                  = Config.Bind(category, "Foliage Info", true, new ConfigDescription("A rough rating of surrounding foliage.", null));
             TerrainInfo                  = Config.Bind(category, "Terrain Info", true
-                                                     , new ConfigDescription("A hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.", null, new ConfigurationManagerAttributes() { Order = 4}));
-            HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, new ConfigDescription("Hide the reminder about disabled Brightness module.", null, new ConfigurationManagerAttributes() { Order = 5}));
+                                                     , new ConfigDescription("A hint about surrounding grasses. Only grasses in direction to the bot doing vision check is applied and there are some more dynamic factors, so this only gives you the rough idea about how dense the surrounding grasses are.", null));
+            HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, new ConfigDescription("Hide the reminder about disabled Brightness module.", null));
             InfoOffset                 = Config.Bind(category, "InfoOffset", 0,
-                                                   new ConfigDescription("Vertical offset to the top.", new AcceptableValueRange<int>(0, 7), new ConfigurationManagerAttributes() { Order = 9}));
+                                                   new ConfigDescription("Vertical offset to the top.", new AcceptableValueRange<int>(0, 7)));
             // AlternativeMeterUnicde                  = Config.Bind(category, "Alternative Meter", false, "If somehow the GUI meters unicodes are not rendered on your system, try this options.");
 
 
@@ -178,10 +179,6 @@ namespace ThatsLit
             category                   = "9. Balance";
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss. Makes bosses EASY.");
             EnableEquipmentCheck         = Config.Bind(category, "Equipment Check", true, "Whether the mod checks your equipments. Disabling this stops lights/lasers detection and makes stealth EASY.");
-            // ExtraDarknessImpactScale        = Config.Bind(category, "Darkness Impact Scale", 0f, new ConfigDescription("Additionaly scale how AI noticing players slower due to darkness. If 100% is not enough for you.", new AcceptableValueRange<float>(0, 1.0f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
-            // ExtraBrightnessImpactScale      = Config.Bind(category, "Brightness Impact Scale", 0f, new ConfigDescription("Additionaly Scale how AI noticing players faster due to brightness. If 100% is not enough for you.", new AcceptableValueRange<float>(0f, 1.0f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
-            category                   = "10. Experiments";
-            VolumetricLightRenderer              = Config.Bind(category, "Observe Volumetric Lights", true, "Let Brightness Module reacts to volumetric lights. Disable this if it cause issues.");
             
         }
 
