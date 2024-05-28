@@ -72,7 +72,7 @@ namespace ThatsLit.Patches.Vision
                     if (player.DebugInfo != null) player.DebugInfo.lastEncounteringShotCutoff = cutoff;
                 }
                  // Assuming surprise attack by the player, even not facing away
-                return Mathf.Clamp(ThatsLitPlugin.VagueHintChance.Value * 2f, 0f, 0.95f)
+                return Mathf.Clamp(ThatsLitPlugin.VisibilityCancelChance.Value * 2f, 0f, 0.95f)
                      * (0.5f * Mathf.InverseLerp(30f + 30f * rand3, 100f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(2.5f, 20f, knownPosDelta))
                      * Mathf.InverseLerp(10, 110f, distance)
                      * Mathf.InverseLerp(0f, 15f, visionDeviation)
@@ -84,7 +84,7 @@ namespace ThatsLit.Patches.Vision
             if (botImpactType != BotImpactType.BOSS)
             {
                 float vagueHintAngleFactor = Mathf.InverseLerp(0f, 5f, distance) * Mathf.InverseLerp(70f, 110f, visionDeviation); // When facing away, replace with vague hint
-                if ((rand3 < vagueHintAngleFactor * Mathf.Clamp01(ThatsLitPlugin.VagueHintChance.Value))
+                if ((rand3 < vagueHintAngleFactor * Mathf.Clamp01(ThatsLitPlugin.VisibilityCancelChance.Value))
                  || rand3 < GetSurpriseChanceInFront())
                 {
                     if (player.DebugInfo != null) player.DebugInfo.vagueHint++;

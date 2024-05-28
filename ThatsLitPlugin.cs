@@ -118,11 +118,11 @@ namespace ThatsLit
             EnabledEncountering        = Config.Bind(category,
                                                      "Enable",
                                                      true,
-                                                     new ConfigDescription("Enable the module. This randomly nerf AIs a bit at the moment they encounter you, especially when they are sprinting.", null, new ConfigurationManagerAttributes() { Order = 100 }));
-            VagueHintChance            = Config.Bind(category,
-                                                     "Vague Hint Chance",
+                                                     new ConfigDescription("Enable the module. Encountering Patch nerf bots reaction at the moment they see a player, especially when they are sprinting.", null, new ConfigurationManagerAttributes() { Order = 100 }));
+            VisibilityCancelChance            = Config.Bind(category,
+                                                     "Visibility Cancel Chance",
                                                      0.6f,
-                                                     new ConfigDescription("The chance to cancel a bot's visual confirmation on you and instead only tell it it's spotted from roughly your direction, when the system say you are visible to it but it's not even facing your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+                                                     new ConfigDescription("Basically, this reduce instant returning fire. When the system set you to be visible to a bot, but the bot is not even facing your way (yes this happens in some situations), at this chance That's Lit will cancel the visibility and instead only tell it it's spotted from roughly your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
 
             category                   = "4. Grasses & Foliage";
             EnabledGrasses             = Config.Bind(category, "Enable Grasses", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
@@ -216,7 +216,7 @@ namespace ThatsLit
         public static ConfigEntry<float> FinalOffset { get; private set; }
         public static ConfigEntry<float> FinalImpactScaleDelaying { get; private set; }
         public static ConfigEntry<float> FinalImpactScaleFastening { get; private set; }
-        public static ConfigEntry<float> VagueHintChance { get; private set; }
+        public static ConfigEntry<float> VisibilityCancelChance { get; private set; }
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
         public static ConfigEntry<bool> IncludeBosses { get; private set; }
         public static ConfigEntry<bool> LessEquipmentCheck { get; private set; }
