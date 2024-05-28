@@ -347,7 +347,7 @@ namespace ThatsLit
 
         protected void StartCountPixels(PlayerLitScoreProfile player, Unity.Collections.NativeArray<Color32> tex, float thresholdShine, float thresholdHigh, float thresholdHighMid, float thresholdMid, float thresholdMidLow, float thresholdLow)
         {
-            if (!tex.IsCreated) return;
+            if (player == null || tex == null || !tex.IsCreated) return;
 
             NativeArray<float> thresholds = new NativeArray<float>(6, Allocator.TempJob);
             thresholds[0] = thresholdShine;
