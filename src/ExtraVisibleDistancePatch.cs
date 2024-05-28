@@ -29,7 +29,7 @@ namespace ThatsLit
             if (__instance?.Owner == null
              || (part.Key?.Owner?.IsAI ?? true) == true
              || !ThatsLitPlugin.EnabledMod.Value
-             || ThatsLitPlugin.LitVisionDistanceScale.Value == 0
+             || ThatsLitPlugin.ExtraVisionDistanceScale.Value == 0
              || !ThatsLitPlugin.EnabledLighting.Value)
                 return true;
 
@@ -90,7 +90,7 @@ namespace ThatsLit
             if (thermalActive)
             {
                 float compensation = thermalRange - originalDist;
-                if (compensation > 0) addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation * ThatsLitPlugin.LitVisionDistanceScale.Value;
+                if (compensation > 0) addVisibility += UnityEngine.Random.Range(0.5f, 1f) * compensation * ThatsLitPlugin.ExtraVisionDistanceScale.Value;
                 if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisCompThermal = compensation;
             }
             else if (nvgActive && frame0.ambienceScore < 0) // Base + Sun/Moon < 0
@@ -105,7 +105,7 @@ namespace ThatsLit
                 if (compensation > 0)
                 {
                     compensation *= 1f - fogFactor;
-                    compensation *= player.PlayerLitScoreProfile.litScoreFactor * ThatsLitPlugin.LitVisionDistanceScale.Value * scale;
+                    compensation *= player.PlayerLitScoreProfile.litScoreFactor * ThatsLitPlugin.ExtraVisionDistanceScale.Value * scale;
                     addVisibility += compensation * UnityEngine.Random.Range(0.25f, 1f); // 0.25x~1x of extra capped at 100m
                 }
                 if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisCompNVG = compensation;
@@ -116,7 +116,7 @@ namespace ThatsLit
                 if (compensation > 0)
                 {
                     compensation *= 1f - fogFactor;
-                    compensation *= (1f + frame0.ambienceScore / 5f) * ThatsLitPlugin.LitVisionDistanceScale.Value;
+                    compensation *= (1f + frame0.ambienceScore / 5f) * ThatsLitPlugin.ExtraVisionDistanceScale.Value;
                     addVisibility += compensation * UnityEngine.Random.Range(0.2f, 1f);
                 }
                 if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisCompDay = compensation;

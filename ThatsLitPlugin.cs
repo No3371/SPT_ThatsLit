@@ -76,19 +76,19 @@ namespace ThatsLit
         {
             string category = "0. Readme";
             Config.Bind(category,
-                        "Performance",
+                        "Performance (Readme)",
                         true,
                         new ConfigDescription("The mod takes away at least several fps. Actual overhead varies from machine to machine, some lose 5, some lose 20. You can try giving up the brightness module if the performance is not acceptable.",
                                                          null,
                                                          new ConfigurationManagerAttributes() { ReadOnly = true }));
             Config.Bind(category,
-                        "Balance",
+                        "Balance (Readme)",
                         true,
                         new ConfigDescription("The mod aims to make AIs reasonable without making it easy, but it requires some proper setup. Besides, SAIN or other mods can change bots, and everyone has different configurations, so you may have different experience than mine with default That's Lit configs. Check \"Recommended Mods\" on the mod page for more info.",
                                                          null,
                                                          new ConfigurationManagerAttributes() { ReadOnly = true }));
             Config.Bind(category,
-                        "Mechanics",
+                        "Mechanics (Readme)",
                         true,
                         new ConfigDescription("The mod tries to make everything as intuitive as possible so you can enjoy human-like AIs by just applying common sense. However, EFT's AIs are never designed to be human-like, the mod basically \"imagine up\" some new systems out of data here and there in the game, there are things can't be done, or can't be very accurate. It's best to read the mod description page if you want to make the most out of That's Lit.",
                                                          null,
@@ -102,7 +102,7 @@ namespace ThatsLit
             EnabledLighting            = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order                                                              = 100 }));
             DarknessImpactScaleOffset        = Config.Bind(category, "Darkness Impact Offset", 0.5f, new ConfigDescription("Scale how AI noticing players slower due to darkness. Be careful when increasing this as it could easily breaks the combat balance.", new AcceptableValueRange<float>(0, 1.0f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
             BrightnessImpactScaleOffset      = Config.Bind(category, "Brightness Impact Offset", 0.5f, new ConfigDescription("Scale how AI noticing players faster due to brightness. Be careful when increasing this as it could easily breaks the combat balance.", new AcceptableValueRange<float>(0f, 1.0f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
-            LitVisionDistanceScale     = Config.Bind(category, "Lit Vision Distance Scale", 1f, new ConfigDescription("Scale how AI noticing players from further under some circumstances. This is designed to compensate low night vision distance from SAIN, you may want to set this to 0 if you don't run SAIN.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 93 }));
+            ExtraVisionDistanceScale     = Config.Bind(category, "Extra Vision Distance Scale", 1f, new ConfigDescription("Scale how AI noticing players from further under some circumstances. This is designed to compensate low night vision distance from SAIN, you may want to set this to 0 if you don't run SAIN.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 93 }));
             EnableFactoryNight         = Config.Bind(category, "Factory (Night)", true, "Enable darkness/brightness on the map.");
             EnableLighthouse           = Config.Bind(category, "Lighthouse", true, "Enable darkness/brightness on the map.");
             EnableShoreline            = Config.Bind(category, "Shoreline", true, "Enable darkness/brightness on the map.");
@@ -135,7 +135,7 @@ namespace ThatsLit
                                             new ConfigDescription("Scale the strength of extra chance to be overlooked by faraway bots from sneaking around foliages.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
 
             category                   = "5. Tweaks";
-            EnableMovementImpact       = Config.Bind(category, "MovementImpact", true, "Should sprinting bots spot player slower & Should moving (esp. sprinting) player get spotted slightly faster. This option is provided because SAIN is including similiar (player side only) feature (though their effectiveness is unknown yet.");
+            EnableMovementImpact       = Config.Bind(category, "Movement Impact", true, "Should sprinting bots spot player slower & Should moving (esp. sprinting) player get spotted slightly faster. This option is provided because SAIN is including similiar (player side only) feature (though their effectiveness is unknown yet.");
             FinalImpactScaleDelaying        = Config.Bind(category,
                                                     "Final Impact Scale (Delaying)",
                                                     1f,
@@ -209,7 +209,7 @@ namespace ThatsLit
         public static float BrightnessImpactScale => BrightnessImpactScaleOffset.Value * 2f;
         public static ConfigEntry<float> ExtraDarknessImpactScale { get; private set; }
         public static ConfigEntry<float> ExtraBrightnessImpactScale { get; private set; }
-        public static ConfigEntry<float> LitVisionDistanceScale { get; private set; }
+        public static ConfigEntry<float> ExtraVisionDistanceScale { get; private set; }
         public static ConfigEntry<float> FinalOffset { get; private set; }
         public static ConfigEntry<float> FinalImpactScaleDelaying { get; private set; }
         public static ConfigEntry<float> FinalImpactScaleFastening { get; private set; }
