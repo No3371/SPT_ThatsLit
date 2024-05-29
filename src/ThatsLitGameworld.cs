@@ -496,9 +496,12 @@ namespace ThatsLit
                 return;
             }
 
-            if ((position - player.LastCheckedPos).magnitude < 0.1f) return ;
+            if (player == null || terrainDetailsUnavailable)
+                return ;
 
-            if (player == null || terrainDetailsUnavailable) return ;
+            if ((position - player.LastCheckedPos).magnitude < 0.1f)
+                return ;
+
             Array.Clear(player.detailScoreCache, 0, player.detailScoreCache.Length);
             if (player.Details5x5 != null) Array.Clear(player.Details5x5, 0, player.Details5x5.Length);
             player.RecentDetailCount3x3 = 0;
@@ -515,7 +518,8 @@ namespace ThatsLit
             if (!terrain || !manager || !manager.isInitialized) return ;
             if (!terrainDetailMaps.TryGetValue(terrain, out var detailMap))
             {
-                if (gatheringDetailMap == null) gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(terrain));
+                if (gatheringDetailMap == null)
+                    gatheringDetailMap = StartCoroutine(BuildAllTerrainDetailMapCoroutine(terrain));
                 return;
             }
 
@@ -543,7 +547,9 @@ namespace ThatsLit
 
             for (int d = 0; d < manager.prototypeList.Count; d++)
             {
-                var resolution = (manager.prototypeList[d] as GPUInstancerDetailPrototype).detailResolution;
+                GPUInstancerDetailPrototype gPUInstancerDetailPrototype = manager.prototypeList[d] as GPUInstancerDetailPrototype;
+                if (gPUInstancerDetailPrototype == null) continue;
+                var resolution = gPUInstancerDetailPrototype.detailResolution;
                 Vector2Int resolutionPos = new Vector2Int((int)(currentLocationOnTerrainmap.x * resolution), (int)(currentLocationOnTerrainmap.y * resolution));
                 // EFT.UI.ConsoleScreen.Log($"JOB: Calculating score for detail#{d} at detail pos ({resolutionPos.x},{resolutionPos.y})" );
                 for (int x = 0; x < 5; x++)
