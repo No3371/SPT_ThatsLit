@@ -398,7 +398,7 @@ namespace ThatsLit
             //     }
             // }
 
-            if (ThatsLitPlugin.EnableEquipmentCheck.Value && Time.time > lastCheckedLights + (ThatsLitPlugin.LessEquipmentCheck.Value ? 0.61f : 0.33f))
+            if (ThatsLitPlugin.EnableEquipmentCheck.Value && Time.time > lastCheckedLights + 0.41)
             {
                 lastCheckedLights = Time.time;
                 var state = LightAndLaserState;
