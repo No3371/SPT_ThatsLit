@@ -50,6 +50,38 @@ namespace ThatsLit
         {
             get => (storage & 0b_1100_1100) > 0;
         }
+        public bool AnyVisibleLight
+        {
+            get => (storage & 0b_1000_1000) > 0;
+        }
+        public bool AnyVisibleLaser
+        {
+            get => (storage & 0b_0100_0100) > 0;
+        }
+        public bool AnyIRLight
+        {
+            get => (storage & 0b_0010_0010) > 0;
+        }
+        public bool AnyIRLaser
+        {
+            get => (storage & 0b_0001_0001) > 0;
+        }
+        public bool AnyVisibleMain
+        {
+            get => (storage & 0b_1100_0000) > 0;
+        }
+        public bool AnyIRMain
+        {
+            get => (storage & 0b_0011_0000) > 0;
+        }
+        public bool AnyVisibleSub
+        {
+            get => (storage & 0b_0000_1100) > 0;
+        }
+        public bool AnyIRSub
+        {
+            get => (storage & 0b_0000_0011) > 0;
+        }
         public bool AnyIR
         {
             get => (storage & 0b_0011_0011) > 0;
