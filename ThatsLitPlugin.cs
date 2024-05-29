@@ -137,13 +137,13 @@ namespace ThatsLit
             category                   = "5. Tweaks";
             EnableMovementImpact       = Config.Bind(category, "Movement Impact", true, "Should sprinting bots spot player slower & Should moving (esp. sprinting) player get spotted slightly faster. This option is provided because SAIN is including similiar (player side only) feature (though their effectiveness is unknown yet.");
             FinalImpactScaleDelaying        = Config.Bind(category,
-                                                    "Final Impact Scale (Delaying)",
+                                                    "Final Impact Scale (Slower)",
                                                     1f,
-                                                    new ConfigDescription("Scale the delay of bot reaction from the mod. 0% = use the original value. Adjust this to balance your game to your liking.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 98}));
+                                                    new ConfigDescription("Scale how much slower bots react because of the mod. 0% = use the original value. *Carefully* adjust this to balance your game to your liking.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 98}));
             FinalImpactScaleFastening         = Config.Bind(category,
-                                                     "Final Impact Scale (Fastening)",
+                                                     "Final Impact Scale (Faster)",
                                                      1f,
-                                                     new ConfigDescription("Scale the fastening of bot reaction from the mod. 0% = use the original value. Adjust this to balance your game to your liking.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 97}));
+                                                     new ConfigDescription("Scale how much faster bots react because of the mod. 0% = use the original value. *Carefully* adjust this to balance your game to your liking.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 97}));
             FinalOffset                = Config.Bind(category, "Final Offset", 0f, "(Not recommanded because it's easy to mess up the balance, try Final Impact Scale first) Modify the final 'time to be seen' seconds. Positive means AIs react slower and vice versa. Applied after Final Impact Scale.");
             AlternativeReactionFluctuation       = Config.Bind(category, "Alternative Reaction Fluctuation", true, "If Brightness module is disabled, introduce a slight fluctuation to bot reaction time, so rarely you may get lucky or unlucky, may be not noticeable.");
             
