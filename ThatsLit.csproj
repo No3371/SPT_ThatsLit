@@ -62,7 +62,7 @@
       <HintPath>$(ManagedAssembliesPath)\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule">
+    <Reference Include="UnityEngine.UI">
       <HintPath>$(ManagedAssembliesPath)\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
@@ -83,7 +83,6 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="ItemComponent.Types" />
-    <Reference Include="UnityEngine.UI" />
     <Reference Include="UnityEngine.JSONSerializeModule" />
     <Reference Include="UnityEngine.IMGUIModule" />
     <Reference Include="UnityEngine.PhysicsModule.dll">

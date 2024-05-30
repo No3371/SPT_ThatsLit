@@ -1,11 +1,12 @@
 #define DEBUG_DETAILS
+using System;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
 namespace ThatsLit
 {
-    public class PlayerLitScoreProfile
+    public class PlayerLitScoreProfile : IDisposable
     {
         internal float lum3s, lum1s, lum10s;
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
@@ -92,9 +93,14 @@ namespace ThatsLit
             if (frame5.score < score) score = frame5.score;
             return score;
         }
-        
 
-        public struct CountPixelsJob : IJobParallelFor
+        public void Dispose()
+        {
+            CountingJobHandle.Complete();
+            PixelCountingJob.Dispose();
+        }
+
+        public struct CountPixelsJob : IJobParallelFor, IDisposable
         {
             [Unity.Collections.LowLevel.Unsafe.NativeSetThreadIndex]
             public int threadIndex;
@@ -108,6 +114,14 @@ namespace ThatsLit
             public NativeArray<float> lum; // lum, lumNonDark
             [ReadOnly]
             public NativeArray<float> thresholds; // thresholdShine, thresholdHigh, thresholdHighMid, thresholdMid, thresholdMidLow, thresholdLow
+
+            public void Dispose()
+            {
+                tex.Dispose();
+                counted.Dispose();
+                lum.Dispose();
+                thresholds.Dispose();
+            }
 
             public void Execute(int index)
             {

@@ -372,6 +372,11 @@ namespace ThatsLit
             shine = high = highMid = mid = midLow = low = dark = valid = 0;
             lum = 0;
             lumNonDark = 0;
+            if (player.CountingJobHandle.IsCompleted)
+            {
+                player.PixelCountingJob.Dispose();
+                return;
+            }
 
             player.CountingJobHandle.Complete();
             var job = player.PixelCountingJob;
