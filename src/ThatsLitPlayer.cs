@@ -131,13 +131,14 @@ namespace ThatsLit
             MaybeEnableBrightness();
         }
 
-        void MaybeEnableBrightness ()
+        internal void MaybeEnableBrightness ()
         {
             if (!ThatsLitPlugin.EnabledLighting.Value
              || Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null)
                 return;
 
             if (PlayerLitScoreProfile == null) PlayerLitScoreProfile = new PlayerLitScoreProfile(this);
+            if (PlayerLitScoreProfile.IsProxy) return;
 
             if (rt == null)
             {
@@ -177,12 +178,18 @@ namespace ThatsLit
             }
         }
 
-        void DisableBrightness ()
+        internal void DisableBrightness ()
         {
             if (cam) cam.enabled = false;
             if (display) display.enabled = false;
             PlayerLitScoreProfile = null;
             ThatsLitPlugin.DebugTexture.SettingChanged -= HandleDebugTextureSettingChanged;
+        }
+        internal void ToggleBrightnessProxy (bool toggle)
+        {
+            if (cam) cam.enabled = !toggle;
+            if (display) display.enabled = !toggle;
+            PlayerLitScoreProfile.IsProxy = toggle;
         }
 
         private void Update()
@@ -240,6 +247,8 @@ namespace ThatsLit
             && Time.time > TerrainDetails.LastCheckedTime + 0.41f)
             {
                 Singleton<ThatsLitGameworld>.Instance.CheckTerrainDetails(bodyPos, TerrainDetails);
+                ThatsLitAPI.OnPlayerSurroundingTerrainSampledDirect?.Invoke(this);
+                ThatsLitAPI.OnPlayerSurroundingTerrainSampled?.Invoke(this.Player);
                 if (ThatsLitPlugin.TerrainInfo.Value)
                 {
                     var score = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(TerrainDetails, Vector3.zero, 0, 0);
@@ -514,6 +523,9 @@ namespace ThatsLit
                 Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, Singleton<ThatsLitGameworld>.Instance, PlayerLitScoreProfile, Utility.GetInGameDayTime(), ActiveRaidSettings.LocationId);
             ThatsLitPlugin.swScoreCalc.Stop();
             observed.Dispose();
+
+            ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect?.Invoke(this, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+            ThatsLitAPI.OnPlayerBrightnessScoreCalculated?.Invoke(Player, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
         }
         internal float overheadHaxRating;
         internal float OverheadHaxRatingFactor => overheadHaxRating / 10f;

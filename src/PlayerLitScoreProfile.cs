@@ -8,6 +8,7 @@ namespace ThatsLit
 {
     public class PlayerLitScoreProfile : IDisposable
     {
+        public bool IsProxy { get; set; }
         internal float lum3s, lum1s, lum10s;
         public FrameStats frame0, frame1, frame2, frame3, frame4, frame5;
         internal float detailBonusSmooth;

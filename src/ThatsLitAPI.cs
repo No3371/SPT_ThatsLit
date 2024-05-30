@@ -1,0 +1,202 @@
+using System;
+using Comfort.Common;
+using EFT;
+using UnityEngine;
+
+namespace ThatsLit
+{
+    public static class ThatsLitAPI
+    {
+        public static void ToggleBrightnessProxyDirect (ThatsLitPlayer player, bool toggle)
+        {
+            if (player.PlayerLitScoreProfile == null) player.PlayerLitScoreProfile = new PlayerLitScoreProfile(player);
+            if (player.PlayerLitScoreProfile.IsProxy == toggle)
+                return;
+            player.ToggleBrightnessProxy(toggle);
+        }
+
+        public static void ToggleBrightnessProxy (Player player, bool toggle)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
+                return;
+
+            ToggleBrightnessProxyDirect(tlp, toggle);
+        }
+        public static Action<ThatsLitPlayer> OnBeforePlayerSetupDirect;
+        public static void TrySetPlayerScoreDirect(ThatsLitPlayer player, float score, float ambienceScore)
+        {
+            if (player.PlayerLitScoreProfile?.IsProxy != true) return;
+
+            player.PlayerLitScoreProfile.frame0.multiFrameLitScore = score;
+            player.PlayerLitScoreProfile.frame0.ambienceScore = ambienceScore;
+        }
+        public static Action<Player> OnBeforePlayerSetup;
+        public static void TrySetPlayerScore(Player player, float score, float ambienceScore)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
+                return;
+
+            TrySetPlayerScoreDirect(tlp, score, ambienceScore);
+        }
+
+        public static float GetScore (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
+                return 0;
+
+            return GetScoreDirect(tlp);
+        }
+
+        public static float GetAmbienceScore (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
+                return 0;
+
+            return GetAmbienceScoreDirect(tlp);
+        }
+
+        public static float GetScoreDirect (ThatsLitPlayer player)
+        {
+            return player.PlayerLitScoreProfile?.frame0.multiFrameLitScore ?? 0;
+        }
+
+        public static float GetAmbienceScoreDirect (ThatsLitPlayer player)
+        {
+            return player.PlayerLitScoreProfile?.frame0.ambienceScore ?? 0;
+        }
+
+        public static float GetFoliageScore (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
+                return 0;
+
+            return GetFoliageScoreDirect(tlp);
+        }
+
+        public static float GetFoliageScoreDirect (ThatsLitPlayer player)
+        {
+            return player.Foliage?.FoliageScore ?? 0;
+        }
+        public static Action<ThatsLitPlayer, float, float> OnPlayerBrightnessScoreCalculatedDirect;
+        public static Action<Player, float, float> OnPlayerBrightnessScoreCalculated;
+        public static Action<ThatsLitPlayer> OnPlayerSurroundingTerrainSampledDirect;
+        public static Action<Player> OnPlayerSurroundingTerrainSampled;
+
+        public static (float prone, float crouch) GetTerrainDetailScoreDirect (ThatsLitPlayer player, Vector3 dirPlayerToObserverEye, float distance, float observeAngle)
+        {
+            if (player.TerrainDetails == null)
+                return (0, 0);
+            var score = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.TerrainDetails, dirPlayerToObserverEye, distance, observeAngle);
+            return (score.prone, score.regular);
+        }
+
+        public static (float prone, float crouch) GetTerrainDetailScore (Player player, Vector3 dirPlayerToObserverEye, float distance, float observeAngle)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return GetTerrainDetailScoreDirect(tlp, dirPlayerToObserverEye, distance, observeAngle);
+            return (0, 0);
+        }
+
+        public static LightAndLaserState GetLightAndLaserStateDirect (ThatsLitPlayer player)
+        {
+            return player.LightAndLaserState;
+        }
+        public static bool AnyVisibleLight (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.AnyVisibleLight;
+            return false;
+        }
+        public static bool AnyVisibleLaser (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.AnyVisibleLaser;
+            return false;
+        }
+        public static bool AnyIRLight (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.AnyIRLight;
+            return false;
+        }
+        public static bool AnyIRLaser (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.AnyIRLaser;
+            return false;
+        }
+        public static bool AnyVisibleMain (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.AnyVisibleMain;
+            return false;
+        }
+        public static bool AnyVisibleSub (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.AnyVisibleSub;
+            return false;
+        }
+        public static bool AnyIRMain (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.AnyIRMain;
+            return false;
+        }
+        public static bool AnyIRSub (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.AnyIRSub;
+            return false;
+        }
+        public static float GetMainVisibleLight (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.deviceStateCache.light;
+            return 0;
+        }
+        public static float GetMainVisibleLaser (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.deviceStateCache.laser;
+            return 0;
+        }
+        public static float GetMainIRLight (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.deviceStateCache.irLight;
+            return 0;
+        }
+        public static float GetMainIRLaser (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.deviceStateCache.irLaser;
+            return 0;
+        }
+        public static float GetSheathedVisibleLight (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.deviceStateCacheSub.light;
+            return 0;
+        }
+        public static float GetSheathedVisibleLaser (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.deviceStateCacheSub.laser;
+            return 0;
+        }
+        public static float GetSheathedIRLight (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.deviceStateCacheSub.irLight;
+            return 0;
+        }
+        public static float GetSheathedIRLaser (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
+                return tlp.LightAndLaserState.deviceStateCacheSub.irLaser;
+            return 0;
+        }
+    }
+
+}

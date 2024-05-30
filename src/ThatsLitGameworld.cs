@@ -35,6 +35,8 @@ namespace ThatsLit
                 {
                     var tlp = player.gameObject.AddComponent<ThatsLitPlayer>();
                     AllThatsLitPlayers.Add(player, tlp);
+                    ThatsLitAPI.OnBeforePlayerSetup?.Invoke(player);
+                    ThatsLitAPI.OnBeforePlayerSetupDirect?.Invoke(tlp);
                     tlp.Setup(player);
                     if (player == GameWorld.MainPlayer) MainThatsLitPlayer = tlp;
                 }
