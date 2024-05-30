@@ -190,6 +190,10 @@ namespace ThatsLit
             if (cam) cam.enabled = !toggle;
             if (display) display.enabled = !toggle;
             PlayerLitScoreProfile.IsProxy = toggle;
+            if (toggle)
+            {
+                PlayerLitScoreProfile.frame0 = default;
+            }
         }
 
         private void Update()
@@ -200,7 +204,7 @@ namespace ThatsLit
                 MonoBehaviour.Destroy(this);
                 return;
             }
-
+            
             if (!ThatsLitPlugin.EnabledMod.Value)
             {
                 if (cam?.enabled ?? false) GameObject.Destroy(cam.gameObject);
@@ -292,17 +296,20 @@ namespace ThatsLit
                 return;
             }
 
-            if (gquReq.done && cam != null && cam.enabled) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
+            if (gquReq.done)
             {
-                if (!req.hasError)
+                gquReq = AsyncGPUReadback.Request(rt, 0, req =>
                 {
                     observed.Dispose();
-                    observed = req.GetData<Color32>();
-                    ThatsLitPlugin.swScoreCalc.MaybeResume();
-                        Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.PreCalculate(PlayerLitScoreProfile, observed, Utility.GetInGameDayTime());
-                    ThatsLitPlugin.swScoreCalc.Stop();
-                }
-            });
+                    if (!req.hasError && cam != null && cam.enabled && PlayerLitScoreProfile.IsProxy == false)
+                    {
+                        observed = req.GetData<Color32>();
+                        ThatsLitPlugin.swScoreCalc.MaybeResume();
+                            Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.PreCalculate(PlayerLitScoreProfile, observed, Utility.GetInGameDayTime());
+                        ThatsLitPlugin.swScoreCalc.Stop();
+                    }
+                });
+            }
 
             var camPos = Time.frameCount % 6;
             var camHeight = Player.IsInPronePose ? 0.45f : 2.2f * (0.6f + 0.4f * Player.PoseLevel);
@@ -524,8 +531,11 @@ namespace ThatsLit
             ThatsLitPlugin.swScoreCalc.Stop();
             observed.Dispose();
 
-            ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect?.Invoke(this, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
-            ThatsLitAPI.OnPlayerBrightnessScoreCalculated?.Invoke(Player, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+            if (PlayerLitScoreProfile.IsProxy == false)
+            {
+                ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect?.Invoke(this, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+                ThatsLitAPI.OnPlayerBrightnessScoreCalculated?.Invoke(Player, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+            }
         }
         internal float overheadHaxRating;
         internal float OverheadHaxRatingFactor => overheadHaxRating / 10f;

@@ -53,7 +53,6 @@ namespace ThatsLit
 
         public void PreCalculate (PlayerLitScoreProfile player, Unity.Collections.NativeArray<Color32> tex, float time)
         {
-            if (player.IsProxy) return;
             GetThresholds(time, out float thS, out float thH, out float thHM, out float thM, out float thML, out float thL);
             StartCountPixels(player, tex, thS, thH, thHM, thM, thML, thL);
         }
@@ -74,6 +73,11 @@ namespace ThatsLit
             player.frame1 = player.frame0;
             FrameStats thisFrame = default;
             CompleteCountPixels(player, out thisFrame.pxS, out thisFrame.pxH, out thisFrame.pxHM, out thisFrame.pxM, out thisFrame.pxML, out thisFrame.pxL, out thisFrame.pxD, out thisFrame.lum, out float lumNonDark, out thisFrame.pixels);
+            if (player.IsProxy)
+            {
+                player.frame0 = default;
+                return 0;
+            }
             if (thisFrame.pixels == 0) thisFrame.pixels = RESOLUTION * RESOLUTION;
             thisFrame.avgLum = thisFrame.lum / (float)thisFrame.pixels;
             thisFrame.avgLumNonDark = thisFrame.lum / (float) (thisFrame.pixels - thisFrame.pxD);
@@ -373,14 +377,15 @@ namespace ThatsLit
             shine = high = highMid = mid = midLow = low = dark = valid = 0;
             lum = 0;
             lumNonDark = 0;
-            if (player.CountingJobHandle.IsCompleted)
-            {
-                player.PixelCountingJob.Dispose();
-                return;
-            }
 
             player.CountingJobHandle.Complete();
             var job = player.PixelCountingJob;
+            if (player.IsProxy == false)
+            {
+                job.Dispose();
+                player.PixelCountingJob = job;
+                return;
+            }
             job.thresholds.Dispose();
             
             if (job.lum.IsCreated) for (int i = 0; i < job.lum.Length; i += 2)
