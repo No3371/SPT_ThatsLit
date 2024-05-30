@@ -152,16 +152,20 @@
   </ItemGroup>
 
   <Target Name="CopyOutput" AfterTargets="Build">
+      <ItemGroup>
+          <!-- Because this ItemGroup is inside the target, this will enumerate
+                all files just before calling Copy. If the ItemGroup were outside
+                the target , it would enumerate the files during evaluation, before
+                the build starts, which may miss files created during the build. -->
+          <PackedFiles Include="$(ProjectDir)\Packed\*.*"/>
+      </ItemGroup>
     <Message Text="Copying new build to dist" Importance="High" />
 
     <Copy
       SourceFiles="$(TargetDir)$(AssemblyName).dll"
       DestinationFolder="$(PluginsPath)\ThatsLit" />
     <Copy
-      SourceFiles="$(ProjectDir)\default.thatslitcompat.json"
-      DestinationFolder="$(PluginsPath)\ThatsLit" />
-    <Copy
-      SourceFiles="$(ProjectDir)\empty.thatslitcompat.json"
+      SourceFiles="@(PackedFiles)"
       DestinationFolder="$(PluginsPath)\ThatsLit" />
 
     <Message Text="Copied build files" Importance="High" />
