@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>ThatsLit-$(Configuration)</AssemblyName>
+    <AssemblyName>ThatsLit</AssemblyName>
     <LangVersion>8.0</LangVersion>
-    <Version>1.373.3</Version>
+    <Version>1.383.09</Version>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>   
   </PropertyGroup>
 <!-- 
