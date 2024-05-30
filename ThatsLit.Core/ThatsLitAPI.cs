@@ -39,7 +39,7 @@ namespace ThatsLit
             TrySetPlayerScoreDirect(tlp, score, ambienceScore);
         }
 
-        public static float GetScore (Player player)
+        public static float GetBrightnessScore (Player player)
         {
             if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
                 return 0;
@@ -47,7 +47,7 @@ namespace ThatsLit
             return GetScoreDirect(tlp);
         }
 
-        public static float GetAmbienceScore (Player player)
+        public static float GetAmbienceBrightnessScore (Player player)
         {
             if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
                 return 0;
