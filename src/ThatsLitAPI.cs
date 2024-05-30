@@ -81,22 +81,39 @@ namespace ThatsLit
         public static Action<Player, float, float> OnPlayerBrightnessScoreCalculated;
         public static Action<ThatsLitPlayer> OnPlayerSurroundingTerrainSampledDirect;
         public static Action<Player> OnPlayerSurroundingTerrainSampled;
+        public static int GetTerrainDetailCount3x3Direct (ThatsLitPlayer player)
+        {
+            return player.TerrainDetails?.RecentDetailCount3x3 ?? 0;
+        }
+        public static int GetTerrainDetailCount5x5Direct (ThatsLitPlayer player)
+        {
+            return player.TerrainDetails?.RecentDetailCount5x5 ?? 0;
+        }
+        public static int GetTerrainDetailCount3x3 (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
+                return 0;
 
-        public static (float prone, float crouch) GetTerrainDetailScoreDirect (ThatsLitPlayer player, Vector3 dirPlayerToObserverEye, float distance, float observeAngle)
+            return GetTerrainDetailCount3x3Direct(tlp);
+        }
+        public static int GetTerrainDetailCount5x5 (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
+                return 0;
+
+            return GetTerrainDetailCount5x5Direct(tlp);
+        }
+        public static float GetTerrainDetailScoreCenter3x3Direct (ThatsLitPlayer player)
         {
             if (player.TerrainDetails == null)
-                return (0, 0);
-            var score = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.TerrainDetails, dirPlayerToObserverEye, distance, observeAngle);
-            return (score.prone, score.regular);
-        }
+                return 0f;
+            var score = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.TerrainDetails, Vector3.zero, 0, 0);
+            if (player.Player.IsInPronePose)
+                return score.prone;
 
-        public static (float prone, float crouch) GetTerrainDetailScore (Player player, Vector3 dirPlayerToObserverEye, float distance, float observeAngle)
-        {
-            if (Singleton<ThatsLitGameworld>.Instance.AllThatsLitPlayers.TryGetValue(player, out ThatsLitPlayer tlp))
-                return GetTerrainDetailScoreDirect(tlp, dirPlayerToObserverEye, distance, observeAngle);
-            return (0, 0);
+            var pf = Utility.GetPoseFactor(player.Player.PoseLevel, player.Player.Physical.MaxPoseLevel, player.Player.IsInPronePose);
+            return Utility.GetPoseWeightedRegularTerrainScore(pf, score);
         }
-
         public static LightAndLaserState GetLightAndLaserStateDirect (ThatsLitPlayer player)
         {
             return player.LightAndLaserState;
