@@ -1,0 +1,113 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>ThatsLit.Sync</AssemblyName>
+    <LangVersion>8.0</LangVersion>
+    <Version>1.383.01</Version>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- folder switch -->
+    <EFTPath>..\..\..</EFTPath>
+    <ManagedAssembliesPath>$(EFTPath)\EscapeFromTarkov_Data\Managed</ManagedAssembliesPath>
+    <BepInExPath>$(EFTPath)\BepInEx\core</BepInExPath>
+    <PluginsPath>$(EFTPath)\BepInEx\plugins</PluginsPath>
+    <AssemblySearchPaths>$(BepInExPath);$(ManagedAssembliesPath);$(PluginsPath)\ThatsLit;.\FikaRef</AssemblySearchPaths>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExPath)\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Aki.Reflection">
+      <HintPath>$(ManagedAssembliesPath)\Aki.Reflection.dll</HintPath>
+    </Reference>
+    <Reference Include="AnimationSystem.Types">
+      <HintPath>$(ManagedAssembliesPath)\AnimationSystem.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(ManagedAssembliesPath)\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExPath)\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Comfort">
+      <HintPath>$(ManagedAssembliesPath)\Comfort.dll</HintPath>
+    </Reference>
+    <Reference Include="Fika.Core">
+      <HintPath>.\FikaRef\Fika.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="ItemComponent.Types" />
+    <Reference Include="UnityEngine" />
+    <Reference Include="UnityEngine.CoreModule" />
+    <Reference Include="UnityEngine.UI" />
+    <Reference Include="UnityEngine.JSONSerializeModule" />
+    <Reference Include="UnityEngine.IMGUIModule" />
+    <Reference Include="UnityEngine.PhysicsModule.dll">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule.dll">
+      <HintPath>$(ManagedAssembliesPath)\UnityEngine.TerrainModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule" />
+    <Reference Include="ThatsLit.Core">
+      <HintPath>$(PluginsPath)\ThatsLit\ThatsLit.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Core">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Data">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Drawing">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.IO.Compression.FileSystem">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Numerics">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Runtime.Serialization">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CopyOutput" AfterTargets="Build">
+    <Message Text="Copying new build to dist" Importance="High" />
+
+    <Copy
+      SourceFiles="$(TargetDir)$(AssemblyName).dll"
+      DestinationFolder="$(PluginsPath)\ThatsLit" />
+
+    <Message Text="Copied build files" Importance="High" />
+  </Target>
+</Project>

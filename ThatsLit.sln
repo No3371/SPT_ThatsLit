@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThatsLit", "ThatsLit.csproj", "{F48F0FE3-079E-47CF-98DB-8F38A183F69A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThatsLit.Core", "ThatsLit.Core\ThatsLit.Core.csproj", "{F48F0FE3-079E-47CF-98DB-8F38A183F69A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThatsLit.Sync", "ThatsLit.Sync\ThatsLit.Sync.csproj", "{B6F71B6D-E283-4F01-AA32-356D5A7A7C10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
