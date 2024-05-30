@@ -779,5 +779,33 @@ namespace ThatsLit
         {
             return terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor));
         }
+
+        internal static float GetObservedTerrainDetailScoreProne (Player player, Vector3 observerEyePos, Vector3 observerLookDir, float base3x3TerrainScore)
+        {
+            // Calculating cutoff from lying on slopes
+            var playerSurfaceNormal = player.MovementContext.SurfaceNormal;
+            System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = player.MainParts;
+            Vector3 playerLegPos = (playerParts[BodyPartType.leftLeg].Position + playerParts[BodyPartType.rightLeg].Position) / 2f;
+            var playerLegToHead = playerParts[BodyPartType.head].Position - playerLegPos;
+            var playerLegToBotEye = observerEyePos - playerLegPos;
+            var playerDirInView = Vector3.ProjectOnPlane(playerLegToHead, -playerLegToBotEye);
+            // projected length = 1.0x original => perpendicular (most visible)
+            var sizeInViewFactor = playerDirInView.magnitude / playerLegToHead.magnitude;
+            // BUT this means players lying flat which should get covers could be considered very visible (lying horizontally in view)
+            
+            // bot -> ↖ player (opposite side of ground, must ignore) #1
+            // bot -> ↘ player (opposite side of ground, must ignore) #2
+            // bot -> ↗ player
+            // bot -> ↙ player
+            // <-player->
+            var facingAngle = Vector3.Angle(playerLegToHead, playerLegToBotEye);
+            if (facingAngle > 90f) sizeInViewFactor *= Mathf.InverseLerp(180f, 90f, facingAngle);
+            else sizeInViewFactor *= Mathf.InverseLerp(0, 90f, facingAngle);
+
+            var surfaceNormalAngle = Vector3.Angle(playerSurfaceNormal, playerLegToBotEye);
+            sizeInViewFactor *= Mathf.InverseLerp(0f, 90f, surfaceNormalAngle);
+
+            return base3x3TerrainScore * sizeInViewFactor;
+        }
     }
 }
