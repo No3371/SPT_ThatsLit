@@ -765,5 +765,19 @@ namespace ThatsLit
             }
             return copy as T;
         }
+
+        internal static float GetPoseFactor(float currentPoseLevel, float maxPoseLevel, bool isInPronePose)
+        {
+            var pPoseFactor = currentPoseLevel / maxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
+            if (isInPronePose) pPoseFactor -= 0.4f; // prone: 0
+            pPoseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f (Prevent devide by zero)
+            pPoseFactor = Mathf.Clamp01(pPoseFactor);
+            return pPoseFactor;
+        }
+
+        internal static float GetPoseWeightedRegularTerrainScore(float pPoseFactor, TerrainDetailScore terrainScore)
+        {
+            return terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor));
+        }
     }
 }

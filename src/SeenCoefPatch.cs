@@ -76,11 +76,8 @@ namespace ThatsLit
             System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = player.Player.MainParts;
             Vector3 eyeToPlayerBody = playerParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
 
-            var pPoseFactor = __instance.Person.AIData.Player.PoseLevel / __instance.Person.AIData.Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
             bool isInPronePose = __instance.Person.AIData.Player.IsInPronePose;
-            if (isInPronePose) pPoseFactor -= 0.4f; // prone: 0
-            pPoseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f (Prevent devide by zero)
-            pPoseFactor = Mathf.Clamp01(pPoseFactor);
+            float pPoseFactor = Utility.GetPoseFactor(__instance.Person.AIData.Player.PoseLevel, __instance.Person.AIData.Player.Physical.MaxPoseLevel, isInPronePose);
 
             float rand1 = UnityEngine.Random.Range(0f, 1f);
             float rand2 = UnityEngine.Random.Range(0f, 1f);
@@ -443,7 +440,7 @@ namespace ThatsLit
                     }
                     else
                     {
-                        detailScore = terrainScore.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, pPoseFactor));
+                        detailScore = Utility.GetPoseWeightedRegularTerrainScore(pPoseFactor, terrainScore);
                         detailScore *= (1f - cqb11mTo1mSquared) * Mathf.InverseLerp(-25f, 5, visionAngleDeltaVerticalSigned); // nerf when high pose or < 10m or looking down
                     }
 

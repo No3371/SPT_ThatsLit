@@ -253,8 +253,8 @@ namespace ThatsLit
                 {
                     var score = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(TerrainDetails, Vector3.zero, 0, 0);
                     terrainScoreHintProne = score.prone;
-                    var pf = (Player.PoseLevel / Player.AIData.Player.Physical.MaxPoseLevel) * 0.6f + 0.4f;
-                    terrainScoreHintRegular = score.regular / (1f + 0.35f * Mathf.InverseLerp(0.45f, 1f, pf));
+                    var pf = Utility.GetPoseFactor(Player.PoseLevel, Player.Physical.MaxPoseLevel, Player.IsInPronePose);
+                    terrainScoreHintRegular = Utility.GetPoseWeightedRegularTerrainScore(pf, score);
                 }
             }
             ThatsLitPlugin.swTerrain.Stop();
