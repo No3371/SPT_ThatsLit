@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>ThatsLit</AssemblyName>
+    <AssemblyName>ThatsLit.Core</AssemblyName>
     <LangVersion>8.0</LangVersion>
     <Version>1.383.09</Version>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>   
@@ -14,10 +14,11 @@
 
   <PropertyGroup>
     <!-- folder switch -->
-    <EFTPath>..\..</EFTPath>
+    <EFTPath>..\..\..</EFTPath>
     <ManagedAssembliesPath>$(EFTPath)\EscapeFromTarkov_Data\Managed</ManagedAssembliesPath>
     <BepInExPath>$(EFTPath)\BepInEx\core</BepInExPath>
     <ManagedPath>$(TarkovPath)/EscapeFromTarkov_Data/Managed</ManagedPath>
+    <PluginsPath>$(EFTPath)\BepInEx\plugins</PluginsPath>
     <AssemblySearchPaths>$(BepInExPath);$(ManagedAssembliesPath);</AssemblySearchPaths>
   </PropertyGroup>
 
@@ -155,13 +156,13 @@
 
     <Copy
       SourceFiles="$(TargetDir)$(AssemblyName).dll"
-      DestinationFolder="$(ProjectDir)\..\..\BepInEx\plugins\ThatsLit" />
+      DestinationFolder="$(PluginsPath)\ThatsLit" />
     <Copy
       SourceFiles="$(ProjectDir)\default.thatslitcompat.json"
-      DestinationFolder="$(ProjectDir)\..\..\BepInEx\plugins\ThatsLit" />
+      DestinationFolder="$(PluginsPath)\ThatsLit" />
     <Copy
       SourceFiles="$(ProjectDir)\empty.thatslitcompat.json"
-      DestinationFolder="$(ProjectDir)\..\..\BepInEx\plugins\ThatsLit" />
+      DestinationFolder="$(PluginsPath)\ThatsLit" />
 
     <Message Text="Copied build files" Importance="High" />
   </Target>
