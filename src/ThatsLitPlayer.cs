@@ -292,7 +292,7 @@ namespace ThatsLit
                 return;
             }
 
-            if (gquReq.done) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
+            if (gquReq.done && cam != null && cam.enabled) gquReq = AsyncGPUReadback.Request(rt, 0, req =>
             {
                 if (!req.hasError)
                 {
@@ -512,8 +512,8 @@ namespace ThatsLit
         void LateUpdate()
         {
             if (Player == null) return;
-            if (PlayerLitScoreProfile == null) return;
             Singleton<ThatsLitGameworld>.Instance.GetWeatherStats(out fog, out rain, out cloud);
+            if (PlayerLitScoreProfile == null) return;
 
             //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
             // if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
@@ -662,6 +662,7 @@ namespace ThatsLit
             if (display) GameObject.Destroy(display);
             if (cam) GameObject.Destroy(cam);
             if (rt) rt.Release();
+            observed.Dispose();
         }
         float litFactorSample, ambScoreSample;
         static float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleFoliageCheck, benchmarkSampleTerrainCheck, benchmarkSampleGUI;

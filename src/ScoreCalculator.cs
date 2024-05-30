@@ -53,6 +53,7 @@ namespace ThatsLit
 
         public void PreCalculate (PlayerLitScoreProfile player, Unity.Collections.NativeArray<Color32> tex, float time)
         {
+            if (player.IsProxy) return;
             GetThresholds(time, out float thS, out float thH, out float thHM, out float thM, out float thML, out float thL);
             StartCountPixels(player, tex, thS, thH, thHM, thM, thML, thL);
         }
