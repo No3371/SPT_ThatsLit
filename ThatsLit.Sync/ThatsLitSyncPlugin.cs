@@ -33,7 +33,7 @@ namespace ThatsLit.Sync
         public const int TarkovVersion = 29197;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit Sync";
-        public const string ModVersion = "1.383.02";
+        public const string ModVersion = "1.383.03";
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.8.0";
         private static long modVersionComparable;
@@ -54,7 +54,7 @@ namespace ThatsLit.Sync
 
     [BepInPlugin("bastudio.thatslit.sync", ModName, ModVersion)]
     [BepInDependency(SPTGUID, SPTVersion)]
-    [BepInDependency("bastudio.thatslit", "1.383.08")]
+    [BepInDependency("bastudio.thatslit", "1.383.11")]
     [BepInDependency("com.fika.core", "0.0.0")]
     [BepInProcess(EscapeFromTarkov)]
     public class ThatsLitSyncPlugin : BaseUnityPlugin
@@ -101,6 +101,7 @@ namespace ThatsLit.Sync
                     return;
                 
                 ThatsLitAPI.TrySetPlayerScore(player, packet.score, packet.ambienceScore);
+                writer.Reset();
                 Singleton<FikaServer>.Instance.SendDataToAll(writer, ref packet, DeliveryMethod.Unreliable);
             });
         }
@@ -133,6 +134,7 @@ namespace ThatsLit.Sync
             if (player.Player is CoopPlayer coopPlayer && player.Player.IsYourPlayer)
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
+                writer.Reset();
                 Singleton<FikaClient>.Instance.SendData(writer, ref packet, DeliveryMethod.Unreliable);
             }
         }
