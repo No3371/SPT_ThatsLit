@@ -294,12 +294,12 @@ namespace ThatsLit
                 return;
             }
 
-            if (gquReq.done)
+            if (gquReq.done && rt != null)
             {
                 gquReq = AsyncGPUReadback.Request(rt, 0, req =>
                 {
                     observed.Dispose();
-                    if (!req.hasError && cam != null && cam.enabled && PlayerLitScoreProfile.IsProxy == false)
+                    if (!req.hasError)
                     {
                         observed = req.GetData<Color32>();
                         ThatsLitPlugin.swScoreCalc.MaybeResume();
@@ -518,22 +518,18 @@ namespace ThatsLit
         {
             if (Player == null) return;
             Singleton<ThatsLitGameworld>.Instance.GetWeatherStats(out fog, out rain, out cloud);
-            if (PlayerLitScoreProfile == null) return;
+            if (PlayerLitScoreProfile == null || PlayerLitScoreProfile.IsProxy) return;
 
             //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
             // if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
 
-            if (!observed.IsCreated) return;
             ThatsLitPlugin.swScoreCalc.MaybeResume();
                 Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.CalculateMultiFrameScore(cloud, fog, rain, Singleton<ThatsLitGameworld>.Instance, PlayerLitScoreProfile, Utility.GetInGameDayTime(), ActiveRaidSettings.LocationId);
             ThatsLitPlugin.swScoreCalc.Stop();
-            observed.Dispose();
 
-            if (PlayerLitScoreProfile.IsProxy == false)
-            {
-                ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect?.Invoke(this, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
-                ThatsLitAPI.OnPlayerBrightnessScoreCalculated?.Invoke(Player, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
-            }
+            ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect?.Invoke(this, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+            ThatsLitAPI.OnPlayerBrightnessScoreCalculated?.Invoke(Player, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+
         }
         internal float overheadHaxRating;
         internal float OverheadHaxRatingFactor => overheadHaxRating / 10f;
