@@ -380,12 +380,13 @@ namespace ThatsLit
 
             player.CountingJobHandle.Complete();
             var job = player.PixelCountingJob;
-            if (player.IsProxy == false)
+            if (player.IsProxy == true)
             {
                 job.Dispose();
                 player.PixelCountingJob = job;
                 return;
             }
+            job.tex.Dispose();
             job.thresholds.Dispose();
             
             if (job.lum.IsCreated) for (int i = 0; i < job.lum.Length; i += 2)
