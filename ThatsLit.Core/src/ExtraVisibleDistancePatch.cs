@@ -130,7 +130,8 @@ namespace ThatsLit
                 float compensation = __instance.Owner.Settings.FileSettings.Look.MIDDLE_DIST - originalDist;
                 if (compensation > 0)
                 {
-                    addVisibility += litDiff * UnityEngine.Random.Range(0.5f, 1f);
+                    compensation *= litDiff;
+                    addVisibility += compensation;
                 }
                 if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisComp = compensation;
             }
