@@ -57,7 +57,7 @@ namespace ThatsLit
             StartCountPixels(player, tex, thS, thH, thHM, thM, thML, thL);
         }
         
-        public virtual float CalculateMultiFrameScore (Unity.Collections.NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitGameworld gameWorld, PlayerLitScoreProfile player, float time, string locationId)
+        public virtual float CalculateMultiFrameScore (float cloud, float fog, float rain, ThatsLitGameworld gameWorld, PlayerLitScoreProfile player, float time, string locationId)
         {
             // if (ThatsLitPlugin.DevMode.Value)
             //     minAmbienceLum = ThatsLitPlugin.OverrideMinAmbienceLum.Value;
@@ -199,7 +199,7 @@ namespace ThatsLit
             compensationTarget *= 1 + hightLightedPixelFactor * lowAmbienceScoreFactor;
             var expectedFinalScore = lumScore + ambienceScore;
             var compensation = Mathf.Clamp(compensationTarget - expectedFinalScore, 0, 2); // contrast:0.1 -> final toward 0.1, contrast:0.5 -> final toward 0.25
-            lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor * MultiFrameContrastImpactScale * (1f - ContrastSuppression); // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
+            lumScore += compensation * Mathf.Clamp01(avgLumContrast * 10f) * lowAmbienceScoreFactor * MultiFrameContrastImpactScale; // amb-1 => 1f, amb-0.5 => *0.75f, amb0 => 5f (not needed)
             if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                 player.Player.DebugInfo.scoreRaw3 = lumScore + ambienceScore;
 
@@ -350,7 +350,7 @@ namespace ThatsLit
                  + pxD * sD);
         }
 
-        protected void StartCountPixels(PlayerLitScoreProfile player, Unity.Collections.NativeArray<Color32> tex, float thresholdShine, float thresholdHigh, float thresholdHighMid, float thresholdMid, float thresholdMidLow, float thresholdLow)
+        protected void StartCountPixels(PlayerLitScoreProfile player, NativeArray<Color32> tex, float thresholdShine, float thresholdHigh, float thresholdHighMid, float thresholdMid, float thresholdMidLow, float thresholdLow)
         {
             if (player == null || tex == null || !tex.IsCreated) return;
 
@@ -571,7 +571,6 @@ namespace ThatsLit
         protected virtual float ScoreDark { get => 0; }
         protected virtual float MultiFrameContrastImpactScale { get => 1f; }
         protected virtual float NightTerrainImpactScale { get => 0.2f; }
-        protected virtual float ContrastSuppression { get => 0f; }
     }
     public class HideoutScoreCalculator : ScoreCalculator
     {
@@ -684,7 +683,6 @@ namespace ThatsLit
         protected override float ThresholdMid { get => 0.1f; }
         protected override float ThresholdMidLow { get => 0.025f; }
         protected override float ThresholdLow { get => 0.005f; }
-        protected override float ContrastSuppression => 0.3f;
         bool IsPlayerInParking
         {
             get => isPlayerInParking;
@@ -702,14 +700,7 @@ namespace ThatsLit
         float rawCloud;
 
         
-        protected override float MultiFrameContrastImpactScale
-        {
-            get
-            {
-                if (!IsPlayerInParking) return base.MultiFrameContrastImpactScale;
-                else return Mathf.Lerp(base.MultiFrameContrastImpactScale, 0.5f, ParkingTransitionFactor);
-            }
-        }
+        protected override float MultiFrameContrastImpactScale => 0.65f;
 
         bool IsOverhead { get; set; }
 
@@ -725,7 +716,7 @@ namespace ThatsLit
             return base.CalculateSunLight(locationId, time, cloudiness);
         }
 
-        public override float CalculateMultiFrameScore(NativeArray<Color32> tex, float cloud, float fog, float rain, ThatsLitGameworld gameWorld, PlayerLitScoreProfile player, float time, string locationId)
+        public override float CalculateMultiFrameScore(float cloud, float fog, float rain, ThatsLitGameworld gameWorld, PlayerLitScoreProfile player, float time, string locationId)
         {
             rawCloud = cloud;
 
@@ -739,7 +730,7 @@ namespace ThatsLit
             }
 
             if (IsPlayerInParking != isParking) isPlayerInParking = isParking;
-            return base.CalculateMultiFrameScore(tex, cloud, fog, rain, gameWorld, player, time, locationId);
+            return base.CalculateMultiFrameScore(cloud, fog, rain, gameWorld, player, time, locationId);
         }
 
         // Characters in the basement floor gets lit up by ambience lighting

@@ -28,9 +28,7 @@ namespace ThatsLit
     // un-cull N for all Lights
     // Cull N for FPS cam
     // Un-Cull N for TL cam
-    //
-    // # Reduce stealth when near stationary weapons not in extreame darkness
-    // # Cast for EFT.Interactive.StationaryWeapon/AGSMachinery/Utes on layer Interactive
+    // ! Could breaks Vision check?
     public class ThatsLitPlayer : MonoBehaviour
     {
         public const int DEBUG_INTERVAL = 61;
@@ -527,7 +525,7 @@ namespace ThatsLit
 
             if (!observed.IsCreated) return;
             ThatsLitPlugin.swScoreCalc.MaybeResume();
-                Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.CalculateMultiFrameScore(observed, cloud, fog, rain, Singleton<ThatsLitGameworld>.Instance, PlayerLitScoreProfile, Utility.GetInGameDayTime(), ActiveRaidSettings.LocationId);
+                Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.CalculateMultiFrameScore(cloud, fog, rain, Singleton<ThatsLitGameworld>.Instance, PlayerLitScoreProfile, Utility.GetInGameDayTime(), ActiveRaidSettings.LocationId);
             ThatsLitPlugin.swScoreCalc.Stop();
             observed.Dispose();
 

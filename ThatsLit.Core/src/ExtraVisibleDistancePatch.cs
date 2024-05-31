@@ -105,7 +105,8 @@ namespace ThatsLit
                 if (compensation > 0)
                 {
                     compensation *= 1f - fogFactor;
-                    compensation *= player.PlayerLitScoreProfile.litScoreFactor * ThatsLitPlugin.ExtraVisionDistanceScale.Value * scale;
+                    compensation *= scale;
+                    compensation *= player.PlayerLitScoreProfile.litScoreFactor * ThatsLitPlugin.ExtraVisionDistanceScale.Value;
                     addVisibility += compensation * UnityEngine.Random.Range(0.25f, 1f); // 0.25x~1x of extra capped at 100m
                 }
                 if (isNearest && player.DebugInfo != null) player.DebugInfo.lastDisCompNVG = compensation;
