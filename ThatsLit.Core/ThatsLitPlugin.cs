@@ -174,6 +174,7 @@ namespace ThatsLit
             EnableBenchmark              = Config.Bind(category, "Benchmark", false, "");
             DebugTerrain               = Config.Bind(category, "Debug Terrain", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
             DebugCompat               = Config.Bind(category, "Debug Compat", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
+            DebugProxy               = Config.Bind(category, "Debug Proxy", false, new ConfigDescription("", null, new ConfigurationManagerAttributes() { IsAdvanced                                                                        = true }));
 
             category                   = "9. Balance";
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss. Makes bosses EASY.");
@@ -192,6 +193,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> DebugTerrain { get; private set; }
         public static ConfigEntry<bool> DebugCompat { get; private set; }
+        public static ConfigEntry<bool> DebugProxy { get; private set; }
         public static ConfigEntry<bool> EnabledMod { get; private set; }
         public static ConfigEntry<bool> EnabledLighting { get; private set; }
         public static ConfigEntry<bool> EnabledEncountering { get; private set; }

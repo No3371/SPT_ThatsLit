@@ -33,14 +33,26 @@ namespace ThatsLit
                 if (player.IsAI) continue;
                 if (!AllThatsLitPlayers.ContainsKey(player))
                 {
-                    var tlp = player.gameObject.AddComponent<ThatsLitPlayer>();
-                    AllThatsLitPlayers.Add(player, tlp);
-                    ThatsLitAPI.OnBeforePlayerSetup?.Invoke(player);
-                    ThatsLitAPI.OnBeforePlayerSetupDirect?.Invoke(tlp);
-                    tlp.Setup(player);
-                    if (player == GameWorld.MainPlayer) MainThatsLitPlayer = tlp;
+                    TrySetupPlayer(player);
                 }
             }
+        }
+
+        internal void TrySetupPlayer (Player player)
+        {
+            if (ThatsLitAPI.ShouldSetupPlayer?.Invoke(player) != true)
+            {
+                return;
+            }
+            var tlp = player.gameObject.AddComponent<ThatsLitPlayer>();
+            AllThatsLitPlayers.Add(player, tlp);
+            tlp.Player = player;
+            ThatsLitAPI.OnBeforePlayerSetup?.Invoke(player);
+            ThatsLitAPI.OnBeforePlayerSetupDirect?.Invoke(tlp);
+            if (ThatsLitPlugin.DebugProxy.Value)
+                ThatsLitAPI.ToggleBrightnessProxyDirect(tlp, true);
+            tlp.Setup();
+            if (player == GameWorld.MainPlayer) MainThatsLitPlayer = tlp;
         }
         private void OnDestroy()
         {
@@ -56,6 +68,8 @@ namespace ThatsLit
             {
                 Logger.LogError("Dispose Component Error");
             }
+
+            ThatsLitAPI.OnGameWorldDestroyed?.Invoke();
         }
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
         public ThatsLitPlayer MainThatsLitPlayer { get; private set; }
@@ -132,6 +146,8 @@ namespace ThatsLit
                 default:
                     break;
             }
+
+            ThatsLitAPI.OnGameWorldSetup?.Invoke(this);
         }
 
 

@@ -7,6 +7,17 @@ namespace ThatsLit
 {
     public static class ThatsLitAPI
     {
+        public static bool IsBrightnessProxyDirect (ThatsLitPlayer player)
+        {
+            return player.PlayerLitScoreProfile?.IsProxy ?? false;
+        }
+        public static bool IsBrightnessProxy (Player player)
+        {
+            if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
+                return false;
+            return tlp.PlayerLitScoreProfile.IsProxy;
+        }
+
         public static void ToggleBrightnessProxyDirect (ThatsLitPlayer player, bool toggle)
         {
             if (player.PlayerLitScoreProfile == null) player.PlayerLitScoreProfile = new PlayerLitScoreProfile(player);
@@ -23,7 +34,7 @@ namespace ThatsLit
             ToggleBrightnessProxyDirect(tlp, toggle);
         }
         public static Action<ThatsLitPlayer> OnBeforePlayerSetupDirect;
-        public static void TrySetPlayerScoreDirect(ThatsLitPlayer player, float score, float ambienceScore)
+        public static void TrySetProxyBrightnessScoreDirect(ThatsLitPlayer player, float score, float ambienceScore)
         {
             if (player.PlayerLitScoreProfile?.IsProxy != true) return;
 
@@ -31,12 +42,12 @@ namespace ThatsLit
             player.PlayerLitScoreProfile.frame0.ambienceScore = ambienceScore;
         }
         public static Action<Player> OnBeforePlayerSetup;
-        public static void TrySetPlayerScore(Player player, float score, float ambienceScore)
+        public static void TrySetProxyBrightnessScore(Player player, float score, float ambienceScore)
         {
             if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
                 return;
 
-            TrySetPlayerScoreDirect(tlp, score, ambienceScore);
+            TrySetProxyBrightnessScoreDirect(tlp, score, ambienceScore);
         }
 
         public static float GetBrightnessScore (Player player)
@@ -44,7 +55,7 @@ namespace ThatsLit
             if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
                 return 0;
 
-            return GetScoreDirect(tlp);
+            return GetBrightnessScoreDirect(tlp);
         }
 
         public static float GetAmbienceBrightnessScore (Player player)
@@ -52,15 +63,15 @@ namespace ThatsLit
             if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
                 return 0;
 
-            return GetAmbienceScoreDirect(tlp);
+            return GetAmbienceBrightnessScoreDirect(tlp);
         }
 
-        public static float GetScoreDirect (ThatsLitPlayer player)
+        public static float GetBrightnessScoreDirect (ThatsLitPlayer player)
         {
             return player.PlayerLitScoreProfile?.frame0.multiFrameLitScore ?? 0;
         }
 
-        public static float GetAmbienceScoreDirect (ThatsLitPlayer player)
+        public static float GetAmbienceBrightnessScoreDirect (ThatsLitPlayer player)
         {
             return player.PlayerLitScoreProfile?.frame0.ambienceScore ?? 0;
         }
@@ -77,6 +88,9 @@ namespace ThatsLit
         {
             return player.Foliage?.FoliageScore ?? 0;
         }
+        public static Func<Player, bool> ShouldSetupPlayer;
+        public static Action<ThatsLitGameworld> OnGameWorldSetup;
+        public static Action OnGameWorldDestroyed;
         public static Action<ThatsLitPlayer, float, float> OnPlayerBrightnessScoreCalculatedDirect;
         public static Action<Player, float, float> OnPlayerBrightnessScoreCalculated;
         public static Action<ThatsLitPlayer> OnPlayerSurroundingTerrainSampledDirect;
