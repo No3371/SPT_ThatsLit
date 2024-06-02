@@ -119,9 +119,8 @@ namespace ThatsLit
         }
 
         static Camera prefab;
-        internal void Setup (Player player)
+        internal void Setup ()
         {
-            this.Player = player;
 
             awakeAt = Time.time;
             if (Player.IsYourPlayer) DebugInfo = new PlayerDebugInfo();
@@ -205,10 +204,7 @@ namespace ThatsLit
             
             if (!ThatsLitPlugin.EnabledMod.Value)
             {
-                if (cam?.enabled ?? false) GameObject.Destroy(cam.gameObject);
-                if (rt != null) rt.Release();
-                if (display?.enabled ?? false) GameObject.Destroy(display);
-                this.enabled = false;
+                DisableBrightness();
                 return;
             }
 
@@ -298,6 +294,11 @@ namespace ThatsLit
 
             if (gquReq.done && rt != null)
             {
+                if (cam?.enabled == false)
+                {
+                    observed.Dispose();
+                }
+                else
                 gquReq = AsyncGPUReadback.Request(rt, 0, req =>
                 {
                     observed.Dispose();
@@ -311,75 +312,76 @@ namespace ThatsLit
                 });
             }
 
-            var camPos = Time.frameCount % 6;
-            var camHeight = Player.IsInPronePose ? 0.45f : 2.2f * (0.6f + 0.4f * Player.PoseLevel);
-            var targetHeight = Player.IsInPronePose ? 0.2f : 0.7f;
-            var horizontalScale = Player.IsInPronePose ? 1.2f : 0.8f;
-            switch (Time.frameCount % 6)
+            if (cam?.enabled == true)
             {
-                case 0:
-                    {
-                        if (Player.IsInPronePose)
+                var camPos = Time.frameCount % 6;
+                var camHeight = Player.IsInPronePose ? 0.45f : 2.2f * (0.6f + 0.4f * Player.PoseLevel);
+                var targetHeight = Player.IsInPronePose ? 0.2f : 0.7f;
+                var horizontalScale = Player.IsInPronePose ? 1.2f : 0.8f;
+                switch (Time.frameCount % 6)
+                {
+                    case 0:
                         {
-                            cam.transform.localPosition = new Vector3(0, 2, 0);
-                            cam.transform.LookAt(Player.Transform.Original.position);
+                            if (Player.IsInPronePose)
+                            {
+                                cam.transform.localPosition = new Vector3(0, 2, 0);
+                                cam.transform.LookAt(Player.Transform.Original.position);
+                            }
+                            else
+                            {
+                                cam.transform.localPosition = new Vector3(0, camHeight, 0);
+                                cam.transform.LookAt(Player.Transform.Original.position);
+                            }
+                            break;
                         }
-                        else
+                    case 1:
                         {
-                            cam.transform.localPosition = new Vector3(0, camHeight, 0);
-                            cam.transform.LookAt(Player.Transform.Original.position);
+                            cam.transform.localPosition = new Vector3(horizontalScale, camHeight, horizontalScale);
+                            cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * targetHeight);
+                            break;
                         }
-                        break;
-                    }
-                case 1:
-                    {
-                        cam.transform.localPosition = new Vector3(horizontalScale, camHeight, horizontalScale);
-                        cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * targetHeight);
-                        break;
-                    }
-                case 2:
-                    {
-                        cam.transform.localPosition = new Vector3(horizontalScale, camHeight, -horizontalScale);
-                        cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * targetHeight);
-                        break;
-                    }
-                case 3:
-                    {
-                        if (Player.IsInPronePose)
+                    case 2:
                         {
-                            cam.transform.localPosition = new Vector3(0, 2f, 0);
-                            cam.transform.LookAt(Player.Transform.Original.position);
+                            cam.transform.localPosition = new Vector3(horizontalScale, camHeight, -horizontalScale);
+                            cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * targetHeight);
+                            break;
                         }
-                        else
+                    case 3:
                         {
-                            cam.transform.localPosition = new Vector3(0, -0.5f, 0.35f);
-                            cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * 1f);
+                            if (Player.IsInPronePose)
+                            {
+                                cam.transform.localPosition = new Vector3(0, 2f, 0);
+                                cam.transform.LookAt(Player.Transform.Original.position);
+                            }
+                            else
+                            {
+                                cam.transform.localPosition = new Vector3(0, -0.5f, 0.35f);
+                                cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * 1f);
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case 4:
-                    {
-                        cam.transform.localPosition = new Vector3(-horizontalScale, camHeight, -horizontalScale);
-                        cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * targetHeight);
-                        break;
-                    }
-                case 5:
-                    {
-                        cam.transform.localPosition = new Vector3(-horizontalScale, camHeight, horizontalScale);
-                        cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * targetHeight);
-                        break;
-                    }
+                    case 4:
+                        {
+                            cam.transform.localPosition = new Vector3(-horizontalScale, camHeight, -horizontalScale);
+                            cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * targetHeight);
+                            break;
+                        }
+                    case 5:
+                        {
+                            cam.transform.localPosition = new Vector3(-horizontalScale, camHeight, horizontalScale);
+                            cam.transform.LookAt(Player.Transform.Original.position + Vector3.up * targetHeight);
+                            break;
+                        }
+                }
+
+                if (ThatsLitPlugin.DebugTexture.Value && Time.frameCount % 61 == 0 && display?.enabled == true && rt != null)
+                    Graphics.CopyTexture(rt, slowRT);
             }
-
-            if (ThatsLitPlugin.DebugTexture.Value && Time.frameCount % 61 == 0 && display?.enabled == true)
-                Graphics.CopyTexture(rt, slowRT);
-
-            // Ambient shadow
+                // Ambient shadow
             UpdateAmbienceShadowRating();
 
             overheadHaxRating = UpdateOverheadHaxCastRating(bodyPos, overheadHaxRating);
             surroundingRating = UpdateSurroundingCastRating(bodyPos, surroundingRating);
-
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
             //     envCam.transform.localPosition = envCamOffset;
@@ -414,7 +416,9 @@ namespace ThatsLit
             //     }
             // }
 
-            if (ThatsLitPlugin.EnableEquipmentCheck.Value && Time.time > lastCheckedLights + 0.41)
+            if (ThatsLitPlugin.EnableEquipmentCheck.Value
+             && Time.time > lastCheckedLights + 0.41
+             && PlayerLitScoreProfile != null)
             {
                 lastCheckedLights = Time.time;
                 var state = LightAndLaserState;
@@ -520,7 +524,7 @@ namespace ThatsLit
         {
             if (Player == null) return;
             Singleton<ThatsLitGameworld>.Instance.GetWeatherStats(out fog, out rain, out cloud);
-            if (PlayerLitScoreProfile == null || PlayerLitScoreProfile.IsProxy) return;
+            if (PlayerLitScoreProfile == null) return;
 
             //if (debugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(tex, debugTex);
             // if (envDebugTex != null && Time.frameCount % 61 == 0) Graphics.CopyTexture(envTex, envDebugTex);
@@ -529,8 +533,12 @@ namespace ThatsLit
                 Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.CalculateMultiFrameScore(cloud, fog, rain, Singleton<ThatsLitGameworld>.Instance, PlayerLitScoreProfile, Utility.GetInGameDayTime(), ActiveRaidSettings.LocationId);
             ThatsLitPlugin.swScoreCalc.Stop();
 
-            ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect?.Invoke(this, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
-            ThatsLitAPI.OnPlayerBrightnessScoreCalculated?.Invoke(Player, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+            if (!PlayerLitScoreProfile.IsProxy)
+            {
+                ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect?.Invoke(this, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+                ThatsLitAPI.OnPlayerBrightnessScoreCalculated?.Invoke(Player, PlayerLitScoreProfile.frame0.multiFrameLitScore, PlayerLitScoreProfile.frame0.ambienceScore);
+            }
+
 
         }
         internal float overheadHaxRating;
@@ -815,6 +823,11 @@ namespace ThatsLit
         internal virtual void OnGUIScoreCalc ()
         {
             if (PlayerLitScoreProfile == null || DebugInfo == null) return;
+            if (PlayerLitScoreProfile.IsProxy)
+            {
+                GUILayout.Label("  [PROXY]");
+                return;
+            }
             if (ThatsLitPlayer.IsDebugSampleFrame)
             {
                 DebugInfo.shinePixelsRatioSample = (PlayerLitScoreProfile.frame0.RatioShinePixels + PlayerLitScoreProfile.frame1.RatioShinePixels + PlayerLitScoreProfile.frame2.RatioShinePixels + PlayerLitScoreProfile.frame3.RatioShinePixels + PlayerLitScoreProfile.frame4.RatioShinePixels + PlayerLitScoreProfile.frame5.RatioShinePixels) / 6f;
