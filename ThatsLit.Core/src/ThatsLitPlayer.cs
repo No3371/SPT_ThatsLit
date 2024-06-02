@@ -42,7 +42,7 @@ namespace ThatsLit
         public RawImage display;
         public PlayerDebugInfo DebugInfo { get; internal set; }
         public LightAndLaserState LightAndLaserState { get; internal set; }
-        float awakeAt;
+        float setupTime;
         float lastCheckedLights;
         public static RaidSettings ActiveRaidSettings => Singleton<ThatsLitGameworld>.Instance.activeRaidSettings;
         public Player Player { get; internal set; }
@@ -232,7 +232,8 @@ namespace ThatsLit
                 lastOutBunkerTime = Time.time;
             }
 
-            if (lastOutBunkerTime < lastInBunkerTime && bodyPos.SqrDistance(lastInBunderPos) > 2.25f) bunkerTimeClamped += Time.deltaTime;
+            if (lastOutBunkerTime < lastInBunkerTime && bodyPos.SqrDistance(lastInBunderPos) > 2.25f)
+                 bunkerTimeClamped += Time.deltaTime;
             else bunkerTimeClamped -= Time.deltaTime * 5;
 
             bunkerTimeClamped = Mathf.Clamp(bunkerTimeClamped, 0, 10);
@@ -263,14 +264,15 @@ namespace ThatsLit
 
             ThatsLitPlugin.swFoliage.MaybeResume();
             if (ThatsLitPlugin.EnabledFoliage.Value
-                && !Singleton<ThatsLitGameworld>.Instance.foliageUnavailable
-                && Foliage == null)
+             && !Singleton<ThatsLitGameworld>.Instance.foliageUnavailable
+             && Foliage == null)
             {
                 Foliage = new PlayerFoliageProfile(new FoliageInfo[16], new Collider[16]);
             }
             if (Foliage != null)
             {
-                if (!Foliage.IsFoliageSorted) Foliage.IsFoliageSorted = SlicedBubbleSort(Foliage.Foliage, Foliage.FoliageCount * 3 / 2, Foliage.FoliageCount);
+                if (!Foliage.IsFoliageSorted)
+                    Foliage.IsFoliageSorted = SlicedBubbleSort(Foliage.Foliage, Foliage.FoliageCount * 3 / 2, Foliage.FoliageCount);
                 Singleton<ThatsLitGameworld>.Instance.UpdateFoliageScore(bodyPos, Foliage);
             }
             ThatsLitPlugin.swFoliage.Stop();
@@ -708,7 +710,7 @@ namespace ThatsLit
             }
             if (ThatsLitPlugin.ScoreInfo.Value
              && Singleton<ThatsLitGameworld>.Instance.ScoreCalculator != null
-             && Time.time < awakeAt + 10)
+             && Time.time < setupTime + 10)
                 GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
             if (ThatsLitPlugin.ScoreInfo.Value && PlayerLitScoreProfile != null)
             {
@@ -749,7 +751,7 @@ namespace ThatsLit
             ThatsLitPlugin.swGUI.MaybeResume();
             if (PlayerLitScoreProfile == null)
             {
-                if (Time.time - awakeAt < 30f && !ThatsLitPlugin.HideMapTip.Value)
+                if (Time.time - setupTime < 30f && !ThatsLitPlugin.HideMapTip.Value)
                     GUILayout.Label("  [That's Lit] Brightness module is disabled in configs or not supported on this map.");
             }
 
@@ -778,7 +780,6 @@ namespace ThatsLit
             {
                 litFactorSample = PlayerLitScoreProfile?.litScoreFactor ?? 0;
                 ambScoreSample = PlayerLitScoreProfile?.frame0.ambienceScore ?? 0;
-                
             }
             if (Time.frameCount % DEBUG_INTERVAL == 1 && ThatsLitPlugin.EnableBenchmark.Value && layoutCall) // The trap here is OnGUI is called multiple times per frame, make sure to reset the stopwatches only once
             {
