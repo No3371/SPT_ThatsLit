@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>ThatsLit.Core</AssemblyName>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Version>1.383.09</Version>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>   
   </PropertyGroup>
