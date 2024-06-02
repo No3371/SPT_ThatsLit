@@ -767,6 +767,7 @@ namespace ThatsLit
             poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
 
             OnGUIInfo();
+            ThatsLitAPI.OnMainPlayerGUI?.Invoke();
 
             if (!ThatsLitPlugin.DebugInfo.Value || DebugInfo == null) return;
 

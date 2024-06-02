@@ -82,6 +82,7 @@ namespace ThatsLit.Sync
             ThatsLitAPI.ShouldSetupPlayer += ShouldSetupPlayer;
             ThatsLitAPI.OnBeforePlayerSetupDirect += OnBeforePlayerSetupDirect;
             ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect += OnPlayerBrightnessScoreCalculatedDirect;
+            ThatsLitAPI.OnMainPlayerGUI += OnMainPlayerGUI;
         }
 
         void Update ()
@@ -108,20 +109,20 @@ namespace ThatsLit.Sync
             return false;
         }
 
-        void OnGUI ()
+        void OnMainPlayerGUI ()
         {
             if (!ShowInfo.Value) return;
             var tlWorld = Singleton<ThatsLitGameworld>.Instance;
             if (tlWorld == null) return;
             GUILayout.Label($"  [That's Lit Sync]");
-            GUILayout.Label($"  Tracking {ActivePlayers.Count} players");
+            // GUILayout.Label($"  Tracking {ActivePlayers.Count} players");
             foreach (var p in tlWorld.AllThatsLitPlayers)
             {
                 if (p.Value == null) continue;
                 if (p.Value.Player is ObservedCoopPlayer coopPlayer)
                 {
                     if (ThatsLitAPI.IsBrightnessProxy(p.Value.Player))
-                        GUILayout.Label($"  {p.Value.Player.Profile.Nickname} [Proxy]");
+                        GUILayout.Label($"  {p.Value.Player.Profile.Nickname}");
                     else
                         GUILayout.Label($"  {p.Value.Player.Profile.Nickname} !Non-Proxy!");
                     Utility.GUILayoutDrawAsymetricMeter((int)(ThatsLitAPI.GetBrightnessScoreDirect(p.Value) / 0.0999f));

@@ -91,6 +91,7 @@ namespace ThatsLit
         public static Func<Player, bool> ShouldSetupPlayer;
         public static Action<ThatsLitGameworld> OnGameWorldSetup;
         public static Action OnGameWorldDestroyed;
+        public static Action OnMainPlayerGUI;
         public static Action<ThatsLitPlayer, float, float> OnPlayerBrightnessScoreCalculatedDirect;
         public static Action<Player, float, float> OnPlayerBrightnessScoreCalculated;
         public static Action<ThatsLitPlayer> OnPlayerSurroundingTerrainSampledDirect;
