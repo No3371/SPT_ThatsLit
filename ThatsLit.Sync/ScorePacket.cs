@@ -6,13 +6,12 @@ namespace ThatsLit.Sync
     {
         public int netId;
         public float score, ambienceScore;
-        private float ambScore;
 
         public ScorePacket(int netId, float score, float ambScore) : this()
         {
             this.netId = netId;
             this.score = score;
-            this.ambScore = ambScore;
+            this.ambienceScore = ambScore;
         }
 
         public void Deserialize(NetDataReader reader)
