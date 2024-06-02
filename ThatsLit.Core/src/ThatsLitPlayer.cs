@@ -122,7 +122,8 @@ namespace ThatsLit
         internal void Setup ()
         {
             setupTime = Time.time;
-            if (Player.IsYourPlayer) DebugInfo = new PlayerDebugInfo();
+            if (Player.IsYourPlayer)
+                DebugInfo = new PlayerDebugInfo();
 
             MaybeEnableBrightness();
         }
