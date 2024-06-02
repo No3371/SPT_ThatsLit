@@ -48,7 +48,7 @@ namespace ThatsLit
     [BepInProcess(EscapeFromTarkov)]
     public class ThatsLitPlugin : BaseUnityPlugin
     {
-
+        internal static bool SAINLoaded { get; private set; }
         internal static ManagedStopWatch swUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis;
         static ThatsLitPlugin ()
         {
@@ -70,6 +70,8 @@ namespace ThatsLit
             BindConfigs();
             Patches();
             ThatsLitCompat.LoadCompatFiles();
+            if (Chainloader.PluginInfos.ContainsKey("me.sol.sain"))
+                SAINLoaded = true;
         }
 
         private void BindConfigs()
