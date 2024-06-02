@@ -121,8 +121,7 @@ namespace ThatsLit
         static Camera prefab;
         internal void Setup ()
         {
-
-            awakeAt = Time.time;
+            setupTime = Time.time;
             if (Player.IsYourPlayer) DebugInfo = new PlayerDebugInfo();
 
             MaybeEnableBrightness();
