@@ -75,7 +75,6 @@ namespace ThatsLit
             CompleteCountPixels(player, out thisFrame.pxS, out thisFrame.pxH, out thisFrame.pxHM, out thisFrame.pxM, out thisFrame.pxML, out thisFrame.pxL, out thisFrame.pxD, out thisFrame.lum, out float lumNonDark, out thisFrame.pixels);
             if (player.IsProxy)
             {
-                player.frame0 = default;
                 return 0;
             }
             if (thisFrame.pixels == 0) thisFrame.pixels = RESOLUTION * RESOLUTION;
