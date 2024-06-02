@@ -358,7 +358,7 @@ namespace ThatsLit
             return compat.TemplateInstance.modes[selectedMode];
         }
 
-        internal static void GUILayoutDrawAsymetricMeter(int level, bool alternative = false)
+        public static void GUILayoutDrawAsymetricMeter(int level, bool alternative = false)
         {
             if (alternative)
             {
