@@ -40,7 +40,7 @@ namespace ThatsLit
 
         internal void TrySetupPlayer (Player player)
         {
-            if (ThatsLitAPI.ShouldSetupPlayer?.Invoke(player) != true)
+            if (ThatsLitAPI.ShouldSetupPlayer != null && ThatsLitAPI.ShouldSetupPlayer.Invoke(player) == false)
             {
                 return;
             }
