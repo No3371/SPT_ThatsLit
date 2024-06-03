@@ -84,7 +84,8 @@ namespace ThatsLit
             float rand3 = UnityEngine.Random.Range(0f, 1f);
             float rand4 = UnityEngine.Random.Range(0f, 1f);
             float rand5 = UnityEngine.Random.Range(0f, 1f);
-
+            
+            Player.FirearmController fc = player.Player?.HandsController as Player.FirearmController;
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
             var visionAngleDelta90Clamped = Mathf.InverseLerp(0, 90f, visionAngleDelta);
@@ -143,7 +144,7 @@ namespace ThatsLit
                     }
                 }
             }
-            else if (UnityEngine.Random.Range((__instance.Owner.Mover?.IsMoving ?? false) ? -4f : -1f, 1f) > Mathf.Clamp01(visionAngleDelta / 15f)) // ADS
+            else if (fc?.IsAiming ?? false) // ADS
             {
                 EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
                 if (sightMod != null)
@@ -827,7 +828,7 @@ namespace ThatsLit
 
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
 
-            Player.FirearmController fc = player.Player?.HandsController as Player.FirearmController;
+            
             if (__result > original) // That's Lit delaying the bot
             {
                 // In ~0.2s after being seen, stealth is nullfied (fading between 0.1~0.2)
