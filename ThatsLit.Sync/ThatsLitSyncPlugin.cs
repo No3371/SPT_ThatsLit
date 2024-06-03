@@ -115,6 +115,10 @@ namespace ThatsLit.Sync
             var tlWorld = Singleton<ThatsLitGameworld>.Instance;
             if (tlWorld == null) return;
             GUILayout.Label($"  [That's Lit Sync]");
+            if (!ThatsLitPlugin.EnabledLighting.Value)
+            {
+                GUILayout.Label("  !Brightness Module OFF!");
+            }
             // GUILayout.Label($"  Tracking {ActivePlayers.Count} players");
             foreach (var p in tlWorld.AllThatsLitPlayers)
             {
