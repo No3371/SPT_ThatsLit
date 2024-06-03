@@ -133,10 +133,10 @@ namespace ThatsLit
                                                      "Enable",
                                                      true,
                                                      new ConfigDescription("Enable the module. Encountering Patch nerf bots reaction at the moment they see a player, especially when they are sprinting.", null, new ConfigurationManagerAttributes() { Order = 100 }));
-            VisibilityCancelChance            = Config.Bind(category,
-                                                     "Visibility Cancel Chance",
-                                                     0.6f,
-                                                     new ConfigDescription("Basically, this reduce instant returning fire. When the system set you to be visible to a bot, but the bot is not even facing your way (yes this happens in some situations), at this chance That's Lit will cancel the visibility and instead only tell it it's spotted from roughly your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
+            // VisibilityCancelChance            = Config.Bind(category,
+            //                                          "Visibility Cancel Chance",
+            //                                          0.6f,
+            //                                          new ConfigDescription("Basically, this reduce instant returning fire. When the system set you to be visible to a bot, but the bot is not even facing your way (yes this happens in some situations), at this chance That's Lit will cancel the visibility and instead only tell it it's spotted from roughly your way.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 99 }));
 
             category                   = "4. Grasses & Foliage";
             EnabledGrasses             = Config.Bind(category, "Enable Grasses", true, new ConfigDescription("Enable the module. This enable grasses to block bot vision.", null, new ConfigurationManagerAttributes() { Order                                                                                    = 100 }));
@@ -227,7 +227,7 @@ namespace ThatsLit
         public static ConfigEntry<float> FinalOffset { get; private set; }
         public static ConfigEntry<float> FinalImpactScaleDelaying { get; private set; }
         public static ConfigEntry<float> FinalImpactScaleFastening { get; private set; }
-        public static ConfigEntry<float> VisibilityCancelChance { get; private set; }
+        // public static ConfigEntry<float> VisibilityCancelChance { get; private set; }
         public static ConfigEntry<float> FoliageImpactScale { get; private set; }
         public static ConfigEntry<bool> IncludeBosses { get; private set; }
         public static ConfigEntry<bool> EnableLighthouse { get; private set; }
