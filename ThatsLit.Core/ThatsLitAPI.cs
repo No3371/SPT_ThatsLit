@@ -15,7 +15,7 @@ namespace ThatsLit
         {
             if (Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(player, out ThatsLitPlayer tlp) != true)
                 return false;
-            return tlp.PlayerLitScoreProfile.IsProxy;
+            return tlp.PlayerLitScoreProfile?.IsProxy ?? false;
         }
 
         public static void ToggleBrightnessProxyDirect (ThatsLitPlayer player, bool toggle)
@@ -120,7 +120,7 @@ namespace ThatsLit
         }
         public static float GetTerrainDetailScoreCenter3x3Direct (ThatsLitPlayer player)
         {
-            if (player.TerrainDetails == null)
+            if (player.TerrainDetails == null || player.Player == null)
                 return 0f;
             var score = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.TerrainDetails, Vector3.zero, 0, 0);
             if (player.Player.IsInPronePose)
