@@ -725,7 +725,7 @@ namespace ThatsLit
                 Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.multiFrameLitScore / 0.0999f));
                 Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(PlayerLitScoreProfile.frame0.multiFrameLitScore, POWER) / 0.0999f));
             }
-            if (ThatsLitPlugin.EquipmentInfo.Value && PlayerLitScoreProfile != null && LightAndLaserState.storage != 0)
+            if (ThatsLitPlugin.EquipmentInfo.Value && LightAndLaserState.storage != 0)
                 GUILayout.Label(LightAndLaserState.Format());
             if (ThatsLitPlugin.FoliageInfo.Value
              && Foliage != null
