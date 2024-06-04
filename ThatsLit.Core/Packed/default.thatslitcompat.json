@@ -276,6 +276,24 @@
             "_comment": null
         },
         {
+            "name": "vanilla_L_L",
+            "modes": [
+                {
+                    "light": 1.0,
+                    "laser": 0.0,
+                    "irLight": 0.0,
+                    "irLaser": 0.0
+                },
+                {
+                    "light": 1.0,
+                    "laser": 0.0,
+                    "irLight": 0.0,
+                    "irLaser": 0.0
+                }
+            ],
+            "_comment": null
+        },
+        {
             "name": "vanilla_LS",
             "modes": [
                 {
@@ -512,7 +530,7 @@
         {
             "id": "57d17c5e2459775a5c57d17d",
             "_comment": "flashlight_ultrafire_WF",
-            "template": "vanilla_L"
+            "template": "vanilla_L_L"
         },
         
         {
