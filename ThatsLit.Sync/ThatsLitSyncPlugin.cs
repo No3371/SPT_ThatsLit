@@ -54,7 +54,7 @@ namespace ThatsLit.Sync
 
     [BepInPlugin("bastudio.thatslit.sync", ModName, ModVersion)]
     [BepInDependency(SPTGUID, SPTVersion)]
-    [BepInDependency("bastudio.thatslit", "1.383.18")]
+    [BepInDependency("bastudio.thatslit", "1.383.20")]
     [BepInDependency("com.fika.core", "0.0.0")]
     [BepInProcess(EscapeFromTarkov)]
     [DefaultExecutionOrder(100)]
