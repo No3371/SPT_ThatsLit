@@ -147,6 +147,7 @@ namespace ThatsLit.Sync
                 string message = $"[That's Lit Sync] Brightness is disabled! Will always send neutral score.";
                 NotificationManagerClass.DisplayWarningNotification(message);
                 Logger.LogError(message);
+                EFT.UI.ConsoleScreen.Log(message);
             }
         }
 

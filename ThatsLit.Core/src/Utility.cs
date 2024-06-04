@@ -352,6 +352,7 @@ namespace ThatsLit
                     string message = $"[That's Lit] Unknown device or mode: {itemTemplateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(itemTemplateId)?.Name} mode {selectedMode}";
                     NotificationManagerClass.DisplayWarningNotification(message);
                     Logger.LogWarning(message);
+                    EFT.UI.ConsoleScreen.Log(message);
                 }
                 return default;
             }
