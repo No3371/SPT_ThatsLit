@@ -48,6 +48,7 @@ namespace ThatsLit.Patches.Vision
             float distance = botEyeToPlayerBody.magnitude;
             var visionDeviation = Vector3.Angle(botLookDir, botEyeToPlayerBody);
             var visionDeviationToLast = Vector3.Angle(botEyeToPlayerBody, botEyeToLastSeenPos);
+            if (!__instance.HaveSeen) visionDeviationToLast = 180f;
 
             float srand = UnityEngine.Random.Range(-1f, 1f);
             float srand2 = UnityEngine.Random.Range(-1f, 1f);
