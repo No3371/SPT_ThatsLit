@@ -92,6 +92,10 @@ namespace ThatsLit
 
             var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time, player);
 
+            if (gameWorld.IsWinter && insideTime < 2f) // Debuff from winter terrain
+            {
+                baseAmbienceScore = Mathf.Lerp(baseAmbienceScore, 0.5f, 0.25f * Mathf.InverseLerp(0f, 1.2f, cloud) * Mathf.InverseLerp(1.2f, 0.2f, insideTime)) ;
+            }
             baseAmbienceScore += (MinBaseAmbienceScore - baseAmbienceScore) * player.Player.OverheadHaxRatingFactor * 0.2f * GetMapAmbienceCoef(locationId, time);
 
 
