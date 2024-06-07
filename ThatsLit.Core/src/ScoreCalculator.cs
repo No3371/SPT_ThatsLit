@@ -588,7 +588,7 @@ namespace ThatsLit
     public class ReserveScoreCalculator : ScoreCalculator
     {
         
-        protected override float MinBaseAmbienceScore => -0.88f;
+        protected override float MinBaseAmbienceScore => -0.82f;
         protected override float MaxBaseAmbienceScore => -0.05f;
         protected override float MinAmbienceLum => 0.011f;
         protected override float MaxAmbienceLum => 0.011f;
