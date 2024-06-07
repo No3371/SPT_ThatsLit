@@ -44,8 +44,10 @@ namespace ThatsLit.Patches.Vision
             Vector3 botPos = __instance.Owner.Position;
             Vector3 botLookDir = __instance.Owner.GetPlayer.LookDirection;
             Vector3 botEyeToPlayerBody = __instance.Person.MainParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
+            Vector3 botEyeToLastSeenPos = __instance.EnemyLastPositionReal - __instance.Owner.MainParts[BodyPartType.head].Position;
             float distance = botEyeToPlayerBody.magnitude;
             var visionDeviation = Vector3.Angle(botLookDir, botEyeToPlayerBody);
+            var visionDeviationToLast = Vector3.Angle(botEyeToPlayerBody, botEyeToLastSeenPos);
 
             float srand = UnityEngine.Random.Range(-1f, 1f);
             float srand2 = UnityEngine.Random.Range(-1f, 1f);
@@ -72,7 +74,7 @@ namespace ThatsLit.Patches.Vision
                     if (player.DebugInfo != null) player.DebugInfo.lastEncounteringShotCutoff = cutoff;
                 }
                  // Assuming surprise attack by the player, even not facing away
-                return (0.5f * Mathf.InverseLerp(30f + 30f * rand3, 100f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(2.5f, 20f, knownPosDelta))
+                return (0.5f * Mathf.InverseLerp(30f + 15f * rand3, 100f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(0, 60f, visionDeviationToLast))
                      * Mathf.InverseLerp(10, 110f, distance)
                      * Mathf.InverseLerp(0f, 15f, visionDeviation)
                      * (1f - cutoff * (0.5f + 0.5f * rand4));
