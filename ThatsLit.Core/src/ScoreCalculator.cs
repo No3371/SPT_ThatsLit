@@ -112,7 +112,7 @@ namespace ThatsLit
                 player.Player.DebugInfo.scoreRawBase = baseAmbienceScore;
 
             var ambienceScore = baseAmbienceScore;
-            float insideCoef2to9s = Mathf.Clamp01((insideTime - 2) / 7f); // 0 ~ 2 sec => 0%, 9 sec => 100%
+            float insideCoef2to9s = Mathf.InverseLerp(2f, 9f, insideTime); // 0 ~ 2 sec => 0%, 9 sec => 100%
             var locCloudiness = Mathf.Lerp(cloud, 1.3f, bunkerTimeFactor); // So it's always considered "cloudy" in bunker
             ambienceScore += Mathf.Clamp01((locCloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact; // Weather offset
             moonLightScore = CalculateMoonLight(locationId, time, locCloudiness);
@@ -122,9 +122,9 @@ namespace ThatsLit
             // =====
             // Scale up ambience score in winter raidsm given any light (regardless ambience shadow)
             // =====
-            if (gameWorld.IsWinter && insideTime < 2f) // Debuff from winter environment when outside
+            if (gameWorld.IsWinter) // Debuff from winter environment when outside
             {
-                ambienceScore *= 1 + 0.2f * Mathf.Clamp01((sunLightScore + moonLightScore) / 0.5f);
+                ambienceScore *= 1 + 0.2f * Mathf.Clamp01((sunLightScore + moonLightScore) / 0.5f) * Mathf.InverseLerp(1.2f, 0.2f, insideTime);
             }
 
             // =====
@@ -135,14 +135,14 @@ namespace ThatsLit
             {
                 float surroundingTerrainScoreProne = Singleton<ThatsLitGameworld>.Instance.CalculateDetailScore(player.Player.TerrainDetails, Vector3.zero, 0, 0).prone;
                 float footTerrainScoreProne = Singleton<ThatsLitGameworld>.Instance.CalculateCenterDetailScore(player.Player.TerrainDetails).prone;
-                var surroundingDetailsScaling = surroundingTerrainScoreProne * 0.667f + footTerrainScoreProne * 0.333f;
+                var surroundingDetailsScaling = Mathf.Clamp01(surroundingTerrainScoreProne) * 0.667f + Mathf.Clamp01(footTerrainScoreProne) * 0.333f;
                 surroundingDetailsScaling = Mathf.Clamp01(surroundingDetailsScaling);
-                surroundingDetailsScaling *= Mathf.Clamp01((0.5f * player.Player.TerrainDetails.RecentDetailCount3x3 + 0.5f * player.Player.TerrainDetails.RecentDetailCount5x5)/ 60f);
+                surroundingDetailsScaling *= Mathf.Clamp01((0.6f * player.Player.TerrainDetails.RecentDetailCount3x3 + 0.4f * player.Player.TerrainDetails.RecentDetailCount5x5)/ 60f);
                 surroundingDetailsScaling *= surroundingDetailsScaling;
                 surroundingDetailsScaling *= Mathf.InverseLerp(-0.1f, MinBaseAmbienceScore, ambienceScore);
                 surroundingDetailsScaling *= NightTerrainImpactScale; // max 0.2
                 if (surroundingDetailsScaling > player.detailBonusSmooth)
-                    player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, surroundingDetailsScaling, Time.fixedDeltaTime * 2.5f);
+                    player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, surroundingDetailsScaling, Time.fixedDeltaTime * 2.2f);
                 else if (surroundingDetailsScaling < player.detailBonusSmooth)
                     player.detailBonusSmooth = Mathf.Lerp(player.detailBonusSmooth, surroundingDetailsScaling, Time.fixedDeltaTime * 6f);
 
