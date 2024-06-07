@@ -84,7 +84,7 @@ namespace ThatsLit.Patches.Vision
             BotImpactType botImpactType = Utility.GetBotImpactType(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault);
             if (botImpactType != BotImpactType.BOSS)
             {
-                float vagueHintAngleFactor = Mathf.InverseLerp(0f, 3.5f, distance) * Mathf.InverseLerp(70f, 110f, visionDeviation); // When facing away, replace with vague hint
+                float vagueHintAngleFactor = Mathf.InverseLerp(0f, 3.5f, distance) * Mathf.InverseLerp(70f, 100f, visionDeviation); // When facing away, replace with vague hint
                 if ((rand3 < vagueHintAngleFactor)
                  || rand3 < GetSurpriseChanceInFront())
                 {
