@@ -865,7 +865,7 @@ namespace ThatsLit
             if (player.DebugInfo != null && nearestAI)
             {
                 player.DebugInfo.lastNearestFocusAngleX = lutLookup1;
-                player.DebugInfo.lastNearestFocusAngleY = lutLookup1;
+                player.DebugInfo.lastNearestFocusAngleY = lutLookup2;
             }
 
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
