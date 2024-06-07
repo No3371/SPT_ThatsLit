@@ -148,10 +148,10 @@ namespace ThatsLit.Patches.Vision
             {
                 // Force a ~0.45s delay
                 aim.SetNextAimingDelay(
-                    (0.1f + rand * 0.4f)
+                    (0.07f + rand * 0.3f)
                     * (__state.unexpected? 1f : 0.5f)
-                    * (0.05f + Mathf.InverseLerp(0, 15, __state.visionDeviation))
-                    * (botImpactType == BotImpactType.BOSS? 0.5f : 1f));
+                    * (0.05f + Mathf.InverseLerp(0, 25, __state.visionDeviation))
+                    * (botImpactType == BotImpactType.BOSS? 0.25f : botImpactType == BotImpactType.FOLLOWER? 0.5f : 1f));
 
                 // ~30% chance to force a miss
                 if (rand2 < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.InverseLerp(0, 30, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
@@ -162,11 +162,11 @@ namespace ThatsLit.Patches.Vision
                 // Force a ~0.15s delay
                 aim.SetNextAimingDelay(
                     rand * 0.15f
-                    * Mathf.InverseLerp(0, 15, __state.visionDeviation)
-                    * (botImpactType == BotImpactType.BOSS? 0.5f : 1f));
+                    * Mathf.InverseLerp(0, 25f, __state.visionDeviation)
+                    * (botImpactType == BotImpactType.BOSS? 0.25f : botImpactType == BotImpactType.FOLLOWER? 0.5f : 1f));
 
                 // ~40% chance to force a miss
-                if (rand2 < 0.2f * Mathf.InverseLerp(0, 35, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
+                if (rand2 < 0.2f * Mathf.InverseLerp(0, 40f, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
                     aim.NextShotMiss();
             }
 
