@@ -59,7 +59,7 @@ namespace ThatsLit
 
             var caution = __instance.Owner.Id % 10; // 0 -> HIGH, 1 -> HIGH-MID, 2,3,4 -> MID, 5,6,7,8,9 -> LOW
             float sinceSeen = Time.time - personalLastSeenTime;
-            float lastSeenPosDelta = (__instance.Person.Position - __instance.EnemyLastPosition).magnitude;
+            float lastSeenPosDelta = (__instance.Person.Position - __instance.EnemyLastPositionReal).magnitude;
             float lastSeenPosDeltaSqr = lastSeenPosDelta * lastSeenPosDelta;
 
             var sinceSeenFactorSqr = Mathf.Clamp01(sinceSeen / __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN);
