@@ -271,14 +271,14 @@ namespace ThatsLit
             // Global random overlooking
             // ======
             float globalOverlookChance = 0.01f / pPoseFactor;
-            globalOverlookChance *= 1 + (7f + 0.5f * caution) * Mathf.InverseLerp(10f, 110f, zoomedDis) * notSeenRecentAndNear; // linear
+            globalOverlookChance *= 1 + (6f + 0.5f * caution) * Mathf.InverseLerp(10f, 110f, zoomedDis) * notSeenRecentAndNear; // linear
             if (canSeeLight) globalOverlookChance /= 2f - Mathf.InverseLerp(10f, 110f, dis);
             // 110m unseen => 200% (Prone), 22% (Crouch), 10% (Stand) !1 CHECK
             // 40m unseen => 74% (Prone), 8.14% (Crouch)
             // 20m unseen => 38% (Prone), 4.18%% (Crouch)
             // 10m unseen => 20% (Prone), 2.2% (Crouch)
 
-            globalOverlookChance *= 0.4f + 0.6f * Mathf.InverseLerp(5f, 90f, visionAngleDelta);
+            globalOverlookChance *= 0.35f + 0.65f * Mathf.InverseLerp(5f, 90f, visionAngleDelta);
             if (player.DebugInfo != null && nearestAI)
             {
                 player.DebugInfo.lastGlobalOverlookChance = globalOverlookChance;
@@ -873,7 +873,7 @@ namespace ThatsLit
                 // If player flashlights directly shining against the bot
                 if (upperVisible >= 3) // >= 3 upper parts visible
                 {
-                    __result *= 1 - 0.5f * Mathf.InverseLerp(5f, 0f, wCoFacingAngle) * Mathf.InverseLerp(35f, 5f, zoomedDis);
+                    __result *= 1 - 0.5f * Mathf.InverseLerp(5f, 0f, wCoFacingAngle) * Mathf.InverseLerp(40f, 7.5f, zoomedDis);
                 }
             }
 
