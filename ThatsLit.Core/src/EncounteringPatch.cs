@@ -90,8 +90,8 @@ namespace ThatsLit.Patches.Vision
                 {
                     if (player.DebugInfo != null) player.DebugInfo.vagueHint++;
                     var vagueSource = botPos + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
-                    vagueSource += Vector3.Cross(botEyeToPlayerBody, Vector3.up).normalized * srand2 * distance / 3f;
-                    vagueSource += Vector3.up * rand3 * distance / 3f;
+                    vagueSource += Vector3.Cross(Vector3.up, botEyeToPlayerBody).normalized * srand2 * distance / 3f;
+                    vagueSource += Vector3.up * rand3 * distance / 3f; // ~+30% height
                     if (__instance.Owner?.Memory != null
                      && __instance.Owner?.Covers != null)
                     {
