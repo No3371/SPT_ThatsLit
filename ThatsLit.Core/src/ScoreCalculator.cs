@@ -813,12 +813,12 @@ namespace ThatsLit
                 return 0.1f + GetTimeProgress(time, 6, 8) * 0.2f;
             else if (time >= 7.5 && time < 12) // 0.3 ~ 1
                 return 0.3f + GetTimeProgress(time, 8, 12) * 0.7f;
-            else if (time >= 12 && time < 15) // 1 ~ 1
+            else if (time >= 12 && time < 15.5f) // 1 ~ 1
                 return 1;
-            else if (time >= 15 && time < 19) // 1 ~ 0.5f
-                return 1f - GetTimeProgress(time, 15, 19) * 0.5f;
-            else if (time >= 19 && time < 21.5f) // 0.5 ~ 0f
-                return 0.5f - GetTimeProgress(time, 19, 21.5f) * 0.5f;
+            else if (time >= 15.5f && time < 20.5f) // 1 ~ 0.65f
+                return 1f - 0.35f * GetTimeProgress(time, 15.5f, 20.5f);
+            else if (time >= 20.5f && time < 21.9f) // 0.5 ~ 0f
+                return 0.65f - 0.65f * GetTimeProgress(time, 20.5f, 21.9f);
             else return 0;
         }
     }
