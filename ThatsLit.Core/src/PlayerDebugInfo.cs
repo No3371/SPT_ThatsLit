@@ -19,5 +19,6 @@ namespace ThatsLit
         internal float lastVisiblePartsFactor;
         internal float lastGlobalOverlookChance;
         internal float lastDisCompThermal, lastDisCompNVG, lastDisCompDay, lastDisComp;
+        internal float lastNearestFocusAngle;
     }
 }

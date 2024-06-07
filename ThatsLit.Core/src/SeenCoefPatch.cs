@@ -830,8 +830,23 @@ namespace ThatsLit
             __result += (0.04f * rand2) * partsHidingCutoff;
             __result *= 1f + (0.15f + 0.85f * rand1) * partsHidingCutoff * 9f;
 
-            __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
+            // Simulated Free Look
+            float sin = 0.75f * Mathf.Sin(Time.time / ((float)(1f + caution))) + 0.25f * Mathf.Sin(Time.time);
+            int focusLUTIndex = (int) ((Time.time + sin * 2.5f) / (float)(2.5f + caution));
+            focusLUTIndex %= 50;
+            var simFreelookAngleOffset = focusLUTs[caution][focusLUTIndex];
+            simFreelookAngleOffset += 15f * sin;
+            simFreelookAngleOffset = Mathf.Clamp(simFreelookAngleOffset, -90f, 90f);
+            if (fc?.IsAiming == true) simFreelookAngleOffset = Mathf.Lerp(simFreelookAngleOffset, 0, 0.5f);
+            if (activeGoggle != null) simFreelookAngleOffset = Mathf.Lerp(simFreelookAngleOffset, 0, 0.5f);
+            var simFocusDeltaFactor = Mathf.InverseLerp(0, 180f, Mathf.Abs(Mathf.Clamp(visionAngleDeltaHorizontalSigned, -90f, 90f) - simFreelookAngleOffset));
+            __result *= 1f + 0.25f * notSeenRecentAndNear * simFocusDeltaFactor;
+            if (player.DebugInfo != null && nearestAI)
+            {
+                player.DebugInfo.lastNearestFocusAngle = simFreelookAngleOffset;
+            }
 
+            __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
             
             if (__result > original) // That's Lit delaying the bot
             {
@@ -888,5 +903,20 @@ namespace ThatsLit
 
             ThatsLitPlugin.swSeenCoef.Stop();
         }
+
+
+        static readonly float[][] focusLUTs = new float[][] {
+            new float[] {54.50f, 28.23f, -54.50f, 17.80f, -17.62f, -58.32f, 48.27f, -66.88f, 69.67f, -36.08f, 50.87f, -16.10f, -59.42f, 68.01f, 18.32f, 69.32f, -68.27f, -51.95f, -45.43f, 38.74f, -10.35f, 34.30f, -40.63f, -62.96f, -61.36f, 16.48f, 84.80f, 2.70f, 53.44f, -7.11f, -10.39f, 60.13f, -42.86f, 22.92f, 29.99f, -83.94f, 30.09f, -20.46f, 48.12f, 27.54f, -58.72f, -56.59f, 39.65f, 17.28f, -38.71f, -5.84f, -11.16f, -78.23f, -84.09f, 6.36f, },
+            new float[] {-16.11f, 47.32f, -35.87f, -31.00f, 15.78f, -28.40f, 64.51f, -58.02f, 49.74f, -40.41f, -73.03f, 0.95f, 7.26f, -44.57f, -17.56f, -78.32f, 63.43f, -44.22f, 33.66f, -47.39f, 73.35f, 33.44f, -3.25f, 14.87f, -69.54f, 38.66f, -80.62f, -16.72f, -67.90f, -34.57f, -48.72f, 32.42f, -17.01f, -57.30f, 31.10f, 29.54f, 51.84f, 37.27f, -67.88f, 51.05f, -15.93f, -11.92f, 28.91f, -19.16f, 82.05f, -62.37f, 43.96f, -88.40f, -76.82f, -48.78f, },
+            new float[]{-49.53f, 62.54f, -82.87f, 31.25f, -67.10f, 74.12f, -14.81f, 1.96f, 49.63f, -79.96f, -22.95f, 88.76f, 64.99f, 25.40f, -52.47f, -14.16f, -11.66f, -53.45f, -42.81f, -54.19f, -80.31f, 72.49f, -67.57f, 51.40f, 47.34f, -56.81f, -0.72f, 17.45f, 84.34f, 45.96f, 47.41f, 34.15f, -58.55f, -79.47f, 70.43f, 79.69f, 56.19f, 76.97f, -26.03f, -59.00f, 41.01f, -72.72f, 41.22f, -25.58f, 18.61f, -17.60f, -42.80f, 67.38f, -7.94f, -3.68f, },
+            new float[]{-45.68f, -68.52f, -85.61f, -82.18f, -62.53f, 60.81f, -53.25f, -62.42f, -2.17f, 4.25f, -37.11f, 64.48f, 8.25f, 0.97f, -58.77f, 44.72f, -34.67f, -42.61f, 14.65f, -80.17f, 51.47f, 66.20f, -60.68f, -65.04f, -80.87f, -14.65f, -25.26f, -83.60f, -14.45f, 14.97f, 35.66f, -4.00f, -62.77f, 71.46f, -19.43f, 63.21f, -58.42f, -5.38f, -40.35f, 77.27f, -31.53f, -53.64f, -65.73f, 72.33f, -54.52f, -31.50f, 68.12f, -80.40f, -83.35f, 20.19f, },
+            new float[]{67.26f, -12.92f, -85.54f, -40.74f, -49.06f, -63.74f, 8.11f, 72.04f, 70.22f, 21.47f, 62.14f, -61.84f, 26.96f, 32.89f, -13.55f, -30.90f, 54.59f, -88.60f, 15.45f, -74.99f, -82.73f, -4.15f, -44.30f, -13.88f, -86.44f, -25.44f, 89.95f, 64.59f, 6.46f, 80.01f, 89.29f, -81.85f, -51.50f, 85.21f, -60.00f, -45.53f, 37.28f, 24.17f, 45.13f, -61.79f, 38.30f, -22.89f, 58.03f, -59.23f, 22.35f, -44.53f, 53.58f, 4.29f, -45.47f, 76.20f, },
+            new float[]{-60.77f, -10.91f, -18.86f, 11.65f, -49.81f, -11.79f, 34.44f, 54.10f, 27.66f, -4.31f, -84.01f, -69.11f, 48.67f, -85.23f, -83.99f, 23.79f, 78.87f, 53.05f, -42.09f, 63.23f, 85.31f, 81.66f, 52.04f, -60.44f, 16.42f, -74.05f, 43.25f, -54.74f, 89.70f, 58.13f, 56.97f, 27.70f, -48.73f, 36.54f, -39.29f, -65.99f, -83.48f, 52.16f, 73.87f, 64.80f, 81.86f, -18.26f, -67.03f, 60.58f, 5.15f, 27.45f, 9.52f, 80.36f, -13.85f, 57.30f, },
+            new float[]{52.96f, 37.93f, -32.44f, -4.76f, 72.21f, 51.19f, -80.08f, -1.37f, -31.86f, -63.34f, 66.30f, -83.05f, -0.77f, -16.76f, -5.49f, 14.94f, 3.11f, -8.07f, -27.55f, 25.28f, 38.59f, -38.94f, -31.48f, 24.61f, -21.79f, -20.20f, 27.24f, 24.43f, 63.57f, -87.11f, 48.99f, -12.57f, -30.00f, -23.50f, -31.87f, 40.98f, -73.25f, 47.89f, 82.61f, -53.31f, 19.84f, -64.08f, -13.87f, -71.09f, 65.30f, -48.18f, 1.95f, 18.50f, -4.76f, -59.12f, },
+            new float[]{-64.57f, 36.44f, 40.01f, -31.82f, 25.78f, 54.54f, 11.02f, 63.93f, 75.41f, 53.81f, 75.80f, -75.32f, -89.76f, 75.25f, -64.03f, 40.65f, 6.29f, -1.26f, -35.97f, 74.86f, 89.63f, -28.19f, 67.43f, -29.17f, 69.74f, 83.09f, -26.16f, 16.01f, -71.31f, 80.60f, -45.07f, 33.23f, -40.92f, 8.62f, 85.99f, 10.53f, 3.77f, -49.93f, -30.65f, 58.04f, 15.10f, 21.66f, 80.79f, 41.91f, -86.74f, -31.44f, 51.03f, 70.24f, -23.77f, 88.81f, },
+            new float[]{22.96f, 37.25f, 30.70f, 40.43f, 20.07f, -57.04f, -48.55f, 65.37f, 43.31f, -73.80f, 1.59f, -43.19f, -32.10f, -32.81f, -24.28f, -18.44f, 65.97f, -64.20f, 55.00f, 68.86f, 49.26f, 69.38f, -71.39f, 84.26f, -77.68f, -37.36f, -22.46f, -1.41f, 53.86f, 5.09f, -1.23f, -39.88f, -77.28f, -65.89f, 80.69f, -47.02f, 62.67f, 22.80f, -88.46f, 56.65f, -34.39f, -47.66f, 63.19f, 44.12f, 27.04f, 20.89f, 8.33f, -68.87f, 43.41f, -64.82f, },
+            new float[]{13.07f, -28.97f, -68.14f, 27.52f, 55.57f, 10.89f, -40.27f, 24.99f, -57.12f, 3.58f, 4.15f, 52.29f, -16.64f, 63.75f, -21.98f, -81.54f, -81.94f, -51.21f, -23.39f, 40.56f, -47.03f, -1.95f, -86.94f, -80.37f, -75.41f, -81.19f, -9.42f, -85.49f, -89.89f, 53.66f, -33.51f, 35.40f, -55.27f, -68.08f, -59.30f, -45.99f, 49.99f, 23.53f, 65.20f, -60.54f, -84.18f, 1.12f, 23.76f, -65.70f, 37.50f, 67.38f, 24.82f, 89.15f, -29.88f, -27.76f, },
+        };
     }
+
 }
