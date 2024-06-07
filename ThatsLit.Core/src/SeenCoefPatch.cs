@@ -62,19 +62,11 @@ namespace ThatsLit
             float lastSeenPosDelta = (__instance.Person.Position - __instance.EnemyLastPositionReal).magnitude;
             float lastSeenPosDeltaSqr = lastSeenPosDelta * lastSeenPosDelta;
 
-            var sinceSeenFactorSqr = Mathf.Clamp01(sinceSeen / __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN);
-            var sinceSeenFactorSqrSlow = Mathf.Clamp01(sinceSeen / __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN * 2f);
-            var seenPosDeltaFactorSqr = Mathf.Clamp01((float) (lastSeenPosDelta / __instance.Owner.Settings.FileSettings.Look.DIST_REPEATED_SEEN / 4f));
-            sinceSeenFactorSqr = sinceSeenFactorSqr * sinceSeenFactorSqr;
-            sinceSeenFactorSqrSlow = sinceSeenFactorSqrSlow * sinceSeenFactorSqrSlow;
-            seenPosDeltaFactorSqr = seenPosDeltaFactorSqr * seenPosDeltaFactorSqr;
-
-            float notSeenRecentAndNear = Mathf.Clamp01(seenPosDeltaFactorSqr + sinceSeenFactorSqrSlow) + sinceSeenFactorSqr / 3f;
-
             float deNullification = 0;
 
             System.Collections.Generic.Dictionary<BodyPartType, EnemyPart> playerParts = player.Player.MainParts;
             Vector3 eyeToPlayerBody = playerParts[BodyPartType.body].Position - __instance.Owner.MainParts[BodyPartType.head].Position;
+            Vector3 eyeToLastSeenPos = __instance.EnemyLastPositionReal - __instance.Owner.MainParts[BodyPartType.head].Position;
 
             bool isInPronePose = __instance.Person.AIData.Player.IsInPronePose;
             float pPoseFactor = Utility.GetPoseFactor(__instance.Person.AIData.Player.PoseLevel, __instance.Person.AIData.Player.Physical.MaxPoseLevel, isInPronePose);
@@ -89,10 +81,22 @@ namespace ThatsLit
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
             var visionAngleDelta90Clamped = Mathf.InverseLerp(0, 90f, visionAngleDelta);
-            var visionAngleDeltaHorizontal = Vector3.Angle(new Vector3(botVisionDir.x, 0, botVisionDir.z), new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z));
+            var visionAngleDeltaHorizontalSigned = Vector3.SignedAngle(botVisionDir, eyeToPlayerBody, Vector3.up);
+            var visionAngleDeltaHorizontal = Mathf.Abs(visionAngleDeltaHorizontalSigned);
             // negative if looking down (from higher pos), 0 when looking straight...
             var visionAngleDeltaVertical = Vector3.Angle(new Vector3(eyeToPlayerBody.x, 0, eyeToPlayerBody.z), eyeToPlayerBody); 
             var visionAngleDeltaVerticalSigned = visionAngleDeltaVertical * (eyeToPlayerBody.y >= 0 ? 1f : -1f); 
+            var visionAngleDeltaToLast = Vector3.Angle(eyeToLastSeenPos, eyeToPlayerBody);
+
+            var sinceSeenFactorSqr = Mathf.Clamp01(sinceSeen / __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN);
+            var sinceSeenFactorSqrSlow = Mathf.Clamp01(sinceSeen / __instance.Owner.Settings.FileSettings.Look.SEC_REPEATED_SEEN * 2f);
+            var seenPosDeltaFactorSqr = Mathf.Clamp01((float) (lastSeenPosDelta / __instance.Owner.Settings.FileSettings.Look.DIST_REPEATED_SEEN / 4f));
+            seenPosDeltaFactorSqr = Mathf.Lerp(seenPosDeltaFactorSqr, 0, Mathf.InverseLerp(45f, 0f, visionAngleDeltaToLast));
+            sinceSeenFactorSqr = sinceSeenFactorSqr * sinceSeenFactorSqr;
+            sinceSeenFactorSqrSlow = sinceSeenFactorSqrSlow * sinceSeenFactorSqrSlow;
+            seenPosDeltaFactorSqr = seenPosDeltaFactorSqr * seenPosDeltaFactorSqr;
+
+            float notSeenRecentAndNear = Mathf.Clamp01(seenPosDeltaFactorSqr + sinceSeenFactorSqrSlow) + sinceSeenFactorSqr / 3f;
 
             var dis = eyeToPlayerBody.magnitude;
             float zoomedDis = dis;
