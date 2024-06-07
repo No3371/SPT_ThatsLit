@@ -746,7 +746,7 @@ namespace ThatsLit
                 // Enhance indoor darkness in daytime
                 if (this.CalculateSunLightTimeFactor(locationId, Utility.GetInGameDayTime()) > 0.05f)
                 {
-                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -1f, 0.6f * Mathf.InverseLerp(2f, 7f, Time.time - player.Player.lastOutside) * (player.Player.AmbienceShadowFactor));
+                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -0.54f, 0.7f * Mathf.InverseLerp(2f, 7f, Time.time - player.Player.lastOutside) * (player.Player.AmbienceShadowFactor));
                 }
                 else
                 {
