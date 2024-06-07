@@ -33,7 +33,7 @@ namespace ThatsLit.Sync
         public const int TarkovVersion = 29197;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit Sync";
-        public const string ModVersion = "1.383.14";
+        public const string ModVersion = "1.383.17";
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.8.0";
         private static long modVersionComparable;
@@ -63,7 +63,9 @@ namespace ThatsLit.Sync
         NetDataWriter writer = new NetDataWriter();
         public static Dictionary<int, Player> ActivePlayers = new Dictionary<int, Player>();
         public static ConfigEntry<bool> ShowInfo;
+        public static ConfigEntry<bool> DebugLog;
         public static ConfigEntry<bool> LogPackets;
+        float lastScore, lastAmbscore, lastSent;
         void Awake()
         {
             if (!VersionChecker.CheckEftVersion(Logger, base.Info, Config))
@@ -73,6 +75,7 @@ namespace ThatsLit.Sync
 
             ShowInfo = Config.Bind<bool>("Main", "Show Info", true);
             LogPackets = Config.Bind<bool>("Main", "LogPackets", false);
+            DebugLog = Config.Bind<bool>("Main", "DebugLog", false);
 
             FikaEventDispatcher.SubscribeEvent<FikaGameCreatedEvent>(OnFikaGameCreated);
             FikaEventDispatcher.SubscribeEvent<FikaServerCreatedEvent>(OnFikaServerCreated);
@@ -164,27 +167,27 @@ namespace ThatsLit.Sync
 
             ThatsLitAPI.TrySetProxyBrightnessScore(player, packet.score, packet.ambienceScore);
             BroadcastScore(ref packet);
-            if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [Redirect] Broadcasting #{ packet.netId } {packet.score}/{packet.ambienceScore}");
+            if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [Redirect] Broadcasting #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
         }
-        void HandlePacketClienr (ScorePacket packet)
+        void HandlePacketClient (ScorePacket packet)
         {
             if (!ActivePlayers.TryGetValue(packet.netId, out var player)
-                || player.IsYourPlayer) // Don't take broadcasted back packet
+             || player.IsYourPlayer) // Don't take broadcasted back packet
                 return;
             
-            if (LogPackets.Value) Logger.LogInfo($"[That's Lit] Received #{ packet.netId } {packet.score}/{packet.ambienceScore}");
+            if (LogPackets.Value) Logger.LogInfo($"[That's Lit] Received #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
             ThatsLitAPI.TrySetProxyBrightnessScore(player, packet.score, packet.ambienceScore);
         }
         
 
         void OnFikaClientCreated(FikaClientCreatedEvent ev)
         {
-            ev.Client.packetProcessor.SubscribeNetSerializable<ScorePacket>(HandlePacketClienr);
+            ev.Client.packetProcessor.SubscribeNetSerializable<ScorePacket>(HandlePacketClient);
         }
 
         void OnBeforePlayerSetupDirect(ThatsLitPlayer player)
         {
-            Logger.LogInfo($"[That's Lit Sync] Player setup attempt: { player.Player.Profile.Nickname }");
+            if (DebugLog.Value) Logger.LogInfo($"[That's Lit Sync] Player setup attempt: { player.Player.Profile.Nickname }");
 
             CoopPlayer coopPlayer = player.Player as CoopPlayer;
             if (coopPlayer == null) // Not Fika types
@@ -197,10 +200,15 @@ namespace ThatsLit.Sync
             if (player.Player is ObservedCoopPlayer observed && observed.IsObservedAI) // Remote bots on clients
                 return;
 
-            Logger.LogInfo($"[That's Lit Sync] Player setup condition passed: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } ");
+            if (DebugLog.Value) Logger.LogInfo($"[That's Lit Sync] Player setup condition passed: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
             ActivePlayers.Add(coopPlayer.NetId, coopPlayer);
             if (!player.Player.IsYourPlayer)
+            {
                 ThatsLitAPI.ToggleBrightnessProxyDirect(player, true);
+                if (DebugLog.Value) Logger.LogInfo($"[That's Lit Sync] Remote Player set to proxy: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
+            }
+            else if (DebugLog.Value) Logger.LogInfo($"[That's Lit Sync] Local player setup: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
+            
         }
 
         void OnPlayerBrightnessScoreCalculatedDirect(ThatsLitPlayer player, float score, float ambScore)
@@ -211,15 +219,22 @@ namespace ThatsLit.Sync
             if (MatchmakerAcceptPatches.IsServer && coopPlayer != null && coopPlayer.IsYourPlayer)
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
-                if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Broadcasting #{ coopPlayer.NetId } {score}/{ambScore}");
+                if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Broadcasting #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
                 BroadcastScore(ref packet);
             }
             else if (MatchmakerAcceptPatches.IsClient && coopPlayer != null && coopPlayer.IsYourPlayer)
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
                 writer.Reset();
-                Singleton<FikaClient>.Instance.SendData(writer, ref packet, DeliveryMethod.Unreliable);
-                if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Uploading #{ coopPlayer.NetId } {score}/{ambScore}");
+                if (Mathf.Abs(lastScore - score) + Mathf.Abs(lastAmbscore - ambScore) > 0.03f || Time.time - lastSent > 1f)
+                {
+                    Singleton<FikaClient>.Instance.SendData(writer, ref packet, DeliveryMethod.Unreliable);
+                    lastSent = Time.time;
+                    lastScore = score;
+                    lastAmbscore = ambScore;
+                    if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Uploading #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
+                }
+                if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Uploading throttled for #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
             }
         }
 
