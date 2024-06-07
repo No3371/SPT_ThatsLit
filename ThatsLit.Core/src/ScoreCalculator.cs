@@ -148,7 +148,7 @@ namespace ThatsLit
                 }
 
                 ambienceScore -= player.detailBonusSmooth * outside1s;
-                ambienceScore = Mathf.Clamp(ambienceScore, -0.95f, 1f);
+                ambienceScore = Mathf.Clamp(ambienceScore, MinBaseAmbienceScore, 1f);
             }
             if (ThatsLitPlayer.IsDebugSampleFrame && player.Player.DebugInfo != null)
                 player.Player.DebugInfo.scoreRaw0 = ambienceScore;
