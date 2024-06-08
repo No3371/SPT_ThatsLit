@@ -642,6 +642,7 @@ namespace ThatsLit
                         break;
                 }
                 var bushRatFactor = Mathf.Clamp01(angleFactor * foliageDisFactor * enemyDisFactor * poseScale * yDeltaFactor);
+                if (Singleton<ThatsLitGameworld>.Instance.IsWinter) bushRatFactor /= 1.15f;
                 if (player.DebugInfo != null && nearestAI)
                 {
                     player.DebugInfo.lastBushRat = bushRatFactor;
