@@ -226,7 +226,7 @@ namespace ThatsLit.Sync
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
                 writer.Reset();
-                if (Mathf.Abs(lastScore - score) + Mathf.Abs(lastAmbscore - ambScore) > 0.03f || Time.time - lastSent > 1f)
+                if (Mathf.Abs(lastScore - score) + Mathf.Abs(lastAmbscore - ambScore) > (score < -0.7f? 0.015f : 0.03f) || Time.time - lastSent > 1f)
                 {
                     Singleton<FikaClient>.Instance.SendData(writer, ref packet, DeliveryMethod.Unreliable);
                     lastSent = Time.time;
