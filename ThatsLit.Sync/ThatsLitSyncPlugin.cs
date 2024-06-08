@@ -33,7 +33,7 @@ namespace ThatsLit.Sync
         public const int TarkovVersion = 29197;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit Sync";
-        public const string ModVersion = "1.383.17";
+        public const string ModVersion = "1.383.18";
         public const string SPTGUID = "com.spt-aki.core";
         public const string SPTVersion = "3.8.0";
         private static long modVersionComparable;
