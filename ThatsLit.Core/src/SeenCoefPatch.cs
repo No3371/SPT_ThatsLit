@@ -650,7 +650,8 @@ namespace ThatsLit
                 if (botImpactType == BotImpactType.FOLLOWER || canSeeLight || (canSeeLaser && rand3 < 0.2f)) bushRatFactor /= 2f;
                 if (bushRat && bushRatFactor > 0.01f)
                 {
-                    if (player.DebugInfo != null && nearestAI) player.DebugInfo.IsBushRatting = bushRat;
+                    if (player.DebugInfo != null && nearestAI)
+                        player.DebugInfo.IsBushRatting = bushRat;
                     __result = Mathf.Max(__result, dis);
                     switch (caution)
                     {
