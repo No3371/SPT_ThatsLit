@@ -85,12 +85,16 @@ namespace ThatsLit
                 
             }
             Patches();
+            TryCheckUpdate();
+        }
+
+        public void TryCheckUpdate ()
+        {
             StartCoroutine(CheckUpdate());
         }
 
         IEnumerator CheckUpdate ()
         {
-            //! Somehow TryGetValue returns true, but the out parameter is null.
             var url = "https://raw.githubusercontent.com/No3371/SPT_ThatsLit/main/ThatsLit.Core/.update_notifier";
             if (!Chainloader.PluginInfos.TryGetValue("bastudio.updatenotifier", out var pluginInfo))
             {
