@@ -16,6 +16,7 @@ using LiteNetLib.Utils;
 using System.Collections.Generic;
 using EFT;
 using Fika.Core.Coop.Matchmaker;
+using System.Collections;
 
 namespace ThatsLit.Sync
 {
@@ -58,6 +59,7 @@ namespace ThatsLit.Sync
     [BepInDependency("com.fika.core", "0.0.0")]
     [BepInProcess(EscapeFromTarkov)]
     [DefaultExecutionOrder(100)]
+    [BepInDependency("bastudio.updatenotifier", BepInDependency.DependencyFlags.SoftDependency)]
     public class ThatsLitSyncPlugin : BaseUnityPlugin
     {
         NetDataWriter writer = new NetDataWriter();
@@ -86,6 +88,26 @@ namespace ThatsLit.Sync
             ThatsLitAPI.OnBeforePlayerSetupDirect += OnBeforePlayerSetupDirect;
             ThatsLitAPI.OnPlayerBrightnessScoreCalculatedDirect += OnPlayerBrightnessScoreCalculatedDirect;
             ThatsLitAPI.OnMainPlayerGUI += OnMainPlayerGUI;
+
+            TryCheckUpdate();
+        }
+
+        public void TryCheckUpdate ()
+        {
+            StartCoroutine(CheckUpdate());
+        }
+
+        IEnumerator CheckUpdate ()
+        {
+            var url = "https://raw.githubusercontent.com/No3371/SPT_ThatsLit/main/ThatsLit.Sync/.update_notifier";
+            if (!Chainloader.PluginInfos.TryGetValue("bastudio.updatenotifier", out var pluginInfo))
+            {
+                Logger.LogInfo("Update Notifier not found.");
+                yield break;
+            }
+
+            BaseUnityPlugin updntf = pluginInfo.Instance;
+            updntf.GetType().GetMethod("CheckForUpdate").Invoke(updntf, new object[] {this, url});
         }
 
         void Update ()
