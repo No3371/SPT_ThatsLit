@@ -354,6 +354,7 @@ namespace ThatsLit
                     player.DebugInfo.lastScore = score;
                     player.DebugInfo.lastFactor1 = factor;
                 }
+                player.DebugInfo.nearestCaution = caution;
             }
 
             if (player.Foliage != null)
