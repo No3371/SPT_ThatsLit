@@ -2,11 +2,10 @@
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using DrakiaXYZ.VersionChecker;
-using ThatsLit.Helpers;
 using System;
-using UnityEngine;
 using static ThatsLit.AssemblyInfo;
 using ThatsLit.Patches.Vision;
+using System.Collections;
 
 namespace ThatsLit
 {
@@ -47,10 +46,10 @@ namespace ThatsLit
     [BepInDependency(SPTGUID, SPTVersion)]
     [BepInProcess(EscapeFromTarkov)]
     [BepInDependency("me.sol.sain", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("bastudio.updatenotifier", BepInDependency.DependencyFlags.SoftDependency)]
     public class ThatsLitPlugin : BaseUnityPlugin
     {
         internal static bool SAINLoaded { get; private set; }
-        internal static ManagedStopWatch swUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis;
         internal static ManagedStopWatch swUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis, swNoBushOverride;
         static ThatsLitPlugin ()
         {
@@ -71,7 +70,6 @@ namespace ThatsLit
             }
 
             BindConfigs();
-            Patches();
             ThatsLitCompat.LoadCompatFiles();
             if (Chainloader.PluginInfos.ContainsKey("me.sol.sain"))
                 SAINLoaded = true;
@@ -86,6 +84,22 @@ namespace ThatsLit
                 EFT.UI.ConsoleScreen.Log(message);
                 
             }
+            Patches();
+            StartCoroutine(CheckUpdate());
+        }
+
+        IEnumerator CheckUpdate ()
+        {
+            //! Somehow TryGetValue returns true, but the out parameter is null.
+            var url = "https://raw.githubusercontent.com/No3371/SPT_ThatsLit/main/ThatsLit.Core/.update_notifier";
+            if (!Chainloader.PluginInfos.TryGetValue("bastudio.updatenotifier", out var pluginInfo))
+            {
+                Logger.LogInfo("Update Notifier not found.");
+                yield break;
+            }
+
+            BaseUnityPlugin updntf = pluginInfo.Instance;
+            updntf.GetType().GetMethod("CheckForUpdate").Invoke(updntf, new object[] {this, url});
         }
 
         private void BindConfigs()
