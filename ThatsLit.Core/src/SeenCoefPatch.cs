@@ -361,6 +361,7 @@ namespace ThatsLit
             {
                 Vector2 bestMatchFoliageDir = Vector2.zero;
                 float bestMatchDeg = 360f;
+                float bestMatchDis = 0;
                 for (int i = 0; i < Math.Min(ThatsLitPlugin.FoliageSamples.Value, player.Foliage.FoliageCount); i++) {
                     var f = player.Foliage.Foliage[i];
                     if (f == default) break;
@@ -369,11 +370,13 @@ namespace ThatsLit
                     {
                         bestMatchDeg = fDeg;
                         bestMatchFoliageDir = f.dir;
+                        bestMatchDis = f.dis;
                     }
                 }
                 var foliageImpact = player.Foliage.FoliageScore;
                 foliageImpact *= 1 + Mathf.InverseLerp(0f, -1f, factor);
-                if (bestMatchFoliageDir != Vector2.zero) foliageImpact *= Mathf.InverseLerp(90f, 0f, bestMatchDeg);
+                if (bestMatchFoliageDir != Vector2.zero)
+                    foliageImpact *= Mathf.InverseLerp(90f, 0f, bestMatchDeg);
                                                                                                                 // Maybe randomly lose vision for foliages
                 float foliageBlindChance = Mathf.Clamp01(
                                                 disFactor // Mainly works for far away enemies
@@ -386,6 +389,12 @@ namespace ThatsLit
                 {
                     __result += rand2;
                     __result *= 1 + disFactor + rand4 * (5f + caution);
+                }
+
+                if (ThatsLitPlugin.SAINLoaded && ThatsLitPlugin.InterruptSAINNoBush.Value) // Compensation for SAINNoBushOverride
+                {
+                    // Extra stealth at the other side of foliage
+                    __result += 15f * sinceSeenFactorSqr * Mathf.InverseLerp(30f, 5f, bestMatchDeg) * Mathf.InverseLerp(15f, 1f, dis) * Mathf.InverseLerp(0, 1f, bestMatchDis);
                 }
             }
 
