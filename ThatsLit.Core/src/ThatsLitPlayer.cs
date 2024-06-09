@@ -264,7 +264,7 @@ namespace ThatsLit
             if (Foliage != null)
             {
                 if (!Foliage.IsFoliageSorted)
-                    Foliage.IsFoliageSorted = SlicedBubbleSort(Foliage.Foliage, Foliage.FoliageCount * 3 / 2, Foliage.FoliageCount);
+                    Foliage.IsFoliageSorted = SlicedBubbleSort(Foliage.Foliage, Foliage.FoliageCount * 2, Foliage.FoliageCount);
                 Singleton<ThatsLitGameworld>.Instance.UpdateFoliageScore(bodyPos, Foliage);
             }
             ThatsLitPlugin.swFoliage.Stop();
