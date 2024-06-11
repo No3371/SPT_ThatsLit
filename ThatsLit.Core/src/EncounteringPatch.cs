@@ -86,6 +86,7 @@ namespace ThatsLit.Patches.Vision
             if (botImpactType != BotImpactType.BOSS)
             {
                 float vagueHintAngleFactor = Mathf.InverseLerp(0f, 3.5f, distance) * Mathf.InverseLerp(70f, 100f, visionDeviation); // When facing away, replace with vague hint
+                vagueHintAngleFactor *= 1f + Mathf.InverseLerp(10f, 25f, botEyeToPlayerBody.y);
                 if ((rand3 < vagueHintAngleFactor)
                  || rand3 < GetSurpriseChanceInFront())
                 {
