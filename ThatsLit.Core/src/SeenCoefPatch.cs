@@ -77,7 +77,8 @@ namespace ThatsLit
             float rand4 = UnityEngine.Random.Range(0f, 1f);
             float rand5 = UnityEngine.Random.Range(0f, 1f);
             
-            Player.FirearmController fc = player.Player?.HandsController as Player.FirearmController;
+            Player.FirearmController botFC = __instance.Owner?.GetPlayer?.HandsController as Player.FirearmController;
+            Player.FirearmController playerFC = player.Player?.HandsController as Player.FirearmController;
             Vector3 botVisionDir = __instance.Owner.GetPlayer.LookDirection;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
             var visionAngleDelta90Clamped = Mathf.InverseLerp(0, 90f, visionAngleDelta);
@@ -149,7 +150,7 @@ namespace ThatsLit
                     }
                 }
             }
-            else if (fc?.IsAiming ?? false) // ADS
+            else if (botFC?.IsAiming ?? false) // ADS
             {
                 EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
                 if (sightMod != null)
@@ -857,7 +858,7 @@ namespace ThatsLit
             lutLookup2 = Mathf.Clamp(lutLookup2, 0, 45f);
             simFreeLookDir = simFreeLookDir.RotateAroundPivot(Vector3.up, new Vector3(0f, lutLookup1));
             simFreeLookDir = simFreeLookDir.RotateAroundPivot(Vector3.Cross(Vector3.up, botVisionDir), new Vector3(0f, -lutLookup2));
-            if (fc?.IsAiming == true)
+            if (playerFC?.IsAiming == true)
             {
                 simFreeLookDir = new Vector3(
                     Mathf.Lerp(simFreeLookDir.x, botVisionDir.x, 0.5f),
@@ -894,16 +895,16 @@ namespace ThatsLit
                 // Cutoff from directly facing at shooting player
                 __result *= 1f - 0.5f * facingShotFactor * Mathf.InverseLerp(-0.45f, 0.45f, factor);
 
-                if (fc?.IsStationaryWeapon == true)
+                if (playerFC?.IsStationaryWeapon == true)
                 {
                     __result *= 1f - 0.3f * rand4 * Mathf.InverseLerp(30f, 5f, zoomedDis);
                 }
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
-            if (canSeeLight && fc != null)
+            if (canSeeLight && playerFC != null)
             {
-                float wCoFacingAngle = Vector3.Angle(-eyeToPlayerBody, fc.WeaponDirection);
+                float wCoFacingAngle = Vector3.Angle(-eyeToPlayerBody, playerFC.WeaponDirection);
                 // If player flashlights directly shining against the bot
                 if (upperVisible >= 3) // >= 3 upper parts visible
                 {
