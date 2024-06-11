@@ -91,16 +91,11 @@ namespace ThatsLit
 
         public void TryCheckUpdate ()
         {
-            StartCoroutine(CheckUpdate());
-        }
-
-        IEnumerator CheckUpdate ()
-        {
             var url = "https://raw.githubusercontent.com/No3371/SPT_ThatsLit/main/ThatsLit.Core/.update_notifier";
             if (!Chainloader.PluginInfos.TryGetValue("bastudio.updatenotifier", out var pluginInfo))
             {
                 Logger.LogInfo("Update Notifier not found.");
-                yield break;
+                return;
             }
 
             BaseUnityPlugin updntf = pluginInfo.Instance;
@@ -214,7 +209,7 @@ namespace ThatsLit
             category                   = "9. Balance";
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss. Makes bosses EASY.");
             EnableEquipmentCheck         = Config.Bind(category, "Equipment Check", true, "Whether the mod checks your equipments. Disabling this stops lights/lasers detection and makes stealth EASY.");
-            InterruptSAINNoBush              = Config.Bind(category, "Interrupt SAIN No Bush", false, "New SAIN No Bush is designed to be aggressive. It can block bot vision even if you are just 2m away and the bot is looking straight at you. This add a chance to turn off SAIN's No Bush ESP at close range.");
+            InterruptSAINNoBush              = Config.Bind(category, "Interrupt SAIN No Bush", false, "DO NOT COMPLAIN ABOUT NO BUSH ESP TO Solarint IF YOU HAVE THIS ON.New SAIN No Bush is designed to be aggressive. It can block bot vision even if you are just 2m away and the bot is looking straight at you. This add a chance to turn off SAIN's No Bush ESP at close range.");
             ForceBlindFireScatter              = Config.Bind(category, "Force Blind Fire Scatter", false, "Force a random scatter on bot blind fireing, scaled by distance.");
             
         }
