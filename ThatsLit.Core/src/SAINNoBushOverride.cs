@@ -44,12 +44,21 @@ namespace ThatsLit.Patches.Vision
             var interruptChance = Mathf.InverseLerp(50f, 10f - caution, enemy.Distance);
             interruptChance *= interruptChance;
             interruptChance += Mathf.InverseLerp(20f, 10f - caution, enemy.Distance) * 0.1f;
-            interruptChance *= Mathf.InverseLerp(75f, 5f, visionAngleDelta);
+            interruptChance *= Mathf.InverseLerp(75f, 10f, visionAngleDelta);
             if (player.Player.IsInPronePose)
                 interruptChance /= 2f;
             else
                 interruptChance *= 0.2f + player.Player.PoseLevel;
-            interruptChance = Mathf.Lerp(interruptChance, 1f - 0.2f * Mathf.InverseLerp(15, 100f, enemy.Distance), 0.75f * Mathf.InverseLerp(10f, 0.3f, lastSeenPosDelta) + 0.9f * Mathf.InverseLerp(5f, 1f, sinceSeen));
+            
+            var interruptChanceSeen = 1f - 0.5f * Mathf.InverseLerp(5, 50f, enemy.Distance);
+            if (interruptChance < interruptChanceSeen)
+                interruptChance = Mathf.Lerp(interruptChance, interruptChanceSeen, 0.75f * Mathf.InverseLerp(5f, 0.3f, lastSeenPosDelta) + 0.9f * Mathf.InverseLerp(5f, 1f, sinceSeen));
+
+            if (___BotOwner.GetPlayer?.HandsController is Player.FirearmController fc
+             && fc.IsAiming
+             && interruptChance < 0.75f)
+                interruptChance = Mathf.Lerp(interruptChance, 0.75f, Mathf.InverseLerp(5f, 0f, visionAngleDelta) * Mathf.InverseLerp(100, 10f, enemy.Distance));
+    
             if (player.DebugInfo != null)
             {
                 player.DebugInfo.lastInterruptChance = interruptChance;
