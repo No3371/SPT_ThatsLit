@@ -675,7 +675,7 @@ namespace ThatsLit
             observed.Dispose();
         }
         float litFactorSample, ambScoreSample;
-        static float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleFoliageCheck, benchmarkSampleTerrainCheck, benchmarkSampleGUI, benchmarkSampleNoBushOverride;
+        static float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleFoliageCheck, benchmarkSampleTerrainCheck, benchmarkSampleGUI, benchmarkSampleNoBushOverride, benchmarkSampleBlindFire;
         int guiFrame;
         string infoCache1, infoCache2, infoCacheBenchmark;
 
@@ -794,7 +794,7 @@ namespace ThatsLit
             if (ThatsLitPlugin.EnableBenchmark.Value)
             {
                 if (layoutCall)
-                    infoCacheBenchmark = $"  Update:         {benchmarkSampleUpdate,8:0.0000}\n  Foliage:        {benchmarkSampleFoliageCheck,8:0.0000}\n  Terrain:        {benchmarkSampleTerrainCheck,8:0.0000}\n  SeenCoef:       {benchmarkSampleSeenCoef,8:0.0000}\n  Encountering:   {benchmarkSampleEncountering,8:0.0000}\n  ExtraVisDis:    {benchmarkSampleExtraVisDis,8:0.0000}\n  ScoreCalculator:{benchmarkSampleScoreCalculator,8:0.0000}\n  Info(+Debug):    {benchmarkSampleGUI,8:0.0000} ms\n  No Bush OVR:    {benchmarkSampleNoBushOverride,8:0.0000} ms";
+                    infoCacheBenchmark = $"  Update:         {benchmarkSampleUpdate,8:0.0000}\n  Foliage:        {benchmarkSampleFoliageCheck,8:0.0000}\n  Terrain:        {benchmarkSampleTerrainCheck,8:0.0000}\n  SeenCoef:       {benchmarkSampleSeenCoef,8:0.0000}\n  Encountering:   {benchmarkSampleEncountering,8:0.0000}\n  ExtraVisDis:    {benchmarkSampleExtraVisDis,8:0.0000}\n  ScoreCalculator:{benchmarkSampleScoreCalculator,8:0.0000}\n  Info(+Debug):    {benchmarkSampleGUI,8:0.0000}\n  No Bush OVR:    {benchmarkSampleNoBushOverride,8:0.0000}\n  BlindFire:    {benchmarkSampleBlindFire,8:0.0000} ms";
                 GUILayout.Label(infoCacheBenchmark);
                 if (Time.frameCount % 6000 == 0)
                     if (layoutCall) EFT.UI.ConsoleScreen.Log(infoCacheBenchmark);
@@ -852,6 +852,7 @@ namespace ThatsLit
             benchmarkSampleFoliageCheck     = ThatsLitPlugin.swFoliage.ConcludeMs() / (float) DEBUG_INTERVAL;
             benchmarkSampleTerrainCheck     = ThatsLitPlugin.swTerrain.ConcludeMs() / (float) DEBUG_INTERVAL;
             benchmarkSampleNoBushOverride              = ThatsLitPlugin.swNoBushOverride.ConcludeMs() / (float) DEBUG_INTERVAL;
+            benchmarkSampleBlindFire              = ThatsLitPlugin.swBlindFireScatter.ConcludeMs() / (float) DEBUG_INTERVAL;
         }
     }
 }

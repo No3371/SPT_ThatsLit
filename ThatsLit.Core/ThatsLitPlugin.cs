@@ -50,7 +50,7 @@ namespace ThatsLit
     public class ThatsLitPlugin : BaseUnityPlugin
     {
         internal static bool SAINLoaded { get; private set; }
-        internal static ManagedStopWatch swUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis, swNoBushOverride;
+        internal static ManagedStopWatch swUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis, swNoBushOverride, swBlindFireScatter;
         static ThatsLitPlugin ()
         {
             swUpdate = new ManagedStopWatch("Update");
@@ -61,6 +61,7 @@ namespace ThatsLit
             swEncountering = new ManagedStopWatch("Encountering");
             swExtraVisDis = new ManagedStopWatch("ExtraVisDis");
             swNoBushOverride = new ManagedStopWatch("NoBushOverride");
+            swBlindFireScatter = new ManagedStopWatch("BlindFireScatter");
         }
         private void Awake()
         {
@@ -214,6 +215,7 @@ namespace ThatsLit
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss. Makes bosses EASY.");
             EnableEquipmentCheck         = Config.Bind(category, "Equipment Check", true, "Whether the mod checks your equipments. Disabling this stops lights/lasers detection and makes stealth EASY.");
             InterruptSAINNoBush              = Config.Bind(category, "Interrupt SAIN No Bush", false, "New SAIN No Bush is designed to be aggressive. It can block bot vision even if you are just 2m away and the bot is looking straight at you. This add a chance to turn off SAIN's No Bush ESP at close range.");
+            ForceBlindFireScatter              = Config.Bind(category, "Force Blind Fire Scatter", false, "Force a random scatter on bot blind fireing, scaled by distance.");
             
         }
 
@@ -270,6 +272,7 @@ namespace ThatsLit
         public static ConfigEntry<int> FoliageSamples { get; private set; }
         public static ConfigEntry<bool> VolumetricLightRenderer { get; private set; }
         public static ConfigEntry<bool> InterruptSAINNoBush { get; private set; }
+        public static ConfigEntry<bool> ForceBlindFireScatter { get; private set; }
         // public static ConfigEntry<bool> DevMode { get; private set; }
         // public static ConfigEntry<bool> DevModeInvisible { get; private set; }
         // public static ConfigEntry<bool> NoGPUReq { get; private set; }
@@ -300,7 +303,9 @@ namespace ThatsLit
             new EncounteringPatch().Enable();
             new ExtraVisibleDistancePatch().Enable();
             new InitiateShotMonitor().Enable();
-            if (SAINLoaded) new SAINNoBushOverride().Enable();
+            new BlindFirePatch().Enable();
+            if (SAINLoaded)
+                new SAINNoBushOverride().Enable();
         }
 
         private void Update()
