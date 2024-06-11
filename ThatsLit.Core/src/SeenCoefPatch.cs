@@ -407,11 +407,11 @@ namespace ThatsLit
                     __result *= 1 + disFactor + rand4 * (5f + caution);
                 }
 
-                if (ThatsLitPlugin.SAINLoaded && ThatsLitPlugin.InterruptSAINNoBush.Value) // Compensation for SAINNoBushOverride
-                {
-                    // Extra stealth at the other side of foliage
-                    __result += 15f * sinceSeenFactorSqr * Mathf.InverseLerp(30f, 5f, bestMatchDeg) * Mathf.InverseLerp(15f, 1f, dis) * Mathf.InverseLerp(0, 1f, bestMatchDis);
-                }
+                // if (ThatsLitPlugin.SAINLoaded && ThatsLitPlugin.InterruptSAINNoBush.Value) // Compensation for SAINNoBushOverride
+                // {
+                //     // Extra stealth at the other side of foliage
+                //     __result += 15f * sinceSeenFactorSqr * Mathf.InverseLerp(30f, 5f, bestMatchDeg) * Mathf.InverseLerp(15f, 1f, dis) * Mathf.InverseLerp(0, 1f, bestMatchDis);
+                // }
             }
 
             // CBQ Factors =====
