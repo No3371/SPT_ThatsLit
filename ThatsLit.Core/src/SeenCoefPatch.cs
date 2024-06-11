@@ -231,16 +231,18 @@ namespace ThatsLit
                 switch (caution)
                 {
                     case 0:
-                        overheadChance /= 1.5f;
+                        overheadChance /= 2f;
                         break;
                     case 1:
-                        overheadChance /= 1.2f;
+                        overheadChance /= 1.4f;
                         break;
                     case 2:
+                        overheadChance /= 1.15f;
+                        break;
                     case 3:
                     case 4:
-                        break;
                     case 5:
+                        break;
                     case 6:
                     case 7:
                     case 8:
