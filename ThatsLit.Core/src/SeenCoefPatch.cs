@@ -286,6 +286,7 @@ namespace ThatsLit
             if (player.DebugInfo != null && nearestAI)
             {
                 player.DebugInfo.lastGlobalOverlookChance = globalOverlookChance;
+                player.DebugInfo.nearestOffset = eyeToPlayerBody;
             }
             globalOverlookChance *= botImpactType != BotImpactType.DEFAULT? 0.5f : 1f;
             if (rand5 < globalOverlookChance)

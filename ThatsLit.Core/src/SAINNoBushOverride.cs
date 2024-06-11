@@ -51,7 +51,10 @@ namespace ThatsLit.Patches.Vision
                 interruptChance *= 0.2f + player.Player.PoseLevel;
             interruptChance = Mathf.Lerp(interruptChance, 1f - 0.2f * Mathf.InverseLerp(15, 100f, enemy.Distance), 0.75f * Mathf.InverseLerp(10f, 0.3f, lastSeenPosDelta) + 0.9f * Mathf.InverseLerp(5f, 1f, sinceSeen));
             if (player.DebugInfo != null)
+            {
                 player.DebugInfo.lastInterruptChance = interruptChance;
+                player.DebugInfo.lastInterruptChanceDis = enemy.Distance;
+            }
 
             if (player.DebugInfo != null)
                 player.DebugInfo.attemptToCancelSAINNoBush++;

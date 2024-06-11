@@ -21,7 +21,9 @@ namespace ThatsLit
         internal float lastDisCompThermal, lastDisCompNVG, lastDisCompDay, lastDisComp;
         internal float lastNearestFocusAngleX, lastNearestFocusAngleY;
         internal int cancelledSAINNoBush, attemptToCancelSAINNoBush;
-        internal float lastInterruptChance;
+        internal float lastInterruptChance, lastInterruptChanceDis;
         internal int nearestCaution;
+        internal Vector3 nearestOffset, sniperHintOffset;
+        internal float sniperHintChance;
     }
 }
