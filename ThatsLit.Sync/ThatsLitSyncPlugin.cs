@@ -94,16 +94,11 @@ namespace ThatsLit.Sync
 
         public void TryCheckUpdate ()
         {
-            StartCoroutine(CheckUpdate());
-        }
-
-        IEnumerator CheckUpdate ()
-        {
             var url = "https://raw.githubusercontent.com/No3371/SPT_ThatsLit/main/ThatsLit.Sync/.update_notifier";
             if (!Chainloader.PluginInfos.TryGetValue("bastudio.updatenotifier", out var pluginInfo))
             {
                 Logger.LogInfo("Update Notifier not found.");
-                yield break;
+                return;
             }
 
             BaseUnityPlugin updntf = pluginInfo.Instance;
