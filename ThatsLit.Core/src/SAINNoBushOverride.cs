@@ -12,7 +12,7 @@ namespace ThatsLit.Patches.Vision
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(Type.GetType("SAIN.Components.SAINNoBushESP, SAIN"), "SetCanShoot");
+            return AccessTools.Method(Type.GetType("SAIN.Components.SAINNoBushESP, SAIN"), "SetCanShoot", new Type[]{typeof(bool)});
         }
 
         
