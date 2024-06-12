@@ -155,8 +155,8 @@ namespace ThatsLit
             }
             else if (name.EndsWith("4ad690")) // tall and somewhat thick
             {
-                prone = 0.007f * num;
-                crouch = 0.013f * num;
+                prone = 0.015f * num;
+                crouch = 0.015f * num;
             }
             else if (name.EndsWith("bf0a23"))
             {
