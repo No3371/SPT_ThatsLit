@@ -784,7 +784,7 @@ namespace ThatsLit
                 else if (factor > 0)
                 {
                     if (rand5 < factor * factor) __result *= 1f - 0.5f * ThatsLitPlugin.BrightnessImpactScale;
-                    else __result /= 1f + factor / 5f * ThatsLitPlugin.BrightnessImpactScale;
+                    else __result /= 1f + factor / 4f * ThatsLitPlugin.BrightnessImpactScale;
                 }
             }
 
