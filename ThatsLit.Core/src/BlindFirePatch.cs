@@ -30,7 +30,7 @@ namespace ThatsLit.Patches.Vision
             }
             float dis = Vector3.Distance(__result, ___botOwner_0.GetPlayer.Position);
 
-            __result += UnityEngine.Random.insideUnitSphere * 5 * Mathf.InverseLerp(0f, 200f, dis);
+            __result += UnityEngine.Random.insideUnitSphere * 5 * Mathf.InverseLerp(15f, 200f, dis);
             ThatsLitPlugin.swBlindFireScatter.Stop();
         }
     }
