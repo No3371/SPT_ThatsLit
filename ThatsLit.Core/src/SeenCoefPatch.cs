@@ -114,6 +114,7 @@ namespace ThatsLit
             if (player.lastShotVector != Vector3.zero && Time.time - player.lastShotTime < 0.5f)
                 facingShotFactor = Mathf.InverseLerp(15f, 0f, shotAngleDelta) * Mathf.InverseLerp(0.5f, 0f, Time.time - player.lastShotTime);
 
+            float aimSin = Mathf.Sin(Time.time / (1 + 0.1f * caution) + (__instance.Owner.Position.x + __instance.Owner.Position.z) % 2f);
             ThatsLitCompat.ScopeTemplate activeScope = null;
             BotNightVisionData nightVision = __instance.Owner.NightVision;
             ThatsLitCompat.GoggleTemplate activeGoggle = null;
@@ -150,7 +151,7 @@ namespace ThatsLit
                     }
                 }
             }
-            else if (botFC?.IsAiming ?? false) // ADS
+            else if (aimSin > 0.5f) // Fake ADS, because bots don't really aim around for looking out
             {
                 EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
                 if (sightMod != null)
