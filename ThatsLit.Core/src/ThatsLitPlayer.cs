@@ -485,7 +485,7 @@ namespace ThatsLit
                 {
                     ambienceShadownRating += 10f * Time.deltaTime;
                 }
-                else ambienceShadownRating -= 22f * Time.deltaTime;
+                else ambienceShadownRating -= 25f * Time.deltaTime;
                 ambienceShadownRating = Mathf.Clamp(ambienceShadownRating, 0, 10f);
             }
         }
