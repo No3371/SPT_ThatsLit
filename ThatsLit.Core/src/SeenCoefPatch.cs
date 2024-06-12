@@ -61,6 +61,7 @@ namespace ThatsLit
             float sinceSeen = Time.time - personalLastSeenTime;
             float lastSeenPosDelta = (__instance.Person.Position - __instance.EnemyLastPositionReal).magnitude;
             float lastSeenPosDeltaSqr = lastSeenPosDelta * lastSeenPosDelta;
+            float botVelocity = __instance.Owner.GetPlayer.Velocity.magnitude;
 
             float deNullification = 0;
 
@@ -175,7 +176,7 @@ namespace ThatsLit
                     }
 
                     // Force a sniper showdown
-                    float sniperHintChance = 0.1f * Mathf.InverseLerp(4f, 24f, currentZoom) * Mathf.InverseLerp(10f, 1f, visionAngleDeltaHorizontal) * Mathf.InverseLerp(0.6f, 0f, __instance.Owner.GetPlayer.PoseLevel) * Mathf.InverseLerp(5, 30f, eyeToPlayerBody.y);
+                    float sniperHintChance = 0.1f * Mathf.InverseLerp(4f, 24f, currentZoom) * Mathf.InverseLerp(10f, 1f, visionAngleDeltaHorizontal) * Mathf.InverseLerp(1f, 0f, botVelocity) * Mathf.InverseLerp(5, 30f, eyeToPlayerBody.y);
                     if (rand3 < sniperHintChance)
                     {
                         __result = Mathf.Min(__result, 1f);
