@@ -116,7 +116,8 @@ namespace ThatsLit.Patches.Vision
             if (player.DebugInfo != null) player.DebugInfo.encounter++;
 
             float delayAimChance = 0.5f * Mathf.InverseLerp(0, 9f + srand2 * 5f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(0, 5f, knownPosDelta);
-            if (__instance.Owner?.Memory.GoalEnemy == __instance) delayAimChance *= 0.7f;
+            if (__instance.Owner?.Memory.GoalEnemy.Person == player.Player)
+                delayAimChance *= 0.65f;
             if (rand4 - 0.2f * Mathf.InverseLerp(0, 5, player.Player.Velocity.magnitude) < delayAimChance) // Busting into sight / out of cover
             {
                 __state = new State()
