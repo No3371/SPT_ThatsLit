@@ -217,18 +217,23 @@ namespace ThatsLit
             if (visionAngleDelta > 110) canSeeLightSub = false;
             if (visionAngleDelta > 85) canSeeLaserSub = false;
 
-            nearestRecent += 0.6f;
             bool nearestAI = false;
-            if (player.DebugInfo != null && dis <= nearestRecent)
+            float lastNearestDistance = Vector3.Distance(player.Player.Position, player.lastNearest.Position);
+            if (player.lastNearest == null || lastNearestDistance > dis)
             {
-                nearestRecent = dis;
-                nearestAI = true;
-                player.DebugInfo.lastNearest = nearestRecent;
-                if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1)
+                player.lastNearest = __instance.Owner;
+                if (player.DebugInfo != null)
                 {
-                    player.DebugInfo.lastCalcFrom = original;
+                    player.DebugInfo.lastNearest = lastNearestDistance;
+                    player.lastNearest = __instance.Owner;
+                    if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1)
+                    {
+                        player.DebugInfo.lastCalcFrom = original;
+                    }
                 }
             }
+            nearestAI = player.lastNearest == __instance.Owner;
+
             // ======
             // Overhead overlooking
             // ======

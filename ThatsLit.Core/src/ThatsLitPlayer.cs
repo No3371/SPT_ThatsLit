@@ -76,6 +76,7 @@ namespace ThatsLit
         }
         private CheckStimEffectProxy checkEffectDelegate;
         static float canLoadTime = 0;
+        internal BotOwner lastNearest;
         public static bool CanLoad ()
         {
             if (CameraClass.Instance.OpticCameraManager.Camera != null
