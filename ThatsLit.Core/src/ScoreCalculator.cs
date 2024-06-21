@@ -462,25 +462,40 @@ namespace ThatsLit
             else return 0;
         }
 
-        // Fog determine visual brightness of further envrionment, unused
         // The increased visual brightness when moon is up (0~5) when c < 1
         // cloudiness blocks moon light
+        // Fog determine visibility and visual brightness of further envrionment, unused
         protected virtual float CalculateMoonLight(string locationId, float time, float cloudiness)
         {
-            cloudiness = 1 - cloudiness; // difference from 1
-            if (cloudiness > 1) cloudiness = Mathf.Lerp(cloudiness, 1, 0.25f); // Balancing days of -1.5 cloudiness, which seems more common in 3.7+
             float maxMoonlightScore = GetMaxMoonlightScore();
-            return cloudiness * maxMoonlightScore * CalculateMoonLightTimeFactor(locationId, time);
+            return TransformCloudness(cloudiness) * maxMoonlightScore * CalculateMoonLightTimeFactor(locationId, time);
         }
 
         // The increased visual brightness when sun is up (5~22) hours when c < 1
         // cloudiness blocks sun light
         protected virtual float CalculateSunLight(string locationId, float time, float cloudiness)
         {
-            cloudiness = 1 - cloudiness; // difference from 1
-            if (cloudiness > 2f) cloudiness = Mathf.Lerp(cloudiness, 2, 0.5f); // Balancing days of -1.5 cloudiness, which seems more common in 3.7+
             float maxSunlightScore = GetMaxSunlightScore();
-            return cloudiness * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
+            return TransformCloudness(cloudiness) * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
+        }
+
+        float TransformCloudness (float cloudiness)
+        {
+            if (cloudiness == 0) return 0;
+            if (cloudiness >= 0)
+            {
+                // Ease out
+                var eval = Mathf.InverseLerp(cloudiness, 0f, 1.5f);
+                eval = Mathf.Sin(eval * Mathf.PI / 2f);
+                return eval;
+            }
+            else
+            {
+                // Bezier
+                var eval = Mathf.InverseLerp(cloudiness, 0f, -1.25f);
+                eval = eval * eval * (3f - 2f * eval);
+                return eval;
+            }
         }
 
         internal virtual float CalculateSunLightTimeFactor(string locationId, float time)
