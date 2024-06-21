@@ -30,14 +30,19 @@ namespace ThatsLit.Patches.Vision
         {
             __state = default;
 
-            if (!value) return true; // SKIP. Only works when the player is set to be visible to the bot.
-            if (__instance.IsVisible) return true; // SKIP. Only works when the bot hasn't see the player. IsVisible means the player is already seen.
-            if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return true;
-            if (__instance.Owner == null) return true;
+            if (!value)
+                return true; // SKIP. Only works when the player is set to be visible to the bot.
+            if (__instance.IsVisible)
+                return true; // SKIP. Only works when the bot hasn't see the player. IsVisible means the player is already seen.
+            if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value)
+                return true;
+            if (__instance.Owner == null)
+                return true;
     
             ThatsLitPlayer player = null;
             Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
-            if (player == null) return true;
+            if (player == null)
+                return true;
 
             ThatsLitPlugin.swEncountering.MaybeResume();
 
@@ -48,7 +53,8 @@ namespace ThatsLit.Patches.Vision
             float distance = botEyeToPlayerBody.magnitude;
             var visionDeviation = Vector3.Angle(botLookDir, botEyeToPlayerBody);
             var visionDeviationToLast = Vector3.Angle(botEyeToPlayerBody, botEyeToLastSeenPos);
-            if (!__instance.HaveSeen) visionDeviationToLast = 180f;
+            if (!__instance.HaveSeen)
+                visionDeviationToLast = 180f;
 
             float srand = UnityEngine.Random.Range(-1f, 1f);
             float srand2 = UnityEngine.Random.Range(-1f, 1f);
@@ -97,8 +103,9 @@ namespace ThatsLit.Patches.Vision
                     if (__instance.Owner?.Memory != null
                      && __instance.Owner?.Covers != null)
                     {
-                        if (player.DebugInfo != null) player.DebugInfo.signalDanger++;
                         __instance.Owner?.DangerPointsData?.AddPointOfDanger(new PlaceForCheck(vagueSource, PlaceForCheckType.simple), true);
+                        if (player.DebugInfo != null)
+                            player.DebugInfo.signalDanger++;
                     }
 
                     if (__instance.Owner?.BotsGroup?.CoverPointMaster != null
@@ -109,11 +116,13 @@ namespace ThatsLit.Patches.Vision
                         return false; // Cancel visibllity (SetVisible does not only get called for direct vision... ex: for group members )
                     }
                     else
-                        if (player.DebugInfo != null) player.DebugInfo.vagueHintCancel++;
+                        if (player.DebugInfo != null)
+                            player.DebugInfo.vagueHintCancel++;
                 }
             }
 
-            if (player.DebugInfo != null) player.DebugInfo.encounter++;
+            if (player.DebugInfo != null)
+                player.DebugInfo.encounter++;
 
             float delayAimChance = 0.5f * Mathf.InverseLerp(0, 9f + srand2 * 5f, sinceLastSeen) + 0.5f * Mathf.InverseLerp(0, 5f, knownPosDelta);
             if (__instance.Owner?.Memory?.GoalEnemy?.Person == player.Player as IPlayer)
@@ -138,11 +147,14 @@ namespace ThatsLit.Patches.Vision
         [HarmonyAfter("me.sol.sain")]
         public static void PatchPostfix(EnemyInfo __instance, State __state)
         {
-            if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value) return;
-            if (!__state.triggered || __instance.Owner?.Memory?.GoalEnemy != __instance) return; // Not triggering the patch OR the bot is engaging others
+            if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value)
+                return;
+            if (!__state.triggered || __instance.Owner?.Memory?.GoalEnemy != __instance)
+                return; // Not triggering the patch OR the bot is engaging others
 
             var aim = __instance.Owner?.AimingData;
-            if (aim == null) return;
+            if (aim == null)
+                return;
 
             ThatsLitPlugin.swEncountering.MaybeResume();
 
