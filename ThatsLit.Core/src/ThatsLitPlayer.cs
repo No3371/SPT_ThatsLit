@@ -670,8 +670,8 @@ namespace ThatsLit
         private void OnDestroy()
         {
             DisableBrightness();
-            if (display) GameObject.Destroy(display);
-            if (cam) GameObject.Destroy(cam);
+            if (display) GameObject.Destroy(display.gameObject);
+            if (cam) GameObject.Destroy(cam.gameObject);
             if (rt) rt.Release();
             observed.Dispose();
         }
