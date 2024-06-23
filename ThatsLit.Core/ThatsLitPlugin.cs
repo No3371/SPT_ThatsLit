@@ -87,8 +87,8 @@ namespace ThatsLit
             {
                 string message = $"[That's Lit] Fika detected, but That's Lit Sync extension not found. Without it, you will lose many fps per player. Get Sync extension from Fika Discord.";
                 NotificationManagerClass.DisplayWarningNotification(message, EFT.Communications.ENotificationDurationType.Long);
-                // Logger.LogError(message);
-                EFT.UI.ConsoleScreen.Log(message);
+                Logger.LogError(message);
+                // EFT.UI.ConsoleScreen.Log(message); // EXCEPTION and fails plugin loading (Console is not loaded yet)
             }
         }
 
