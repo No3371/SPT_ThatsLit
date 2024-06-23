@@ -304,7 +304,7 @@ namespace ThatsLit
                     {
                         observed = req.GetData<Color32>();
                         ThatsLitPlugin.swScoreCalc.MaybeResume();
-                            Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.PreCalculate(PlayerLitScoreProfile, observed, Utility.GetInGameDayTime());
+                            Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator?.PreCalculate(PlayerLitScoreProfile, observed, Utility.GetInGameDayTime());
                         ThatsLitPlugin.swScoreCalc.Stop();
                     }
                 });
