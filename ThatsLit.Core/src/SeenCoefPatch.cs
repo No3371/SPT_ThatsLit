@@ -174,18 +174,6 @@ namespace ThatsLit
                         else if (activeScope?.nightVision != null)
                             inNVGView = true;
                     }
-
-                    // Force a sniper showdown
-                    float sniperHintChance = 0.1f * Mathf.InverseLerp(4f, 24f, currentZoom) * Mathf.InverseLerp(10f, 1f, visionAngleDeltaHorizontal) * Mathf.InverseLerp(1f, 0f, botVelocity) * Mathf.InverseLerp(5, 30f, eyeToPlayerBody.y);
-                    if (rand3 < sniperHintChance)
-                    {
-                        __result = Mathf.Min(__result, 1f);
-                        if (player.DebugInfo != null)
-                        {
-                            player.DebugInfo.sniperHintOffset = eyeToPlayerBody;
-                            player.DebugInfo.sniperHintChance = sniperHintChance;
-                        }
-                    }
                 }
             }
 
