@@ -467,6 +467,7 @@ namespace ThatsLit
                 Singleton<ThatsLitGameworld>.Instance.singleIdThrottlers.TryGetValue(lastNearest.ProfileId, out throttler);
 
                 if (nearestBotGoalEnemy?.Person == Player
+                 && nearestBotGoalEnemy?.HaveSeen == true
                  && Time.time - throttler.lastForceLook > 1f
                  && lastNearest.Mover.IsMoving == true && nearestBotPlayer.IsSprintEnabled == false
                  && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
@@ -483,6 +484,7 @@ namespace ThatsLit
                 }
 
                 if (nearestBotGoalEnemy?.Person == Player
+                 && nearestBotGoalEnemy?.HaveSeen == true
                  && nearestBotPlayer.Velocity.sqrMagnitude > 0.25f
                  && Time.time - lastOutside > 1f
                  && Time.time - throttler.lastForceLook > 1f
