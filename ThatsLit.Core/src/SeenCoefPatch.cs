@@ -930,9 +930,52 @@ namespace ThatsLit
                 // If player flashlights directly shining against the bot
                 if (upperVisible >= 3) // >= 3 upper parts visible
                 {
-                    __result *= 1 - 0.5f * Mathf.InverseLerp(5f, 0f, wCoFacingAngle) * Mathf.InverseLerp(40f, 7.5f, zoomedDis);
+                    if (wCoFacingAngle < 7.5f)
+                    {
+                        __result *= 1 - 0.75f * Mathf.InverseLerp(7.5f, 0f, wCoFacingAngle) * Mathf.InverseLerp(40f, 7.5f, zoomedDis);
+                        // if (player.DebugInfo != null)
+                        // {
+                        //     player.DebugInfo.flashLightHint++;
+                        // }
+                    }
+                    else if (nearestAI && dis < 15f)
+                    {
+                        __result *= 1 - rand4 * 0.4f * Mathf.InverseLerp(15, 1f, dis) * Mathf.InverseLerp(90f, 0f, Vector3.Angle(-playerFC.WeaponDirection, botVisionDir));
+                        if (player.DebugInfo != null)
+                        {
+                            player.DebugInfo.flashLightHint++;
+                        }
+                    }
                 }
             }
+
+            // Anti sniper
+            float sniperHintChance = pPoseFactor * 0.2f * Mathf.InverseLerp(1f, 0f, player.OverheadHaxRatingFactor) * Mathf.InverseLerp(1f, 0f, insideTime) * Mathf.InverseLerp(250f, 25f, zoomedDis) * Mathf.InverseLerp(15f, 1f, visionAngleDeltaHorizontal) * Mathf.InverseLerp(1f, 0f, botVelocity) * Mathf.InverseLerp(5, 30f, eyeToPlayerBody.y);
+            if (rand3 < sniperHintChance)
+            {
+                __result = Mathf.Min(__result, 1f);
+                if (player.DebugInfo != null)
+                {
+                    player.DebugInfo.sniperHintOffset = eyeToPlayerBody;
+                    player.DebugInfo.sniperHintChance = sniperHintChance;
+                }
+            }
+
+            // if (nearestAI
+            //  && canSeeLight
+            //  && upperVisible >= 3
+            //  && dis < 15f
+            //  && score < 0.25f
+            //  && Vector3.Angle(botVisionDir, player.flashLightHit.normal) > 90f
+            //  && Vector3.Angle(botVisionDir, player.flashLightHit.point - __instance.Owner.MyHead.position) < 90f
+            //  && !Physics.Raycast(__instance.Owner.MyHead.position, player.flashLightHit.point, (player.flashLightHit.point - __instance.Owner.MyHead.position).magnitude - 0.05f, ThatsLitPlayer.ambienceRaycastMask))
+            // {
+            //     __result = Mathf.Lerp(__result, 0.5f * original, rand5 * Mathf.InverseLerp(15, 2f, dis) * Mathf.InverseLerp(0.25f, -0.5f, score) );
+            //     if (player.DebugInfo != null)
+            //     {
+            //         player.DebugInfo.flashLightHint++;
+            //     }
+            // }
 
             // Up to 50% penalty
             if (__result < 0.5f * original)
@@ -943,7 +986,8 @@ namespace ThatsLit
             __result = Mathf.Lerp(original, __result, __result < original ? ThatsLitPlugin.FinalImpactScaleFastening.Value : ThatsLitPlugin.FinalImpactScaleDelaying.Value);
 
             __result += ThatsLitPlugin.FinalOffset.Value;
-            if (__result < 0.005f) __result = 0.005f;
+            if (__result < 0.005f)
+                __result = 0.005f;
 
             if (player.DebugInfo != null)
             {
