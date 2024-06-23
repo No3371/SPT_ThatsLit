@@ -33,7 +33,7 @@ namespace ThatsLit
              || !ThatsLitPlugin.EnabledLighting.Value)
                 return true;
 
-            if (Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
+            if (Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
 
             ThatsLitPlayer player = null;
             Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
@@ -55,7 +55,7 @@ namespace ThatsLit
             }
             ThatsLitPlugin.swExtraVisDis.MaybeResume();
 
-            bool thermalActive = false, nvgActive = false, scope = false;
+            bool thermalActive = false, nvgActive = false;
             float thermalRange = 0;
 
             var botNVG = __instance.Owner?.NightVision;
@@ -67,11 +67,10 @@ namespace ThatsLit
             }
             else
             {
-                EFT.InventoryLogic.SightComponent sightMod = __instance.Owner.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
+                EFT.InventoryLogic.SightComponent sightMod = __instance.Owner?.GetPlayer?.ProceduralWeaponAnimation?.CurrentAimingMod;
                 if (sightMod != null)
                 {
-                    scope = true;
-                    ThatsLitCompat.Scopes.TryGetValue(sightMod.Item.TemplateId, out var scopeCompat);
+                    ThatsLitCompat.Scopes.TryGetValue(sightMod.Item?.TemplateId, out var scopeCompat);
                     if (scopeCompat?.TemplateInstance?.thermal != null)
                     {
                         thermalActive = true;
