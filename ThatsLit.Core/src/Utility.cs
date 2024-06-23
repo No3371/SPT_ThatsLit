@@ -808,5 +808,10 @@ namespace ThatsLit
 
             return base3x3TerrainScore * sizeInViewFactor;
         }
+
+        internal static bool IsPMCSpawnType (WildSpawnType? spawnType)
+        {
+            return spawnType != null && (int) spawnType == 47 || (int) spawnType == 48; // sptUsec = 47, sptBear = 48
+        }
     }
 }

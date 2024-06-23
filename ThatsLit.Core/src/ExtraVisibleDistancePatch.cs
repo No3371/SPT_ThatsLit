@@ -29,7 +29,8 @@ namespace ThatsLit
              || (part.Key?.Owner?.IsAI ?? true) == true
              || !ThatsLitPlugin.EnabledMod.Value
              || ThatsLitPlugin.ExtraVisionDistanceScale.Value == 0
-             || !ThatsLitPlugin.EnabledLighting.Value)
+             || !ThatsLitPlugin.EnabledLighting.Value
+             || ThatsLitPlugin.PMCOnlyMode.Value && !Utility.IsPMCSpawnType(__instance.Owner?.Profile?.Info?.Settings?.Role))
                 return true;
 
             if (Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;

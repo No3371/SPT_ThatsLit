@@ -35,6 +35,8 @@ namespace ThatsLit.Patches.Vision
                 return true; // SKIP. Only works when the bot hasn't see the player. IsVisible means the player is already seen.
             if (!ThatsLitPlugin.EnabledMod.Value || !ThatsLitPlugin.EnabledEncountering.Value)
                 return true;
+            if (ThatsLitPlugin.PMCOnlyMode.Value && !Utility.IsPMCSpawnType(__instance.Owner?.Profile?.Info?.Settings?.Role))
+                return true;
             if (__instance.Owner == null)
                 return true;
     
