@@ -45,9 +45,10 @@ namespace ThatsLit.Patches.Vision
                 return;
             }
 
-            var interruptChance = Mathf.InverseLerp(50f, 10f - caution, enemy.Distance);
-            interruptChance *= interruptChance;
-            interruptChance += Mathf.InverseLerp(20f, 10f - caution, enemy.Distance) * 0.1f;
+            var interruptChance = Mathf.InverseLerp(35f - caution * 2f, 10f - caution, enemy.Distance);
+            interruptChance *= interruptChance * interruptChance;
+            interruptChance = Mathf.Abs(interruptChance);
+            interruptChance += Mathf.InverseLerp(15f - caution, 10f - caution, enemy.Distance) * 0.1f;
             interruptChance *= Mathf.InverseLerp(75f, 10f, visionAngleDelta);
             if (player.Player.IsInPronePose)
                 interruptChance /= 2f;
