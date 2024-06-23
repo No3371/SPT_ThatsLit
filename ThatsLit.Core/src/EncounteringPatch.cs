@@ -4,7 +4,6 @@ using System.Reflection;
 using UnityEngine;
 using Comfort.Common;
 using EFT;
-using System;
 
 namespace ThatsLit.Patches.Vision
 {
@@ -96,10 +95,12 @@ namespace ThatsLit.Patches.Vision
                 if ((rand3 < vagueHintAngleFactor)
                  || rand3 < GetSurpriseChanceInFront())
                 {
-                    if (player.DebugInfo != null) player.DebugInfo.vagueHint++;
-                    var vagueSource = botPos + botEyeToPlayerBody * (1f + 0.2f * srand); //  +-20% distance
-                    vagueSource += Vector3.Cross(Vector3.up, botEyeToPlayerBody).normalized * srand2 * distance / 3f;
-                    vagueSource += Vector3.up * rand3 * distance / 3f; // ~+30% height
+                    if (player.DebugInfo != null)
+                        player.DebugInfo.vagueHint++;
+                    var vagueSource = UnityEngine.Random.insideUnitSphere * 50f * Mathf.InverseLerp(3.5f, 100f, distance); //  ~50m deviation
+                    if (vagueSource.y < 0)
+                        vagueSource.y = 0;
+                    vagueSource += __instance.Person.MainParts[BodyPartType.body].Position;
                     if (__instance.Owner?.Memory != null
                      && __instance.Owner?.Covers != null)
                     {
