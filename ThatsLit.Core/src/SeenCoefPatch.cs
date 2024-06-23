@@ -22,8 +22,6 @@ namespace ThatsLit
             return ReflectionHelper.FindMethodByArgTypes(typeof(EnemyInfo), new Type[] { typeof(BifacialTransform), typeof(BifacialTransform), typeof(BotDifficultySettingsClass), typeof(AIData), typeof(float), typeof(Vector3) }); ;
         }
 
-        private static float nearestRecent;
-
         [PatchPostfix]
         [HarmonyAfter("me.sol.sain")]
         public static void PatchPostfix(EnemyInfo __instance, BifacialTransform BotTransform, BifacialTransform enemy, float personalLastSeenTime, Vector3 personalLastSeenPos, ref float __result)
@@ -206,10 +204,10 @@ namespace ThatsLit
             if (visionAngleDelta > 85) canSeeLaserSub = false;
 
             bool nearestAI = false;
-            float lastNearestDistance = Vector3.Distance(player.Player.Position, player.lastNearest.Position);
-            if (player.lastNearest == null || lastNearestDistance > dis)
+            if (player.lastNearest == null || Vector3.Distance(player.Player.Position, player.lastNearest?.Position ?? Vector3.zero) > dis)
             {
                 player.lastNearest = __instance.Owner;
+                float lastNearestDistance = Vector3.Distance(player.Player.Position, player.lastNearest.Position);
                 if (player.DebugInfo != null)
                 {
                     player.DebugInfo.lastNearest = lastNearestDistance;
