@@ -481,21 +481,9 @@ namespace ThatsLit
 
         float TransformCloudness (float cloudiness)
         {
-            if (cloudiness == 0) return 0;
-            if (cloudiness >= 0)
-            {
-                // Ease out
-                var eval = Mathf.InverseLerp(cloudiness, 0f, 1.5f);
-                eval = Mathf.Sin(eval * Mathf.PI / 2f);
-                return eval;
-            }
-            else
-            {
-                // Bezier
-                var eval = Mathf.InverseLerp(cloudiness, 0f, -1.25f);
-                eval = eval * eval * (3f - 2f * eval);
-                return eval;
-            }
+            var eval = Mathf.InverseLerp(cloudiness, 1.15f, -1.5f);
+            eval = eval * eval * (3f - 2f * eval);
+            return eval;
         }
 
         internal virtual float CalculateSunLightTimeFactor(string locationId, float time)
