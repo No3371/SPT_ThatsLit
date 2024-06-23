@@ -39,7 +39,11 @@ namespace ThatsLit.Patches.Vision
             Vector3 botVisionDir = ___BotOwner.GetPlayer.LookDirection;
             Vector3 eyeToPlayerBody = player.Player.MainParts[BodyPartType.body].Position - ___BotOwner.MainParts[BodyPartType.head].Position;
             var visionAngleDelta = Vector3.Angle(botVisionDir, eyeToPlayerBody);
-            if (visionAngleDelta > 85f) return;
+            if (visionAngleDelta > 85f)
+            {
+                ThatsLitPlugin.swNoBushOverride.Stop();
+                return;
+            }
 
             var interruptChance = Mathf.InverseLerp(50f, 10f - caution, enemy.Distance);
             interruptChance *= interruptChance;
