@@ -25,5 +25,7 @@ namespace ThatsLit
         internal int nearestCaution;
         internal Vector3 nearestOffset, sniperHintOffset;
         internal float sniperHintChance;
+        internal int flashLightHint;
+        internal int forceLooks, sideLooks;
     }
 }
