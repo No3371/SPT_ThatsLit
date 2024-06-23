@@ -102,7 +102,7 @@ namespace ThatsLit
             }
 
             BaseUnityPlugin updntf = pluginInfo.Instance;
-            updntf.GetType().GetMethod("CheckForUpdate").Invoke(updntf, new object[] {this, url});
+            updntf.GetType().GetMethod("CheckForUpdate", new Type[] { typeof(BaseUnityPlugin), typeof(string)}).Invoke(updntf, new object[] {this, url});
         }
 
         private void BindConfigs()
