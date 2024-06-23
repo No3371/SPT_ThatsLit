@@ -53,14 +53,15 @@ namespace ThatsLit
         internal static ManagedStopWatch swUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis, swNoBushOverride, swBlindFireScatter;
         static ThatsLitPlugin ()
         {
-            swUpdate = new ManagedStopWatch("Update");
-            swGUI = new ManagedStopWatch("GUI");
-            swFoliage = new ManagedStopWatch("Foliage");
-            swTerrain = new ManagedStopWatch("Terrain");
-            swSeenCoef = new ManagedStopWatch("SeenCoef");
-            swEncountering = new ManagedStopWatch("Encountering");
-            swExtraVisDis = new ManagedStopWatch("ExtraVisDis");
-            swNoBushOverride = new ManagedStopWatch("NoBushOverride");
+            swUpdate           = new ManagedStopWatch("Update");
+            swGUI              = new ManagedStopWatch("GUI");
+            swFoliage          = new ManagedStopWatch("Foliage");
+            swTerrain          = new ManagedStopWatch("Terrain");
+            swScoreCalc          = new ManagedStopWatch("ScoreCalc");
+            swSeenCoef         = new ManagedStopWatch("SeenCoef");
+            swEncountering     = new ManagedStopWatch("Encountering");
+            swExtraVisDis      = new ManagedStopWatch("ExtraVisDis");
+            swNoBushOverride   = new ManagedStopWatch("NoBushOverride");
             swBlindFireScatter = new ManagedStopWatch("BlindFireScatter");
         }
         private void Awake()
