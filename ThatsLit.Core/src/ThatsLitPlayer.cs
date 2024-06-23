@@ -76,6 +76,7 @@ namespace ThatsLit
         }
         private CheckStimEffectProxy checkEffectDelegate;
         static float canLoadTime = 0;
+        internal RaycastHit flashLightHit;
         internal BotOwner lastNearest;
         public static bool CanLoad ()
         {
@@ -379,6 +380,7 @@ namespace ThatsLit
 
             overheadHaxRating = UpdateOverheadHaxCastRating(bodyPos, overheadHaxRating);
             surroundingRating = UpdateSurroundingCastRating(bodyPos, surroundingRating);
+            CastFlashlight();
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
             //     envCam.transform.localPosition = envCamOffset;
@@ -432,6 +434,114 @@ namespace ThatsLit
             }
 
             ThatsLitPlugin.swUpdate.Stop();
+        }
+
+        void FixedUpdate ()
+        {
+            if (ThatsLitPlugin.BotLookDirectionTweaks.Value == false)
+                return;
+
+            if (Player == null) return;
+            if (Player?.HealthController?.IsAlive == false)
+            {
+                return;
+            }
+            if (Singleton<ThatsLitGameworld>.Instance == null)
+                return;
+            
+            if (!ThatsLitPlugin.EnabledMod.Value)
+            {
+                return;
+            }
+
+            Player nearestBotPlayer = lastNearest?.GetPlayer;
+            if (nearestBotPlayer != null
+             && nearestBotPlayer.MainParts != null
+             && nearestBotPlayer.MainParts.ContainsKey(BodyPartType.head)
+             && lastNearest.Steering != null
+             && lastNearest.Mover != null)
+            {
+                var nearestBotGoalEnemy = lastNearest.Memory?.GoalEnemy;
+
+                ThatsLitGameworld.SingleIdThrottler throttler;
+                Singleton<ThatsLitGameworld>.Instance.singleIdThrottlers.TryGetValue(lastNearest.ProfileId, out throttler);
+
+                if (nearestBotGoalEnemy?.Person == Player
+                 && Time.time - throttler.lastForceLook > 1f
+                 && lastNearest.Mover.IsMoving == true && nearestBotPlayer.IsSprintEnabled == false
+                 && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
+                 && Vector3.Distance(Player.Position, lastNearest.Position) < 5f
+                 && UnityEngine.Random.Range(0f, 1f) < 0.6f * Mathf.InverseLerp(15f, 5f, Time.time - nearestBotGoalEnemy.TimeLastSeenReal) + 0.5f * Mathf.InverseLerp(7.5f, 1f, Vector3.Distance(Player.Position, nearestBotGoalEnemy.EnemyLastPositionReal)))
+                {
+                    lastNearest.Steering.LookToDirection(Player.Position);
+                    if (DebugInfo != null)
+                        DebugInfo.forceLooks++;
+                    
+                    throttler.lastForceLook = Time.time;
+                    Singleton<ThatsLitGameworld>.Instance.singleIdThrottlers[lastNearest.ProfileId] = throttler;
+                    return;
+                }
+
+                if (nearestBotGoalEnemy?.Person == Player
+                 && nearestBotPlayer.Velocity.sqrMagnitude > 0.25f
+                 && Time.time - lastOutside > 1f
+                 && Time.time - throttler.lastForceLook > 1f
+                 && UnityEngine.Random.Range(0f, 1f) < 0.05f * Mathf.InverseLerp(10f, 2f, nearestBotGoalEnemy.Distance))
+                {
+                    lastNearest.Steering?.LookToDirection(Player.Position);
+                    if (DebugInfo != null)
+                        DebugInfo.forceLooks++;
+
+                    throttler.lastForceLook = Time.time;
+                    Singleton<ThatsLitGameworld>.Instance.singleIdThrottlers[lastNearest.ProfileId] = throttler;
+                    return;
+                }
+
+                if (lastNearest.Mover.IsMoving == true && !nearestBotPlayer.IsSprintEnabled
+                 && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
+                 && Time.time - throttler.lastSideLook > 10f
+                 && UnityEngine.Random.Range(0f, 1f) < 0.15f)
+                {
+                    lastNearest.StartCoroutine(MakeBotPeekSide(lastNearest));
+                    if (DebugInfo != null)
+                        DebugInfo.sideLooks++;
+                    
+                    throttler.lastSideLook = Time.time;
+                    Singleton<ThatsLitGameworld>.Instance.singleIdThrottlers[lastNearest.ProfileId] = throttler;
+                    return;
+                }
+
+                Vector3 botHeadPos = nearestBotPlayer.MainParts[BodyPartType.head].Position;
+                if (flashLightHit.collider != null
+                 && Time.time - throttler.lastForceLook > 1f
+                 && botHeadPos != null
+                 && (nearestBotGoalEnemy?.Person == Player || nearestBotGoalEnemy == null)
+                 && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
+                 && Vector3.Angle(lastNearest.LookDirection, flashLightHit.normal) > 90f
+                 && Vector3.Angle(lastNearest.LookDirection, flashLightHit.point - botHeadPos) < 90f
+                 && Vector3.Angle(lastNearest.LookDirection, Player.Position - botHeadPos) > 30f
+                 && UnityEngine.Random.Range(0f, 1f) < 0.05f * Mathf.InverseLerp(20f, 2f, Vector3.Distance(lastNearest.Position, Player.Position)))
+                {
+                    lastNearest.Steering?.LookToDirection(Player.Position);
+                    if (DebugInfo != null)
+                        DebugInfo.forceLooks++;
+                    
+                    throttler.lastForceLook = Time.time;
+                    Singleton<ThatsLitGameworld>.Instance.singleIdThrottlers[lastNearest.ProfileId] = throttler;
+                    return;
+                }
+            }
+            
+        }
+
+
+        IEnumerator MakeBotPeekSide (BotOwner bot)
+        {
+            Vector3 lookDirection = bot.LookDirection;
+            Vector3 dir = lookDirection.RotateAroundPivot(Vector3.up, Quaternion.Euler(0f, UnityEngine.Random.Range(-180f, 180f), 0f));
+            bot.Steering?.LookToDirection(dir);
+            yield return new WaitForSeconds(UnityEngine.Random.Range(0, 4f));
+            bot.Steering?.LookToMovingDirection();
         }
 
         private void UpdateAmbienceShadowRating()
@@ -555,11 +665,25 @@ namespace ThatsLit
         private bool SurroundingCast (Vector3 from, out RaycastHit hit)
         {
             Vector3 cast = new Vector3(1, 0, 0);
-            int slice = Time.frameCount % 90;
-            cast = Quaternion.Euler(0, slice * 4, 0) * cast;
+            int slice = Time.frameCount % 60;
+            cast = Quaternion.Euler(0, slice * 6, 0) * cast;
             
             var ray = new Ray(from, cast);
-            return Physics.Raycast(ray, out hit, 5);
+            return Physics.Raycast(ray, out hit, 5, ambienceRaycastMask);
+        }
+
+        private void CastFlashlight ()
+        {
+            if (!LightAndLaserState.AnyLightMain)
+            {
+                flashLightHit = default;
+                return;
+            }
+            if (Player.HandsController is Player.FirearmController fc)
+            {
+                var ray = new Ray(fc.FireportPosition, fc.WeaponDirection + UnityEngine.Random.insideUnitSphere / 10f);
+                Physics.Raycast(ray, out flashLightHit, 20, ambienceRaycastMask);
+            }
         }
 
         private bool RaycastIgnoreGlass (Ray ray, float distance, LayerMask mask, out RaycastHit hit, out RaycastHit lastPenetrated, int depth = 0, int maxDepth = 10)
@@ -776,7 +900,7 @@ namespace ThatsLit
             float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
             
             if (layoutCall)
-                infoCache1 = $"  IMPACT: {DebugInfo.lastCalcFrom:0.000} -> {DebugInfo.lastCalcTo:0.000} ({DebugInfo.lastFactor2:0.000} <- {DebugInfo.lastFactor1:0.000} <- {DebugInfo.lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {DebugInfo.calced} (+{DebugInfo.calcedLastFrame})\n  ENCOUNTER: {DebugInfo.encounter}  V.HINT: { DebugInfo.vagueHint }  V.CANCEL: { DebugInfo.vagueHintCancel }  SIG.D: { DebugInfo.signalDanger }\n  LAST SHOT: { lastShotVector } { Time.time - lastShotTime:0.0}s { DebugInfo.lastEncounterShotAngleDelta }deg  -{ DebugInfo.lastEncounteringShotCutoff }x\n  LAST_PARTS: { DebugInfo.lastVisiblePartsFactor} (x9)  G.OVL: { DebugInfo.lastGlobalOverlookChance:P1}\n  V.DIS.COMP: { DebugInfo.lastDisCompThermal }(T)  { DebugInfo.lastDisCompNVG }(NVG)  { DebugInfo.lastDisCompDay }(Day)  { DebugInfo.lastDisComp }  Focus: { DebugInfo.lastNearestFocusAngleX:0.0}degX/{ DebugInfo.lastNearestFocusAngleY:0.0}degY\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000}  3x3/5x5: { TerrainDetails?.RecentDetailCount3x3 }/{ TerrainDetails?.RecentDetailCount5x5 } (score-{ PlayerLitScoreProfile?.detailBonusSmooth:0.00})  FOLIAGE: {Foliage?.FoliageScore:0.000} ({Foliage?.FoliageCount}) (H{Foliage?.Nearest?.dis:0.00} to {Foliage?.Nearest?.name}) RAT: { DebugInfo.lastBushRat:0.00}\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {Utility.GetInGameDayTime():0.000} / WINTER: {Singleton<ThatsLitGameworld>.Instance.IsWinter}\n  POSE: {poseFactor} SPEED: { Player.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}  SRD: { surroundingRating:0.000}\n  {DebugInfo.nearestOffset}  Caution: { DebugInfo.nearestCaution }  NoBush.Cancel: {DebugInfo.cancelledSAINNoBush}/{DebugInfo.attemptToCancelSAINNoBush} {DebugInfo.lastInterruptChance:P1}  {DebugInfo.lastInterruptChanceDis:0.0}m SNP: {DebugInfo.sniperHintOffset} ({DebugInfo.sniperHintChance:P1})";
+                infoCache1 = $"  IMPACT: {DebugInfo.lastCalcFrom:0.000} -> {DebugInfo.lastCalcTo:0.000} ({DebugInfo.lastFactor2:0.000} <- {DebugInfo.lastFactor1:0.000} <- {DebugInfo.lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {DebugInfo.calced} (+{DebugInfo.calcedLastFrame})\n  ENCOUNTER: {DebugInfo.encounter}  V.HINT: { DebugInfo.vagueHint }  V.CANCEL: { DebugInfo.vagueHintCancel }  SIG.D: { DebugInfo.signalDanger }\n  LAST SHOT: { lastShotVector } { Time.time - lastShotTime:0.0}s { DebugInfo.lastEncounterShotAngleDelta }deg  -{ DebugInfo.lastEncounteringShotCutoff }x\n  LAST_PARTS: { DebugInfo.lastVisiblePartsFactor} (x9)  G.OVL: { DebugInfo.lastGlobalOverlookChance:P1}\n  V.DIS.COMP: { DebugInfo.lastDisCompThermal }(T)  { DebugInfo.lastDisCompNVG }(NVG)  { DebugInfo.lastDisCompDay }(Day)  { DebugInfo.lastDisComp }  Focus: { DebugInfo.lastNearestFocusAngleX:0.0}degX/{ DebugInfo.lastNearestFocusAngleY:0.0}degY\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000}  3x3/5x5: { TerrainDetails?.RecentDetailCount3x3 }/{ TerrainDetails?.RecentDetailCount5x5 } (score-{ PlayerLitScoreProfile?.detailBonusSmooth:0.00})  FOLIAGE: {Foliage?.FoliageScore:0.000} ({Foliage?.FoliageCount}) (H{Foliage?.Nearest?.dis:0.00} to {Foliage?.Nearest?.name}) RAT: { DebugInfo.lastBushRat:0.00}\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {Utility.GetInGameDayTime():0.000} / WINTER: {Singleton<ThatsLitGameworld>.Instance.IsWinter}\n  POSE: {poseFactor} SPEED: { Player.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}  SRD: { surroundingRating:0.000}\n  {DebugInfo.nearestOffset}  Caution: { DebugInfo.nearestCaution }  NoBush.Cancel: {DebugInfo.cancelledSAINNoBush}/{DebugInfo.attemptToCancelSAINNoBush} {DebugInfo.lastInterruptChance:P1}  {DebugInfo.lastInterruptChanceDis:0.0}m SNP: {DebugInfo.sniperHintOffset} ({DebugInfo.sniperHintChance:P1})  FL: {flashLightHit.point:000.0}  HINT:{DebugInfo.flashLightHint}\n  F.L:{DebugInfo.forceLooks}  S.L:{DebugInfo.sideLooks}";
             GUILayout.Label(infoCache1);
             // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
             
