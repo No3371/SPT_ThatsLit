@@ -90,6 +90,10 @@ namespace ThatsLit
         {
             get => (storage & 0b_1010_1010) > 0;
         }
+        public bool AnyLightMain
+        {
+            get => (storage & 0b_1010_0000) > 0;
+        }
         public bool AnyLaser
         {
             get => (storage & 0b_0101_0101) > 0;
