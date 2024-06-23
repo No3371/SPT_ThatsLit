@@ -158,32 +158,35 @@ namespace ThatsLit.Patches.Vision
 
             ThatsLitPlugin.swEncountering.MaybeResume();
 
+            var caution = __instance.Owner.Id % 10;
             BotImpactType botImpactType = Utility.GetBotImpactType(__instance.Owner?.Profile?.Info?.Settings?.Role ?? WildSpawnType.assault);
             float rand = UnityEngine.Random.Range(0f, 1f);
+            rand *= rand;
             float rand2 = UnityEngine.Random.Range(0f, 1f);
+            rand2 *= rand2;
             if (__state.botSprinting)
             {
                 // Force a ~0.45s delay
                 aim.SetNextAimingDelay(
-                    (0.07f + rand * 0.3f)
+                    (caution * 0.01f + rand * (0.25f + caution * 0.01f))
                     * (__state.unexpected? 1f : 0.5f)
-                    * (0.05f + Mathf.InverseLerp(0, 25, __state.visionDeviation))
+                    * (caution * 0.01f + Mathf.InverseLerp(0, 25, __state.visionDeviation))
                     * (botImpactType == BotImpactType.BOSS? 0.25f : botImpactType == BotImpactType.FOLLOWER? 0.5f : 1f));
 
                 // ~30% chance to force a miss
-                if (rand2 < 0.2f  * (__state.unexpected? 1f : 0.5f) * Mathf.InverseLerp(0, 30, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
+                if (rand2 < 0.225f  * (__state.unexpected? 1f : 0.5f) * Mathf.InverseLerp(0, 30, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
                     aim.NextShotMiss();
             }
             else if (__state.unexpected)
             {
                 // Force a ~0.15s delay
                 aim.SetNextAimingDelay(
-                    rand * 0.15f
+                    rand * (0.18f + caution * 0.01f)
                     * Mathf.InverseLerp(0, 25f, __state.visionDeviation)
                     * (botImpactType == BotImpactType.BOSS? 0.25f : botImpactType == BotImpactType.FOLLOWER? 0.5f : 1f));
 
                 // ~40% chance to force a miss
-                if (rand2 < 0.2f * Mathf.InverseLerp(0, 40f, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
+                if (rand2 < 0.225f * Mathf.InverseLerp(0, 40f, __state.visionDeviation) + 0.2f * Mathf.InverseLerp(0, 5, __instance.Person?.Velocity.magnitude ?? 0))
                     aim.NextShotMiss();
             }
 
