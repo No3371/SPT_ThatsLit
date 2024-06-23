@@ -15,7 +15,6 @@ namespace ThatsLit
     public class ExtraVisibleDistancePatch : ModulePatch
     {
         internal static System.Diagnostics.Stopwatch _benchmarkSW;
-        static float nearestDis;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -37,13 +36,14 @@ namespace ThatsLit
 
             ThatsLitPlayer player = null;
             Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
-            if (player == null) return true;
+            if (player == null || player.PlayerLitScoreProfile == null)
+                return true;
 
-            nearestDis += 0.5f;
+            ThatsLitPlugin.swExtraVisDis.MaybeResume();
+
             bool isNearest = false;
-            if (__instance.Distance < nearestDis)
+            if (player.lastNearest == __instance.Owner)
             {
-                nearestDis = __instance.Distance;
                 isNearest = true;
                 if (player.DebugInfo != null)
                 {
@@ -53,7 +53,6 @@ namespace ThatsLit
                     player.DebugInfo.lastDisCompDay = 0f;
                 }
             }
-            ThatsLitPlugin.swExtraVisDis.MaybeResume();
 
             bool thermalActive = false, nvgActive = false;
             float thermalRange = 0;
