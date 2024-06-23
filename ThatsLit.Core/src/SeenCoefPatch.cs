@@ -872,11 +872,10 @@ namespace ThatsLit
             focusLUTIndex %= 61;
             Vector3 simFreeLookDir = botVisionDir;
             var lutLookup1 = focusLUTs[caution][focusLUTIndex];
-            lutLookup1 += 15f * sin;
+            lutLookup1 += (20f - caution) * sin;
             lutLookup1 = Mathf.Clamp(lutLookup1, -90f, 90f);
             var lutLookup2 = focusLUTs[(caution + focusLUTIndex) % 10][focusLUTIndex];
             lutLookup2  = Mathf.Abs(lutLookup2 / 2f);
-            lutLookup2 += 5f * sin;
             lutLookup2 = Mathf.Clamp(lutLookup2, 0, 45f);
             simFreeLookDir = simFreeLookDir.RotateAroundPivot(Vector3.up, new Vector3(0f, lutLookup1));
             simFreeLookDir = simFreeLookDir.RotateAroundPivot(Vector3.Cross(Vector3.up, botVisionDir), new Vector3(0f, -lutLookup2));
@@ -896,7 +895,7 @@ namespace ThatsLit
             }
             var simFocusDeltaFactor = Mathf.InverseLerp(0, 120f, Vector3.Angle(botVisionDir, simFreeLookDir));
             simFocusDeltaFactor -= 0.5f;
-            __result *= 1f + 0.3f * notSeenRecentAndNear * simFocusDeltaFactor;
+            __result *= 1f + (0.3f + rand1 * 0.2f) * notSeenRecentAndNear * simFocusDeltaFactor;
             if (player.DebugInfo != null && nearestAI)
             {
                 player.DebugInfo.lastNearestFocusAngleX = lutLookup1;
