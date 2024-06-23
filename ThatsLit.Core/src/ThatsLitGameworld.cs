@@ -69,6 +69,8 @@ namespace ThatsLit
                 Logger.LogError("Dispose Component Error");
             }
 
+            if (Singleton<ThatsLitGameworld>.Instance == this)
+                Singleton<ThatsLitGameworld>.Instance = null;
             ThatsLitAPI.OnGameWorldDestroyed?.Invoke();
         }
         public GameWorld GameWorld => Singleton<GameWorld>.Instance;
@@ -78,9 +80,23 @@ namespace ThatsLit
         public RaidSettings activeRaidSettings;
         public bool IsWinter { get; private set; }
         internal bool foliageUnavailable, terrainDetailsUnavailable;
+        internal Dictionary<(string, string), DoubleIdThrottler> doubleIdThrottlers;
+        internal Dictionary<string, SingleIdThrottler> singleIdThrottlers;
+
+        internal struct DoubleIdThrottler
+        {
+        }
+        internal struct SingleIdThrottler
+        {
+            internal float lastAddedDangerPoint;
+            internal float lastSideLook, lastForceLook;
+        }
 
         void Awake ()
         {
+            singleIdThrottlers = new();
+            doubleIdThrottlers = new();
+
             Singleton<ThatsLitGameworld>.Instance = this;
 
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;

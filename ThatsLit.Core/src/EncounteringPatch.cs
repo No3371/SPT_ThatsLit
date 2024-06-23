@@ -103,9 +103,17 @@ namespace ThatsLit.Patches.Vision
                     if (__instance.Owner?.Memory != null
                      && __instance.Owner?.Covers != null)
                     {
-                        __instance.Owner?.DangerPointsData?.AddPointOfDanger(new PlaceForCheck(vagueSource, PlaceForCheckType.simple), true);
-                        if (player.DebugInfo != null)
-                            player.DebugInfo.signalDanger++;
+                        ThatsLitGameworld.SingleIdThrottler throttler;
+                        Singleton<ThatsLitGameworld>.Instance.singleIdThrottlers.TryGetValue(__instance.Owner.ProfileId, out throttler);
+                        if (Time.time - throttler.lastAddedDangerPoint > 1f)
+                        {
+
+                            if (player.DebugInfo != null)
+                                player.DebugInfo.signalDanger++;
+                            __instance.Owner?.DangerPointsData?.AddPointOfDanger(new PlaceForCheck(vagueSource, PlaceForCheckType.simple), true);
+                            throttler.lastAddedDangerPoint = Time.time;
+                            Singleton<ThatsLitGameworld>.Instance.singleIdThrottlers[__instance.Owner.ProfileId] = throttler;
+                        }
                     }
 
                     if (__instance.Owner?.BotsGroup?.CoverPointMaster != null
