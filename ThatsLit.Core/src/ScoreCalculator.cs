@@ -481,8 +481,9 @@ namespace ThatsLit
 
         float TransformCloudness (float cloudiness)
         {
-            var eval = Mathf.InverseLerp(cloudiness, 1.15f, -1.5f);
+            var eval = Mathf.InverseLerp(1.15f, -1.5f, cloudiness);
             eval = eval * eval * (3f - 2f * eval);
+            eval = eval * 2.2f;
             return eval;
         }
 
@@ -549,7 +550,7 @@ namespace ThatsLit
             return maxMoonlightScore;
         }
         protected virtual float MinBaseAmbienceScore { get => -0.9f; }
-        protected virtual float MaxBaseAmbienceScore { get => 0.0f; }
+        protected virtual float MaxBaseAmbienceScore { get => -0.1f; }
         /// <summary>
         /// The ambience change between c-1 and c1 during the darkest hours
         /// </summary>
@@ -592,7 +593,7 @@ namespace ThatsLit
     {
         
         protected override float MinBaseAmbienceScore => -0.82f;
-        protected override float MaxBaseAmbienceScore => -0.05f;
+        protected override float MaxBaseAmbienceScore => -0.1f;
         protected override float MinAmbienceLum => 0.011f;
         protected override float MaxAmbienceLum => 0.011f;
         protected override float ThresholdShine { get => 0.4f; }
@@ -677,7 +678,7 @@ namespace ThatsLit
         private bool isPlayerInParking;
 
         protected override float MinBaseAmbienceScore => -0.8f;
-        protected override float MaxBaseAmbienceScore { get => -0.1f; } // indoor
+        protected override float MaxBaseAmbienceScore { get => -0.15f; } // indoor
         protected override float MaxMoonlightScore => base.MaxMoonlightScore * 0.75f;
         protected override float MinAmbienceLum => 0.008f;
         protected override float MaxAmbienceLum => 0.008f;
@@ -870,7 +871,7 @@ namespace ThatsLit
     {
         
         protected override float MinBaseAmbienceScore => -0.75f;
-        protected override float MaxBaseAmbienceScore => -0.1f;
+        protected override float MaxBaseAmbienceScore => -0.15f;
         protected override float MaxSunlightScore { get => 0.25f; }
         protected override float MaxMoonlightScore { get => 0.1f; }
         protected override float MinAmbienceLum { get => 0.011f; }

@@ -379,7 +379,7 @@ namespace ThatsLit
             UpdateAmbienceShadowRating();
 
             overheadHaxRating = UpdateOverheadHaxCastRating(bodyPos, overheadHaxRating);
-            surroundingRating = UpdateSurroundingCastRating(bodyPos, surroundingRating);
+            // surroundingRating = UpdateSurroundingCastRating(bodyPos, surroundingRating);
             CastFlashlight();
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
@@ -683,7 +683,7 @@ namespace ThatsLit
             }
             if (Player.HandsController is Player.FirearmController fc)
             {
-                var ray = new Ray(fc.FireportPosition, fc.WeaponDirection + UnityEngine.Random.insideUnitSphere / 10f);
+                var ray = new Ray(fc.FireportPosition, fc.WeaponDirection + UnityEngine.Random.insideUnitSphere / 7.5f);
                 Physics.Raycast(ray, out flashLightHit, 20, ambienceRaycastMask);
             }
         }
