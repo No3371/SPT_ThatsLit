@@ -19,10 +19,12 @@ namespace ThatsLit.Patches.Vision
         [PatchPrefix]
         public static void PatchPrefix(ref bool blockShoot, ref BotOwner ___BotOwner)
         {
-            if (!ThatsLitPlugin.InterruptSAINNoBush.Value) return;
+            if (!ThatsLitPlugin.InterruptSAINNoBush.Value)
+                return;
 
             var enemy = ___BotOwner?.Memory?.GoalEnemy;
-            if (enemy == null) return;
+            if (enemy?.Person == null)
+                return;
 
             float lastSeenPosDelta = (enemy.Person.Position - enemy.EnemyLastPositionReal).magnitude;
             float sinceSeen = Time.time - enemy.PersonalSeenTime;
