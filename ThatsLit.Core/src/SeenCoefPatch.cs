@@ -856,40 +856,44 @@ namespace ThatsLit
             __result += (0.04f * rand2) * partsHidingCutoff;
             __result *= 1f + (0.15f + 0.85f * rand1) * partsHidingCutoff * 9f;
 
-            // Simulated Free Look
-            float sin = 0.75f * Mathf.Sin(Time.time / ((float)(1f + caution))) + 0.25f * Mathf.Sin(Time.time);
-            int focusLUTIndex = (int) ((Time.time + sin * 0.5f) / (float)(3f + caution / 5f));
-            focusLUTIndex %= 61;
-            Vector3 simFreeLookDir = botVisionDir;
-            var lutLookup1 = focusLUTs[caution][focusLUTIndex];
-            lutLookup1 += (20f - caution) * sin;
-            lutLookup1 = Mathf.Clamp(lutLookup1, -90f, 90f);
-            var lutLookup2 = focusLUTs[(caution + focusLUTIndex) % 10][focusLUTIndex];
-            lutLookup2  = Mathf.Abs(lutLookup2 / 2f);
-            lutLookup2 = Mathf.Clamp(lutLookup2, 0, 45f);
-            simFreeLookDir = simFreeLookDir.RotateAroundPivot(Vector3.up, new Vector3(0f, lutLookup1));
-            simFreeLookDir = simFreeLookDir.RotateAroundPivot(Vector3.Cross(Vector3.up, botVisionDir), new Vector3(0f, -lutLookup2));
-            if (playerFC?.IsAiming == true)
+            float lastSeenGoalEnemyTime = Time.time - __instance.Owner?.Memory?.GoalEnemy?.TimeLastSeen ?? 0;
+            if (lastSeenGoalEnemyTime > 2f)
             {
-                simFreeLookDir = new Vector3(
-                    Mathf.Lerp(simFreeLookDir.x, botVisionDir.x, 0.5f),
-                    Mathf.Lerp(simFreeLookDir.y, botVisionDir.y, 0.5f),
-                    Mathf.Lerp(simFreeLookDir.z, botVisionDir.z, 0.5f));
-            }
-            if (activeGoggle != null)
-            {
-                simFreeLookDir = new Vector3(
-                    Mathf.Lerp(simFreeLookDir.x, botVisionDir.x, 0.5f),
-                    Mathf.Lerp(simFreeLookDir.y, botVisionDir.y, 0.5f),
-                    Mathf.Lerp(simFreeLookDir.z, botVisionDir.z, 0.5f));
-            }
-            var simFocusDeltaFactor = Mathf.InverseLerp(0, 120f, Vector3.Angle(botVisionDir, simFreeLookDir));
-            simFocusDeltaFactor -= 0.5f;
-            __result *= 1f + (0.3f + rand1 * 0.2f) * notSeenRecentAndNear * simFocusDeltaFactor;
-            if (player.DebugInfo != null && nearestAI)
-            {
-                player.DebugInfo.lastNearestFocusAngleX = lutLookup1;
-                player.DebugInfo.lastNearestFocusAngleY = lutLookup2;
+                // Simulated Free Look
+                float sin = 0.75f * Mathf.Sin(Time.time / ((float)(1f + caution))) + 0.25f * Mathf.Sin(Time.time);
+                int focusLUTIndex = (int) ((Time.time + sin * 0.5f) / (float)(3f + caution / 5f));
+                focusLUTIndex %= 61;
+                Vector3 simFreeLookDir = botVisionDir;
+                var lutLookup1 = focusLUTs[caution][focusLUTIndex];
+                lutLookup1 += (20f - caution) * sin;
+                lutLookup1 = Mathf.Clamp(lutLookup1, -90f, 90f);
+                var lutLookup2 = focusLUTs[(caution + focusLUTIndex) % 10][focusLUTIndex];
+                lutLookup2  = Mathf.Abs(lutLookup2 / 2f);
+                lutLookup2 = Mathf.Clamp(lutLookup2, 0, 45f);
+                simFreeLookDir = simFreeLookDir.RotateAroundPivot(Vector3.up, new Vector3(0f, lutLookup1));
+                simFreeLookDir = simFreeLookDir.RotateAroundPivot(Vector3.Cross(Vector3.up, botVisionDir), new Vector3(0f, -lutLookup2));
+                if (playerFC?.IsAiming == true)
+                {
+                    simFreeLookDir = new Vector3(
+                        Mathf.Lerp(simFreeLookDir.x, botVisionDir.x, 0.5f),
+                        Mathf.Lerp(simFreeLookDir.y, botVisionDir.y, 0.5f),
+                        Mathf.Lerp(simFreeLookDir.z, botVisionDir.z, 0.5f));
+                }
+                if (activeGoggle != null)
+                {
+                    simFreeLookDir = new Vector3(
+                        Mathf.Lerp(simFreeLookDir.x, botVisionDir.x, 0.5f),
+                        Mathf.Lerp(simFreeLookDir.y, botVisionDir.y, 0.5f),
+                        Mathf.Lerp(simFreeLookDir.z, botVisionDir.z, 0.5f));
+                }
+                var simFocusDeltaFactor = Mathf.InverseLerp(0, 120f, Vector3.Angle(botVisionDir, simFreeLookDir));
+                simFocusDeltaFactor -= 0.5f;
+                __result *= 1f + (0.3f + rand1 * 0.2f) * notSeenRecentAndNear * simFocusDeltaFactor * Mathf.InverseLerp(2f, 6f, lastSeenGoalEnemyTime);
+                if (player.DebugInfo != null && nearestAI)
+                {
+                    player.DebugInfo.lastNearestFocusAngleX = lutLookup1;
+                    player.DebugInfo.lastNearestFocusAngleY = lutLookup2;
+                }
             }
 
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
