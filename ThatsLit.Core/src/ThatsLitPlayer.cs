@@ -470,11 +470,11 @@ namespace ThatsLit
                  && nearestBotGoalEnemy?.HaveSeen == true
                  && Time.time - throttler.lastForceLook > 1f
                  && lastNearest.Mover.IsMoving == true && nearestBotPlayer.IsSprintEnabled == false
-                 && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
+                //  && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
                  && Vector3.Distance(Player.Position, lastNearest.Position) < 5f
                  && UnityEngine.Random.Range(0f, 1f) < 0.6f * Mathf.InverseLerp(15f, 5f, Time.time - nearestBotGoalEnemy.TimeLastSeenReal) + 0.5f * Mathf.InverseLerp(7.5f, 1f, Vector3.Distance(Player.Position, nearestBotGoalEnemy.EnemyLastPositionReal)))
                 {
-                    lastNearest.Steering.LookToDirection(Player.Position);
+                    lastNearest.Steering.LookToPoint(Player.Position);
                     if (DebugInfo != null)
                         DebugInfo.forceLooks++;
                     
@@ -485,12 +485,13 @@ namespace ThatsLit
 
                 if (nearestBotGoalEnemy?.Person == Player
                  && nearestBotGoalEnemy?.HaveSeen == true
-                 && nearestBotPlayer.Velocity.sqrMagnitude > 0.25f
+                 && Time.time - nearestBotGoalEnemy.TimeLastSeen < 10f
+                 && lastNearest.Mover.IsMoving == true && !nearestBotPlayer.IsSprintEnabled
                  && Time.time - lastOutside > 1f
                  && Time.time - throttler.lastForceLook > 1f
-                 && UnityEngine.Random.Range(0f, 1f) < 0.05f * Mathf.InverseLerp(10f, 2f, nearestBotGoalEnemy.Distance))
+                 && UnityEngine.Random.Range(0f, 1f) < 0.05f * Mathf.InverseLerp(5f, 1f, nearestBotGoalEnemy.Distance))
                 {
-                    lastNearest.Steering?.LookToDirection(Player.Position);
+                    lastNearest.Steering?.LookToPoint(Player.Position);
                     if (DebugInfo != null)
                         DebugInfo.forceLooks++;
 
@@ -499,10 +500,10 @@ namespace ThatsLit
                     return;
                 }
 
-                if (lastNearest.Mover.IsMoving == true && !nearestBotPlayer.IsSprintEnabled
-                 && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
-                 && Time.time - throttler.lastSideLook > 10f
-                 && UnityEngine.Random.Range(0f, 1f) < 0.15f)
+                if (!nearestBotPlayer.IsSprintEnabled
+                //  && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
+                 && !(nearestBotGoalEnemy != null && Time.time - nearestBotGoalEnemy.TimeLastSeenReal < 10f)
+                 && Time.time - throttler.lastSideLook > 10f)
                 {
                     lastNearest.StartCoroutine(MakeBotPeekSide(lastNearest));
                     if (DebugInfo != null)
@@ -518,13 +519,13 @@ namespace ThatsLit
                  && Time.time - throttler.lastForceLook > 1f
                  && botHeadPos != null
                  && (nearestBotGoalEnemy?.Person == Player || nearestBotGoalEnemy == null)
-                 && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
+                //  && lastNearest.Steering.SteeringMode == EBotSteering.ToMovingDirection
                  && Vector3.Angle(lastNearest.LookDirection, flashLightHit.normal) > 90f
                  && Vector3.Angle(lastNearest.LookDirection, flashLightHit.point - botHeadPos) < 90f
                  && Vector3.Angle(lastNearest.LookDirection, Player.Position - botHeadPos) > 30f
                  && UnityEngine.Random.Range(0f, 1f) < 0.05f * Mathf.InverseLerp(20f, 2f, Vector3.Distance(lastNearest.Position, Player.Position)))
                 {
-                    lastNearest.Steering?.LookToDirection(Player.Position);
+                    lastNearest.Steering?.LookToPoint(Player.Position);
                     if (DebugInfo != null)
                         DebugInfo.forceLooks++;
                     
@@ -542,7 +543,7 @@ namespace ThatsLit
             Vector3 lookDirection = bot.LookDirection;
             Vector3 dir = lookDirection.RotateAroundPivot(Vector3.up, Quaternion.Euler(0f, UnityEngine.Random.Range(-180f, 180f), 0f));
             bot.Steering?.LookToDirection(dir);
-            yield return new WaitForSeconds(UnityEngine.Random.Range(0, 4f));
+            yield return new WaitForSeconds(UnityEngine.Random.Range(1, 4f));
             bot.Steering?.LookToMovingDirection();
         }
 
