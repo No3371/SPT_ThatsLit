@@ -276,6 +276,18 @@
             "_comment": null
         },
         {
+            "name": "vanilla_L+",
+            "modes": [
+                {
+                    "light": 1.25,
+                    "laser": 0.0,
+                    "irLight": 0.0,
+                    "irLaser": 0.0
+                }
+            ],
+            "_comment": null
+        },
+        {
             "name": "vanilla_L_L",
             "modes": [
                 {
@@ -520,7 +532,7 @@
         {
             "id": "5b3a337e5acfc4704b4a19a0",
             "_comment": "tactical_all_zenit_2u_kleh",
-            "template": "vanilla_L"
+            "template": "vanilla_L+"
         },
         {
             "id": "59d790f486f77403cb06aec6",
