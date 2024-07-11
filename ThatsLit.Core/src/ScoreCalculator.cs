@@ -49,7 +49,9 @@ namespace ThatsLit
             //     }
             // };
         }
-        protected internal virtual void OnGUI (bool layout = false) {}
+        protected internal virtual void OnGUI (PlayerLitScoreProfile player, bool layout = false) {
+            GUILayout.Label($"  AvgLum: {player.frame0.avgLum}");
+        }
 
         public void PreCalculate (PlayerLitScoreProfile player, Unity.Collections.NativeArray<Color32> tex, float time)
         {
