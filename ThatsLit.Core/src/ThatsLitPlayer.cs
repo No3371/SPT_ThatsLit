@@ -878,6 +878,8 @@ namespace ThatsLit
             if (Player?.IsYourPlayer != true)
                 return;
 
+            var align = GUI.skin.label.alignment;
+            GUI.skin.label.alignment = TextAnchor.MiddleLeft;
             bool layoutCall = guiFrame < Time.frameCount;
             ThatsLitPlugin.swGUI.MaybeResume();
             if (PlayerLitScoreProfile == null)
@@ -942,6 +944,7 @@ namespace ThatsLit
 
             ThatsLitPlugin.swGUI.Stop();
             guiFrame = Time.frameCount;
+            GUI.skin.label.alignment = align;
             
         }
         string infoCache;
