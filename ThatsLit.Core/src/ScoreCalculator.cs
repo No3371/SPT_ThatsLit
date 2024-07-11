@@ -968,24 +968,21 @@ namespace ThatsLit
 
     public class LabScoreCalculator : ScoreCalculator
     {
+        protected override float BunkerBaseAmbienceTarget { get => 0f; }
         protected override float MinBaseAmbienceScore => -0.5f;
+        protected override float MaxBaseAmbienceScore => -0.5f;
         protected override float MaxMoonlightScore { get => 0; }
         protected override float MaxSunlightScore { get => 0; }
-        protected override float MinAmbienceLum { get => 0.005f; }
-        protected override float MaxAmbienceLum { get => 0.006f; }
-        protected override float PixelLumScoreScale { get => 4.5f; }
-
-        protected override void GetPixelScores(float tlf, out float scoreShine, out float scoreHigh, out float scoreHighMid, out float scoreMid, out float scoreMidLow, out float scoreLow, out float scoreDark)
-        {
-            scoreShine = 5f;
-            scoreHigh = 1.5f;
-            scoreHighMid = 0.8f;
-            scoreMid = 0.5f;
-            scoreMidLow = 0.2f;
-            scoreLow = 0.1f;
-            scoreDark = 0;
-        }
-        protected override float GetMapAmbienceCoef(string locationId, float time) => 0.1f;
+        protected override float MinAmbienceLum { get => 0.02f; }
+        protected override float MaxAmbienceLum { get => 0.06f; }
+        protected override float ThresholdShine { get => 0.2f; }
+        protected override float ThresholdHigh { get => 0.1f; }
+        protected override float ThresholdHighMid { get => 0.05f; }
+        protected override float ThresholdMid { get => 0.025f; }
+        protected override float ThresholdMidLow { get => 0.01f; }
+        protected override float ThresholdLow { get => 0.005f; }
+        protected override float PixelLumScoreScale { get => 5.5f; }
+        protected override float GetMapAmbienceCoef(string locationId, float time) => 0f;
         protected override float CalculateMoonLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness) => 0;
         protected override float CalculateMoonLightTimeFactor(string locationId, float time) => 0;
         internal override float CalculateSunLightTimeFactor(string locationId, float time) => 0;
