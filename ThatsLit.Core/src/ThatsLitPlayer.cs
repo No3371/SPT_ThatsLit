@@ -265,6 +265,24 @@ namespace ThatsLit
             }
             ThatsLitPlugin.swFoliage.Stop();
 
+            if (ThatsLitPlugin.EnableEquipmentCheck.Value
+             && Time.time > lastCheckedLights + 0.41
+             && PlayerLitScoreProfile != null)
+            {
+                lastCheckedLights = Time.time;
+                var state = LightAndLaserState;
+                Utility.DetermineShiningEquipments(Player, out state.deviceStateCache, out state.deviceStateCacheSub);
+                state.VisibleLight = state.deviceStateCache.light > 0;
+                state.VisibleLaser = state.deviceStateCache.laser > 0;
+                state.IRLight = state.deviceStateCache.irLight > 0;
+                state.IRLaser = state.deviceStateCache.irLaser > 0;
+                state.VisibleLightSub = state.deviceStateCacheSub.light > 0;
+                state.VisibleLaserSub = state.deviceStateCacheSub.laser > 0;
+                state.IRLightSub = state.deviceStateCacheSub.irLight > 0;
+                state.IRLaserSub = state.deviceStateCacheSub.irLaser > 0;
+                LightAndLaserState = state;
+            }
+
             if (PlayerLitScoreProfile == null && ThatsLitPlugin.EnabledLighting.Value)
             {
                 MaybeEnableBrightness();
@@ -408,24 +426,6 @@ namespace ThatsLit
             //             }
             //     }
             // }
-
-            if (ThatsLitPlugin.EnableEquipmentCheck.Value
-             && Time.time > lastCheckedLights + 0.41
-             && PlayerLitScoreProfile != null)
-            {
-                lastCheckedLights = Time.time;
-                var state = LightAndLaserState;
-                Utility.DetermineShiningEquipments(Player, out state.deviceStateCache, out state.deviceStateCacheSub);
-                state.VisibleLight = state.deviceStateCache.light > 0;
-                state.VisibleLaser = state.deviceStateCache.laser > 0;
-                state.IRLight = state.deviceStateCache.irLight > 0;
-                state.IRLaser = state.deviceStateCache.irLaser > 0;
-                state.VisibleLightSub = state.deviceStateCacheSub.light > 0;
-                state.VisibleLaserSub = state.deviceStateCacheSub.laser > 0;
-                state.IRLightSub = state.deviceStateCacheSub.irLight > 0;
-                state.IRLaserSub = state.deviceStateCacheSub.irLaser > 0;
-                LightAndLaserState = state;
-            }
 
             ThatsLitPlugin.swUpdate.Stop();
         }
