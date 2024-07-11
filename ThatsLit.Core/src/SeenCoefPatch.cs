@@ -1,5 +1,5 @@
 ﻿#define DEBUG_DETAILS
-using Aki.Reflection.Patching;
+using SPT.Reflection.Patching;
 using EFT;
 using HarmonyLib;
 using System;
@@ -7,7 +7,6 @@ using System.Reflection;
 using UnityEngine;
 using Comfort.Common;
 using EFT.InventoryLogic;
-using System.Diagnostics;
 using EFT.HealthSystem;
 
 

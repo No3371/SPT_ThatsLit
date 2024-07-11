@@ -1,9 +1,9 @@
-using Aki.Reflection.Patching;
 using System.Reflection;
 using UnityEngine;
 using EFT;
-using Aki.Reflection.Utils;
 using System.Linq;
+using SPT.Reflection.Patching;
+using SPT.Reflection.Utils;
 
 namespace ThatsLit.Patches.Vision
 {

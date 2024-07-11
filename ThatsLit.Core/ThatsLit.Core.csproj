@@ -4,7 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>ThatsLit.Core</AssemblyName>
     <LangVersion>latest</LangVersion>
-    <Version>1.383.09</Version>
+    <Version>1.390.01</Version>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>   
   </PropertyGroup>
 <!-- 
@@ -17,9 +17,8 @@
     <EFTPath>..\..\..</EFTPath>
     <ManagedAssembliesPath>$(EFTPath)\EscapeFromTarkov_Data\Managed</ManagedAssembliesPath>
     <BepInExPath>$(EFTPath)\BepInEx\core</BepInExPath>
-    <ManagedPath>$(TarkovPath)/EscapeFromTarkov_Data/Managed</ManagedPath>
     <PluginsPath>$(EFTPath)\BepInEx\plugins</PluginsPath>
-    <AssemblySearchPaths>$(BepInExPath);$(ManagedAssembliesPath);</AssemblySearchPaths>
+    <AssemblySearchPaths>$(BepInExPath);$(ManagedAssembliesPath);$(PluginsPath)\spt;</AssemblySearchPaths>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,12 +30,12 @@
       <HintPath>$(BepInExPath)\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Aki.Common">
-      <HintPath>$(ManagedAssembliesPath)\Aki.Common.dll</HintPath>
+    <Reference Include="spt-core">
+      <HintPath>$(PluginsPath)\spt\spt-core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Aki.Reflection">
-      <HintPath>$(ManagedAssembliesPath)\Aki.Reflection.dll</HintPath>
+    <Reference Include="spt-reflection">
+      <HintPath>$(PluginsPath)\spt\spt-reflection.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">

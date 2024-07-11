@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Collections;
 
-using BaseCellClass = GClass1052;
-using CellClass = GClass1053;
-using SpatialPartitionClass = GClass1067<GClass1052>;
+using BaseCellClass = GClass1061;
+using CellClass = GClass1062;
+using SpatialPartitionClass = GClass1076<GClass1061>;
 using System.Reflection;
 using GPUInstancer;
 using HarmonyLib;
@@ -101,7 +101,7 @@ namespace ThatsLit
 
             var session = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
             if (session == null) throw new Exception("No session!");
-            IsWinter = session.Session.IsWinter;
+            IsWinter = session.Session.Season == ESeason.Winter;
             activeRaidSettings = (RaidSettings)(typeof(TarkovApplication).GetField("_raidSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session));
 
             switch (activeRaidSettings?.LocationId)
