@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
 using EFT.EnvironmentEffect;
 using EFT.UI;
 using EFT.Weather;
-using GPUInstancer;
-using HarmonyLib;
-using ThatsLit.Patches.Vision;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -456,6 +450,7 @@ namespace ThatsLit
 
             Player nearestBotPlayer = lastNearest?.GetPlayer;
             if (nearestBotPlayer != null
+             && nearestBotPlayer.isActiveAndEnabled
              && nearestBotPlayer.MainParts != null
              && nearestBotPlayer.MainParts.ContainsKey(BodyPartType.head)
              && lastNearest.Steering != null
@@ -844,13 +839,16 @@ namespace ThatsLit
              && Singleton<ThatsLitGameworld>.Instance.ScoreCalculator != null
              && Time.time < setupTime + 10)
                 GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
+
             if (ThatsLitPlugin.ScoreInfo.Value && PlayerLitScoreProfile != null)
             {
                 Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.multiFrameLitScore / 0.0999f));
                 Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(PlayerLitScoreProfile.frame0.multiFrameLitScore, POWER) / 0.0999f));
             }
+
             if (ThatsLitPlugin.EquipmentInfo.Value && LightAndLaserState.storage != 0)
                 GUILayout.Label(LightAndLaserState.Format());
+
             if (ThatsLitPlugin.FoliageInfo.Value
              && Foliage != null
              && Foliage.FoliageScore > 0)
@@ -877,7 +875,8 @@ namespace ThatsLit
         }
         private void OnGUI()
         {
-            if (Player?.IsYourPlayer != true) return;
+            if (Player?.IsYourPlayer != true)
+                return;
 
             bool layoutCall = guiFrame < Time.frameCount;
             ThatsLitPlugin.swGUI.MaybeResume();
@@ -888,7 +887,8 @@ namespace ThatsLit
             }
 
             var poseFactor = Player.PoseLevel / Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
-            if (Player.IsInPronePose) poseFactor -= 0.4f; // prone: 0
+            if (Player.IsInPronePose)
+                poseFactor -= 0.4f; // prone: 0
             poseFactor += 0.05f; // base -> prone -> 0.05f, crouch -> 0.45f
 
             OnGUIInfo();

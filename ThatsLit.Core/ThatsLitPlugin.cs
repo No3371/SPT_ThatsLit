@@ -5,7 +5,6 @@ using DrakiaXYZ.VersionChecker;
 using System;
 using static ThatsLit.AssemblyInfo;
 using ThatsLit.Patches.Vision;
-using System.Collections;
 
 namespace ThatsLit
 {
@@ -57,7 +56,7 @@ namespace ThatsLit
             swGUI              = new ManagedStopWatch("GUI");
             swFoliage          = new ManagedStopWatch("Foliage");
             swTerrain          = new ManagedStopWatch("Terrain");
-            swScoreCalc          = new ManagedStopWatch("ScoreCalc");
+            swScoreCalc        = new ManagedStopWatch("ScoreCalc");
             swSeenCoef         = new ManagedStopWatch("SeenCoef");
             swEncountering     = new ManagedStopWatch("Encountering");
             swExtraVisDis      = new ManagedStopWatch("ExtraVisDis");
@@ -213,7 +212,7 @@ namespace ThatsLit
             IncludeBosses              = Config.Bind(category, "Include Bosses", false, "Should all features from this mod work for boss. Makes bosses EASY.");
             PMCOnlyMode              = Config.Bind(category, "PMC Only Mode", false, "Requested. So the mod only affect PMCs.");
             EnableEquipmentCheck         = Config.Bind(category, "Equipment Check", true, "Whether the mod checks your equipments. Disabling this stops lights/lasers detection and makes stealth EASY.");
-            InterruptSAINNoBush              = Config.Bind(category, "Interrupt SAIN No Bush", false, "DO NOT COMPLAIN ABOUT NO BUSH ESP TO Solarint IF YOU HAVE THIS ON.New SAIN No Bush is designed to be aggressive. It can block bot vision even if you are just 2m away and the bot is looking straight at you. This add a chance to turn off SAIN's No Bush ESP at close range.");
+            InterruptSAINNoBush              = Config.Bind(category, "Interrupt SAIN No Bush", false, "DO NOT COMPLAIN ABOUT NO BUSH ESP TO Solarint IF YOU HAVE THIS ON. New SAIN No Bush is designed to be very aggressive, it can block bot vision even if you are just 2m away and the bot is looking straight at you. This add a chance to turn off SAIN's No Bush ESP at close range so things makes sense.");
             ForceBlindFireScatter              = Config.Bind(category, "Force Blind Fire Scatter", true, "Force a random scatter on bot blind fireing, scaled by distance.");
             BotLookDirectionTweaks              = Config.Bind(category, "Bot Look Direction Tweaks", true, "Try to tell the nearest bot to look towards the player when it makes sense.");
             
