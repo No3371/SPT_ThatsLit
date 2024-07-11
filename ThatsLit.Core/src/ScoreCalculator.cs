@@ -72,6 +72,7 @@ namespace ThatsLit
             player.frame2 = player.frame1;
             player.frame1 = player.frame0;
             FrameStats thisFrame = default;
+            thisFrame.cloudiness = cloud;
             CompleteCountPixels(player, out thisFrame.pxS, out thisFrame.pxH, out thisFrame.pxHM, out thisFrame.pxM, out thisFrame.pxML, out thisFrame.pxL, out thisFrame.pxD, out thisFrame.lum, out float lumNonDark, out thisFrame.pixels);
             if (player.IsProxy)
             {
@@ -90,7 +91,7 @@ namespace ThatsLit
             float ambienceShadowFactor = player.Player.AmbienceShadowFactor;
             if (gameWorld.IsWinter) ambienceShadowFactor *= 1f - 0.3f * outside1s;
 
-            var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time, player);
+            var baseAmbienceScore = CalculateBaseAmbienceScore(locationId, time, cloud, player);
 
             if (gameWorld.IsWinter && insideTime < 2f) // Debuff from winter terrain
             {
@@ -115,8 +116,8 @@ namespace ThatsLit
             float insideCoef2to9s = Mathf.InverseLerp(2f, 9f, insideTime); // 0 ~ 2 sec => 0%, 9 sec => 100%
             var locCloudiness = Mathf.Lerp(cloud, 1.3f, bunkerTimeFactor); // So it's always considered "cloudy" in bunker
             ambienceScore += Mathf.Clamp01((locCloudiness - 1f) / -2f) * NonCloudinessBaseAmbienceScoreImpact; // Weather offset
-            moonLightScore = CalculateMoonLight(locationId, time, locCloudiness);
-            sunLightScore = CalculateSunLight(locationId, time, locCloudiness);
+            moonLightScore = CalculateMoonLight(player, locationId, time, locCloudiness);
+            sunLightScore = CalculateSunLight(player, locationId, time, locCloudiness);
             ambienceScore += (moonLightScore + sunLightScore)  * (1f - ambienceShadowFactor - insideCoef2to9s * IndoorAmbienceCutoff * ambienceShadowFactor);
             
             // =====
@@ -420,7 +421,7 @@ namespace ThatsLit
 
         }
 
-        protected virtual float CalculateBaseAmbienceScore(string locationId, float time, PlayerLitScoreProfile player)
+        protected virtual float CalculateBaseAmbienceScore(string locationId, float time, float cloud, PlayerLitScoreProfile player)
         {
             return Mathf.Lerp(GetMinBaseAmbienceLitScore(locationId, time), GetMaxBaseAmbienceLitScore(locationId, time), GetMapAmbienceCoef(locationId, time));
         }
@@ -465,7 +466,7 @@ namespace ThatsLit
         // The increased visual brightness when moon is up (0~5) when c < 1
         // cloudiness blocks moon light
         // Fog determine visibility and visual brightness of further envrionment, unused
-        protected virtual float CalculateMoonLight(string locationId, float time, float cloudiness)
+        protected virtual float CalculateMoonLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness)
         {
             float maxMoonlightScore = GetMaxMoonlightScore();
             return TransformCloudness(cloudiness) * maxMoonlightScore * CalculateMoonLightTimeFactor(locationId, time);
@@ -473,7 +474,7 @@ namespace ThatsLit
 
         // The increased visual brightness when sun is up (5~22) hours when c < 1
         // cloudiness blocks sun light
-        protected virtual float CalculateSunLight(string locationId, float time, float cloudiness)
+        protected virtual float CalculateSunLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness)
         {
             float maxSunlightScore = GetMaxSunlightScore();
             return TransformCloudness(cloudiness) * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
@@ -675,7 +676,25 @@ namespace ThatsLit
     }
     public class InterchangeScoreCalculator : ScoreCalculator
     {
-        private bool isPlayerInParking;
+        public class Data
+        {
+            private bool isPlayerInParking;
+            public bool IsPlayerInParking
+            {
+                get => isPlayerInParking;
+                set
+                {
+                    if (isPlayerInParking != value)
+                    {
+                        TimeEnterOrLeaveParking = Time.time;
+                    }
+                    isPlayerInParking = value;
+                }
+            }
+            public float TimeEnterOrLeaveParking { get; set; }
+            public float ParkingTransitionFactor => Mathf.Clamp01((Time.time - TimeEnterOrLeaveParking) / 5f);
+            public bool IsOverhead { get; set; }
+        }
 
         protected override float MinBaseAmbienceScore => -0.8f;
         protected override float MaxBaseAmbienceScore { get => -0.15f; } // indoor
@@ -690,86 +709,76 @@ namespace ThatsLit
         protected override float ThresholdMid { get => 0.1f; }
         protected override float ThresholdMidLow { get => 0.025f; }
         protected override float ThresholdLow { get => 0.005f; }
-        bool IsPlayerInParking
-        {
-            get => isPlayerInParking;
-            set
-            {
-                if (isPlayerInParking != value)
-                {
-                    TimeEnterOrLeaveParking = Time.time;
-                }
-                isPlayerInParking = value;
-            }
-        }
-        float TimeEnterOrLeaveParking { get; set; }
-        float ParkingTransitionFactor => Mathf.Clamp01((Time.time - TimeEnterOrLeaveParking) / 5f);
-        float rawCloud;
 
-        
         protected override float MultiFrameContrastImpactScale => 0.65f;
 
-        bool IsOverhead { get; set; }
-
-        protected override float CalculateMoonLight(string locationId, float time, float cloudiness)
+        protected override float CalculateMoonLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness)
         {
-            if (IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.3f, ParkingTransitionFactor);
-            return base.CalculateMoonLight(locationId, time, cloudiness);
+            Data data = player.ScoreCalcData as Data;
+            if (data.IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.3f, data.ParkingTransitionFactor);
+            return base.CalculateMoonLight(player, locationId, time, cloudiness);
         }
 
-        protected override float CalculateSunLight(string locationId, float time, float cloudiness)
+        protected override float CalculateSunLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness)
         {
-            if (IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.3f, ParkingTransitionFactor);
-            return base.CalculateSunLight(locationId, time, cloudiness);
+            Data data = player.ScoreCalcData as Data;
+            if (data.IsPlayerInParking) cloudiness = Mathf.Lerp(cloudiness, 1.3f, data.ParkingTransitionFactor);
+            return base.CalculateSunLight(player, locationId, time, cloudiness);
         }
 
         public override float CalculateMultiFrameScore(float cloud, float fog, float rain, ThatsLitGameworld gameWorld, PlayerLitScoreProfile player, float time, string locationId)
         {
-            rawCloud = cloud;
+            if (player.ScoreCalcData as Data == null)
+                player.ScoreCalcData = new Data();
+            Data data = player.ScoreCalcData as Data;
 
             bool isParking = false;
-            IsOverhead = false;
+            data.IsOverhead = false;
 
             if (Physics.Raycast(new Ray(player.Player.Player.MainParts[BodyPartType.head].Position, Vector3.up), out var hit, 5, LayerMaskClass.LowPolyColliderLayerMask))
             {
-                IsOverhead = true;
+                data.IsOverhead = true;
                 if (hit.transform.gameObject.scene.name == "Shopping_Mall_parking_work" && player.Player.transform.position.y < 23.5f) isParking = true;
             }
 
-            if (IsPlayerInParking != isParking) isPlayerInParking = isParking;
+            if (data.IsPlayerInParking != isParking) data.IsPlayerInParking = isParking;
             return base.CalculateMultiFrameScore(cloud, fog, rain, gameWorld, player, time, locationId);
         }
 
         // Characters in the basement floor gets lit up by ambience lighting
-        protected override float CalculateBaseAmbienceScore(string locationId, float time, PlayerLitScoreProfile player)
+        protected override float CalculateBaseAmbienceScore(string locationId, float time, float cloud, PlayerLitScoreProfile player)
         {
-            if (IsPlayerInParking)
-                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), MinBaseAmbienceScore + 0.15f * rawCloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * ParkingTransitionFactor);
-            else if (IsOverhead)
+            if (player.ScoreCalcData as Data == null)
+                player.ScoreCalcData = new Data();
+            Data data = player.ScoreCalcData as Data;
+            if (data.IsPlayerInParking)
+                return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, cloud, player), MinBaseAmbienceScore + 0.15f * cloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * data.ParkingTransitionFactor);
+            else if (data.IsOverhead)
             {
                 // Enhance indoor darkness in daytime
                 if (this.CalculateSunLightTimeFactor(locationId, Utility.GetInGameDayTime()) > 0.05f)
                 {
-                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -0.54f, 0.7f * Mathf.InverseLerp(2f, 7f, Time.time - player.Player.lastOutside) * (player.Player.AmbienceShadowFactor));
+                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, cloud, player), -0.54f, 0.7f * Mathf.InverseLerp(2f, 7f, Time.time - player.Player.lastOutside) * (player.Player.AmbienceShadowFactor));
                 }
                 else
                 {
                     // Limiting darkness indoor in nights
                     float fading = Mathf.Clamp01((player.Player.transform.position.y - 22f) / 2.5f);
-                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, player), -0.35f + 0.2f * rawCloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * 0.9f * fading);
+                    return Mathf.Lerp(base.CalculateBaseAmbienceScore(locationId, time, cloud, player), -0.35f + 0.2f * cloud , (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * 0.9f * fading);
                 }
             }
 
-            return base.CalculateBaseAmbienceScore(locationId, time, player);
+            return base.CalculateBaseAmbienceScore(locationId, time, cloud, player);
         }
 
         protected override float CalculateRawLumScore (FrameStats thisFrame, float lowAmbienceScoreFactor, float hightLightedPixelFactor, PlayerLitScoreProfile player)
         {
-            if (!IsPlayerInParking)
+            Data data = player.ScoreCalcData as Data;
+            if (!data.IsPlayerInParking)
                 return base.CalculateRawLumScore(thisFrame, lowAmbienceScoreFactor, hightLightedPixelFactor, player);
 
             float lumScore = (thisFrame.avgLum - MinAmbienceLum) * (PixelLumScoreScale*1.2f) * (1+2f*lowAmbienceScoreFactor* lowAmbienceScoreFactor) * (0.1f + lowAmbienceScoreFactor);
-            lumScore *= 1f - (thisFrame.RatioDarkPixels + thisFrame.RatioLowPixels * 0.75f + thisFrame.RatioMidLowPixels * 0.5f) * (1f - rawCloud * 0.15f) * (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * ParkingTransitionFactor;
+            lumScore *= 1f - (thisFrame.RatioDarkPixels + thisFrame.RatioLowPixels * 0.75f + thisFrame.RatioMidLowPixels * 0.5f) * (1f - thisFrame.cloudiness * 0.15f) * (player.Player.OverheadHaxRatingFactor * player.Player.OverheadHaxRatingFactor) * data.ParkingTransitionFactor;
             lumScore *= 1 + hightLightedPixelFactor;
             lumScore = Mathf.Clamp(lumScore, 0.1f, 2); // When there is no sun/moon light the player model is pitch black
             return lumScore;
@@ -790,10 +799,13 @@ namespace ThatsLit
             else return 0;
         }
 
-        protected internal override void OnGUI(bool layout = false)
+        protected internal override void OnGUI(PlayerLitScoreProfile player, bool layout = false)
         {
-            base.OnGUI(layout);
-            if (IsPlayerInParking) GUILayout.Label($"  Parking: { ParkingTransitionFactor }");
+            if (player.ScoreCalcData as Data == null)
+                player.ScoreCalcData = new Data();
+            Data data = player.ScoreCalcData as Data;
+            base.OnGUI(player, layout);
+            if (data.IsPlayerInParking) GUILayout.Label($"  Parking: { data.ParkingTransitionFactor }");
         }
     }
     public class ShorelineScoreCalculator : ScoreCalculator
@@ -912,11 +924,11 @@ namespace ThatsLit
 
         // Characters in the basement floor in Ground Zero gets lit up by ambience lighting, so fucked up
         // Try to cheat here
-        protected override float CalculateBaseAmbienceScore(string locationId, float time, PlayerLitScoreProfile player)
+        protected override float CalculateBaseAmbienceScore(string locationId, float time, float cloud, PlayerLitScoreProfile player)
         {
             float playerY = player.Player.Player.Transform.Original.position.y;
             var reduction = Mathf.Clamp01((14.7f - playerY) / 1.5f) * 0.6f;
-            return Mathf.Max(base.CalculateBaseAmbienceScore(locationId, time, player) - reduction, MinBaseAmbienceScore);
+            return Mathf.Max(base.CalculateBaseAmbienceScore(locationId, time, cloud, player) - reduction, MinBaseAmbienceScore);
         }
     }
 
@@ -947,18 +959,33 @@ namespace ThatsLit
             scoreDark = 0;
         }
         protected override float GetMapAmbienceCoef(string locationId, float time) => 0.1f;
-        protected override float CalculateMoonLight(string locationId, float time, float cloudiness) => 0;
+        protected override float CalculateMoonLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness) => 0;
         protected override float CalculateMoonLightTimeFactor(string locationId, float time) => 0;
         internal override float CalculateSunLightTimeFactor(string locationId, float time) => 0;
     }
 
     public class LabScoreCalculator : ScoreCalculator
     {
-        
-        protected override float MinBaseAmbienceScore => -0.1f;
-        protected override float MaxMoonlightScore => 0;
-        protected override float MaxSunlightScore => 0;
-        protected override float MinAmbienceLum => 0.01f;
-        protected override float MaxAmbienceLum => 0.01f;
+        protected override float MinBaseAmbienceScore => -0.5f;
+        protected override float MaxMoonlightScore { get => 0; }
+        protected override float MaxSunlightScore { get => 0; }
+        protected override float MinAmbienceLum { get => 0.005f; }
+        protected override float MaxAmbienceLum { get => 0.006f; }
+        protected override float PixelLumScoreScale { get => 4.5f; }
+
+        protected override void GetPixelScores(float tlf, out float scoreShine, out float scoreHigh, out float scoreHighMid, out float scoreMid, out float scoreMidLow, out float scoreLow, out float scoreDark)
+        {
+            scoreShine = 5f;
+            scoreHigh = 1.5f;
+            scoreHighMid = 0.8f;
+            scoreMid = 0.5f;
+            scoreMidLow = 0.2f;
+            scoreLow = 0.1f;
+            scoreDark = 0;
+        }
+        protected override float GetMapAmbienceCoef(string locationId, float time) => 0.1f;
+        protected override float CalculateMoonLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness) => 0;
+        protected override float CalculateMoonLightTimeFactor(string locationId, float time) => 0;
+        internal override float CalculateSunLightTimeFactor(string locationId, float time) => 0;
     }
 }

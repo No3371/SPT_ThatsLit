@@ -19,8 +19,7 @@
         public float RatioDarkPixels => pxD / (float)pixels;
         public float RatioLowAndDarkPixels => (pxL + pxD) / (float)pixels;
         public int BrighterPixels => pxS + pxH + pxHM + pxM / 2;
-        public float RatioBrighterPixels => BrighterPixels / (float)pixels;
-        public int DarkerPixels => pxM / 2 + pxML + pxL + pxD;
+        public float cloudiness;
 
     }
 }

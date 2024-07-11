@@ -154,7 +154,7 @@ namespace ThatsLit
                     if (ThatsLitPlugin.EnableShoreline.Value) ScoreCalculator = new ShorelineScoreCalculator();
                     break;
                 case "laboratory":
-                    ScoreCalculator = null;
+                    // if (ThatsLitPlugin.EnableLab.Value) ScoreCalculator = new LabScoreCalculator();
                     break;
                 case null:
                     if (ThatsLitPlugin.EnableHideout.Value) ScoreCalculator = new HideoutScoreCalculator();

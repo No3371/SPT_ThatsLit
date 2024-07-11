@@ -16,6 +16,7 @@ namespace ThatsLit
         public ThatsLitPlayer Player { get; }
         public CountPixelsJob PixelCountingJob { get; set; }
         public JobHandle CountingJobHandle { get; set; }
+        internal object ScoreCalcData { get; set; }
 
         public PlayerLitScoreProfile(ThatsLitPlayer player)
         {
