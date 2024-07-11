@@ -14,24 +14,25 @@
     <ManagedAssembliesPath>$(EFTPath)\EscapeFromTarkov_Data\Managed</ManagedAssembliesPath>
     <BepInExPath>$(EFTPath)\BepInEx\core</BepInExPath>
     <PluginsPath>$(EFTPath)\BepInEx\plugins</PluginsPath>
-    <AssemblySearchPaths>$(BepInExPath);$(ManagedAssembliesPath);$(PluginsPath)\ThatsLit;.\FikaRef</AssemblySearchPaths>
+    <AssemblySearchPaths>$(BepInExPath);$(ManagedAssembliesPath);$(PluginsPath)\spt;.\FikaRef;$(PluginsPath)\ThatsLit</AssemblySearchPaths>
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExPath)\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="0Harmony">
       <HintPath>$(BepInExPath)\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Aki.Reflection">
-      <HintPath>$(ManagedAssembliesPath)\Aki.Reflection.dll</HintPath>
-    </Reference>
-    <Reference Include="AnimationSystem.Types">
-      <HintPath>$(ManagedAssembliesPath)\AnimationSystem.Types.dll</HintPath>
+    <Reference Include="spt-reflection">
+      <HintPath>$(PluginsPath)\spt\spt-reflection.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(ManagedAssembliesPath)\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>$(BepInExPath)\BepInEx.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Comfort">
       <HintPath>$(ManagedAssembliesPath)\Comfort.dll</HintPath>

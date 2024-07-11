@@ -1,10 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
-using DrakiaXYZ.VersionChecker;
 using System;
 using UnityEngine;
-using ThatsLit;
 using static ThatsLit.Sync.AssemblyInfo;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
@@ -15,8 +13,7 @@ using Comfort.Common;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
 using EFT;
-using Fika.Core.Coop.Matchmaker;
-using System.Collections;
+using Fika.Core.Coop.Utils;
 
 namespace ThatsLit.Sync
 {
@@ -70,11 +67,6 @@ namespace ThatsLit.Sync
         float lastScore, lastAmbscore, lastSent;
         void Awake()
         {
-            if (!VersionChecker.CheckEftVersion(Logger, base.Info, Config))
-            {
-                throw new Exception("Invalid EFT Version");
-            }
-
             ShowInfo = Config.Bind<bool>("Main", "Show Info", true);
             LogPackets = Config.Bind<bool>("Main", "LogPackets", false);
             DebugLog = Config.Bind<bool>("Main", "DebugLog", false);
@@ -237,16 +229,16 @@ namespace ThatsLit.Sync
 
         void OnPlayerBrightnessScoreCalculatedDirect(ThatsLitPlayer player, float score, float ambScore)
         {
-            if (MatchmakerAcceptPatches.IsSinglePlayer) return;
+            if (FikaBackendUtils.IsSinglePlayer) return;
 
             CoopPlayer coopPlayer = player.Player as CoopPlayer;
-            if (MatchmakerAcceptPatches.IsServer && coopPlayer != null && coopPlayer.IsYourPlayer)
+            if (FikaBackendUtils.IsServer && coopPlayer != null && coopPlayer.IsYourPlayer)
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
                 if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Broadcasting #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
                 BroadcastScore(ref packet);
             }
-            else if (MatchmakerAcceptPatches.IsClient && coopPlayer != null && coopPlayer.IsYourPlayer)
+            else if (FikaBackendUtils.IsClient && coopPlayer != null && coopPlayer.IsYourPlayer)
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
                 writer.Reset();
