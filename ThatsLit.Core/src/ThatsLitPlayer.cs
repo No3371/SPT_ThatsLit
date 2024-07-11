@@ -153,6 +153,7 @@ namespace ThatsLit
 
             if (Player.IsYourPlayer && ThatsLitPlugin.DebugTexture.Value)
             {
+                ThatsLitPlugin.DebugTexture.SettingChanged += HandleDebugTextureSettingChanged;
                 if (slowRT == null) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
                 if (display == null)
                 {
@@ -161,7 +162,6 @@ namespace ThatsLit
                     display.RectTransform().sizeDelta = new Vector2(160, 160);
                     display.texture = slowRT;
                     display.RectTransform().anchoredPosition = new Vector2(-720, -360);
-                    ThatsLitPlugin.DebugTexture.SettingChanged += HandleDebugTextureSettingChanged;
                 }
                 else display.enabled = true;
             }
@@ -786,7 +786,18 @@ namespace ThatsLit
 
         private void HandleDebugTextureSettingChanged(object sender, EventArgs e)
         {
-            if (display) display.enabled = ThatsLitPlugin.DebugTexture.Value;
+            if (slowRT == null)
+                slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
+            if (display == null)
+            {
+                display = new GameObject().AddComponent<RawImage>();
+                display.transform.SetParent(MonoBehaviourSingleton<GameUI>.Instance.RectTransform());
+                display.RectTransform().sizeDelta = new Vector2(160, 160);
+                display.texture = slowRT;
+                display.RectTransform().anchoredPosition = new Vector2(-720, -360);
+            }
+            
+            display.enabled = ThatsLitPlugin.DebugTexture.Value;
         }
 
         private void OnDestroy()
@@ -898,8 +909,6 @@ namespace ThatsLit
 
             if (!ThatsLitPlugin.DebugInfo.Value || DebugInfo == null) return;
 
-            Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.OnGUI(layoutCall);
-
             float fog = WeatherController.Instance?.WeatherCurve?.Fog ?? 0;
             float rain = WeatherController.Instance?.WeatherCurve?.Rain ?? 0;
             float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
@@ -929,6 +938,8 @@ namespace ThatsLit
                 if (Time.frameCount % 6000 == 0)
                     if (layoutCall) EFT.UI.ConsoleScreen.Log(infoCacheBenchmark);
             }
+
+            Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.OnGUI(PlayerLitScoreProfile, layoutCall);
 
             if (ThatsLitPlugin.DebugTerrain.Value && TerrainDetails?.Details5x5 != null)
             {

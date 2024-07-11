@@ -144,6 +144,7 @@ namespace ThatsLit
             EnableCustoms              = Config.Bind(category, "Customs", true, "Enable darkness/brightness on the map.");
             EnableStreets              = Config.Bind(category, "Streets", true, "Enable darkness/brightness on the map.");
             EnableGroundZero              = Config.Bind(category, "Ground Zero", true, "Enable darkness/brightness on the map.");
+            // EnableLab              = Config.Bind(category, "Lab", false, "Enable darkness/brightness on the map.");
             // ShadowlessGroundZero       = Config.Bind(category, "ShadowlessGroundZero", true, "The top half of some big buildings in Ground Zero does not have proper colliders and thus mess with Ambience Shadow calculation. If you really feel it's a big problem, enable this to address the issue.");
             VolumetricLightRenderer              = Config.Bind(category, "Observe Volumetric Lights", true, "Let Brightness Module reacts to volumetric lights. Disable this if it cause issues.");
              
@@ -261,6 +262,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> EnableInterchange { get; private set; }
         public static ConfigEntry<bool> EnableStreets { get; private set; }
         public static ConfigEntry<bool> EnableGroundZero { get; private set; }
+        // public static ConfigEntry<bool> EnableLab { get; private set; }
         public static ConfigEntry<bool> EnableWoods { get; private set; }
         public static ConfigEntry<bool> EnableHideout { get; private set; }
         public static ConfigEntry<bool> ShadowlessGroundZero { get; private set; }
