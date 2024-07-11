@@ -151,9 +151,10 @@ namespace ThatsLit
             else cam.enabled = true;
 
 
+            if (Player.IsYourPlayer)
+                ThatsLitPlugin.DebugTexture.SettingChanged += HandleDebugTextureSettingChanged;
             if (Player.IsYourPlayer && ThatsLitPlugin.DebugTexture.Value)
             {
-                ThatsLitPlugin.DebugTexture.SettingChanged += HandleDebugTextureSettingChanged;
                 if (slowRT == null) slowRT = new Texture2D(RESOLUTION, RESOLUTION, TextureFormat.RGBA32, false);
                 if (display == null)
                 {
