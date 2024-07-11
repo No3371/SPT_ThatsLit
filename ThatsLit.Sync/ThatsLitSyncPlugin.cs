@@ -131,9 +131,13 @@ namespace ThatsLit.Sync
 
         void OnMainPlayerGUI ()
         {
-            if (!ShowInfo.Value) return;
+            if (!ShowInfo.Value)
+                return;
             var tlWorld = Singleton<ThatsLitGameworld>.Instance;
-            if (tlWorld == null) return;
+            if (tlWorld == null)
+                return;
+            if (tlWorld.AllThatsLitPlayers.Count <= 1)
+                return;
             GUILayout.Label($"  [That's Lit Sync]");
             if (!ThatsLitPlugin.EnabledLighting.Value)
             {
@@ -217,14 +221,17 @@ namespace ThatsLit.Sync
             if (player.Player is ObservedCoopPlayer observed && observed.IsObservedAI) // Remote bots on clients
                 return;
 
-            if (DebugLog.Value) Logger.LogInfo($"[That's Lit Sync] Player setup condition passed: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
+            if (DebugLog.Value)
+                Logger.LogInfo($"[That's Lit Sync] Player setup condition passed: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
             ActivePlayers.Add(coopPlayer.NetId, coopPlayer);
             if (!player.Player.IsYourPlayer)
             {
                 ThatsLitAPI.ToggleBrightnessProxyDirect(player, true);
-                if (DebugLog.Value) Logger.LogInfo($"[That's Lit Sync] Remote Player set to proxy: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
+                if (DebugLog.Value)
+                    Logger.LogInfo($"[That's Lit Sync] Remote Player set to proxy: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
             }
-            else if (DebugLog.Value) Logger.LogInfo($"[That's Lit Sync] Local player setup: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
+            else if (DebugLog.Value)
+                Logger.LogInfo($"[That's Lit Sync] Local player setup: { player.Player.Profile.Nickname } #{ coopPlayer.NetId } at f{Time.frameCount}");
             
         }
 
