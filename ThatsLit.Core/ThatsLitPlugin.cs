@@ -84,7 +84,7 @@ namespace ThatsLit
              && EnabledLighting.Value
              && !Chainloader.PluginInfos.ContainsKey("bastudio.thatslit.sync"))
             {
-                string message = $"[That's Lit] Fika detected, but That's Lit Sync extension not found. Without it, you will lose many fps per player. Get Sync extension from Fika Discord.";
+                string message = $"[That's Lit] Fika detected, but That's Lit Sync extension not found. Without the extension, you will lose extra fps per player. Get Sync extension from Fika Discord.";
                 NotificationManagerClass.DisplayWarningNotification(message, EFT.Communications.ENotificationDurationType.Long);
                 Logger.LogError(message);
                 // EFT.UI.ConsoleScreen.Log(message); // EXCEPTION and fails plugin loading (Console is not loaded yet)
@@ -200,7 +200,7 @@ namespace ThatsLit
             ResLevel                 = Config.Bind(category, "Resolution Level", 2,
                                                    new ConfigDescription("Resolution of the observed image by the observer camera, higher level means somewhat higher accuracy. Has an impact on CPU time. Level1 -> 32x32, Level2 -> 64x64... This config is used on raid start.", new AcceptableValueRange<int>(1, 4)));
             FoliageSamples                 = Config.Bind(category, "Foliage Samples", 1,
-                                                   new ConfigDescription("How many foliage to check if it's inbetween you and bots, increasing this allows foliage affects multiple bots from different directions. Could slightly an impact on CPU time. This config is used on raid start.", new AcceptableValueRange<int>(1, 5)));
+                                                   new ConfigDescription("How many foliage to check if it's inbetween you and bots, increasing this allows nearby foliage affects multiple bots from different directions. Could slightly an impact on CPU time. This config is used on raid start.", new AcceptableValueRange<int>(1, 5)));
 
             category                   = "8. Debug";
             DebugInfo                  = Config.Bind(category, "Debug Info (Expensive)", false, "A lot of gibberish.");
