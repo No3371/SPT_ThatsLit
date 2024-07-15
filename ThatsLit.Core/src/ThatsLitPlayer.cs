@@ -826,79 +826,99 @@ namespace ThatsLit
                 switch (ThatsLitPlugin.InfoOffset.Value)
                 {
                     case 1:
-                        GUILayout.Label("\n\n\n\n");
+                        GUILayout.Label("\n\n\n\n", style);
                         break;
                     case 2:
-                        GUILayout.Label("\n\n\n\n\n\n\n\n");
+                        GUILayout.Label("\n\n\n\n\n\n\n\n", style);
                         break;
                     case 3:
-                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n");
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n", style);
                         break;
                     case 4:
-                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", style);
                         break;
                     case 5:
-                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", style);
                         break;
                     case 6:
-                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", style);
                         break;
                     case 7:
-                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                        GUILayout.Label("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", style);
                         break;
                 }
             }
             if (ThatsLitPlugin.ScoreInfo.Value
              && Singleton<ThatsLitGameworld>.Instance.ScoreCalculator != null
              && Time.time < setupTime + 10)
-                GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.");
+                GUILayout.Label("  [That's Lit] The HUD can be configured in plugin settings.", style);
 
             if (ThatsLitPlugin.ScoreInfo.Value && PlayerLitScoreProfile != null)
             {
-                Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.multiFrameLitScore / 0.0999f));
-                Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(PlayerLitScoreProfile.frame0.multiFrameLitScore, POWER) / 0.0999f));
+                Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.multiFrameLitScore / 0.0999f), false, style);
+                Utility.GUILayoutDrawAsymetricMeter((int)(Mathf.Pow(PlayerLitScoreProfile.frame0.multiFrameLitScore, POWER) / 0.0999f), false, style);
             }
 
             if (ThatsLitPlugin.EquipmentInfo.Value && LightAndLaserState.storage != 0)
-                GUILayout.Label(LightAndLaserState.Format());
+                GUILayout.Label(LightAndLaserState.Format(), style);
 
             if (ThatsLitPlugin.FoliageInfo.Value
              && Foliage != null
              && Foliage.FoliageScore > 0)
-                Utility.GUILayoutFoliageMeter((int)(Foliage.FoliageScore / 0.0999f));
+                Utility.GUILayoutFoliageMeter((int)(Foliage.FoliageScore / 0.0999f), false, style);
             if (ThatsLitPlugin.TerrainInfo.Value && TerrainDetails != null && terrainScoreHintProne > 0.0998f)
-                if (Player.IsInPronePose) Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f));
-                else Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f));
+                if (Player.IsInPronePose)
+                    Utility.GUILayoutTerrainMeter((int)(terrainScoreHintProne / 0.0999f), false, style);
+                else
+                    Utility.GUILayoutTerrainMeter((int)(terrainScoreHintRegular / 0.0999f), false, style);
 
             if (ThatsLitPlugin.WeatherInfo.Value && PlayerLitScoreProfile != null)
             {
                 if (cloud <= -1.1f)
-                    GUILayout.Label("  CLEAR ☀☀☀");
+                    GUILayout.Label("  CLEAR ☀☀☀", style);
                 else if (cloud <= -0.7f)
-                    GUILayout.Label("  CLEAR ☀☀");
+                    GUILayout.Label("  CLEAR ☀☀", style);
                 else if (cloud <= -0.25f)
-                    GUILayout.Label("  CLEAR ☀");
+                    GUILayout.Label("  CLEAR ☀", style);
                 else if (cloud >= 1.1f)
-                    GUILayout.Label("  CLOUDY ☁☁☁");
+                    GUILayout.Label("  CLOUDY ☁☁☁", style);
                 else if (cloud >= 0.7f)
-                    GUILayout.Label("  CLOUDY ☁☁");
+                    GUILayout.Label("  CLOUDY ☁☁", style);
                 else if (cloud >= 0.25f)
-                    GUILayout.Label("  CLOUDY ☁");
+                    GUILayout.Label("  CLOUDY ☁", style);
             }
         }
+
+        GUIStyle style;
+
         private void OnGUI()
         {
             if (Player?.IsYourPlayer != true)
                 return;
 
             var align = GUI.skin.label.alignment;
-            GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+            if (style == null)
+            {
+                style = new GUIStyle(GUI.skin.label)
+                {
+                    alignment = TextAnchor.MiddleLeft
+                };
+                if (ThatsLitPlugin.InfoFontSizeOverride.Value != 0) style.fontSize = ThatsLitPlugin.InfoFontSizeOverride.Value;
+            }
+            if (style.fontSize != ThatsLitPlugin.InfoFontSizeOverride.Value)
+            {
+                if (ThatsLitPlugin.InfoFontSizeOverride.Value != 0)
+                    style.fontSize = ThatsLitPlugin.InfoFontSizeOverride.Value;
+                else
+                    style.fontSize = GUI.skin.label.fontSize;
+            }
+
             bool layoutCall = guiFrame < Time.frameCount;
             ThatsLitPlugin.swGUI.MaybeResume();
             if (PlayerLitScoreProfile == null)
             {
                 if (Time.time - setupTime < 30f && !ThatsLitPlugin.HideMapTip.Value)
-                    GUILayout.Label("  [That's Lit] Brightness module is disabled in configs or not supported on this map.");
+                    GUILayout.Label("  [That's Lit] Brightness module is disabled in configs or not supported on this map.", style);
             }
 
             var poseFactor = Player.PoseLevel / Player.Physical.MaxPoseLevel * 0.6f + 0.4f; // crouch: 0.4f
@@ -917,10 +937,10 @@ namespace ThatsLit
             
             if (layoutCall)
                 infoCache1 = $"  IMPACT: {DebugInfo.lastCalcFrom:0.000} -> {DebugInfo.lastCalcTo:0.000} ({DebugInfo.lastFactor2:0.000} <- {DebugInfo.lastFactor1:0.000} <- {DebugInfo.lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {DebugInfo.calced} (+{DebugInfo.calcedLastFrame})\n  ENCOUNTER: {DebugInfo.encounter}  V.HINT: { DebugInfo.vagueHint }  V.CANCEL: { DebugInfo.vagueHintCancel }  SIG.D: { DebugInfo.signalDanger }\n  LAST SHOT: { lastShotVector } { Time.time - lastShotTime:0.0}s { DebugInfo.lastEncounterShotAngleDelta }deg  -{ DebugInfo.lastEncounteringShotCutoff }x\n  LAST_PARTS: { DebugInfo.lastVisiblePartsFactor} (x9)  G.OVL: { DebugInfo.lastGlobalOverlookChance:P1}\n  V.DIS.COMP: { DebugInfo.lastDisCompThermal }(T)  { DebugInfo.lastDisCompNVG }(NVG)  { DebugInfo.lastDisCompDay }(Day)  { DebugInfo.lastDisComp }  Focus: { DebugInfo.lastNearestFocusAngleX:0.0}degX/{ DebugInfo.lastNearestFocusAngleY:0.0}degY\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000}  3x3/5x5: { TerrainDetails?.RecentDetailCount3x3 }/{ TerrainDetails?.RecentDetailCount5x5 } (score-{ PlayerLitScoreProfile?.detailBonusSmooth:0.00})  FOLIAGE: {Foliage?.FoliageScore:0.000} ({Foliage?.FoliageCount}) (H{Foliage?.Nearest?.dis:0.00} to {Foliage?.Nearest?.name}) RAT: { DebugInfo.lastBushRat:0.00}\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {Utility.GetInGameDayTime():0.000} / WINTER: {Singleton<ThatsLitGameworld>.Instance.IsWinter}\n  POSE: {poseFactor} SPEED: { Player.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}  SRD: { surroundingRating:0.000}\n  {DebugInfo.nearestOffset}  Caution: { DebugInfo.nearestCaution }  NoBush.Cancel: {DebugInfo.cancelledSAINNoBush}/{DebugInfo.attemptToCancelSAINNoBush} {DebugInfo.lastInterruptChance:P1}  {DebugInfo.lastInterruptChanceDis:0.0}m SNP: {DebugInfo.sniperHintOffset} ({DebugInfo.sniperHintChance:P1})  FL: {flashLightHit.point:000.0}  HINT:{DebugInfo.flashLightHint}\n  F.L:{DebugInfo.forceLooks}  S.L:{DebugInfo.sideLooks}";
-            GUILayout.Label(infoCache1);
+            GUILayout.Label(infoCache1, style);
             // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
             
-            OnGUIScoreCalc();
+            OnGUIScoreCalc(style);
 
             if (IsDebugSampleFrame)
             {
@@ -936,7 +956,7 @@ namespace ThatsLit
             {
                 if (layoutCall)
                     infoCacheBenchmark = $"  Update:         {benchmarkSampleUpdate,8:0.0000}\n  Foliage:        {benchmarkSampleFoliageCheck,8:0.0000}\n  Terrain:        {benchmarkSampleTerrainCheck,8:0.0000}\n  SeenCoef:       {benchmarkSampleSeenCoef,8:0.0000}\n  Encountering:   {benchmarkSampleEncountering,8:0.0000}\n  ExtraVisDis:    {benchmarkSampleExtraVisDis,8:0.0000}\n  ScoreCalculator:{benchmarkSampleScoreCalculator,8:0.0000}\n  Info(+Debug):    {benchmarkSampleGUI,8:0.0000}\n  No Bush OVR:    {benchmarkSampleNoBushOverride,8:0.0000}\n  BlindFire:    {benchmarkSampleBlindFire,8:0.0000} ms";
-                GUILayout.Label(infoCacheBenchmark);
+                GUILayout.Label(infoCacheBenchmark, style);
                 if (Time.frameCount % 6000 == 0)
                     if (layoutCall) EFT.UI.ConsoleScreen.Log(infoCacheBenchmark);
             }
@@ -946,27 +966,26 @@ namespace ThatsLit
             if (ThatsLitPlugin.DebugTerrain.Value && TerrainDetails?.Details5x5 != null)
             {
                 infoCache2 = $"  DETAIL (SAMPLE): {DebugInfo?.lastFinalDetailScoreNearest:+0.00;-0.00;+0.00} ({DebugInfo?.lastDisFactorNearest:0.000}df) 3x3: { TerrainDetails.RecentDetailCount3x3}\n  {Utility.DetermineDir(DebugInfo?.lastTriggeredDetailCoverDirNearest ?? Vector3.zero)} {DebugInfo?.lastNearest:0.00}m {DebugInfo?.lastTiltAngle} {DebugInfo?.lastRotateAngle}";
-                GUILayout.Label(infoCache2);
+                GUILayout.Label(infoCache2, style);
                 // GUILayout.Label(string.Format(" DETAIL (SAMPLE): {0:+0.00;-0.00;+0.00} ({1:0.000}df) 3x3: {2}", arg0: lastFinalDetailScoreNearest, lastDisFactorNearest, recentDetailCount3x3));
                 // GUILayout.Label(string.Format(" {0} {1:0.00}m {2} {3}", Utility.DetermineDir(lastTriggeredDetailCoverDirNearest), lastNearest, lastTiltAngle, lastRotateAngle));
                 for (int i = TerrainDetails.GetDetailInfoIndex(2, 2, 0, Singleton<ThatsLitGameworld>.Instance.MaxDetailTypes); i < TerrainDetails.GetDetailInfoIndex(3, 2, 0, Singleton<ThatsLitGameworld>.Instance.MaxDetailTypes); i++) // List the underfoot
                     if (TerrainDetails.Details5x5[i].casted)
-                        GUILayout.Label($"  { TerrainDetails.Details5x5[i].count } Detail#{i}({ TerrainDetails.Details5x5[i].name }))");
-                Utility.GUILayoutDrawAsymetricMeter((int)(DebugInfo.lastFinalDetailScoreNearest / 0.0999f));
+                        GUILayout.Label($"  { TerrainDetails.Details5x5[i].count } Detail#{i}({ TerrainDetails.Details5x5[i].name }))", style);
+                Utility.GUILayoutDrawAsymetricMeter((int)(DebugInfo.lastFinalDetailScoreNearest / 0.0999f), false, style);
             }
 
             ThatsLitPlugin.swGUI.Stop();
             guiFrame = Time.frameCount;
-            GUI.skin.label.alignment = align;
             
         }
         string infoCache;
-        internal virtual void OnGUIScoreCalc ()
+        internal virtual void OnGUIScoreCalc (GUIStyle style)
         {
             if (PlayerLitScoreProfile == null || DebugInfo == null) return;
             if (PlayerLitScoreProfile.IsProxy)
             {
-                GUILayout.Label("  [PROXY]");
+                GUILayout.Label("  [PROXY]", style);
                 return;
             }
             if (ThatsLitPlayer.IsDebugSampleFrame)
@@ -980,9 +999,9 @@ namespace ThatsLit
                 DebugInfo.darkPixelsRatioSample = (PlayerLitScoreProfile.frame0.RatioDarkPixels + PlayerLitScoreProfile.frame1.RatioDarkPixels + PlayerLitScoreProfile.frame2.RatioDarkPixels + PlayerLitScoreProfile.frame3.RatioDarkPixels + PlayerLitScoreProfile.frame4.RatioDarkPixels + PlayerLitScoreProfile.frame5.RatioDarkPixels) / 6f;
             }
             if (guiFrame < Time.frameCount) infoCache = $"  PIXELS: {DebugInfo.shinePixelsRatioSample * 100:000}% - {DebugInfo.highLightPixelsRatioSample * 100:000}% - {DebugInfo.highMidLightPixelsRatioSample * 100:000}% - { DebugInfo.midLightPixelsRatioSample * 100:000}% - {DebugInfo.midLowLightPixelsRatioSample * 100:000}% - {DebugInfo.lowLightPixelsRatioSample * 100:000}% | {DebugInfo.darkPixelsRatioSample * 100:000}% (AVG Sample)\n  AvgLum: {PlayerLitScoreProfile.frame0.avgLum:0.000}  AvgLumMF: {PlayerLitScoreProfile.frame0.avgLumMultiFrames:0.000} / {Singleton<ThatsLitGameworld>.Instance.ScoreCalculator.GetMinAmbianceLum():0.000} ~ {Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator?.GetMaxAmbianceLum():0.000} ({Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator?.GetAmbianceLumRange():0.000})\n   Sun: {Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator?.sunLightScore:0.000}/{Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator?.GetMaxSunlightScore():0.000}, Moon: {Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator?.moonLightScore:0.000}/{Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator?.GetMaxMoonlightScore():0.000}\n  SCORE : {DebugInfo.scoreRawBase:＋0.00;－0.00;+0.00} -> {DebugInfo.scoreRaw0:＋0.00;－0.00;+0.00} -> {DebugInfo.scoreRaw1:＋0.00;－0.00;+0.00} -> {DebugInfo.scoreRaw2:＋0.00;－0.00;+0.00} -> {DebugInfo.scoreRaw3:＋0.00;－0.00;+0.00} -> {DebugInfo.scoreRaw4:＋0.00;－0.00;+0.00} (SAMPLE)";            
-            GUILayout.Label(infoCache);
+            GUILayout.Label(infoCache, style);
 
-            Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.score / 0.0999f));
+            Utility.GUILayoutDrawAsymetricMeter((int)(PlayerLitScoreProfile.frame0.score / 0.0999f), false, style);
         }
 
         private void ConcludeBenchmarks()

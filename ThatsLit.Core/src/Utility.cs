@@ -359,90 +359,91 @@ namespace ThatsLit
             return compat.TemplateInstance.modes[selectedMode];
         }
 
-        public static void GUILayoutDrawAsymetricMeter(int level, bool alternative = false)
+        public static void GUILayoutDrawAsymetricMeter(int level, bool alternative = false, GUIStyle style = null)
         {
+            if (style == null) style = GUI.skin.label;
             if (alternative)
             {
                 if (level < -10)
                 {
-                    GUILayout.Label("  ##########|----------");
+                    GUILayout.Label("  ##########|----------", style);
                     return;
                 }
                 if (level > 10)
                 {
-                    GUILayout.Label("  ----------|##########");
+                    GUILayout.Label("  ----------|##########", style);
                     return;
                 }
                 switch (level)
                 {
                     case -11:
-                        GUILayout.Label("  ##########|----------");
+                        GUILayout.Label("  ##########|----------", style);
                         break;
                     case -10:
-                        GUILayout.Label("  ##########|----------");
+                        GUILayout.Label("  ##########|----------", style);
                         break;
                     case -9:
-                        GUILayout.Label("  -#########|----------");
+                        GUILayout.Label("  -#########|----------", style);
                         break;
                     case -8:
-                        GUILayout.Label("  --########|----------");
+                        GUILayout.Label("  --########|----------", style);
                         break;
                     case -7:
-                        GUILayout.Label("  ---#######|----------");
+                        GUILayout.Label("  ---#######|----------", style);
                         break;
                     case -6:
-                        GUILayout.Label("  ----######|----------");
+                        GUILayout.Label("  ----######|----------", style);
                         break;
                     case -5:
-                        GUILayout.Label("  -----#####|----------");
+                        GUILayout.Label("  -----#####|----------", style);
                         break;
                     case -4:
-                        GUILayout.Label("  ------####|----------");
+                        GUILayout.Label("  ------####|----------", style);
                         break;
                     case -3:
-                        GUILayout.Label("  -------###|----------");
+                        GUILayout.Label("  -------###|----------", style);
                         break;
                     case -2:
-                        GUILayout.Label("  --------##|----------");
+                        GUILayout.Label("  --------##|----------", style);
                         break;
                     case -1:
-                        GUILayout.Label("  ---------#|----------");
+                        GUILayout.Label("  ---------#|----------", style);
                         break;
                     case 0:
-                        GUILayout.Label("  ----------|----------");
+                        GUILayout.Label("  ----------|----------", style);
                         break;
                     case 1:
-                        GUILayout.Label("  ----------|#---------");
+                        GUILayout.Label("  ----------|#---------", style);
                         break;
                     case 2:
-                        GUILayout.Label("  ----------|##--------");
+                        GUILayout.Label("  ----------|##--------", style);
                         break;
                     case 3:
-                        GUILayout.Label("  ----------|###-------");
+                        GUILayout.Label("  ----------|###-------", style);
                         break;
                     case 4:
-                        GUILayout.Label("  ----------|####------");
+                        GUILayout.Label("  ----------|####------", style);
                         break;
                     case 5:
-                        GUILayout.Label("  ----------|#####-----");
+                        GUILayout.Label("  ----------|#####-----", style);
                         break;
                     case 6:
-                        GUILayout.Label("  ----------|######----");
+                        GUILayout.Label("  ----------|######----", style);
                         break;
                     case 7:
-                        GUILayout.Label("  ----------|#######---");
+                        GUILayout.Label("  ----------|#######---", style);
                         break;
                     case 8:
-                        GUILayout.Label("  ----------|########--");
+                        GUILayout.Label("  ----------|########--", style);
                         break;
                     case 9:
-                        GUILayout.Label("  ----------|#########-");
+                        GUILayout.Label("  ----------|#########-", style);
                         break;
                     case 10:
-                        GUILayout.Label("  ----------|##########");
+                        GUILayout.Label("  ----------|##########", style);
                         break;
                     case 11:
-                        GUILayout.Label("  ----------|##########");
+                        GUILayout.Label("  ----------|##########", style);
                         break;
                 }
                 return;
@@ -450,84 +451,84 @@ namespace ThatsLit
 
             if (level < -10)
             {
-                GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱");
+                GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰ ▱▱▱▱▱▱▱▱▱▱", style);
                 return;
             }
             if (level > 10)
             {
-                GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰");
+                GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰", style);
                 return;
             }
             switch (level)
             {
                 case -11:
-                    GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -10:
-                    GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▰▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -9:
-                    GUILayout.Label("  ▱▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▰▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -8:
-                    GUILayout.Label("  ▱▱▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▰▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -7:
-                    GUILayout.Label("  ▱▱▱▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▰▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -6:
-                    GUILayout.Label("  ▱▱▱▱▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▰▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -5:
-                    GUILayout.Label("  ▱▱▱▱▱▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▰▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -4:
-                    GUILayout.Label("  ▱▱▱▱▱▱▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▰▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -3:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▰▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▰▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -2:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▰▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▰▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case -1:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▰  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▰  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case 0:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▱▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▱▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case 1:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case 2:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▱▱▱▱▱▱▱▱", style);
                     break;
                 case 3:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▱▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▱▱▱▱▱▱▱", style);
                     break;
                 case 4:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▱▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▱▱▱▱▱▱", style);
                     break;
                 case 5:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▱▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▱▱▱▱▱", style);
                     break;
                 case 6:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▱▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▱▱▱▱", style);
                     break;
                 case 7:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▱▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▱▱▱", style);
                     break;
                 case 8:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▱▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▱▱", style);
                     break;
                 case 9:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▱");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▱", style);
                     break;
                 case 10:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰", style);
                     break;
                 case 11:
-                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰");
+                    GUILayout.Label("  ▱▱▱▱▱▱▱▱▱▱  ▰▰▰▰▰▰▰▰▰▰", style);
                     break;
             }
         }
@@ -541,178 +542,180 @@ namespace ThatsLit
             }
         }
 
-        internal static void GUILayoutFoliageMeter(int level, bool alternative = false)
+        internal static void GUILayoutFoliageMeter(int level, bool alternative = false, GUIStyle style= null)
         {
+            if (style == null) style = GUI.skin.label;
             if (alternative)
             {
                 if (level <= 0)
                 {
-                    GUILayout.Label("  FOLIAGE  ----------|");
+                    GUILayout.Label("  FOLIAGE  ----------|", style);
                     return;
                 }
                 if (level >= 10)
                 {
-                    GUILayout.Label("  FOLIAGE  ##########|");
+                    GUILayout.Label("  FOLIAGE  ##########|", style);
                     return;
                 }
                 switch (level)
                 {
                     case 1:
-                        GUILayout.Label("  FOLIAGE  #---------|");
+                        GUILayout.Label("  FOLIAGE  #---------|", style);
                         break;
                     case 2:
-                        GUILayout.Label("  FOLIAGE  ##--------|");
+                        GUILayout.Label("  FOLIAGE  ##--------|", style);
                         break;
                     case 3:
-                        GUILayout.Label("  FOLIAGE  ###-------|");
+                        GUILayout.Label("  FOLIAGE  ###-------|", style);
                         break;
                     case 4:
-                        GUILayout.Label("  FOLIAGE  ####------|");
+                        GUILayout.Label("  FOLIAGE  ####------|", style);
                         break;
                     case 5:
-                        GUILayout.Label("  FOLIAGE  #####-----|");
+                        GUILayout.Label("  FOLIAGE  #####-----|", style);
                         break;
                     case 6:
-                        GUILayout.Label("  FOLIAGE  ######----|");
+                        GUILayout.Label("  FOLIAGE  ######----|", style);
                         break;
                     case 7:
-                        GUILayout.Label("  FOLIAGE  #######---|");
+                        GUILayout.Label("  FOLIAGE  #######---|", style);
                         break;
                     case 8:
-                        GUILayout.Label("  FOLIAGE  ########--|");
+                        GUILayout.Label("  FOLIAGE  ########--|", style);
                         break;
                     case 9:
-                        GUILayout.Label("  FOLIAGE  #########-|");
+                        GUILayout.Label("  FOLIAGE  #########-|", style);
                         break;
                 }
             }
 
             if (level <= 0)
             {
-                GUILayout.Label("  FOLIAGE  ▱▱▱▱▱▱▱▱▱▱");
+                GUILayout.Label("  FOLIAGE  ▱▱▱▱▱▱▱▱▱▱", style);
                 return;
             }
             if (level >= 10)
             {
-                GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▰▰");
+                GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▰▰", style);
                 return;
             }
             switch (level)
             {
                 case 1:
-                    GUILayout.Label("  FOLIAGE  ▰▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case 2:
-                    GUILayout.Label("  FOLIAGE  ▰▰▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▱▱▱▱▱▱▱▱", style);
                     break;
                 case 3:
-                    GUILayout.Label("  FOLIAGE  ▰▰▰▱▱▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▱▱▱▱▱▱▱", style);
                     break;
                 case 4:
-                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▱▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▱▱▱▱▱▱", style);
                     break;
                 case 5:
-                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▱▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▱▱▱▱▱", style);
                     break;
                 case 6:
-                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▱▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▱▱▱▱", style);
                     break;
                 case 7:
-                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▱▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▱▱▱", style);
                     break;
                 case 8:
-                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▱▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▱▱", style);
                     break;
                 case 9:
-                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▰▱");
+                    GUILayout.Label("  FOLIAGE  ▰▰▰▰▰▰▰▰▰▱", style);
                     break;
             }
         }
 
-        internal static void GUILayoutTerrainMeter(int level, bool alternative = false)
+        internal static void GUILayoutTerrainMeter(int level, bool alternative = false, GUIStyle style = null)
         {
+            if (style == null) style = GUI.skin.label;
             if (alternative)
             {
                 if (level <= 0)
                 {
-                    GUILayout.Label("  TERRAIN  ----------|");
+                    GUILayout.Label("  TERRAIN  ----------|", style);
                     return;
                 }
                 if (level >= 10)
                 {
-                    GUILayout.Label("  TERRAIN  ##########|");
+                    GUILayout.Label("  TERRAIN  ##########|", style);
                     return;
                 }
                 switch (level)
                 {
                     case 1:
-                        GUILayout.Label("  TERRAIN  #---------|");
+                        GUILayout.Label("  TERRAIN  #---------|", style);
                         break;
                     case 2:
-                        GUILayout.Label("  TERRAIN  ##--------|");
+                        GUILayout.Label("  TERRAIN  ##--------|", style);
                         break;
                     case 3:
-                        GUILayout.Label("  TERRAIN  ###-------|");
+                        GUILayout.Label("  TERRAIN  ###-------|", style);
                         break;
                     case 4:
-                        GUILayout.Label("  TERRAIN  ####------|");
+                        GUILayout.Label("  TERRAIN  ####------|", style);
                         break;
                     case 5:
-                        GUILayout.Label("  TERRAIN  #####-----|");
+                        GUILayout.Label("  TERRAIN  #####-----|", style);
                         break;
                     case 6:
-                        GUILayout.Label("  TERRAIN  ######----|");
+                        GUILayout.Label("  TERRAIN  ######----|", style);
                         break;
                     case 7:
-                        GUILayout.Label("  TERRAIN  #######---|");
+                        GUILayout.Label("  TERRAIN  #######---|", style);
                         break;
                     case 8:
-                        GUILayout.Label("  TERRAIN  ########--|");
+                        GUILayout.Label("  TERRAIN  ########--|", style);
                         break;
                     case 9:
-                        GUILayout.Label("  TERRAIN  #########-|");
+                        GUILayout.Label("  TERRAIN  #########-|", style);
                         break;
                 }
             }
 
             if (level <= 0)
             {
-                GUILayout.Label("  TERRAIN  ▱▱▱▱▱▱▱▱▱▱");
+                GUILayout.Label("  TERRAIN  ▱▱▱▱▱▱▱▱▱▱", style);
                 return;
             }
             if (level >= 10)
             {
-                GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▰▰");
+                GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▰▰", style);
                 return;
             }
             switch (level)
             {
                 case 1:
-                    GUILayout.Label("  TERRAIN  ▰▱▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▱▱▱▱▱▱▱▱▱", style);
                     break;
                 case 2:
-                    GUILayout.Label("  TERRAIN  ▰▰▱▱▱▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▱▱▱▱▱▱▱▱", style);
                     break;
                 case 3:
-                    GUILayout.Label("  TERRAIN  ▰▰▰▱▱▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▱▱▱▱▱▱▱", style);
                     break;
                 case 4:
-                    GUILayout.Label("  TERRAIN  ▰▰▰▰▱▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▱▱▱▱▱▱", style);
                     break;
                 case 5:
-                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▱▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▱▱▱▱▱", style);
                     break;
                 case 6:
-                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▱▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▱▱▱▱", style);
                     break;
                 case 7:
-                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▱▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▱▱▱", style);
                     break;
                 case 8:
-                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▱▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▱▱", style);
                     break;
                 case 9:
-                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▰▱");
+                    GUILayout.Label("  TERRAIN  ▰▰▰▰▰▰▰▰▰▱", style);
                     break;
             }
         }

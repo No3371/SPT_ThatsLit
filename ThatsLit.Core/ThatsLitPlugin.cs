@@ -191,6 +191,8 @@ namespace ThatsLit
             HideMapTip                  = Config.Bind(category, "Hide Map Tip", false, new ConfigDescription("Hide the reminder about disabled Brightness module.", null));
             InfoOffset                 = Config.Bind(category, "InfoOffset", 0,
                                                    new ConfigDescription("Vertical offset to the top.", new AcceptableValueRange<int>(0, 7)));
+            InfoFontSizeOverride                 = Config.Bind(category, "Info Font Size Override", 0,
+                                                   new ConfigDescription("Change font size", new AcceptableValueRange<int>(0, 32)));
             // AlternativeMeterUnicde                  = Config.Bind(category, "Alternative Meter", false, "If somehow the GUI meters unicodes are not rendered on your system, try this options.");
 
 
@@ -226,6 +228,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> FoliageInfo { get; private set; }
         public static ConfigEntry<bool> DebugInfo { get; private set; }
         public static ConfigEntry<int> InfoOffset { get; private set; }
+        public static ConfigEntry<int> InfoFontSizeOverride { get; private set; }
         public static ConfigEntry<bool> HideMapTip { get; private set; }
         public static ConfigEntry<bool> DebugTexture { get; private set; }
         public static ConfigEntry<bool> DebugTerrain { get; private set; }
