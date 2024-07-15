@@ -929,7 +929,12 @@ namespace ThatsLit
             OnGUIInfo();
             ThatsLitAPI.OnMainPlayerGUI?.Invoke();
 
-            if (!ThatsLitPlugin.DebugInfo.Value || DebugInfo == null) return;
+            if (!ThatsLitPlugin.DebugInfo.Value || DebugInfo == null)
+            {
+                ThatsLitPlugin.swGUI.Stop();
+                guiFrame = Time.frameCount;
+                return;
+            }
 
             float fog = WeatherController.Instance?.WeatherCurve?.Fog ?? 0;
             float rain = WeatherController.Instance?.WeatherCurve?.Rain ?? 0;
