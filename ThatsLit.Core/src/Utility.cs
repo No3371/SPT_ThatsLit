@@ -814,7 +814,7 @@ namespace ThatsLit
 
         internal static bool IsPMCSpawnType (WildSpawnType? spawnType)
         {
-            return spawnType != null && (int) spawnType == 47 || (int) spawnType == 48; // sptUsec = 47, sptBear = 48
+            return spawnType != null && spawnType == WildSpawnType.pmcBEAR || spawnType == WildSpawnType.pmcUSEC;
         }
     }
 }
