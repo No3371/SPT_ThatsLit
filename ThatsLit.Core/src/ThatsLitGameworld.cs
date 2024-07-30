@@ -740,7 +740,8 @@ namespace ThatsLit
             }
             var waitNextFrame = new WaitForEndOfFrame();
 
-            if (detailMapData == null) detailMapData = new List<int[,]>(mgr.prototypeList.Count);
+            if (detailMapData == null)
+                detailMapData = new List<int[,]>(mgr.prototypeList.Count);
             else detailMapData.Clear();
             for (int layer = 0; layer < mgr.prototypeList.Count; ++layer)
             {
