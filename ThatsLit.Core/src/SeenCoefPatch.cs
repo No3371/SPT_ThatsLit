@@ -734,7 +734,7 @@ namespace ThatsLit
                 var secondsOffset = -1f * Mathf.Pow(factor, 2) * Mathf.Sign(factor) * (UnityEngine.Random.Range(0.5f, 1f) - 0.5f * cqb11mTo1mSquared); // Base
                 secondsOffset += (original * (10f + rand1 * 20f) * (0.1f + 0.9f * sinceSeenFactorSqr * seenPosDeltaFactorSqr) * extremeDarkFactor) / pPoseFactor; // Makes night factory makes sense (filtered by extremeDarkFactor)
                 secondsOffset *= botImpactType == BotImpactType.DEFAULT? 1f : 0.5f;
-                secondsOffset *= secondsOffset > 0 ? ThatsLitPlugin.BrightnessImpactScale : ThatsLitPlugin.DarknessImpactScale;
+                secondsOffset *= secondsOffset > 0 ? ThatsLitPlugin.DarknessImpactScale : ThatsLitPlugin.BrightnessImpactScale;
                 __result += secondsOffset;
                 if (__result < 0) __result = 0;
 
