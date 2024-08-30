@@ -208,7 +208,8 @@ namespace ThatsLit
 
             Vector3 bodyPos = Player.MainParts[BodyPartType.body].Position;
 
-            if (!Player.AIData.IsInside) lastOutside = Time.time;
+            if (!Player.AIData.IsInside)
+                lastOutside = Time.time;
 
             if (EnvironmentManager.Instance.InBunker && lastOutBunkerTime >= lastInBunkerTime)
             {

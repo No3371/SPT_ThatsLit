@@ -415,7 +415,7 @@ namespace ThatsLit
             var cqb6mTo1m = Mathf.InverseLerp(5f, 0f, dis - 1f); // 6+ -> 0, 1f -> 1
             var cqb16mTo1m = Mathf.InverseLerp(15f, 0f, dis - 1f); // 16+ -> 0, 1f -> 1                                                               // Fix for blind bots who are already touching us
 
-            var cqb11mTo1mSquared = Mathf.InverseLerp(10f, 0, dis - 1f); // 11+ -> 0, 1 -> 1, 6 ->0.5
+            var cqb11mTo1mSquared = Mathf.InverseLerp(10f, 0, dis - 1f); // 11 -> 1
             cqb11mTo1mSquared *= cqb11mTo1mSquared; // 6m -> 25%, 1m -> 100%
 
             // Scale down cqb factors for AIs facing away
@@ -669,7 +669,8 @@ namespace ThatsLit
                 {
                     player.DebugInfo.lastBushRat = bushRatFactor;
                 }
-                if (botImpactType == BotImpactType.FOLLOWER || canSeeLight || (canSeeLaser && rand3 < 0.2f)) bushRatFactor /= 2f;
+                if (botImpactType == BotImpactType.FOLLOWER || canSeeLight || (canSeeLaser && rand3 < 0.2f))
+                    bushRatFactor /= 2f;
                 if (bushRat && bushRatFactor > 0.01f)
                 {
                     if (player.DebugInfo != null && nearestAI)
@@ -679,14 +680,16 @@ namespace ThatsLit
                     {
                         case 0:
                         case 1:
-                            if (rand2 > 0.01f) __result *= 1 + 4 * bushRatFactor * UnityEngine.Random.Range(0.2f, 0.4f);
+                            if (rand2 > 0.01f)
+                                __result *= 1 + 4 * bushRatFactor * UnityEngine.Random.Range(0.2f, 0.4f);
                             cqb6mTo1m *= 1f - bushRatFactor * 0.5f;
                             cqb11mTo1mSquared *= 1f - bushRatFactor * 0.5f;
                             break;
                         case 2:
                         case 3:
                         case 4:
-                            if (rand3 > 0.005f) __result *= 1 + 8 * bushRatFactor * UnityEngine.Random.Range(0.3f, 0.65f);
+                            if (rand3 > 0.005f)
+                                __result *= 1 + 8 * bushRatFactor * UnityEngine.Random.Range(0.3f, 0.65f);
                             cqb6mTo1m *= 1f - bushRatFactor * 0.8f;
                             cqb11mTo1mSquared *= 1f - bushRatFactor * 0.8f;
                             break;
@@ -695,7 +698,8 @@ namespace ThatsLit
                         case 7:
                         case 8:
                         case 9:
-                            if (rand1 > 0.001f) __result *= 1 + 6 * bushRatFactor * UnityEngine.Random.Range(0.5f, 1.0f);
+                            if (rand1 > 0.001f)
+                                __result *= 1 + 6 * bushRatFactor * UnityEngine.Random.Range(0.5f, 1.0f);
                             cqb6mTo1m *= 1f - bushRatFactor;
                             cqb11mTo1mSquared *= 1f - bushRatFactor;
                             break;
@@ -724,6 +728,7 @@ namespace ThatsLit
                 {
                     var emptiness = 1f - player.Foliage.FoliageScore * detailScoreRaw;
                     emptiness *= 1f - insideTime;
+                    emptiness = Mathf.Clamp01(emptiness);
                     disFactor *= 0.7f + 0.3f * emptiness; // When player outside is not surrounded by anything in winter, lose dis buff
                 }
 
@@ -731,7 +736,7 @@ namespace ThatsLit
 
                 // Absoulute offset
                 // f-0.1 => -0.005~-0.01, factor: -0.2 => -0.02~-0.04, factor: -0.5 => -0.125~-0.25, factor: -1 => 0 ~ -0.5 (1m), -0.5 ~ -1 (10m)
-                var secondsOffset = -1f * Mathf.Pow(factor, 2) * Mathf.Sign(factor) * (UnityEngine.Random.Range(0.5f, 1f) - 0.5f * cqb11mTo1mSquared); // Base
+                var secondsOffset = -1f * Mathf.Pow(factor, 2) * Mathf.Sign(factor) * (UnityEngine.Random.Range(0.5f, 1f) - 0.5f * cqb11mTo1mSquared); // 1 => -1x, -1 => 1x
                 secondsOffset += (original * (10f + rand1 * 20f) * (0.1f + 0.9f * sinceSeenFactorSqr * seenPosDeltaFactorSqr) * extremeDarkFactor) / pPoseFactor; // Makes night factory makes sense (filtered by extremeDarkFactor)
                 secondsOffset *= botImpactType == BotImpactType.DEFAULT? 1f : 0.5f;
                 secondsOffset *= secondsOffset > 0 ? ThatsLitPlugin.DarknessImpactScale : ThatsLitPlugin.BrightnessImpactScale;
