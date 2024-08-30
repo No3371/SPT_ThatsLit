@@ -1,4 +1,4 @@
-﻿#define DEBUG_DETAILS
+#define DEBUG_DETAILS
 using SPT.Reflection.Patching;
 using EFT;
 using HarmonyLib;
@@ -28,7 +28,7 @@ namespace ThatsLit
             // Don't use GoalEnemy here because it only change when engaging new enemy (it'll stay indifinitely if not engaged with new enemy)
             // Also they could search without having visual?
 
-            if (__result == 8888
+            if (__result >= 8888
              || !ThatsLitPlugin.EnabledMod.Value
              || (ThatsLitPlugin.FinalImpactScaleDelaying.Value == 0 && ThatsLitPlugin.FinalImpactScaleFastening.Value == 0)
              || ThatsLitPlugin.PMCOnlyMode.Value && !Utility.IsPMCSpawnType(__instance.Owner?.Profile?.Info?.Settings?.Role))
