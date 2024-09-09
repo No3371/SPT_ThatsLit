@@ -824,46 +824,50 @@ namespace ThatsLit
 
             // ===== Visible Parts
             // Simulate the situation where part of a player is seen but the bot failed to recognize it due to the lack of full view
-            var visiblePartsFactor = 6f;
-            var upperVisible = 0;
+            var visibleParts = 6f; // Starts at 6 in case all parts are not alawys checked
+            var upperVisible = 4;
             foreach (var p in __instance.AllActiveParts)
             {
-                if (p.Value.LastVisibilityCastSucceed)
+                if (!p.Value.LastVisibilityCastSucceed)
                 {
                     switch (p.Key.BodyPartType)
                     {
                         case BodyPartType.head:
-                            visiblePartsFactor -= 0.5f; // easier to recognize
-                            upperVisible++;
+                            visibleParts -= 0.5f; // easier to recognize
+                            upperVisible--;
                             break;
                         case BodyPartType.body:
-                            visiblePartsFactor -= 2.0f;
-                            upperVisible++;
+                            visibleParts -= 2.0f;
+                            upperVisible--;
                             break;
                         case BodyPartType.leftArm:
                         case BodyPartType.rightArm:
-                            visiblePartsFactor -= 1f;
-                            upperVisible++;
+                            visibleParts -= 1f;
+                            upperVisible--;
                             break;
                         default:
-                            visiblePartsFactor -= 1f;
+                            visibleParts -= 1f;
                             break;
                     }
                 }
             }
-            visiblePartsFactor = Mathf.InverseLerp(6f, 1f, visiblePartsFactor);
-            visiblePartsFactor *= visiblePartsFactor;
-            float partsHidingCutoff = visiblePartsFactor * Mathf.InverseLerp(0f, 45f - caution, visionAngleDelta) * notSeenRecentAndNear * Mathf.InverseLerp(0f, 10f, zoomedDis);
-            if (player.DebugInfo != null && nearestAI)
+            if (ThatsLitPlugin.EnableBodyPartsRecognition.Value)
             {
-                player.DebugInfo.lastVisiblePartsFactor = visiblePartsFactor;
+                var invisiblePartsFactor = Mathf.InverseLerp(6f, 1f, visibleParts);
+                invisiblePartsFactor *= invisiblePartsFactor;
+                if (player.DebugInfo != null && nearestAI)
+                {
+                    player.DebugInfo.lastVisiblePartsFactor = invisiblePartsFactor;
+                }
+                invisiblePartsFactor *= Mathf.InverseLerp(0f, 45f - caution, visionAngleDelta) * notSeenRecentAndNear * Mathf.InverseLerp(0f, 10f, zoomedDis);
+                if (botImpactType != BotImpactType.DEFAULT)
+                    invisiblePartsFactor /= 2f;
+                __result += (0.04f * rand2) * invisiblePartsFactor;
+                __result *= 1f + (0.15f + 0.85f * rand1) * invisiblePartsFactor * 9f;
             }
-            if (botImpactType != BotImpactType.DEFAULT) partsHidingCutoff /= 2f;
-            __result += (0.04f * rand2) * partsHidingCutoff;
-            __result *= 1f + (0.15f + 0.85f * rand1) * partsHidingCutoff * 9f;
 
             float lastSeenGoalEnemyTime = Time.time - __instance.Owner?.Memory?.GoalEnemy?.TimeLastSeen ?? 0;
-            if (lastSeenGoalEnemyTime > 2f)
+            if (ThatsLitPlugin.EnableSimFreeLook.Value && lastSeenGoalEnemyTime > 2f)
             {
                 // Simulated Free Look
                 float sin = 0.75f * Mathf.Sin(Time.time / ((float)(1f + caution))) + 0.25f * Mathf.Sin(Time.time);
@@ -923,13 +927,13 @@ namespace ThatsLit
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
 
-            if (canSeeLight && playerFC != null)
+            if (ThatsLitPlugin.EnableExtraFlashLightReaction.Value && canSeeLight && playerFC != null)
             {
                 float wCoFacingAngle = Vector3.Angle(-eyeToPlayerBody, playerFC.WeaponDirection);
                 // If player flashlights directly shining against the bot
                 if (upperVisible >= 3) // >= 3 upper parts visible
                 {
-                    if (wCoFacingAngle < 7.5f)
+                    if (wCoFacingAngle < 7.5f) // Shining against the bot
                     {
                         __result *= 1 - 0.75f * Mathf.InverseLerp(7.5f, 0f, wCoFacingAngle) * Mathf.InverseLerp(40f, 7.5f, zoomedDis);
                         // if (player.DebugInfo != null)
@@ -937,7 +941,7 @@ namespace ThatsLit
                         //     player.DebugInfo.flashLightHint++;
                         // }
                     }
-                    else if (nearestAI && dis < 15f)
+                    else if (nearestAI && dis < 15f) // Shining toward somewhere else but close enough
                     {
                         __result *= 1 - rand4 * 0.4f * Mathf.InverseLerp(15, 1f, dis) * Mathf.InverseLerp(90f, 0f, Vector3.Angle(-playerFC.WeaponDirection, botVisionDir));
                         if (player.DebugInfo != null)

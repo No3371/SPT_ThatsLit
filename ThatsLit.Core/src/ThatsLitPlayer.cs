@@ -454,7 +454,8 @@ namespace ThatsLit
             }
 
             Player nearestBotPlayer = lastNearest?.GetPlayer;
-            if (nearestBotPlayer != null
+            if (ThatsLitPlugin.EnableNearestBotSteering.Value
+             && nearestBotPlayer != null
              && nearestBotPlayer.isActiveAndEnabled
              && nearestBotPlayer.MainParts != null
              && nearestBotPlayer.MainParts.ContainsKey(BodyPartType.head)
