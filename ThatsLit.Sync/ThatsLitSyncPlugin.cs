@@ -195,7 +195,8 @@ namespace ThatsLit.Sync
 
             ThatsLitAPI.TrySetProxyBrightnessScore(player, packet.score, packet.ambienceScore);
             BroadcastScore(ref packet);
-            if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [Redirect] Broadcasting #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
+            if (LogPackets.Value)
+                Logger.LogInfo($"[That's Lit Sync] [Redirect] Broadcasting #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
         }
         void HandlePacketClient (ScorePacket packet)
         {
@@ -203,7 +204,7 @@ namespace ThatsLit.Sync
              || player.IsYourPlayer) // Don't take broadcasted back packet
                 return;
             
-            if (LogPackets.Value) Logger.LogInfo($"[That's Lit] Received #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
+            if (LogPackets.Value) Logger.LogInfo($"[That's Lit Sync] Received #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
             ThatsLitAPI.TrySetProxyBrightnessScore(player, packet.score, packet.ambienceScore);
         }
         
@@ -250,7 +251,7 @@ namespace ThatsLit.Sync
             if (FikaBackendUtils.IsServer && coopPlayer != null && coopPlayer.IsYourPlayer)
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
-                if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Broadcasting #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
+                if (LogPackets.Value) Logger.LogInfo($"[That's Lit Sync] [On Calc] Broadcasting #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
                 BroadcastScore(ref packet);
             }
             else if (FikaBackendUtils.IsClient && coopPlayer != null && coopPlayer.IsYourPlayer)
@@ -263,9 +264,9 @@ namespace ThatsLit.Sync
                     lastSent = Time.time;
                     lastScore = score;
                     lastAmbscore = ambScore;
-                    if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Uploading #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
+                    if (LogPackets.Value) Logger.LogInfo($"[That's Lit Sync] [On Calc] Uploading #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
                 }
-                if (LogPackets.Value) Logger.LogInfo($"[That's Lit] [On Calc] Uploading throttled for #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
+                if (LogPackets.Value) Logger.LogInfo($"[That's Lit Sync] [On Calc] Uploading throttled for #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
             }
         }
 
