@@ -80,14 +80,21 @@ namespace ThatsLit
 
         void Start ()
         {
-            if (Chainloader.PluginInfos.ContainsKey("com.fika.core")
-             && EnabledLighting.Value
-             && !Chainloader.PluginInfos.ContainsKey("bastudio.thatslit.sync"))
+            this.StartCoroutine(FikaHelper());
+            IEnumerator FikaHelper ()
             {
-                string message = $"[That's Lit] Fika detected, but That's Lit Sync extension not found. Without the extension, you will lose extra fps per player. Get Sync extension from Fika Discord.";
-                NotificationManagerClass.DisplayWarningNotification(message, EFT.Communications.ENotificationDurationType.Long);
-                Logger.LogError(message);
-                // EFT.UI.ConsoleScreen.Log(message); // EXCEPTION and fails plugin loading (Console is not loaded yet)
+                var wait = new WaitForSeconds(1f);
+                while (!PreloaderUI.Instantiated || CommonUI.Instance?.MenuScreen?.isActiveAndEnabled != true)
+                    yield return wait;
+
+                if (Chainloader.PluginInfos.ContainsKey("com.fika.core")
+                && EnabledLighting.Value
+                && !Chainloader.PluginInfos.ContainsKey("bastudio.thatslit.sync"))
+                {
+                    string message = $"[That's Lit] Fika detected, but That's Lit Sync extension not found. Without the extension, you will lose extra fps per player. Get Sync extension from Fika Discord #mod-release.";
+                    NotificationManagerClass.DisplayWarningNotification(message, EFT.Communications.ENotificationDurationType.Infinite);
+                    Logger.LogError(message);
+                }
             }
         }
 
