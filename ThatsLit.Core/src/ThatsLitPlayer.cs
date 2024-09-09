@@ -123,7 +123,8 @@ namespace ThatsLit
         internal void MaybeEnableBrightness ()
         {
             if (!ThatsLitPlugin.EnabledLighting.Value
-             || Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null)
+             || Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null
+             || Application.isBatchMode)
                 return;
 
             if (PlayerLitScoreProfile == null) PlayerLitScoreProfile = new PlayerLitScoreProfile(this);
@@ -231,7 +232,8 @@ namespace ThatsLit
             ThatsLitPlugin.swTerrain.MaybeResume();
             if (ThatsLitPlugin.EnabledGrasses.Value
                 && !Singleton<ThatsLitGameworld>.Instance.terrainDetailsUnavailable
-                && TerrainDetails == null)
+                && TerrainDetails == null
+                && !Application.isBatchMode)
             {
                 TerrainDetails = new PlayerTerrainDetailsProfile();
             }
@@ -255,7 +257,8 @@ namespace ThatsLit
             ThatsLitPlugin.swFoliage.MaybeResume();
             if (ThatsLitPlugin.EnabledFoliage.Value
              && !Singleton<ThatsLitGameworld>.Instance.foliageUnavailable
-             && Foliage == null)
+             && Foliage == null
+             && !Application.isBatchMode)
             {
                 Foliage = new PlayerFoliageProfile(new FoliageInfo[16], new Collider[16]);
             }
