@@ -5,6 +5,9 @@ using DrakiaXYZ.VersionChecker;
 using System;
 using static ThatsLit.AssemblyInfo;
 using ThatsLit.Patches.Vision;
+using System.Collections;
+using UnityEngine;
+using EFT.UI;
 
 namespace ThatsLit
 {
