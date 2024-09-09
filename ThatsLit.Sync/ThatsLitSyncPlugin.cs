@@ -115,9 +115,24 @@ namespace ThatsLit.Sync
 
         bool ShouldSetupPlayer (Player player)
         {
-            if (player.IsYourPlayer) return true; // Local
-            if (player is ObservedCoopPlayer coopPlayer && !coopPlayer.IsObservedAI) return true; // Non AI remote players
-            if (player.IsAI || player.AIData.BotOwner != null || !player.gameObject.name.StartsWith("Player_")) return false;
+            // Logger.LogInfo($"[That's Lit Sync] Setting up player: {player.gameObject.name} ({player.Profile.Nickname})?");
+            if (player.IsYourPlayer)
+            {
+                if (Application.isBatchMode)
+                {
+                    // Logger.LogInfo($"[That's Lit Sync] This player {player.gameObject.name} ({player.Profile.Nickname}) is running in batch mode, skipping...");
+                    return false;
+                }
+                return true; // Local
+            }
+            if (player is ObservedCoopPlayer coopPlayer && !coopPlayer.IsObservedAI)
+            {
+                return true; // Non AI remote players
+            }
+            if (player.IsAI || player.AIData.BotOwner != null || !player.gameObject.name.StartsWith("Player_"))
+            {
+                return false;
+            }
             return false;
         }
 
