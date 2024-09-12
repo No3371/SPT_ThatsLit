@@ -94,7 +94,7 @@ namespace ThatsLit
                 && EnabledLighting.Value
                 && !Chainloader.PluginInfos.ContainsKey("bastudio.thatslit.sync"))
                 {
-                    string message = $"[That's Lit] Fika detected, but That's Lit Sync extension not found. Without the extension, you will lose extra fps per player. Get Sync extension from Fika Discord #mod-release.";
+                    string message = $"[That's Lit] Fika detected, but That's Lit Sync extension is not found. Without the extension, you will lose extra fps per player. Get Sync extension from Fika Discord #mod-releases.";
                     NotificationManagerClass.DisplayWarningNotification(message, EFT.Communications.ENotificationDurationType.Infinite);
                     Logger.LogError(message);
                 }
@@ -179,7 +179,7 @@ namespace ThatsLit
 
             category                   = "5. Tweaks";
             EnableMovementImpact       = Config.Bind(category, "Movement Impact", true, "Should sprinting bots spot player slower & Should moving (esp. sprinting) player get spotted slightly faster. This option is provided because SAIN is including similiar (player side only) feature (though their effectiveness is unknown yet.");
-            EnableSimFreeLook       = Config.Bind(category, "Bot Simulated Free Look", true, "Should bots randomly focus on certain angles in front. This allows bots vision reaction slower or faster depends on how close you are relative to the direction they are focusing on.");
+            EnableSimFreeLook       = Config.Bind(category, "Bot Simulated Free Look", true, "Should bots randomly focus on certain angles in front, just like how human player eyeballing around. This allows bots vision reaction slower or faster depends on how close you are relative to the direction they are focusing on.");
             EnableBodyPartsRecognition       = Config.Bind(category, "Body Parts Recognition", true, "Should bots fail to recogninze the player when the player expose fewer body parts. The fewer parts seen the greater the chance bots fail to react.");
             EnableNearestBotSteering       = Config.Bind(category, "Nearest Bot Steering", true, "Should nearest bot get told to look side way or to the player when they are very close. This is meant to make bots less vulnerable around corners or moving straight forward.");
             EnableExtraFlashLightReaction       = Config.Bind(category, "Extra Flashlight Reaction", true, "Should bots react faster when they can see the player's light and it's shining direct against them, or randomly react faster when they can see the player's light shining towards somewhere else.");
