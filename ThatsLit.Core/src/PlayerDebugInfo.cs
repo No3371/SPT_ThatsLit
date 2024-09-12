@@ -6,7 +6,8 @@ namespace ThatsLit
     public class PlayerDebugInfo
     {
         public bool IsBushRatting { get; set;} 
-        public float lastCalcFrom, lastCalcTo, lastScore, lastFactor1, lastFactor2, rawTerrainScoreSample;
+        public float lastCalcFrom, lastScore, lastFactor1, lastFactor2, rawTerrainScoreSample;
+        public float lastCalcTo0, lastCalcTo1, lastCalcTo2, lastCalcTo3, lastCalcTo4, lastCalcTo5, lastCalcTo6, lastCalcTo7, lastCalcTo8;
         public int calced = 0, calcedLastFrame = 0, encounter, vagueHint, vagueHintCancel, signalDanger;
         public Vector3 lastTriggeredDetailCoverDirNearest;
         public float lastTiltAngle, lastRotateAngle, lastDisFactorNearest;

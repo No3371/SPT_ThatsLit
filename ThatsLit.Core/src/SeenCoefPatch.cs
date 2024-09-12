@@ -215,13 +215,13 @@ namespace ThatsLit
                 {
                     player.DebugInfo.lastNearest = lastNearestDistance;
                     player.lastNearest = __instance.Owner;
-                    if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1)
-                    {
-                        player.DebugInfo.lastCalcFrom = original;
-                    }
                 }
             }
             nearestAI = player.lastNearest == __instance.Owner;
+            if (ShouldLogSeenCoef())
+            {
+                player.DebugInfo.lastCalcFrom = original;
+            }
 
             // ======
             // Overhead overlooking
@@ -284,7 +284,8 @@ namespace ThatsLit
             // ======
             float globalOverlookChance = 0.01f / pPoseFactor;
             globalOverlookChance *= 1 + (6f + 0.5f * caution) * Mathf.InverseLerp(10f, 110f, zoomedDis) * notSeenRecentAndNear; // linear
-            if (canSeeLight) globalOverlookChance /= 2f - Mathf.InverseLerp(10f, 110f, dis);
+            if (canSeeLight)
+                globalOverlookChance /= 2f - Mathf.InverseLerp(10f, 110f, dis);
             // 110m unseen => 200% (Prone), 22% (Crouch), 10% (Stand) !1 CHECK
             // 40m unseen => 74% (Prone), 8.14% (Crouch)
             // 20m unseen => 38% (Prone), 4.18%% (Crouch)
@@ -361,11 +362,12 @@ namespace ThatsLit
                     factor /= 1 + Mathf.InverseLerp(10f, 100f, dis); // Highlight will be less effective from afar, 0.5x at 100m
             }
 
-            if (player.DebugInfo != null && nearestAI)
+            if (player.DebugInfo != null)
             {
-                if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1)
+                if (ShouldLogSeenCoef())
                 {
                     player.DebugInfo.lastScore = score;
+                    player.DebugInfo.lastCalcTo0 = __result;
                     player.DebugInfo.lastFactor1 = factor;
                 }
                 player.DebugInfo.nearestCaution = caution;
@@ -412,6 +414,10 @@ namespace ThatsLit
                 // }
             }
 
+            if (ShouldLogSeenCoef())
+            {
+                player.DebugInfo.lastCalcTo1 = __result;
+            }
             // CBQ Factors =====
             // The closer it is, the higher the factors
             var cqb6mTo1m = Mathf.InverseLerp(5f, 0f, dis - 1f); // 6+ -> 0, 1f -> 1
@@ -535,6 +541,10 @@ namespace ThatsLit
                 }
             }
 
+            if (ShouldLogSeenCoef())
+            {
+                player.DebugInfo.lastCalcTo2 = __result;
+            }
             // BUSH RAT ----------------------------------------------------------------------------------------------------------------
             /// Overlook when the bot has no idea the player is nearby and the player is sitting inside a bush
             if (ThatsLitPlugin.EnabledBushRatting.Value
@@ -710,12 +720,14 @@ namespace ThatsLit
             }
             // BUSH RAT ----------------------------------------------------------------------------------------------------------------
 
+            if (ShouldLogSeenCoef())
+            {
+                player.DebugInfo.lastCalcTo3 = __result;
+            }
 
             /// -0.7 -> 0, -0.8 -> 0.33, -0.9 -> 0.66, -1 -> 1
-            var extremeDarkFactor = Mathf.Clamp01((score - -0.7f) / -0.3f);
+            var extremeDarkFactor = Mathf.InverseLerp(-0.7f, -1f, score);
             extremeDarkFactor *= extremeDarkFactor;
-            var notSoExtremeDarkFactor = Mathf.Clamp01((score - -0.5f) / -0.5f);
-            notSoExtremeDarkFactor *= notSoExtremeDarkFactor;
 
             if (player.PlayerLitScoreProfile == null && ThatsLitPlugin.AlternativeReactionFluctuation.Value)
             {
@@ -791,6 +803,10 @@ namespace ThatsLit
                 }
             }
 
+            if (ShouldLogSeenCoef())
+            {
+                player.DebugInfo.lastCalcTo4 = __result;
+            }
             // Vanilla is multiplying the final SeenCoef with 1E-05
             // Probably to guarantee the continuance of the bot attention
             // However this includes situations that the player has moved at least a bit and the bot is running/facing side/away
@@ -822,6 +838,10 @@ namespace ThatsLit
                 }
             }
 
+            if (ShouldLogSeenCoef())
+            {
+                player.DebugInfo.lastCalcTo5 = __result;
+            }
             // ===== Visible Parts
             // Simulate the situation where part of a player is seen but the bot failed to recognize it due to the lack of full view
             var visibleParts = 6f; // Starts at 6 in case all parts are not alawys checked
@@ -908,6 +928,12 @@ namespace ThatsLit
 
             __result = Mathf.Lerp(__result, original, botImpactType == BotImpactType.DEFAULT? 0f : 0.5f);
             
+
+            if (ShouldLogSeenCoef())
+            {
+                player.DebugInfo.lastCalcTo6 = __result;
+            }
+
             if (__result > original) // That's Lit delaying the bot
             {
                 // In ~0.2s after being seen, stealth is nullfied (fading between 0.1~0.2)
@@ -926,7 +952,6 @@ namespace ThatsLit
                 }
             }
             // This probably will let bots stay unaffected until losing the visual.1s => modified
-
             if (ThatsLitPlugin.EnableExtraFlashLightReaction.Value && canSeeLight && playerFC != null)
             {
                 float wCoFacingAngle = Vector3.Angle(-eyeToPlayerBody, playerFC.WeaponDirection);
@@ -964,6 +989,10 @@ namespace ThatsLit
                 }
             }
 
+            if (ShouldLogSeenCoef())
+            {
+                player.DebugInfo.lastCalcTo7 = __result;
+            }
             // if (nearestAI
             //  && canSeeLight
             //  && upperVisible >= 3
@@ -994,9 +1023,9 @@ namespace ThatsLit
 
             if (player.DebugInfo != null)
             {
-                if (Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1 && nearestAI)
+                if (ShouldLogSeenCoef())
                 {
-                    player.DebugInfo.lastCalcTo = __result;
+                    player.DebugInfo.lastCalcTo8 = __result;
                     player.DebugInfo.lastFactor2 = factor;
                     player.DebugInfo.rawTerrainScoreSample = detailScoreRaw;
                 }
@@ -1006,6 +1035,14 @@ namespace ThatsLit
             
 
             ThatsLitPlugin.swSeenCoef.Stop();
+
+            bool ShouldLogSeenCoef()
+            {
+                return player.DebugInfo != null
+                    && nearestAI
+                    && (!__instance.IsVisible
+                    || Time.frameCount % ThatsLitPlayer.DEBUG_INTERVAL == ThatsLitPlayer.DEBUG_INTERVAL - 1);
+            }
         }
 
 
