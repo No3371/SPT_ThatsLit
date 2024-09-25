@@ -254,8 +254,7 @@ namespace ThatsLit
         static ThatsLitCompat.DeviceMode CheckDevicesOnItem(Item item)
         {
             ThatsLitCompat.DeviceMode result = default;
-            Weapon weapon = item as Weapon;
-            if (weapon == null)
+            if (item == null)
                 return result;
 
             foreach (var it in item.GetAllItems())
