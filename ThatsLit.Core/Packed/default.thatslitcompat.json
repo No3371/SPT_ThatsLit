@@ -186,7 +186,7 @@
             "_comment": null
         },
         {
-            "name": "vanilla_X_LS_ILS_ILILS",
+            "name": "vanilla_X_LS_ILS_IL_ILILS",
             "modes": [
                 {
                     "light": 0.0,
@@ -196,7 +196,7 @@
                 },
                 {
                     "light": 0.0,
-                    "laser": 1.0,
+                    "laser": 0.8,
                     "irLight": 0.0,
                     "irLaser": 0.0
                 },
@@ -204,13 +204,19 @@
                     "light": 0.0,
                     "laser": 0.0,
                     "irLight": 0.0,
-                    "irLaser": 1.0
+                    "irLaser": 0.8
                 },
                 {
                     "light": 0.0,
                     "laser": 0.0,
                     "irLight": 1.0,
-                    "irLaser": 1.0
+                    "irLaser": 0.0
+                },
+                {
+                    "light": 0.0,
+                    "laser": 0.0,
+                    "irLight": 1.0,
+                    "irLaser": 0.8
                 }
             ],
             "_comment": "tactical_all_wilcox_raptar_es"
@@ -492,7 +498,7 @@
         {
             "id": "61605d88ffa6e502ac5e7eeb",
             "_comment": "tactical_all_wilcox_raptar_es",
-            "template": "vanilla_X_LS_ILS_IL_ILSIL"
+            "template": "vanilla_X_LS_ILS_IL_ILILS"
         },
         {
             "id": "560d657b4bdc2da74d8b4572",
@@ -544,7 +550,6 @@
             "_comment": "flashlight_ultrafire_WF",
             "template": "vanilla_L_L"
         },
-        
         {
             "id": "5b07dd285acfc4001754240d",
             "_comment": "tactical_all_steiner_las_tac_2",
@@ -588,8 +593,7 @@
         {
             "id": "644a3df63b0b6f03e101e065",
             "_comment": "MAWL-C1+",
-            "template": "vanilla_L_L-_IL_IL-_ILS_ILS-",
-            "alwaysOn": false
+            "template": "vanilla_L_L-_IL_IL-_ILS_ILS-"
         }
     ],
     "extraDevices": [
