@@ -288,12 +288,13 @@ namespace ThatsLit
             mode = CheckDevicesOnItem(activeWeapon);
             modeSub = default;
          
-            var inv = player?.ActiveSlot?.ContainedItem?.Owner as InventoryControllerClass;
-            EquipmentClass equipment = inv?.Inventory?.Equipment;
-            if (equipment == null) return;
+            EquipmentClass equipment = player.Inventory?.Equipment;
+            if (equipment == null)
+                return (mode, modeSub);
 
             mode = ThatsLitCompat.DeviceMode.MergeMax(mode, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.Headwear)?.ContainedItem));
 
+            // If not ActiveWeapon (which is already checked on top)
             if (player?.ActiveSlot != equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon))
             {
                 modeSub = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon)?.ContainedItem));
