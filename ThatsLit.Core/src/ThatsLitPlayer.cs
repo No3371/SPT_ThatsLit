@@ -271,12 +271,12 @@ namespace ThatsLit
             ThatsLitPlugin.swFoliage.Stop();
 
             if (ThatsLitPlugin.EnableEquipmentCheck.Value
-             && Time.time > lastCheckedLights + 0.41
+             && Time.time > lastCheckedLights + 0.41f
              && PlayerLitScoreProfile != null)
             {
                 lastCheckedLights = Time.time;
                 var state = LightAndLaserState;
-                Utility.DetermineShiningEquipments(Player, out state.deviceStateCache, out state.deviceStateCacheSub);
+                (state.deviceStateCache, state.deviceStateCacheSub) = Utility.DetermineShiningEquipments(Player);
                 state.VisibleLight = state.deviceStateCache.light > 0;
                 state.VisibleLaser = state.deviceStateCache.laser > 0;
                 state.IRLight = state.deviceStateCache.irLight > 0;

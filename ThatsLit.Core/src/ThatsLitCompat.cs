@@ -90,6 +90,11 @@ namespace ThatsLit
                     if (f.deviceTemplates != null)
                     foreach (var c in f.deviceTemplates)
                     {
+                        if (c.modes == null || c.modes.Length == 0)
+                        {
+                            Logger.LogError($"[That's Lit] Device Template: { c.name } have 0 mode defined");
+                            // continue; // keep it for references
+                        }
                         DeviceTemplates[c.name] = c;
                         if (ThatsLitPlugin.DebugCompat.Value)
                             Logger.LogWarning($"[That's Lit Debug] Device Template: { c.name }");
@@ -114,6 +119,17 @@ namespace ThatsLit
                     if (f.devices != null)
                     foreach (var c in f.devices)
                     {
+                        if (c.TemplateInstance == null)
+                        {
+                            Logger.LogError($"[That's Lit] Device: { c.id } template is invalid: { c.template }");
+                            continue;
+                        }
+                        if (c.TemplateInstance.modes == null || c.TemplateInstance.modes.Length == 0)
+                        {
+                            Logger.LogError($"[That's Lit] Device: { c.id } have 0 mode defined");
+                            continue;
+                        }
+
                         Devices[c.id] = c;
                         if (ThatsLitPlugin.DebugCompat.Value)
                             Logger.LogWarning($"[That's Lit Debug] Device: { c.id }");
@@ -122,6 +138,16 @@ namespace ThatsLit
                     if (f.extraDevices != null)
                     foreach (var c in f.extraDevices)
                     {
+                        if (c.TemplateInstance == null)
+                        {
+                            Logger.LogError($"[That's Lit] Device: { c.id } template is invalid: { c.template }");
+                            continue;
+                        }
+                        if (c.TemplateInstance.modes == null || c.TemplateInstance.modes.Length == 0)
+                        {
+                            Logger.LogError($"[That's Lit] Device: { c.id } have 0 mode defined");
+                            continue;
+                        }
                         ExtraDevices[c.id] = c;
                         if (ThatsLitPlugin.DebugCompat.Value)
                             Logger.LogWarning($"[That's Lit Debug] Extra Device: { c.id }");
@@ -163,7 +189,11 @@ namespace ThatsLit
             {
                 if (modes == null || modes.Length == 0) return default;
                 if (modes.Length <= mode)
-                    if (fallbackLast) mode = modes.Length - 1;
+                    if (fallbackLast)
+                        if (modes.Length <= 0)
+                            return default;
+                        else
+                            mode = modes.Length - 1;
                     else return default;
                 return modes[mode];
             }

@@ -261,9 +261,8 @@ namespace ThatsLit
             foreach (var it in item.GetAllItems())
             {
                 if (string.IsNullOrWhiteSpace(it?.TemplateId)) continue;
-                ThatsLitCompat.ExtraDevices.TryGetValue(it.TemplateId, out var extraDevice);
-                // Logger.LogWarning($"{it?.TemplateId} {extraDevice?.TemplateInstance?.name}");
-                if (extraDevice != null && extraDevice.TemplateInstance != null)
+                if (ThatsLitCompat.ExtraDevices.TryGetValue(it.TemplateId, out var extraDevice)
+                 && extraDevice?.TemplateInstance != null)
                 {
                     if (it is SightModClass sightMod)
                     {
@@ -283,8 +282,9 @@ namespace ThatsLit
             return result;
         }
 
-        internal static void DetermineShiningEquipments(Player player, out ThatsLitCompat.DeviceMode mode, out ThatsLitCompat.DeviceMode modeSub)
+        internal static (ThatsLitCompat.DeviceMode mode, ThatsLitCompat.DeviceMode modeSub) DetermineShiningEquipments(Player player)
         {
+            ThatsLitCompat.DeviceMode mode, modeSub;
             Weapon activeWeapon = player?.ActiveSlot?.ContainedItem as Weapon;
             mode = CheckDevicesOnItem(activeWeapon);
             modeSub = default;
@@ -312,33 +312,7 @@ namespace ThatsLit
                 modeSub = ThatsLitCompat.DeviceMode.MergeMax(modeSub, CheckDevicesOnItem(equipment.GetSlot(EquipmentSlot.Holster)?.ContainedItem));
             }
 
-            // GClass2550 544909bb4bdc2d6f028b4577 x item tactical_all_insight_anpeq15 2457 / V + IR + IRL / MODES: 4  V -> IR -> IRL -> IR+IRL
-            // 560d657b4bdc2da74d8b4572 tactical_all_zenit_2p_kleh_vis_laser MODES: 3, F -> F+V -> V
-            // GClass2550 56def37dd2720bec348b456a item tactical_all_surefire_x400_vis_laser 2457 F + V MDOES: 3: F -> F + V -> V
-            // 57fd23e32459772d0805bcf1 item tactical_all_holosun_ls321 2457 V + IR + IRL MDOES 4: V -> IR -> IRL -> IRL + IR
-            // 55818b164bdc2ddc698b456c tactical_all_zenit_2irs_kleh_lam MODES: 3 IRL -> IRL+IR -> IR
-            // 5a7b483fe899ef0016170d15 tactical_all_surefire_xc1 MODES: 1
-            // 5a800961159bd4315e3a1657 tactical_all_glock_gl_21_vis_lam MODES 3
-            // 5b07dd285acfc4001754240d tactical_all_steiner_las_tac_2 Modes 1
-
-            // "_id": "5b3a337e5acfc4704b4a19a0", "_name": "tactical_all_zenit_2u_kleh", 1
-            //"_id": "5c06595c0db834001a66af6c", "_name": "tactical_all_insight_la5", 4, V -> IR -> IRL -> IRL+IR
-            //"_id": "5c079ed60db834001a66b372", "_name": "tactical_tt_dlp_tactical_precision_laser_sight", 1
-            //"_id": "5c5952732e2216398b5abda2", "_name": "tactical_all_zenit_perst_3", 4
-            //"_id": "5cc9c20cd7f00c001336c65d", "_name": "tactical_all_ncstar_tactical_blue_laser", 1
-            //"_id": "5d10b49bd7ad1a1a560708b0", "_name": "tactical_all_insight_anpeq2", 2
-            //"_id": "5d2369418abbc306c62e0c80", "_name": "tactical_all_steiner_9021_dbal_pl", 6 / F -> V -> F+V -> IRF -> IR -> IRF+IR
-            //"_id": "61605d88ffa6e502ac5e7eeb", "_name": "tactical_all_wilcox_raptar_es", 5 / RF -> V -> IR -> IRL -> IRL+IR
-            //"_id": "626becf9582c3e319310b837", "_name": "tactical_all_insight_wmx200", 2
-            //"_id": "6272370ee4013c5d7e31f418", "_name": "tactical_all_olight_baldr_pro", 3
-            //"_id": "6272379924e29f06af4d5ecb", "_name": "tactical_all_olight_baldr_pro_tan", 3
-
-
-            //"_id": "57d17c5e2459775a5c57d17d", "_name": "flashlight_ultrafire_WF-501B", 1 (2) (different slot)
-            //"_id": "59d790f486f77403cb06aec6", "_name": "flashlight_armytek_predator_pro_v3_xhp35_hi", 1(2) (different slot)
-
-
-            // "_id": "5bffcf7a0db83400232fea79", "_name": "pistolgrip_tt_pm_laser_tt_206", always on
+            return (mode, modeSub);
         }
         static ThatsLitCompat.DeviceMode GetDeviceMode(string itemTemplateId, int selectedMode)
         {
