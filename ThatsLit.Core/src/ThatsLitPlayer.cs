@@ -44,6 +44,9 @@ namespace ThatsLit
         /// 0~10
         /// </summary>
         internal float ambienceShadownRating;
+        /// <summary>
+        /// Used in ScoreCalculator
+        /// </summary>
         internal float AmbienceShadowFactor => Mathf.Pow(ambienceShadownRating / 10f, 2); 
         internal float bunkerTimeClamped;
         internal float lastInBunkerTime, lastOutBunkerTime;

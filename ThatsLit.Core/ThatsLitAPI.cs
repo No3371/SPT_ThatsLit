@@ -20,7 +20,8 @@ namespace ThatsLit
 
         public static void ToggleBrightnessProxyDirect (ThatsLitPlayer player, bool toggle)
         {
-            if (player.PlayerLitScoreProfile == null) player.PlayerLitScoreProfile = new PlayerLitScoreProfile(player);
+            if (player.PlayerLitScoreProfile == null)
+                player.PlayerLitScoreProfile = new PlayerLitScoreProfile(player);
             if (player.PlayerLitScoreProfile.IsProxy == toggle)
                 return;
             player.ToggleBrightnessProxy(toggle);
