@@ -301,7 +301,7 @@ namespace ThatsLit
                 ThatsLitPlugin.swUpdate.Stop();
                 return;
             }
-            else if (PlayerLitScoreProfile != null && !ThatsLitPlugin.EnabledLighting.Value)
+            else if (PlayerLitScoreProfile != null && !PlayerLitScoreProfile.IsProxy && !ThatsLitPlugin.EnabledLighting.Value)
             {
                 DisableBrightness();
                 ThatsLitPlugin.swUpdate.Stop();
@@ -315,6 +315,7 @@ namespace ThatsLit
             }
 
             // ! Consdier this the box of all Brightness required statements
+            // Remember that proxies also have a PlayerLitScoreProfile
 
             if (gquReq.done && rt != null)
             {
