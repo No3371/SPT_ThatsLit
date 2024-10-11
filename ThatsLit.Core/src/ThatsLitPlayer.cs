@@ -688,9 +688,9 @@ namespace ThatsLit
         /// </summary>
         private void CastFlashlight ()
         {
+            flashLightHit = default;
             if (!LightAndLaserState.AnyLightMain)
             {
-                flashLightHit = default;
                 return;
             }
             if (Player.HandsController is Player.FirearmController fc)
