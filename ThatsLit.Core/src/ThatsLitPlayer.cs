@@ -126,7 +126,7 @@ namespace ThatsLit
         internal void MaybeEnableBrightness ()
         {
             if (!ThatsLitPlugin.EnabledLighting.Value
-             || Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null
+             || Singleton<ThatsLitGameworld>.Instance.ScoreCalculator == null // Disabled on the map?
              || Application.isBatchMode)
                 return;
 
@@ -308,11 +308,13 @@ namespace ThatsLit
                 return;
             }
 
-            if (PlayerLitScoreProfile == null)
+            if (PlayerLitScoreProfile == null || PlayerLitScoreProfile.IsProxy || Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator == null)
             {
                 ThatsLitPlugin.swUpdate.Stop();
                 return;
             }
+
+            // ! Consdier this the box of all Brightness required statements
 
             if (gquReq.done && rt != null)
             {
@@ -402,7 +404,64 @@ namespace ThatsLit
             
             // Ambient shadow
             // Not required for proxies
-            UpdateAmbienceShadowRating();
+            Vector3 headPos = Player.MainParts[BodyPartType.head].Position;
+            Vector3 lhPos = Player.MainParts[BodyPartType.leftArm].Position;
+            Vector3 rhPos = Player.MainParts[BodyPartType.rightArm].Position;
+            Vector3 lPos = Player.MainParts[BodyPartType.leftLeg].Position;
+            Vector3 rPos = Player.MainParts[BodyPartType.rightLeg].Position;
+            if (TOD_Sky.Instance != null)
+            {
+                Ray ray = default;
+                float? sunlightFactor = Singleton<ThatsLitGameworld>.Instance.ScoreCalculator?.CalculateSunLightTimeFactor(ActiveRaidSettings.LocationId, Utility.GetInGameDayTime());
+                if (sunlightFactor == null)
+                    sunlightFactor = TOD_Sky.Instance.IsDay ? 1f : 0f;
+                Vector3 ambienceDir = sunlightFactor > 0.05f ? TOD_Sky.Instance.LocalSunDirection : TOD_Sky.Instance.LightDirection;
+
+                switch (Time.frameCount % 5)
+                {
+                    case 0:
+                        {
+                            ray = new Ray(headPos, ambienceDir);
+                            break;
+                        }
+                    case 1:
+                        {
+                            ray = new Ray(lPos, ambienceDir);
+                            break;
+                        }
+                    case 2:
+                        {
+                            ray = new Ray(rPos, ambienceDir);
+                            break;
+                        }
+                    case 3:
+                        {
+                            ray = new Ray(lhPos, ambienceDir);
+                            break;
+                        }
+                    case 4:
+                        {
+                            ray = new Ray(rhPos, ambienceDir);
+                            break;
+                        }
+                }
+
+                var casted1 = RaycastIgnoreGlass(ray, 2000, ambienceRaycastMask, out var highPolyHit, out var lastPenetrated); // Anything high poly that is not glass
+
+                // if (Time.frameCount % 213 == 0)
+                //     EFT.UI.ConsoleScreen.Log($"---");
+                // Fuck GZ buildings (low poly)
+                bool casted2 = false;
+
+                // if (!casted1) casted2 = RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask_lowPriority, out var lowPolyHit, out var _, 0, 3) && lastPenetrated.distance < lowPolyHit.distance; // high/low poly any non-glass that is further than 0 or casted glass
+                if (casted1 || casted2)
+                {
+                    ambienceShadownRating += 10f * Time.deltaTime;
+                }
+                else ambienceShadownRating -= 25f * Time.deltaTime;
+                ambienceShadownRating = Mathf.Clamp(ambienceShadownRating, 0, 10f);
+            }
+
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
             //     envCam.transform.localPosition = envCamOffset;
@@ -551,64 +610,6 @@ namespace ThatsLit
             bot.Steering?.LookToDirection(dir);
             yield return new WaitForSeconds(UnityEngine.Random.Range(1, 4f));
             bot.Steering?.LookToMovingDirection();
-        }
-
-        private void UpdateAmbienceShadowRating()
-        {
-            Vector3 headPos = Player.MainParts[BodyPartType.head].Position;
-            Vector3 lhPos = Player.MainParts[BodyPartType.leftArm].Position;
-            Vector3 rhPos = Player.MainParts[BodyPartType.rightArm].Position;
-            Vector3 lPos = Player.MainParts[BodyPartType.leftLeg].Position;
-            Vector3 rPos = Player.MainParts[BodyPartType.rightLeg].Position;
-            if (TOD_Sky.Instance != null)
-            {
-                Ray ray = default;
-                Vector3 ambienceDir = Singleton<ThatsLitGameworld>.Instance.ScoreCalculator.CalculateSunLightTimeFactor(ActiveRaidSettings.LocationId, Utility.GetInGameDayTime()) > 0.05f ? TOD_Sky.Instance.LocalSunDirection : TOD_Sky.Instance.LightDirection;
-
-                switch (Time.frameCount % 5)
-                {
-                    case 0:
-                        {
-                            ray = new Ray(headPos, ambienceDir);
-                            break;
-                        }
-                    case 1:
-                        {
-                            ray = new Ray(lPos, ambienceDir);
-                            break;
-                        }
-                    case 2:
-                        {
-                            ray = new Ray(rPos, ambienceDir);
-                            break;
-                        }
-                    case 3:
-                        {
-                            ray = new Ray(lhPos, ambienceDir);
-                            break;
-                        }
-                    case 4:
-                        {
-                            ray = new Ray(rhPos, ambienceDir);
-                            break;
-                        }
-                }
-
-                var casted1 = RaycastIgnoreGlass(ray, 2000, ambienceRaycastMask, out var highPolyHit, out var lastPenetrated); // Anything high poly that is not glass
-
-                // if (Time.frameCount % 213 == 0)
-                //     EFT.UI.ConsoleScreen.Log($"---");
-                // Fuck GZ buildings (low poly)
-                bool casted2 = false;
-
-                // if (!casted1) casted2 = RaycastIgnoreGlass(ray, 1250, ambienceRaycastMask_lowPriority, out var lowPolyHit, out var _, 0, 3) && lastPenetrated.distance < lowPolyHit.distance; // high/low poly any non-glass that is further than 0 or casted glass
-                if (casted1 || casted2)
-                {
-                    ambienceShadownRating += 10f * Time.deltaTime;
-                }
-                else ambienceShadownRating -= 25f * Time.deltaTime;
-                ambienceShadownRating = Mathf.Clamp(ambienceShadownRating, 0, 10f);
-            }
         }
 
         private float UpdateOverheadHaxCastRating(Vector3 bodyPos, float currentRating)
