@@ -288,6 +288,10 @@ namespace ThatsLit
                 LightAndLaserState = state;
             }
 
+            CastFlashlight();
+
+            overheadHaxRating = UpdateOverheadHaxCastRating(bodyPos, overheadHaxRating);
+
             if (PlayerLitScoreProfile == null && ThatsLitPlugin.EnabledLighting.Value)
             {
                 MaybeEnableBrightness();
@@ -392,12 +396,10 @@ namespace ThatsLit
                 if (ThatsLitPlugin.DebugTexture.Value && Time.frameCount % 61 == 0 && display?.enabled == true && rt != null)
                     Graphics.CopyTexture(rt, slowRT);
             }
-                // Ambient shadow
+            
+            // Ambient shadow
+            // Not required for proxies
             UpdateAmbienceShadowRating();
-
-            overheadHaxRating = UpdateOverheadHaxCastRating(bodyPos, overheadHaxRating);
-            // surroundingRating = UpdateSurroundingCastRating(bodyPos, surroundingRating);
-            CastFlashlight();
             // if (ThatsLitPlugin.DebugTexture.Value && envCam)
             // {
             //     envCam.transform.localPosition = envCamOffset;
@@ -677,6 +679,9 @@ namespace ThatsLit
             return Physics.Raycast(ray, out hit, 5, ambienceRaycastMask);
         }
 
+        /// <summary>
+        /// Detect where the active flashlight is hitting.
+        /// </summary>
         private void CastFlashlight ()
         {
             if (!LightAndLaserState.AnyLightMain)
