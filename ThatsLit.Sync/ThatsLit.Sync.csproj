@@ -4,7 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>ThatsLit.Sync</AssemblyName>
     <LangVersion>8.0</LangVersion>
-    <Version>1.383.01</Version>
+    <Version>1.3100.0</Version>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 

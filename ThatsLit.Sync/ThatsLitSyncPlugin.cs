@@ -28,12 +28,12 @@ namespace ThatsLit.Sync
         public const string Trademark = "";
         public const string Culture = "";
 
-        public const int TarkovVersion = 30626;
+        public const int TarkovVersion = 33420;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit Sync";
-        public const string ModVersion = "1.394.03";
+        public const string ModVersion = "1.3100.0";
         public const string SPTGUID = "com.SPT.core";
-        public const string SPTVersion = "3.9.0";
+        public const string SPTVersion = "3.10.0";
         private static long modVersionComparable;
 
         public static long ModVersionComparable
@@ -52,14 +52,13 @@ namespace ThatsLit.Sync
 
     [BepInPlugin("bastudio.thatslit.sync", ModName, ModVersion)]
     [BepInDependency(SPTGUID, SPTVersion)]
-    [BepInDependency("bastudio.thatslit", "1.394.03")]
+    [BepInDependency("bastudio.thatslit", "1.3100.0")]
     [BepInDependency("com.fika.core", "0.0.0")]
     [BepInProcess(EscapeFromTarkov)]
     [DefaultExecutionOrder(100)]
     [BepInDependency("bastudio.updatenotifier", BepInDependency.DependencyFlags.SoftDependency)]
     public class ThatsLitSyncPlugin : BaseUnityPlugin
     {
-        NetDataWriter writer = new NetDataWriter();
         public static Dictionary<int, Player> ActivePlayers = new Dictionary<int, Player>();
         public static ConfigEntry<bool> ShowInfo;
         public static ConfigEntry<bool> DebugLog;
@@ -72,8 +71,7 @@ namespace ThatsLit.Sync
             DebugLog = Config.Bind<bool>("Main", "DebugLog", false);
 
             FikaEventDispatcher.SubscribeEvent<FikaGameCreatedEvent>(OnFikaGameCreated);
-            FikaEventDispatcher.SubscribeEvent<FikaServerCreatedEvent>(OnFikaServerCreated);
-            FikaEventDispatcher.SubscribeEvent<FikaClientCreatedEvent>(OnFikaClientCreated);
+            FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent >(OnFikaNetworkManagerCreated);
 
             ThatsLitAPI.OnGameWorldDestroyed += OnGameWorldDestroyed;
             ThatsLitAPI.ShouldSetupPlayer += ShouldSetupPlayer;
@@ -94,7 +92,7 @@ namespace ThatsLit.Sync
             }
 
             BaseUnityPlugin updntf = pluginInfo.Instance;
-            updntf.GetType().GetMethod("CheckForUpdate").Invoke(updntf, new object[] {this, url});
+            updntf.GetType().GetMethod("CheckForUpdate", new Type[] { typeof(BaseUnityPlugin), typeof(string)}).Invoke(updntf, new object[] {this, url});
         }
 
         void Update ()
@@ -182,12 +180,20 @@ namespace ThatsLit.Sync
             }
         }
 
-        void OnFikaServerCreated (FikaServerCreatedEvent ev)
+        void OnFikaNetworkManagerCreated (FikaNetworkManagerCreatedEvent ev)
         {
-            ev.Server.packetProcessor.SubscribeNetSerializable<ScorePacket, NetPeer>(HandlePacketServer);
+            switch (ev.Manager)
+            {
+                case FikaServer server:
+                    server.RegisterPacket<ScorePacket>(HandlePacketServer);
+                break;
+                case FikaClient client:
+                    client.RegisterPacket<ScorePacket>(HandlePacketClient);
+                break;
+            }
         }
 
-        void HandlePacketServer (ScorePacket packet, NetPeer peer)
+        void HandlePacketServer (ScorePacket packet)
         {
             if (!ActivePlayers.TryGetValue(packet.netId, out var player)
                 || player.IsYourPlayer)
@@ -198,6 +204,7 @@ namespace ThatsLit.Sync
             if (LogPackets.Value)
                 Logger.LogInfo($"[That's Lit Sync] [Redirect] Broadcasting #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
         }
+
         void HandlePacketClient (ScorePacket packet)
         {
             if (!ActivePlayers.TryGetValue(packet.netId, out var player)
@@ -206,12 +213,6 @@ namespace ThatsLit.Sync
             
             if (LogPackets.Value) Logger.LogInfo($"[That's Lit Sync] Received #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
             ThatsLitAPI.TrySetProxyBrightnessScore(player, packet.score, packet.ambienceScore);
-        }
-        
-
-        void OnFikaClientCreated(FikaClientCreatedEvent ev)
-        {
-            ev.Client.packetProcessor.SubscribeNetSerializable<ScorePacket>(HandlePacketClient);
         }
 
         void OnBeforePlayerSetupDirect(ThatsLitPlayer player)
@@ -257,10 +258,9 @@ namespace ThatsLit.Sync
             else if (FikaBackendUtils.IsClient && coopPlayer != null && coopPlayer.IsYourPlayer)
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
-                writer.Reset();
                 if (Mathf.Abs(lastScore - score) + Mathf.Abs(lastAmbscore - ambScore) > (score < -0.7f? 0.015f : 0.03f) || Time.time - lastSent > 1f)
                 {
-                    Singleton<FikaClient>.Instance.SendData(writer, ref packet, DeliveryMethod.Unreliable);
+                    Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.Unreliable);
                     lastSent = Time.time;
                     lastScore = score;
                     lastAmbscore = ambScore;
@@ -272,8 +272,7 @@ namespace ThatsLit.Sync
 
         void BroadcastScore (ref ScorePacket packet)
         {
-            writer.Reset();
-            Singleton<FikaServer>.Instance.SendDataToAll(writer, ref packet, DeliveryMethod.Unreliable);
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
         }
     }
 }
