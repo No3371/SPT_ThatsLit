@@ -1,4 +1,4 @@
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using ThatsLit.Helpers;
 using System;
@@ -94,6 +94,7 @@ namespace ThatsLit
 
         void Awake ()
         {
+            foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");
             singleIdThrottlers = new();
             doubleIdThrottlers = new();
 
@@ -180,7 +181,7 @@ namespace ThatsLit
             rain = WeatherController.Instance.WeatherCurve.Rain;
             cloud = WeatherController.Instance.WeatherCurve.Cloudiness;
         }
-        private static readonly LayerMask foliageLayerMask = 1 << LayerMask.NameToLayer("Foliage") | 1 << LayerMask.NameToLayer("Grass") | 1 << LayerMask.NameToLayer("PlayerSpiritAura");// PlayerSpiritAura is Visceral Bodies compat
+        private LayerMask foliageLayerMask;// PlayerSpiritAura is Visceral Bodies compat
         
         internal void UpdateFoliageScore(Vector3 bodyPos, PlayerFoliageProfile player)
         {
