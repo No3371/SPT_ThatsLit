@@ -263,7 +263,7 @@ namespace ThatsLit
                 if (ThatsLitCompat.ExtraDevices.TryGetValue(it.TemplateId, out var extraDevice)
                  && extraDevice?.TemplateInstance != null)
                 {
-                    if (it is SightModClass sightMod)
+                    if (it is SightsItemClass sightMod)
                     {
                         result = ThatsLitCompat.DeviceMode.MergeMax(result, extraDevice.TemplateInstance.SafeGetMode(sightMod.Sight?.SelectedScopeMode ?? 0));
                     }
@@ -288,7 +288,7 @@ namespace ThatsLit
             mode = CheckDevicesOnItem(activeWeapon);
             modeSub = default;
          
-            EquipmentClass equipment = player.Inventory?.Equipment;
+            InventoryEquipment equipment = player.Inventory?.Equipment;
             if (equipment == null)
                 return (mode, modeSub);
 
@@ -323,7 +323,7 @@ namespace ThatsLit
             {
                 if (ThatsLitPlayer.IsDebugSampleFrame)
                 {
-                    string message = $"[That's Lit] Unknown device or mode: {itemTemplateId} {Singleton<ItemFactory>.Instance?.GetPresetItem(itemTemplateId)?.Name} mode {selectedMode}";
+                    string message = $"[That's Lit] Unknown device or mode: {itemTemplateId} {Singleton<ItemFactoryClass>.Instance?.GetPresetItem(itemTemplateId)?.Name} mode {selectedMode}";
                     NotificationManagerClass.DisplayWarningNotification(message);
                     Logger.LogWarning(message);
                     EFT.UI.ConsoleScreen.Log(message);

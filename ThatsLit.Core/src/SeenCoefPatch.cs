@@ -18,7 +18,7 @@ namespace ThatsLit
 
         protected override MethodBase GetTargetMethod()
         {
-            return ReflectionHelper.FindMethodByArgTypes(typeof(EnemyInfo), new Type[] { typeof(BifacialTransform), typeof(BifacialTransform), typeof(BotDifficultySettingsClass), typeof(AIData), typeof(float), typeof(Vector3) }); ;
+            return ReflectionHelper.FindMethodByArgTypes(typeof(EnemyInfo), new Type[] { typeof(BifacialTransform), typeof(BifacialTransform), typeof(BotDifficultySettingsClass), typeof(IAIData), typeof(float), typeof(Vector3) }); ;
         }
 
         [PatchPostfix]

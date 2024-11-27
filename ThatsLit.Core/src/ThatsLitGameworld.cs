@@ -1,4 +1,4 @@
-﻿using Comfort.Common;
+using Comfort.Common;
 using EFT;
 using ThatsLit.Helpers;
 using System;
@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Collections;
 
-using BaseCellClass = GClass1061;
-using CellClass = GClass1062;
-using SpatialPartitionClass = GClass1076<GClass1061>;
+using BaseCellClass = GClass1169;
+using CellClass = GClass1170;
+using SpatialPartitionClass = GClass1184<GClass1169>;
 using System.Reflection;
 using GPUInstancer;
 using HarmonyLib;
