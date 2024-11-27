@@ -937,12 +937,12 @@ namespace ThatsLit
     public class NightFactoryScoreCalculator : ScoreCalculator
     {
         
-        protected override float MinBaseAmbienceScore => -1;
+        protected override float MinBaseAmbienceScore => -0.87f;
         protected override float MaxMoonlightScore { get => 0; }
         protected override float MaxSunlightScore { get => 0; }
         protected override float MinAmbienceLum { get => 0.002f; }
         protected override float MaxAmbienceLum { get => 0.002f; }
-        protected override float PixelLumScoreScale { get => 5f; }
+        protected override float PixelLumScoreScale { get => 6f; }
         protected override float ThresholdShine { get => 0.5f; }
         protected override float ThresholdHigh { get => 0.35f; }
         protected override float ThresholdHighMid { get => 0.2f; }
