@@ -470,7 +470,7 @@ namespace ThatsLit
         protected virtual float CalculateMoonLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness)
         {
             float maxMoonlightScore = GetMaxMoonlightScore();
-            return TransformCloudness(cloudiness) * maxMoonlightScore * CalculateMoonLightTimeFactor(locationId, time);
+            return CloudnessToAmbienceScale(cloudiness) * maxMoonlightScore * CalculateMoonLightTimeFactor(locationId, time);
         }
 
         // The increased visual brightness when sun is up (5~22) hours when c < 1
@@ -478,10 +478,12 @@ namespace ThatsLit
         protected virtual float CalculateSunLight(PlayerLitScoreProfile player, string locationId, float time, float cloudiness)
         {
             float maxSunlightScore = GetMaxSunlightScore();
-            return TransformCloudness(cloudiness) * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
+            return CloudnessToAmbienceScale(cloudiness) * maxSunlightScore * CalculateSunLightTimeFactor(locationId, time);
         }
 
-        float TransformCloudness (float cloudiness)
+        // https://www.desmos.com/calculator/vuem57hptl
+        // This curve is used to scale sun and moon light from clouded day to fully clear day
+        float CloudnessToAmbienceScale (float cloudiness)
         {
             var eval = Mathf.InverseLerp(1.15f, -1.5f, cloudiness);
             eval = eval * eval * (3f - 2f * eval);
@@ -610,7 +612,6 @@ namespace ThatsLit
 
     public class WoodsScoreCalculator : ScoreCalculator
     {
-        
         protected override float MinBaseAmbienceScore => -0.75f;
         protected override float MinAmbienceLum => 0.015f;
         protected override float MaxAmbienceLum => 0.017f;
@@ -621,6 +622,7 @@ namespace ThatsLit
         protected override float ThresholdMidLow { get => 0.01f; }
         protected override float ThresholdLow { get => 0.005f; }
         protected override float NightTerrainImpactScale { get => 0.3f; }
+
         protected override float GetMapAmbienceCoef(string locationId, float time)
         {
             if (time >= 5 && time < 7.5f) // 0 ~ 0.5f
