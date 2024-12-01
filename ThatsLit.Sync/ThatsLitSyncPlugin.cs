@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using System;
@@ -258,7 +258,7 @@ namespace ThatsLit.Sync
             else if (FikaBackendUtils.IsClient && coopPlayer != null && coopPlayer.IsYourPlayer)
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
-                if (Mathf.Abs(lastScore - score) + Mathf.Abs(lastAmbscore - ambScore) > (score < -0.7f? 0.015f : 0.03f) || Time.time - lastSent > 1f)
+                if (Mathf.Abs(lastScore - score) + Mathf.Abs(lastAmbscore - ambScore) > (Mathf.Abs(score) > 0.65f? 0.015f : 0.035f) || Time.time - lastSent > 5f)
                 {
                     Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.Unreliable);
                     lastSent = Time.time;
