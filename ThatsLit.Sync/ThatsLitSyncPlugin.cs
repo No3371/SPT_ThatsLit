@@ -253,7 +253,7 @@ namespace ThatsLit.Sync
             {
                 var packet = new ScorePacket(coopPlayer.NetId, score, ambScore);
                 if (LogPackets.Value) Logger.LogInfo($"[That's Lit Sync] [On Calc] Broadcasting #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
-                BroadcastScore(ref packet);
+                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
             }
             else if (FikaBackendUtils.IsClient && coopPlayer != null && coopPlayer.IsYourPlayer)
             {
