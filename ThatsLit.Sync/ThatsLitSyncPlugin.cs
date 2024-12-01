@@ -195,20 +195,18 @@ namespace ThatsLit.Sync
 
         void HandlePacketServer (ScorePacket packet, NetPeer peer)
         {
-            if (!ActivePlayers.TryGetValue(packet.netId, out var player)
-                || player.IsYourPlayer)
+            if (!ActivePlayers.TryGetValue(packet.netId, out var player) || player.IsYourPlayer)
                 return;
 
             ThatsLitAPI.TrySetProxyBrightnessScore(player, packet.score, packet.ambienceScore);
-            BroadcastScore(ref packet, peer);
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.Unreliable, peer);
             if (LogPackets.Value)
                 Logger.LogInfo($"[That's Lit Sync] [Redirect] Broadcasting #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
         }
 
         void HandlePacketClient (ScorePacket packet)
         {
-            if (!ActivePlayers.TryGetValue(packet.netId, out var player)
-             || player.IsYourPlayer) // Don't take broadcasted back packet
+            if (!ActivePlayers.TryGetValue(packet.netId, out var player) || player.IsYourPlayer) // Don't take broadcasted back packet
                 return;
             
             if (LogPackets.Value) Logger.LogInfo($"[That's Lit Sync] Received #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
@@ -268,11 +266,6 @@ namespace ThatsLit.Sync
                 }
                 if (LogPackets.Value) Logger.LogInfo($"[That's Lit Sync] [On Calc] Uploading throttled for #{ coopPlayer.NetId } {score}/{ambScore} at f{Time.frameCount}");
             }
-        }
-
-        void BroadcastScore (ref ScorePacket packet, NetPeer peer)
-        {
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.Unreliable, peer);
         }
     }
 }
