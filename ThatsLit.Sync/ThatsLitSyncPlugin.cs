@@ -185,7 +185,7 @@ namespace ThatsLit.Sync
             switch (ev.Manager)
             {
                 case FikaServer server:
-                    server.RegisterPacket<ScorePacket>(HandlePacketServer);
+                    server.RegisterPacket<ScorePacket, NetPeer>(HandlePacketServer);
                 break;
                 case FikaClient client:
                     client.RegisterPacket<ScorePacket>(HandlePacketClient);
@@ -193,14 +193,14 @@ namespace ThatsLit.Sync
             }
         }
 
-        void HandlePacketServer (ScorePacket packet)
+        void HandlePacketServer (ScorePacket packet, NetPeer peer)
         {
             if (!ActivePlayers.TryGetValue(packet.netId, out var player)
                 || player.IsYourPlayer)
                 return;
 
             ThatsLitAPI.TrySetProxyBrightnessScore(player, packet.score, packet.ambienceScore);
-            BroadcastScore(ref packet);
+            BroadcastScore(ref packet, peer);
             if (LogPackets.Value)
                 Logger.LogInfo($"[That's Lit Sync] [Redirect] Broadcasting #{ packet.netId } {packet.score}/{packet.ambienceScore} at f{Time.frameCount}");
         }
@@ -270,9 +270,9 @@ namespace ThatsLit.Sync
             }
         }
 
-        void BroadcastScore (ref ScorePacket packet)
+        void BroadcastScore (ref ScorePacket packet, NetPeer peer)
         {
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.Unreliable, peer);
         }
     }
 }
