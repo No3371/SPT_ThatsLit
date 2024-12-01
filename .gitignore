@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Package
 *.zip
+ThatsLit.Sync/FikaRef/Fika.Core.dll
