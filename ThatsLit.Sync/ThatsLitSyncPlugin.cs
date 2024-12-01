@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using System;
@@ -246,7 +246,7 @@ namespace ThatsLit.Sync
 
         void OnPlayerBrightnessScoreCalculatedDirect(ThatsLitPlayer player, float score, float ambScore)
         {
-            if (FikaBackendUtils.IsSinglePlayer) return;
+            if (FikaBackendUtils.IsSinglePlayer || ActivePlayers.Count <= 1) return;
 
             CoopPlayer coopPlayer = player.Player as CoopPlayer;
             if (FikaBackendUtils.IsServer && coopPlayer != null && coopPlayer.IsYourPlayer)
