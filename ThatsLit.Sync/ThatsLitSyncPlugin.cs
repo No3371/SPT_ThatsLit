@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using System;
@@ -14,6 +14,7 @@ using LiteNetLib.Utils;
 using System.Collections.Generic;
 using EFT;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Coop.GameMode;
 
 namespace ThatsLit.Sync
 {
@@ -31,7 +32,7 @@ namespace ThatsLit.Sync
         public const int TarkovVersion = 33420;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit Sync";
-        public const string ModVersion = "1.3100.1";
+        public const string ModVersion = "1.3100.2";
         public const string SPTGUID = "com.SPT.core";
         public const string SPTVersion = "3.10.0";
         private static long modVersionComparable;
