@@ -25,7 +25,7 @@ namespace ThatsLit
         public const int TarkovVersion = 33420;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.3100.0";
+        public const string ModVersion = "1.3100.1";
         public const string SPTGUID = "com.SPT.core";
         public const string SPTVersion = "3.10.0";
         private static long modVersionComparable;
@@ -94,7 +94,7 @@ namespace ThatsLit
                 && EnabledLighting.Value
                 && !Chainloader.PluginInfos.ContainsKey("bastudio.thatslit.sync"))
                 {
-                    string message = $"[That's Lit] Fika detected, but That's Lit Sync extension is not found. Without the extension, you will lose extra fps per player. Get Sync extension from Fika Discord #mod-releases.";
+                    string message = $"[That's Lit] Fika detected, but That's Lit Sync is not installed. Without the extension, you lose extra fps per player. Get Sync from Fika Discord - #mod-releases - That's Lit.";
                     NotificationManagerClass.DisplayWarningNotification(message, EFT.Communications.ENotificationDurationType.Infinite);
                     Logger.LogError(message);
                 }
