@@ -51,7 +51,7 @@ namespace ThatsLit
             ThatsLitAPI.OnBeforePlayerSetupDirect?.Invoke(tlp);
             if (ThatsLitPlugin.DebugProxy.Value)
                 ThatsLitAPI.ToggleBrightnessProxyDirect(tlp, true);
-            tlp.Setup();
+            tlp.Setup(this);
             if (player == GameWorld.MainPlayer) MainThatsLitPlayer = tlp;
         }
         private void OnDestroy()
