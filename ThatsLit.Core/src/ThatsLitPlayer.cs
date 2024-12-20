@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using Comfort.Common;
 using EFT;
@@ -91,6 +91,7 @@ namespace ThatsLit
                         if (ThatsLitPlugin.VolumetricLightRenderer.Value) volumetricLightRenderer.IsOptic = false;
                         break;
                     case AreaLightManager areaLightManager:
+                        MonoBehaviour.Destroy(c);
                         break;
                     default:
                         MonoBehaviour.Destroy(c);
