@@ -32,7 +32,7 @@ namespace ThatsLit.Sync
         public const int TarkovVersion = 33420;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit Sync";
-        public const string ModVersion = "1.3100.2";
+        public const string ModVersion = "1.3100.3";
         public const string SPTGUID = "com.SPT.core";
         public const string SPTVersion = "3.10.0";
         private static long modVersionComparable;
@@ -245,7 +245,10 @@ namespace ThatsLit.Sync
 
         void OnPlayerBrightnessScoreCalculatedDirect(ThatsLitPlayer player, float score, float ambScore)
         {
-            if (FikaBackendUtils.IsSinglePlayer || ActivePlayers.Count <= 1) return;
+            if (FikaBackendUtils.IsSinglePlayer) return;
+
+            var game = (CoopGame) Singleton<IFikaGame>.Instance;
+            if (game?.Status != GameStatus.Started) return;
 
             CoopPlayer coopPlayer = player.Player as CoopPlayer;
             if (FikaBackendUtils.IsServer && coopPlayer != null && coopPlayer.IsYourPlayer)
