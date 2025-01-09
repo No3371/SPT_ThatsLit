@@ -95,7 +95,8 @@ namespace ThatsLit
                 && EnabledLighting.Value
                 && !Chainloader.PluginInfos.ContainsKey("bastudio.thatslit.sync"))
                 {
-                    string message = $"[That's Lit] Fika detected, but That's Lit Sync is not installed. Without the extension, you lose extra fps per player. Get Sync from Fika Discord - #mod-releases - That's Lit.";
+                    string message = $"[That's Lit] Fika detected, but That's Lit Sync is not installed. Without the extension, you lose extra fps per player. Get Sync from Fika Discord - #mod-releases - That's Lit. Direct link is provided in the console (`).";
+                    EFT.UI.ConsoleScreen.Log($"That's Lit Sync: https://discord.com/channels/1202292159366037545/1245739513481924739");
                     NotificationManagerClass.DisplayWarningNotification(message, EFT.Communications.ENotificationDurationType.Infinite);
                     Logger.LogError(message);
                 }
