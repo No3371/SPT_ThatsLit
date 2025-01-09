@@ -327,17 +327,19 @@ namespace ThatsLit
                     observed.Dispose();
                 }
                 else
-                gquReq = AsyncGPUReadback.Request(rt, 0, req =>
                 {
-                    observed.Dispose();
-                    if (!req.hasError)
+                    gquReq = AsyncGPUReadback.Request(rt, 0, req =>
                     {
-                        observed = req.GetData<Color32>();
-                        ThatsLitPlugin.swScoreCalc.MaybeResume();
-                            gameworld?.ScoreCalculator?.PreCalculate(PlayerLitScoreProfile, observed, Utility.GetInGameDayTime());
-                        ThatsLitPlugin.swScoreCalc.Stop();
-                    }
-                });
+                        observed.Dispose();
+                        if (!req.hasError)
+                        {
+                            ThatsLitPlugin.swScoreCalc.MaybeResume();
+                            observed = req.GetData<Color32>();
+                                gameworld?.ScoreCalculator?.PreCalculate(PlayerLitScoreProfile, observed, Utility.GetInGameDayTime());
+                            ThatsLitPlugin.swScoreCalc.Stop();
+                        }
+                    });
+                }
             }
 
             if (cam?.enabled == true)
@@ -505,19 +507,13 @@ namespace ThatsLit
 
         void FixedUpdate ()
         {
-            if (ThatsLitPlugin.BotLookDirectionTweaks.Value == false)
-                return;
-
-            if (Player == null) return;
-            if (Player?.HealthController?.IsAlive == false)
+            ThatsLitPlugin.swFUpdate.MaybeResume();
+            if (ThatsLitPlugin.BotLookDirectionTweaks.Value == false
+             || Player?.HealthController?.IsAlive == false
+             || gameworld == null
+             || !ThatsLitPlugin.EnabledMod.Value)
             {
-                return;
-            }
-            if (gameworld == null)
-                return;
-            
-            if (!ThatsLitPlugin.EnabledMod.Value)
-            {
+                ThatsLitPlugin.swFUpdate.Stop();
                 return;
             }
 
@@ -549,6 +545,7 @@ namespace ThatsLit
                     
                     throttler.lastForceLook = Time.time;
                     gameworld.singleIdThrottlers[lastNearest.ProfileId] = throttler;
+                    ThatsLitPlugin.swFUpdate.Stop();
                     return;
                 }
 
@@ -566,6 +563,7 @@ namespace ThatsLit
 
                     throttler.lastForceLook = Time.time;
                     gameworld.singleIdThrottlers[lastNearest.ProfileId] = throttler;
+                    ThatsLitPlugin.swFUpdate.Stop();
                     return;
                 }
 
@@ -580,6 +578,7 @@ namespace ThatsLit
                     
                     throttler.lastSideLook = Time.time;
                     gameworld.singleIdThrottlers[lastNearest.ProfileId] = throttler;
+                    ThatsLitPlugin.swFUpdate.Stop();
                     return;
                 }
 
@@ -600,10 +599,11 @@ namespace ThatsLit
                     
                     throttler.lastForceLook = Time.time;
                     gameworld.singleIdThrottlers[lastNearest.ProfileId] = throttler;
+                    ThatsLitPlugin.swFUpdate.Stop();
                     return;
                 }
             }
-            
+            ThatsLitPlugin.swFUpdate.Stop();
         }
 
 
@@ -829,7 +829,7 @@ namespace ThatsLit
             observed.Dispose();
         }
         float litFactorSample, ambScoreSample;
-        static float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleFoliageCheck, benchmarkSampleTerrainCheck, benchmarkSampleGUI, benchmarkSampleNoBushOverride, benchmarkSampleBlindFire;
+        static float benchmarkSampleSeenCoef, benchmarkSampleEncountering, benchmarkSampleExtraVisDis, benchmarkSampleScoreCalculator, benchmarkSampleUpdate, benchmarkSampleFUpdate, benchmarkSampleFoliageCheck, benchmarkSampleTerrainCheck, benchmarkSampleGUI, benchmarkSampleNoBushOverride, benchmarkSampleBlindFire;
         int guiFrame;
         string infoCache1, infoCache2, infoCacheBenchmark;
 
@@ -978,7 +978,7 @@ namespace ThatsLit
             if (ThatsLitPlugin.EnableBenchmark.Value)
             {
                 if (layoutCall)
-                    infoCacheBenchmark = $"  Update:         {benchmarkSampleUpdate,8:0.0000}\n  Foliage:        {benchmarkSampleFoliageCheck,8:0.0000}\n  Terrain:        {benchmarkSampleTerrainCheck,8:0.0000}\n  SeenCoef:       {benchmarkSampleSeenCoef,8:0.0000}\n  Encountering:   {benchmarkSampleEncountering,8:0.0000}\n  ExtraVisDis:    {benchmarkSampleExtraVisDis,8:0.0000}\n  ScoreCalculator:{benchmarkSampleScoreCalculator,8:0.0000}\n  Info(+Debug):    {benchmarkSampleGUI,8:0.0000}\n  No Bush OVR:    {benchmarkSampleNoBushOverride,8:0.0000}\n  BlindFire:    {benchmarkSampleBlindFire,8:0.0000} ms";
+                    infoCacheBenchmark = $"  Update:         {benchmarkSampleUpdate,8:0.0000}\n  FUpdate:         {benchmarkSampleFUpdate,8:0.0000}\n  Foliage:        {benchmarkSampleFoliageCheck,8:0.0000}\n  Terrain:        {benchmarkSampleTerrainCheck,8:0.0000}\n  SeenCoef:       {benchmarkSampleSeenCoef,8:0.0000}\n  Encountering:   {benchmarkSampleEncountering,8:0.0000}\n  ExtraVisDis:    {benchmarkSampleExtraVisDis,8:0.0000}\n  ScoreCalculator:{benchmarkSampleScoreCalculator,8:0.0000}\n  Info(+Debug):    {benchmarkSampleGUI,8:0.0000}\n  No Bush OVR:    {benchmarkSampleNoBushOverride,8:0.0000}\n  BlindFire:    {benchmarkSampleBlindFire,8:0.0000} ms";
                 GUILayout.Label(infoCacheBenchmark, style);
                 if (Time.frameCount % 6000 == 0)
                     if (layoutCall) EFT.UI.ConsoleScreen.Log(infoCacheBenchmark);
@@ -1034,6 +1034,7 @@ namespace ThatsLit
             benchmarkSampleExtraVisDis      = ThatsLitPlugin.swExtraVisDis.ConcludeMs() / (float) DEBUG_INTERVAL;
             benchmarkSampleScoreCalculator  = ThatsLitPlugin.swScoreCalc.ConcludeMs() / (float) DEBUG_INTERVAL;
             benchmarkSampleUpdate           = ThatsLitPlugin.swUpdate.ConcludeMs() / (float) DEBUG_INTERVAL;
+            benchmarkSampleFUpdate           = ThatsLitPlugin.swFUpdate.ConcludeMs() / (float) DEBUG_INTERVAL;
             benchmarkSampleGUI              = ThatsLitPlugin.swGUI.ConcludeMs() / (float) DEBUG_INTERVAL;
             benchmarkSampleFoliageCheck     = ThatsLitPlugin.swFoliage.ConcludeMs() / (float) DEBUG_INTERVAL;
             benchmarkSampleTerrainCheck     = ThatsLitPlugin.swTerrain.ConcludeMs() / (float) DEBUG_INTERVAL;

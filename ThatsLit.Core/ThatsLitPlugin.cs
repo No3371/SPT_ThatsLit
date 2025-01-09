@@ -52,10 +52,11 @@ namespace ThatsLit
     public class ThatsLitPlugin : BaseUnityPlugin
     {
         internal static bool SAINLoaded { get; private set; }
-        internal static ManagedStopWatch swUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis, swNoBushOverride, swBlindFireScatter;
+        internal static ManagedStopWatch swUpdate, swFUpdate, swGUI, swFoliage, swTerrain, swScoreCalc, swSeenCoef, swEncountering, swExtraVisDis, swNoBushOverride, swBlindFireScatter;
         static ThatsLitPlugin ()
         {
             swUpdate           = new ManagedStopWatch("Update");
+            swFUpdate           = new ManagedStopWatch("FUpdate");
             swGUI              = new ManagedStopWatch("GUI");
             swFoliage          = new ManagedStopWatch("Foliage");
             swTerrain          = new ManagedStopWatch("Terrain");

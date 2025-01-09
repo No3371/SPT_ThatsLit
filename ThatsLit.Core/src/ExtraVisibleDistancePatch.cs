@@ -25,22 +25,28 @@ namespace ThatsLit
         [HarmonyAfter("me.sol.sain")]
         public static bool PatchPrefix(EnemyInfo __instance, KeyValuePair<EnemyPart, EnemyPartData> part, ref float addVisibility)
         {
+            ThatsLitPlugin.swExtraVisDis.MaybeResume();
             if (__instance?.Owner == null
              || (part.Key?.Owner?.IsAI ?? true) == true
              || !ThatsLitPlugin.EnabledMod.Value
              || ThatsLitPlugin.ExtraVisionDistanceScale.Value == 0
              || !ThatsLitPlugin.EnabledLighting.Value
              || ThatsLitPlugin.PMCOnlyMode.Value && !Utility.IsPMCSpawnType(__instance.Owner?.Profile?.Info?.Settings?.Role))
+            {
+                ThatsLitPlugin.swExtraVisDis.Stop();
                 return true;
+            }
 
             if (Singleton<ThatsLitGameworld>.Instance?.ScoreCalculator == null || __instance.Owner?.LookSensor == null) return true;
 
             ThatsLitPlayer player = null;
             Singleton<ThatsLitGameworld>.Instance?.AllThatsLitPlayers?.TryGetValue(__instance.Person, out player);
             if (player == null || player.PlayerLitScoreProfile == null)
+            {
+                ThatsLitPlugin.swExtraVisDis.Stop();
                 return true;
+            }
 
-            ThatsLitPlugin.swExtraVisDis.MaybeResume();
 
             bool isNearest = false;
             if (player.lastNearest == __instance.Owner)
