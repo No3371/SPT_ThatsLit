@@ -143,7 +143,8 @@ namespace ThatsLit
             //ScoreOffset = Config.Bind(category, "Score Offset", 0f, "Modify the score ranging from -1 to 1, which reflect how much the player is lit. Starting from -0.4 a
 
             category = "2. Darkness / Brightness";
-            EnabledLighting            = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order                                                              = 100 }));
+            EnabledLighting            = Config.Bind(category, "Enable", true, new ConfigDescription("Enable the module. With this turned off, AIs are not affected by your brightness.", null, new ConfigurationManagerAttributes() { Order                                                              = 101 }));
+            EnabledCameraThrottling            = Config.Bind(category, "Throttle Camera", false, new ConfigDescription("When the ambience is bright, make the camera only run every some frames to reduce average fps impact.", null, new ConfigurationManagerAttributes() { Order                                                              = 100 }));
             DarknessImpactScaleOffset        = Config.Bind(category, "Darkness Impact Offset", 0.5f, new ConfigDescription("Scale how AI noticing players slower due to darkness. If That's Lit change bot reaction from 1s to 3s, setting to 100% will makes it 5s (double from 50%). Be careful when increasing this as it could easily breaks the combat balance.", new AcceptableValueRange<float>(0, 1.0f), new ConfigurationManagerAttributes() { Order                                           = 95 }));
             BrightnessImpactScaleOffset      = Config.Bind(category, "Brightness Impact Offset", 0.5f, new ConfigDescription("Scale how AI noticing players faster due to brightness. If That's Lit change bot reaction from 3s to 2s, setting to 100% will makes it 1s (double from 50%; will not make it lower than 50% of original). Be careful when increasing this as it could easily breaks the combat balance.", new AcceptableValueRange<float>(0f, 1.0f), new ConfigurationManagerAttributes() { Order                                       = 94 }));
             ExtraVisionDistanceScale     = Config.Bind(category, "Extra Vision Distance Scale", 1f, new ConfigDescription("Scale how AI noticing players from further under some circumstances. This is designed to compensate low night vision distance from SAIN, you may want to set this to 0 if you don't run SAIN.", new AcceptableValueRange<float>(0, 1f), new ConfigurationManagerAttributes() { Order = 93 }));
@@ -252,6 +253,7 @@ namespace ThatsLit
         public static ConfigEntry<bool> DebugProxy { get; private set; }
         public static ConfigEntry<bool> EnabledMod { get; private set; }
         public static ConfigEntry<bool> EnabledLighting { get; private set; }
+        public static ConfigEntry<bool> EnabledCameraThrottling { get; private set; }
         public static ConfigEntry<bool> EnabledEncountering { get; private set; }
         public static ConfigEntry<bool> EnabledFoliage { get; private set; }
         public static ConfigEntry<bool> EnabledGrasses { get; private set; }

@@ -76,6 +76,8 @@ namespace ThatsLit
         internal RaycastHit flashLightHit;
         internal BotOwner lastNearest;
         ThatsLitGameworld gameworld;
+        static Camera prefab;
+        int cameraThrottleFrequency = 1440;
         public static bool CanLoad ()
         {
             if (CameraClass.Instance.OpticCameraManager.Camera != null
@@ -115,7 +117,6 @@ namespace ThatsLit
             return prefab != null && canLoadTime + 10 < Time.realtimeSinceStartup;
         }
 
-        static Camera prefab;
         internal void Setup (ThatsLitGameworld gameworld)
         {
             setupTime = Time.time;
@@ -319,6 +320,25 @@ namespace ThatsLit
 
             // ! Consdier this the box of all Brightness required statements
             // Remember that proxies also have a PlayerLitScoreProfile
+
+            if (ThatsLitPlugin.EnabledLighting.Value && !cam.enabled && (ThatsLitPlugin.EnabledCameraThrottling.Value == false || Time.frameCount % cameraThrottleFrequency == 0))
+            {
+                cam.enabled = true;
+                cameraThrottleFrequency = (int) (1f/Time.deltaTime);
+                cameraThrottleFrequency = Mathf.Max(cameraThrottleFrequency, 1);
+                cameraThrottleFrequency = (int) Mathf.Lerp(cameraThrottleFrequency, 1, Mathf.InverseLerp(0.35f, -0.1f, PlayerLitScoreProfile.frame0.ambienceScore));
+            }
+            else if (ThatsLitPlugin.EnabledCameraThrottling.Value && (cameraThrottleFrequency == 1 || Time.frameCount % cameraThrottleFrequency != 0))
+            {
+                if (cam.enabled)
+                {
+                    cameraThrottleFrequency = (int) (1f/Time.deltaTime);
+                    cameraThrottleFrequency = Mathf.Max(cameraThrottleFrequency, 1);
+                    cameraThrottleFrequency = (int) Mathf.Lerp(cameraThrottleFrequency, 1, Mathf.InverseLerp(0.35f, -0.1f, PlayerLitScoreProfile.frame0.ambienceScore));
+                    if (cameraThrottleFrequency > 4)
+                        cam.enabled = false;
+                }
+            }
 
             if (gquReq.done && rt != null)
             {
@@ -959,7 +979,7 @@ namespace ThatsLit
             float cloud = WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0;
             
             if (layoutCall)
-                infoCache1 = $"  IMPACT: {DebugInfo.lastCalcFrom:0.000} -> {DebugInfo.lastCalcTo0:0.000} -> {DebugInfo.lastCalcTo1:0.000} -> {DebugInfo.lastCalcTo2:0.000} -> {DebugInfo.lastCalcTo3:0.000} -> {DebugInfo.lastCalcTo4:0.000} -> {DebugInfo.lastCalcTo5:0.000} -> {DebugInfo.lastCalcTo6:0.000} -> {DebugInfo.lastCalcTo7:0.000} -> {DebugInfo.lastCalcTo8:0.000}\n ({DebugInfo.lastFactor2:0.000} <- {DebugInfo.lastFactor1:0.000} <- {DebugInfo.lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {DebugInfo.calced} (+{DebugInfo.calcedLastFrame})\n  ENCOUNTER: {DebugInfo.encounter}  V.HINT: { DebugInfo.vagueHint }  V.CANCEL: { DebugInfo.vagueHintCancel }  SIG.D: { DebugInfo.signalDanger }\n  LAST SHOT: { lastShotVector } { Time.time - lastShotTime:0.0}s { DebugInfo.lastEncounterShotAngleDelta }deg  -{ DebugInfo.lastEncounteringShotCutoff }x\n  LAST_PARTS: { DebugInfo.lastVisiblePartsFactor} (x9)  G.OVL: { DebugInfo.lastGlobalOverlookChance:P1}\n  V.DIS.COMP: { DebugInfo.lastDisCompThermal }(T)  { DebugInfo.lastDisCompNVG }(NVG)  { DebugInfo.lastDisCompDay }(Day)  { DebugInfo.lastDisComp }  Focus: { DebugInfo.lastNearestFocusAngleX:0.0}degX/{ DebugInfo.lastNearestFocusAngleY:0.0}degY\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000}  3x3/5x5: { TerrainDetails?.RecentDetailCount3x3 }/{ TerrainDetails?.RecentDetailCount5x5 } (score-{ PlayerLitScoreProfile?.detailBonusSmooth:0.00})  FOLIAGE: {Foliage?.FoliageScore:0.000} ({Foliage?.FoliageCount}) (H{Foliage?.Nearest?.dis:0.00} to {Foliage?.Nearest?.name}) RAT: { DebugInfo.lastBushRat:0.00}\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {Utility.GetInGameDayTime():0.000} / WINTER: {gameworld.IsWinter}\n  POSE: {poseFactor} SPEED: { Player.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}  SRD: { surroundingRating:0.000}\n  {DebugInfo.nearestOffset}  Caution: { DebugInfo.nearestCaution }  NoBush.Cancel: {DebugInfo.cancelledSAINNoBush}/{DebugInfo.attemptToCancelSAINNoBush} {DebugInfo.lastInterruptChance:P1}  {DebugInfo.lastInterruptChanceDis:0.0}m SNP: {DebugInfo.sniperHintOffset} ({DebugInfo.sniperHintChance:P1})  FL: {flashLightHit.point:000.0}  HINT:{DebugInfo.flashLightHint}\n  F.L:{DebugInfo.forceLooks}  S.L:{DebugInfo.sideLooks}";
+                infoCache1 = $"  IMPACT: {DebugInfo.lastCalcFrom:0.000} -> {DebugInfo.lastCalcTo0:0.000} -> {DebugInfo.lastCalcTo1:0.000} -> {DebugInfo.lastCalcTo2:0.000} -> {DebugInfo.lastCalcTo3:0.000} -> {DebugInfo.lastCalcTo4:0.000} -> {DebugInfo.lastCalcTo5:0.000} -> {DebugInfo.lastCalcTo6:0.000} -> {DebugInfo.lastCalcTo7:0.000} -> {DebugInfo.lastCalcTo8:0.000}\n ({DebugInfo.lastFactor2:0.000} <- {DebugInfo.lastFactor1:0.000} <- {DebugInfo.lastScore:0.000}) AMB: {ambScoreSample:0.00} LIT: {litFactorSample:0.00} (SAMPLE)\n  AFFECTED: {DebugInfo.calced} (+{DebugInfo.calcedLastFrame})\n  ENCOUNTER: {DebugInfo.encounter}  V.HINT: { DebugInfo.vagueHint }  V.CANCEL: { DebugInfo.vagueHintCancel }  SIG.D: { DebugInfo.signalDanger }\n  LAST SHOT: { lastShotVector } { Time.time - lastShotTime:0.0}s { DebugInfo.lastEncounterShotAngleDelta }deg  -{ DebugInfo.lastEncounteringShotCutoff }x\n  LAST_PARTS: { DebugInfo.lastVisiblePartsFactor} (x9)  G.OVL: { DebugInfo.lastGlobalOverlookChance:P1}\n  V.DIS.COMP: { DebugInfo.lastDisCompThermal }(T)  { DebugInfo.lastDisCompNVG }(NVG)  { DebugInfo.lastDisCompDay }(Day)  { DebugInfo.lastDisComp }  Focus: { DebugInfo.lastNearestFocusAngleX:0.0}degX/{ DebugInfo.lastNearestFocusAngleY:0.0}degY\n  TERRAIN: { terrainScoreHintProne :0.000}/{ terrainScoreHintRegular :0.000}  3x3/5x5: { TerrainDetails?.RecentDetailCount3x3 }/{ TerrainDetails?.RecentDetailCount5x5 } (score-{ PlayerLitScoreProfile?.detailBonusSmooth:0.00})  FOLIAGE: {Foliage?.FoliageScore:0.000} ({Foliage?.FoliageCount}) (H{Foliage?.Nearest?.dis:0.00} to {Foliage?.Nearest?.name}) RAT: { DebugInfo.lastBushRat:0.00}\n  FOG: {fog:0.000} / RAIN: {rain:0.000} / CLOUD: {cloud:0.000} / TIME: {Utility.GetInGameDayTime():0.000} / WINTER: {gameworld.IsWinter}\n  POSE: {poseFactor} SPEED: { Player.Velocity.magnitude :0.000}  INSIDE: { Time.time - lastOutside:0.000}  AMB: { ambienceShadownRating:0.000}  OVH: { overheadHaxRating:0.000}  BNKR: { bunkerTimeClamped:0.000}  SRD: { surroundingRating:0.000}\n  {DebugInfo.nearestOffset}  Caution: { DebugInfo.nearestCaution }  NoBush.Cancel: {DebugInfo.cancelledSAINNoBush}/{DebugInfo.attemptToCancelSAINNoBush} {DebugInfo.lastInterruptChance:P1}  {DebugInfo.lastInterruptChanceDis:0.0}m SNP: {DebugInfo.sniperHintOffset} ({DebugInfo.sniperHintChance:P1})  FL: {flashLightHit.point:000.0}  HINT:{DebugInfo.flashLightHint}\n  F.L:{DebugInfo.forceLooks}  S.L:{DebugInfo.sideLooks}\n Throttle: { !cam.enabled } { cameraThrottleFrequency }";
             GUILayout.Label(infoCache1, style);
             // GUILayout.Label(string.Format(" FOG: {0:0.000} / RAIN: {1:0.000} / CLOUD: {2:0.000} / TIME: {3:0.000} / WINTER: {4}", WeatherController.Instance?.WeatherCurve?.Fog ?? 0, WeatherController.Instance?.WeatherCurve?.Rain ?? 0, WeatherController.Instance?.WeatherCurve?.Cloudiness ?? 0, GetInGameDayTime(), isWinterCache));
             
