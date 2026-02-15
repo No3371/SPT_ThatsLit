@@ -9,9 +9,12 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Collections;
 
-using BaseCellClass = GClass1169;
-using CellClass = GClass1170;
-using SpatialPartitionClass = GClass1184<GClass1169>;
+using BaseCellClass = GClass1187;
+// Locator: Whatever SpatialPartitionClass uses as its generic restriction
+using CellClass = GClass1188;
+// Locator: public Dictionary<int, ComputeBuffer> detailInstanceBuffers;
+using SpatialPartitionClass = GClass1202<GClass1187>;
+// Locator: public bool IsActiveCellUpdateRequired(Vector3 position)
 using System.Reflection;
 using GPUInstancer;
 using HarmonyLib;

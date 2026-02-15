@@ -26,6 +26,12 @@
       <HintPath>$(BepInExPath)\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="DissonanceVoip">
+      <HintPath>$(ManagedAssembliesPath)\DissonanceVoip.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>$(ManagedAssembliesPath)\Sirenix.Serialization.dll</HintPath>
+    </Reference>
     <Reference Include="spt-reflection">
       <HintPath>$(PluginsPath)\spt\spt-reflection.dll</HintPath>
       <Private>False</Private>

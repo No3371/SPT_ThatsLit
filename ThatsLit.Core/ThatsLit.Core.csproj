@@ -30,6 +30,9 @@
       <HintPath>$(BepInExPath)\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>$(ManagedAssembliesPath)\Sirenix.Serialization.dll</HintPath>
+    </Reference>
     <Reference Include="spt-core">
       <HintPath>$(PluginsPath)\spt\spt-core.dll</HintPath>
       <Private>False</Private>
@@ -156,16 +159,12 @@
                 all files just before calling Copy. If the ItemGroup were outside
                 the target , it would enumerate the files during evaluation, before
                 the build starts, which may miss files created during the build. -->
-          <PackedFiles Include="$(ProjectDir)\Packed\*.*"/>
+          <PackedFiles Include="$(ProjectDir)\Packed\*.*" />
       </ItemGroup>
     <Message Text="Copying new build to dist" Importance="High" />
 
-    <Copy
-      SourceFiles="$(TargetDir)$(AssemblyName).dll"
-      DestinationFolder="$(PluginsPath)\ThatsLit" />
-    <Copy
-      SourceFiles="@(PackedFiles)"
-      DestinationFolder="$(PluginsPath)\ThatsLit" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(PluginsPath)\ThatsLit" />
+    <Copy SourceFiles="@(PackedFiles)" DestinationFolder="$(PluginsPath)\ThatsLit" />
 
     <Message Text="Copied build files" Importance="High" />
   </Target>

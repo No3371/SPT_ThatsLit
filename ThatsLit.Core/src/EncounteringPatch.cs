@@ -163,7 +163,7 @@ namespace ThatsLit.Patches.Vision
             if (!__state.triggered || __instance.Owner?.Memory?.GoalEnemy != __instance)
                 return; // Not triggering the patch OR the bot is engaging others
 
-            var aim = __instance.Owner?.AimingData;
+            var aim = __instance.Owner?.AimingManager.CurrentAiming;
             if (aim == null)
                 return;
 
