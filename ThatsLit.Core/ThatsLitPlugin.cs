@@ -22,12 +22,12 @@ namespace ThatsLit
         public const string Trademark = "";
         public const string Culture = "";
 
-        public const int TarkovVersion = 33420;
+        public const int TarkovVersion = 35392;
         public const string EscapeFromTarkov = "EscapeFromTarkov.exe";
         public const string ModName = "That's Lit";
-        public const string ModVersion = "1.3100.3";
+        public const string ModVersion = "1.4000.0";
         public const string SPTGUID = "com.SPT.core";
-        public const string SPTVersion = "3.10.0";
+        public const string SPTVersion = "3.11.0";
         private static long modVersionComparable;
 
         public static long ModVersionComparable

@@ -82,6 +82,9 @@
       <HintPath>$(ManagedAssembliesPath)\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+     <Reference Include="Sirenix.Serialization">
+      <HintPath>$(ManagedAssembliesPath)\Sirenix.Serialization.dll</HintPath>
+    </Reference>
     <Reference Include="ItemComponent.Types" />
     <Reference Include="UnityEngine.JSONSerializeModule" />
     <Reference Include="UnityEngine.IMGUIModule" />

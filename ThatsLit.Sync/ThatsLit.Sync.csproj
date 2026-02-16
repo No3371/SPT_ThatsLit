@@ -54,6 +54,13 @@
       <HintPath>$(ManagedAssembliesPath)\UnityEngine.TerrainModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+     <Reference Include="Sirenix.Serialization">
+      <HintPath>$(ManagedAssembliesPath)\Sirenix.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="DissonanceVoip">
+      <HintPath>$(ManagedAssembliesPath)\DissonanceVoip.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.TextRenderingModule" />
     <Reference Include="ThatsLit.Core">
       <HintPath>$(PluginsPath)\ThatsLit\ThatsLit.Core.dll</HintPath>

@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Collections;
 
-using BaseCellClass = GClass1169;
-using CellClass = GClass1170;
-using SpatialPartitionClass = GClass1184<GClass1169>;
+using BaseCellClass = GClass1187;
+using CellClass = GClass1188;
+using SpatialPartitionClass = GClass1202<GClass1187>;
 using System.Reflection;
 using GPUInstancer;
 using HarmonyLib;

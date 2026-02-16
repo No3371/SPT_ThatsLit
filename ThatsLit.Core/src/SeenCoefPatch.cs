@@ -18,12 +18,12 @@ namespace ThatsLit
 
         protected override MethodBase GetTargetMethod()
         {
-            return ReflectionHelper.FindMethodByArgTypes(typeof(EnemyInfo), new Type[] { typeof(BifacialTransform), typeof(BifacialTransform), typeof(BotDifficultySettingsClass), typeof(IAIData), typeof(float), typeof(Vector3) }); ;
+            return ReflectionHelper.FindMethodByArgTypes(typeof(EnemyInfo), new Type[] { typeof(BotDifficultySettingsClass), typeof(IAIData), typeof(float), typeof(Vector3), typeof(float), typeof(float) }); ;
         }
 
         [PatchPostfix]
         [HarmonyAfter("me.sol.sain")]
-        public static void PatchPostfix(EnemyInfo __instance, BifacialTransform BotTransform, BifacialTransform enemy, float personalLastSeenTime, Vector3 personalLastSeenPos, ref float __result)
+        public static void PatchPostfix(EnemyInfo __instance, float personalLastSeenTime, Vector3 personalLastSeenPos, ref float __result)
         {
             // Don't use GoalEnemy here because it only change when engaging new enemy (it'll stay indifinitely if not engaged with new enemy)
             // Also they could search without having visual?
@@ -456,6 +456,8 @@ namespace ThatsLit
 #endif
                         xyFacingFactor = 1f - xyFacingFactor; // 0 ~ 1
 
+                        // Get bot tranfrom as it is not avaliable through arguments anymore
+                        BifacialTransform BotTransform = __instance.Owner.Transform;
                         // Calculate how flat it is in the vision
                         var normal = Vector3.Cross(BotTransform.up, -playerLegToBotEye);
                         var playerLegToHeadAlongVision = Vector3.ProjectOnPlane(playerLegToHead, normal);
